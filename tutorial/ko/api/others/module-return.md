@@ -2,7 +2,145 @@
 
 ofa.js에서 페이지 모듈이든 컴포넌트 모듈이든 모두 `export default async () => {}`를 통해 객체를 반환하여 모듈의 구성과 동작을 정의해야 합니다. 이 문서는 반환 객체에 포함될 수 있는 모든 속성을 정리하였습니다.
 
-## 속성 개요
+## async 함수 매개변수
+
+`export default async () => {}`의 async 함수는 다음 속성들을 포함하는 매개변수 객체를 받습니다:
+
+### 매개변수 목록
+
+| 매개변수 | 유형 | 페이지 모듈 | 컴포넌트 모듈 | 설명 |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | 다른 모듈이나 리소스를 로드하는 함수 |
+| `url` | `string` | ✅ | ✅ | 현재 페이지 또는 컴포넌트 모듈의 파일 주소 |
+| `query` | `object` | ✅ | ❌ | URL 쿼리 매개변수 객체 |### 로드 매개변수
+
+`load`는 다른 모듈, 컴포넌트 또는 리소스를 로드하는 데 사용되는 함수입니다. 컴포넌트 모듈과 페이지 모듈 모두에서 사용할 수 있습니다. `load` 함수의 로드 효과는 `<l-m>` 컴포넌트와 동일하며, 주로 ofa.js 페이지 또는 컴포넌트의 HTML 파일을 로드하는 데 사용됩니다.
+
+**동기 로딩**: `await` 키워드를 사용하면 모듈 로딩이 완료될 때까지 실행이 차단됩니다.
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**비동기 로딩**: `await` 키워드를 사용하지 않고 Promise 객체를 반환하며 실행을 차단하지 않습니다. 필요에 따라 로딩하는 시나리오에 적합합니다.
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('모듈 로딩 완료:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+사용 시나리오:- 구성 요소를 동기적으로 로드하여 사용 전 등록 보장
+- 공유 데이터 모듈 로드
+- 구성 파일 로드
+- 필요에 따라 로드하는 시나리오에 적합한 비동기 로드
+
+> 참고:
+> - `await`를 사용한 동기 로딩은 실행을 차단하므로, 실제 필요에 따라 동기 또는 비동기 방식을 선택하는 것을 권장합니다.
+> - 지연 로딩(lazy loading)이 필요하지 않다면 `<l-m>` 태그를 직접 사용하여 컴포넌트를 로드하는 것을 권장합니다.
+
+### url 매개변수
+
+`url` 매개변수는 페이지 모듈과 컴포넌트 모듈에서 모두 사용할 수 있으며, 현재 모듈의 파일 주소를 나타냅니다.
+
+```javascript
+export default async ({ url }) => {
+  console.log('현재 모듈 주소:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### 쿼리 매개변수
+
+`query` 매개변수는 페이지 모듈에서만 사용할 수 있으며, URL의 쿼리 매개변수를 포함합니다. `query` 객체를 통해 URL의 쿼리 문자열 매개변수에 직접 접근할 수 있습니다.
+
+```javascript
+export default async ({ query }) => {
+  console.log('쿼리 파라미터:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+사용 예시:
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>사용자 상세</h1>
+    <p>사용자 ID: {{userId}}</p>
+    <p>페이지: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || '알 수 없음',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+접속 방법:```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> 중요: Vue의 `this.$route.query`와 같은 방식으로 쿼리 매개변수를 가져오지 마세요, ofa.js는 함수 매개변수를 통해서만 가져오기를 지원합니다
+
+### 전체 매개변수 예제
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('모듈 주소:', url);
+      console.log('조회 매개변수:', query);
+    }
+  };
+};
+```
+
+## 반환 속성 개요
 
 | 속성 | 타입 | 페이지 모듈 | 컴포넌트 모듈 | 설명 | 관련 문서 |
 |------|------|:-------:|:-------:|------|------|

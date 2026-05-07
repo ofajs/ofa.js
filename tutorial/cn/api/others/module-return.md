@@ -2,7 +2,149 @@
 
 在 ofa.js 中，无论是页面模块还是组件模块，都需要通过 `export default async () => {}` 返回一个对象来定义模块的配置和行为。本文档汇总了返回对象可以包含的所有属性。
 
-## 属性总览
+## async 函数参数
+
+`export default async () => {}` 中的 async 函数接收一个参数对象，包含以下属性：
+
+### 参数列表
+
+| 参数 | 类型 | 页面模块 | 组件模块 | 说明 |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | 加载其他模块或资源的函数 |
+| `url` | `string` | ✅ | ✅ | 当前页面或组件模块的文件地址 |
+| `query` | `object` | ✅ | ❌ | URL 查询参数对象 |
+
+### load 参数
+
+`load` 是一个用于加载其他模块、组件或资源的函数。在组件模块和页面模块中都可以使用。`load` 函数的加载效果与 `<l-m>` 组件一致，主要用于加载 ofa.js 页面或组件的 HTML 文件。
+
+**同步加载**：使用 `await` 关键字，会阻塞执行直到模块加载完成。
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**异步加载**：不使用 `await` 关键字，返回 Promise 对象，不会阻塞执行。适合按需加载的场景。
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('模块加载完成:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+使用场景：
+- 同步加载组件，确保组件在使用前已注册
+- 加载共享数据模块
+- 加载配置文件
+- 异步加载适合按需加载的场景
+
+> 注意：
+> - 使用 `await` 同步加载会阻塞执行，建议根据实际需求选择同步或异步方式
+> - 如果没有按需加载的需求，建议直接使用 `<l-m>` 标签加载组件
+
+### url 参数
+
+`url` 参数在页面模块和组件模块中都可用，表示当前模块的文件地址。
+
+```javascript
+export default async ({ url }) => {
+  console.log('当前模块地址:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### query 参数
+
+`query` 参数仅在页面模块中可用，包含 URL 中的查询参数。通过 `query` 对象可以直接访问 URL 中的查询字符串参数。
+
+```javascript
+export default async ({ query }) => {
+  console.log('查询参数:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+使用示例：
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>用户详情</h1>
+    <p>用户ID: {{userId}}</p>
+    <p>页面: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || '未知',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+访问方式：
+```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> 重要：不要使用类似 Vue 的 `this.$route.query` 方式获取查询参数，ofa.js 只支持通过函数参数获取。
+
+### 完整参数示例
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('模块地址:', url);
+      console.log('查询参数:', query);
+    }
+  };
+};
+```
+
+## 返回属性总览
 
 | 属性 | 类型 | 页面模块 | 组件模块 | 说明 | 相关文档 |
 |------|------|:-------:|:-------:|------|------|

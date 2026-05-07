@@ -2,7 +2,145 @@
 
 In ofa.js müssen sowohl Seitenmodule als auch Komponentenmodule über `export default async () => {}` ein Objekt zurückgeben, um die Konfiguration und das Verhalten des Moduls zu definieren. Dieses Dokument fasst alle Eigenschaften zusammen, die das zurückgegebene Objekt enthalten kann.
 
-## Attributübersicht
+## async Funktionsparameter
+
+Die async-Funktion in `export default async () => {}` erhält ein Parameterobjekt mit den folgenden Attributen:
+
+### Parameterliste
+
+| Parameter | Typ | Seitenmodul | Komponentenmodul | Beschreibung |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | Funktion zum Laden anderer Module oder Ressourcen |
+| `url` | `string` | ✅ | ✅ | Dateiadresse des aktuellen Seiten- oder Komponentenmoduls |
+| `query` | `object` | ✅ | ❌ | URL-Abfrageparameterobjekt |### load Parameter
+
+`load` ist eine Funktion zum Laden anderer Module, Komponenten oder Ressourcen. Sie kann sowohl in Komponentenmodulen als auch in Seitenmodulen verwendet werden. Die Ladeauswirkung der `load`-Funktion entspricht der der `<l-m>`-Komponente und dient hauptsächlich zum Laden der HTML-Dateien einer ofa.js-Seite oder -Komponente.
+
+**Synchrones Laden**: Verwendung des Schlüsselworts `await`, blockiert die Ausführung, bis das Modul geladen ist.
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**Asynchrones Laden**: Kein `await`-Schlüsselwort, gibt ein Promise-Objekt zurück und blockiert die Ausführung nicht. Geeignet für Szenarien, bei denen bedarfsabhängiges Laden erforderlich ist.
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('Modul geladen:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+Anwendungsszenarien:- Synchrones Laden von Komponenten, um sicherzustellen, dass die Komponenten vor der Nutzung registriert sind
+- Laden des gemeinsamen Datenmoduls
+- Laden der Konfigurationsdatei
+- Asynchrones Laden für szenarien, die bedarfsgesteuertes Laden erfordern
+
+> Hinweis:
+> - Die synchronisierte Verwendung von `await` blockiert die Ausführung. Es wird empfohlen, je nach tatsächlichem Bedarf die synchrone oder asynchrone Methode zu wählen.
+> - Wenn keine bedarfsabhängige Ladung erforderlich ist, wird empfohlen, die Komponente direkt über das `<l-m>`-Tag zu laden.
+
+### URL-Parameter
+
+Der `url`-Parameter ist sowohl im Seitenmodul als auch im Komponentenmodul verfügbar und stellt die Dateiadresse des aktuellen Moduls dar.
+
+```javascript
+export default async ({ url }) => {
+  console.log('Aktuelle Moduladresse:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### Query-Parameter
+
+Der `query`-Parameter ist nur in Seitenmodulen verfügbar und enthält die Abfrageparameter der URL. Über das `query`-Objekt können Sie direkt auf die Query-String-Parameter der URL zugreifen.
+
+```javascript
+export default async ({ query }) => {
+  console.log('Abfrageparameter:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+Anwendungsbeispiel:
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>Benutzerdetails</h1>
+    <p>Benutzer-ID: {{userId}}</p>
+    <p>Seite: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || 'Unbekannt',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+Zugriffsart:```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> Wichtig: Verwenden Sie nicht die Vue-ähnliche `this.$route.query`-Methode, um Abfrageparameter zu erhalten. ofa.js unterstützt nur den Erhalt über Funktionsparameter.
+
+### Vollständiges Parameterbeispiel
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('Moduladresse:', url);
+      console.log('Abfrageparameter:', query);
+    }
+  };
+};
+```
+
+## Zurückgegebene Eigenschaftenübersicht
 
 | Attribut | Typ | Seitenmodul | Komponentenmodul | Beschreibung | Relevante Dokumentation |
 |------|------|:-------:|:-------:|------|------|

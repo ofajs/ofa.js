@@ -2,7 +2,145 @@
 
 ofa.jsでは、ページモジュールでもコンポーネントモジュールでも、`export default async () => {}` を使用してオブジェクトを返し、モジュールの設定や動作を定義する必要があります。本ドキュメントでは、返すオブジェクトに含めることができるすべてのプロパティをまとめています。
 
-## プロパティ概要
+## async 関数のパラメータ
+
+`export default async () => {}` 内の async 関数は、以下のプロパティを含む引数オブジェクトを受け取ります：
+
+### パラメータリスト
+
+| パラメータ | 型 | ページモジュール | コンポーネントモジュール | 説明 |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | 他のモジュールやリソースを読み込む関数 |
+| `url` | `string` | ✅ | ✅ | 現在のページまたはコンポーネントモジュールのファイルアドレス |
+| `query` | `object` | ✅ | ❌ | URL クエリパラメータオブジェクト |### load パラメータ
+
+`load` は、他のモジュール、コンポーネント、またはリソースを読み込むための関数です。コンポーネントモジュールとページモジュールの両方で使用できます。`load` 関数の読み込み効果は `<l-m>` コンポーネントと同様で、主に ofa.js のページやコンポーネントの HTML ファイルを読み込むために使用されます。
+
+**同期読み込み**: `await` キーワードを使用し、モジュールの読み込みが完了するまで実行をブロックします。
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**非同期ロード**：`await`キーワードを使用せず、Promiseオブジェクトを返し、実行をブロックしません。必要なときに読み込むシーンに適しています。
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('モジュールロード完了:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+使用シーン：- コンポーネントを同期的に読み込み、使用前に登録されていることを確認する
+- 共有データモジュールを読み込む
+- 設定ファイルを読み込む
+- 非同期読み込みは、オンデマンド読み込みに適した場面で行う
+
+> 注意：
+> - `await` を使用した同期的な読み込みは実行をブロックします。実際の要件に応じて同期または非同期の方式を選択することを推奨します
+> - 必要に応じた読み込みの要件がない場合は、`<l-m>` タグを使用してコンポーネントを直接読み込むことを推奨します
+
+### URLパラメータ
+
+`url` パラメータはページモジュールとコンポーネントモジュールの両方で利用可能で、現在のモジュールのファイルアドレスを示します。
+
+```javascript
+export default async ({ url }) => {
+  console.log('現在のモジュールアドレス:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### query パラメータ
+
+`query` パラメータはページモジュールでのみ利用可能で、URL のクエリパラメータを含みます。`query` オブジェクトを通じて URL のクエリ文字列パラメータに直接アクセスできます。
+
+```javascript
+export default async ({ query }) => {
+  console.log('クエリパラメータ:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+使用例：
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>ユーザー詳細</h1>
+    <p>ユーザーID: {{userId}}</p>
+    <p>ページ: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || '不明',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+アクセス方法：```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> 重要：Vue のような `this.$route.query` の方法でクエリパラメータを取得しないでください。ofa.js では関数のパラメータを通じてのみ取得できます。
+
+### 完全なパラメータ例
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('モジュールURL:', url);
+      console.log('クエリパラメータ:', query);
+    }
+  };
+};
+```
+
+## 返却属性の概要
 
 | プロパティ | 型 | ページモジュール | コンポーネントモジュール | 説明 | 関連ドキュメント |
 |------|------|:-------:|:-------:|------|------|

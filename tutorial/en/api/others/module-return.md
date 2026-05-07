@@ -2,7 +2,145 @@
 
 In ofa.js, whether it's a page module or a component module, you need to return an object via `export default async () => {}` to define the module's configuration and behavior. This document summarizes all properties that can be included in the returned object.
 
-## Property Overview
+## async function parameters
+
+`export default async () => {}` The async function in `export default async () => {}` receives a parameter object with the following properties:
+
+### Parameter List
+
+| Parameter | Type | Page Module | Component Module | Description |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | Function to load other modules or resources |
+| `url` | `string` | ✅ | ✅ | File address of the current page or component module |
+| `query` | `object` | ✅ | ❌ | URL query parameter object |### load parameters
+
+`load` is a function used to load other modules, components, or resources. It can be used in both component modules and page modules. The loading effect of the `load` function is consistent with the `<l-m>` component, and it is mainly used to load HTML files of ofa.js pages or components.
+
+**Synchronous loading**：uses the `await` keyword，which blocks execution until the module has finished loading.
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**Async Loading**: Does not use the `await` keyword, returns a Promise object, and does not block execution. Suitable for on-demand loading scenarios.
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('Module loading completed:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+Usage Scenarios:- Synchronously load components to ensure they are registered before use
+- Load shared data modules
+- Load configuration files
+- Asynchronously load for on-demand scenarios
+
+> Note:
+> - Using `await` synchronous loading will block execution; it is recommended to choose synchronous or asynchronous methods based on actual needs
+> - If there is no on-demand loading requirement, it is recommended to directly use the `<l-m>` tag to load components
+
+### URL Parameters
+
+The `url` parameter is available in both page modules and component modules, representing the file address of the current module.
+
+```javascript
+export default async ({ url }) => {
+  console.log('Current module address:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### query parameters
+
+The `query` parameter is only available in page modules and contains the query parameters from the URL. You can directly access the query string parameters in the URL through the `query` object.
+
+```javascript
+export default async ({ query }) => {
+  console.log('Query parameters:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+Usage example:
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>User Details</h1>
+    <p>User ID: {{userId}}</p>
+    <p>Page: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || 'unknown',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+Access Method:```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> Important: Do not use the Vue-like `this.$route.query` method to obtain query parameters; ofa.js only supports obtaining them through function parameters.
+
+### Complete Parameter Example
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('Module URL:', url);
+      console.log('Query Parameters:', query);
+    }
+  };
+};
+```
+
+## Return Attribute Overview
 
 | Property | Type | Page Module | Component Module | Description | Related Documentation |
 |------|------|:-------:|:-------:|------|------|

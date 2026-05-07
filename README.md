@@ -92,6 +92,20 @@ However, with ofa.js, you can quickly create a component by simply creating an H
 
 In addition, ofa.js introduces template syntax sugar similar to that of Angular and Vue, enabling you to work more efficiently when developing Web Components.
 
+## AI Skill
+
+For search engines or online AI indexing:
+
+```
+https://raw.githubusercontent.com/ofajs/ofa.js/main/skills/ofajs-docs/SKILL.md
+```
+
+For AI tools that support skills, you can add the following skill URL to help AI learn ofa.js:
+
+```
+https://raw.githubusercontent.com/ofajs/ofa.js/main/skills/ofajs-docs.zip
+```
+
 ## Why Develop ofa.js?
 
 The original intention behind the development of ofa.js was to solve the **engineering** problems of web development without relying on compilation tools.

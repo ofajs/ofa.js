@@ -132,6 +132,7 @@ Need multi-page application?
 | `watch: { prop() {} }` | [Watchers](./references/watch.md) |
 | `ready() attached() detached()` | [Lifecycle](./references/lifecycle.md) |
 | `<template component>` `tag` `attrs` | [Create Component](./references/create-component.md) |
+| `export default async ({ load, url, query })` | [Module Return Object Properties](./references/module-return.md) |
 | `o-provider` `o-consumer` | [Context State](./references/context-state.md) |
 | `$.stanz()` | [State Management](./references/state-management.md) |
 | `o-app` `o-router` | [Routes](./references/routes.md), [Micro App](./references/micro-app.md) |

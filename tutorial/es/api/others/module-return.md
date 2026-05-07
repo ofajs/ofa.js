@@ -2,7 +2,145 @@
 
 En ofa.js, ya sea un módulo de página o un módulo de componente, es necesario devolver un objeto mediante `export default async () => {}` para definir la configuración y el comportamiento del módulo. Este documento recopila todas las propiedades que puede contener el objeto devuelto.
 
-## Descripción general de los atributos
+## Parámetros de la función async
+
+`export default async () => {}` La función async recibe un objeto de parámetros que contiene las siguientes propiedades:
+
+### Lista de parámetros
+
+| Parámetro | Tipo | Módulo de página | Módulo de componente | Descripción |
+|------|------|:-------:|:-------:|------|
+| `load` | `function` | ✅ | ✅ | Función para cargar otros módulos o recursos |
+| `url` | `string` | ✅ | ✅ | Dirección del archivo actual de la página o módulo de componente |
+| `query` | `object` | ✅ | ❌ | Objeto de parámetros de consulta de URL |### parámetros de carga
+
+`load` es una función utilizada para cargar otros módulos, componentes o recursos. Se puede usar tanto en módulos de componentes como en módulos de página. El efecto de carga de la función `load` es consistente con el del componente `<l-m>`, y se utiliza principalmente para cargar archivos HTML de páginas o componentes de ofa.js.
+
+**Carga sincrónica**: utiliza la palabra clave `await`, bloquea la ejecución hasta que el módulo se haya cargado completamente.
+
+```javascript
+export default async ({ load }) => {
+  const { someModule } = await load("./some-module.js");
+  const component = await load("./my-component.html");
+  
+  return {
+    data: {
+      moduleData: someModule
+    }
+  };
+};
+```
+
+**Carga asíncrona**: No utiliza la palabra clave `await`, devuelve un objeto Promise, no bloquea la ejecución. Adecuado para escenarios de carga bajo demanda.
+
+```javascript
+export default async ({ load }) => {
+  const modulePromise = load("./some-module.js");
+  
+  modulePromise.then(({ someModule }) => {
+    console.log('Módulo cargado:', someModule);
+  });
+  
+  return {
+    data: {}
+  };
+};
+```
+
+Escenario de uso:- Cargar componentes de forma síncrona, asegurándose de que los componentes estén registrados antes de usarlos
+- Cargar módulos de datos compartidos
+- Cargar archivos de configuración
+- La carga asíncrona es adecuada para escenarios de carga bajo demanda
+
+> Nota:
+> - Usar `await` para cargar de manera síncrona bloqueará la ejecución, se recomienda elegir el modo síncrono o asíncrono según las necesidades reales
+> - Si no hay necesidad de carga bajo demanda, se recomienda usar directamente la etiqueta `<l-m>` para cargar componentes
+
+### parámetros de url
+
+El parámetro `url` está disponible tanto en los módulos de página como en los de componente y representa la dirección del archivo del módulo actual.
+
+```javascript
+export default async ({ url }) => {
+  console.log('Dirección del módulo actual:', url);
+  
+  return {
+    data: {
+      moduleUrl: url
+    }
+  };
+};
+```
+
+### parámetros de consulta
+
+El parámetro `query` solo está disponible en los módulos de página y contiene los parámetros de consulta de la URL. A través del objeto `query` se puede acceder directamente a los parámetros de la cadena de consulta de la URL.
+
+```javascript
+export default async ({ query }) => {
+  console.log('Parámetros de consulta:', query);
+  
+  return {
+    data: {
+      userId: query.id,
+      page: query.page || 1
+    }
+  };
+};
+```
+
+Ejemplo de uso:
+
+```html
+<template page>
+  <style>
+    :host { display: block; padding: 20px; }
+  </style>
+  <div>
+    <h1>Detalles del usuario</h1>
+    <p>ID del usuario: {{userId}}</p>
+    <p>Página: {{page}}</p>
+  </div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          userId: query.id || 'desconocido',
+          page: query.page || '1'
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+Modo de acceso:```html
+<o-page src="./user.html?id=123&page=2"></o-page>
+```
+
+> Importante: No utilice métodos similares a `this.$route.query` de Vue para obtener parámetros de consulta. ofa.js solo admite la obtención mediante parámetros de función.
+
+### Ejemplo de parámetros completos
+
+```javascript
+export default async ({ load, url, query }) => {
+  const { config } = await load("./config.js");
+  
+  return {
+    data: {
+      configData: config,
+      moduleUrl: url,
+      queryParams: query
+    },
+    ready() {
+      console.log('Dirección del módulo:', url);
+      console.log('Parámetros de consulta:', query);
+    }
+  };
+};
+```
+
+## Resumen de propiedades devueltas
 
 | Propiedad | Tipo | Módulo de página | Módulo de componente | Descripción | Documentación relacionada |
 |------|------|:-------:|:-------:|------|------|

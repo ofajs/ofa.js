@@ -45,6 +45,8 @@ Contrairement aux modules de page, le module de composant utilise l’attribut `
 
 `tag` est le nom de la balise du composant, **doit être identique au nom de la balise utilisée pour le composant**. Par exemple, si votre composant `tag` est défini comme `"demo-comp"`, alors lors de l'utilisation en HTML, vous devez écrire `<demo-comp></demo-comp>`.
 
+Étant donné que les composants sont essentiellement des Web Components, **le nom du tag du composant doit contenir un trait d'union `-`**. Ceci est une exigence de la spécification Web Components, afin d'éviter les conflits avec les noms de balises des éléments HTML natifs. Par exemple, `demo-comp`, `my-button`, `user-card` sont des noms de balises valides, tandis que `democomp`, `button`, `card` sans trait d'union ne sont pas valides.
+
 ### Référence du module composant
 
 En introduisant le module de composants via la balise `l-m`, le module de composants enregistre automatiquement les composants. Cela ressemble à l'utilisation de la balise `script` pour introduire un script, mais `l-m` est spécifiquement destiné au chargement et à l'enregistrement des modules de composants.

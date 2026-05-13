@@ -46,6 +46,8 @@
 
 `tag` 是组件的标签名，**必须和组件的使用标签名一致**。例如，如果你的组件 `tag` 定义为 `"demo-comp"`，那么在 HTML 中使用时就必须写 `<demo-comp></demo-comp>`。
 
+由于组件本质上是 Web Component，因此**组件标签名必须包含连字符 `-`**。这是 Web Component 规范的要求，以确保与原生 HTML 元素的标签名不冲突。例如 `demo-comp`、`my-button`、`user-card` 等都是有效的标签名，而 `democomp`、`button`、`card` 等没有连字符的标签名是无效的。
+
 ### 组件模块引用
 
 通过 `l-m` 标签引入组件模块，组件模块会自动注册组件。这类似于使用 `script` 标签引入脚本，但 `l-m` 专门用于组件模块的加载和注册。

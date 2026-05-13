@@ -45,6 +45,8 @@ An der Stelle, an der die Komponente verwendet werden soll, wird das Komponenten
 
 `tag` ist der Tag-Name der Komponente, **muss mit dem verwendeten Tag-Namen der Komponente übereinstimmen**. Beispiel: Wenn der `tag` Ihrer Komponente als `"demo-comp"` definiert ist, dann muss im HTML `<demo-comp></demo-comp>` verwendet werden.
 
+Da Komponenten im Wesentlichen Web Components sind, **muss der Komponenten-Tag-Name einen Bindestrich `-` enthalten**. Dies ist eine Anforderung der Web-Component-Spezifikation, um Konflikte mit den Tag-Namen nativer HTML-Elemente zu vermeiden. Beispielsweise sind `demo-comp`, `my-button`, `user-card` usw. gültige Tag-Namen, während `democomp`, `button`, `card` usw. ohne Bindestrich ungültig sind.
+
 ### Komponenten-Modulreferenz
 
 Durch das `l-m`-Tag wird ein Komponentenmodul eingefügt, das automatisch Komponenten registriert. Dies ähnelt der Verwendung des `script`-Tags zum Einbinden von Skripten, aber `l-m` ist speziell für das Laden und Registrieren von Komponentenmodulen vorgesehen.

@@ -77,6 +77,27 @@ Two-way property binding uses the `sync:xxx` syntax, achieving bidirectional syn
 - DOM element changes → component data updates
 - Suitable for scenarios requiring user input and data synchronization
 
+### Two-Way Binding of Objects
+
+For object type data binding, **you do not need to use the `sync` syntax**; you can directly use `:` for one-way passing. This is because JavaScript objects are shared by reference. When a parent component passes an object to a child component, the child component receives a reference to the same object, and modifications to the object will directly reflect on the original data.
+
+ofa.js retains this characteristic of JavaScript, so the unidirectional passing of objects is effectively equivalent to bidirectional passing. For example:
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "Zhang San", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+Directly modifying `userData.name` in the `child-comp` component will also update `userInfo.name` in the parent component, because they point to the same object reference.
+
 ### Common two-way binding scenarios
 
 <o-playground name="Two-way Binding Example" style="--editor-height: 700px">

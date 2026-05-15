@@ -53,6 +53,8 @@
 
 `tag` 是組件的標籤名，**必須和組件的使用標籤名一緻**。例如，如菓妳的組件 `tag` 定義爲 `"demo-comp"`，那麼在 HTML 中使用時就必須寫 `<demo-comp></demo-comp>`。
 
+由於組件本質上是 Web Component，因此**組件標籤名必須包含連字符 `-`**。這是 Web Component 規範的要求，以確保與原生 HTML 元素的標籤名不衝突。例如 `demo-comp`、`my-button`、`user-card` 等都是有效的標籤名，而 `democomp`、`button`、`card` 等沒有連字符的標籤名是無效的。
+
 ### 組件模塊引用
 
 

@@ -46,6 +46,8 @@ Where the component needs to be used, load the component module asynchronously t
 
 `tag` is the component's tag name and **must be consistent with the component's usage tag name**. For example, if your component's `tag` is defined as `"demo-comp"`, then when using it in HTML, you must write `<demo-comp></demo-comp>`.
 
+Since components are essentially Web Components, **component tag names must contain a hyphen `-`**. This is a requirement of the Web Component specification to ensure no conflict with native HTML element tag names. For example, `demo-comp`, `my-button`, `user-card` are all valid tag names, while `democomp`, `button`, `card` without hyphens are invalid.
+
 ### Component Module Reference
 
 Component modules are imported through the `l-m` tag, which automatically registers the component. This is similar to using the `script` tag to import scripts, but `l-m` is specifically for loading and registering component modules.

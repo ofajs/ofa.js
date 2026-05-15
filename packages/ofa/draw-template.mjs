@@ -208,7 +208,10 @@ ${scriptContent}`;
 
     // Determine the starting line number of the source file.
     const originStarRowIndex = originLineArr.findIndex(
-      (lineContent) => lineContent.trim() === "<script>"
+      (lineContent) => {
+        const trimmed = lineContent.trim();
+        return trimmed === "<script>" || trimmed.startsWith("<script ");
+      }
     );
 
     // Determine the ending line number of the source file.

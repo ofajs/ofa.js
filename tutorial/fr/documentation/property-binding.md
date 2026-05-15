@@ -77,6 +77,27 @@ La liaison de propriété bidirectionnelle utilise la syntaxe `sync:xxx`, réali
 - Changement de l'élément DOM → mise à jour des données du composant
 - Convient aux scénarios nécessitant une saisie utilisateur et une synchronisation des données
 
+### Liaison bidirectionnelle de l'objet
+
+Pour la liaison de données de type objet, **il n'est pas nécessaire d'utiliser la syntaxe `sync`**, il suffit d'utiliser `:` pour une transmission unidirectionnelle. Cela est dû au fait que les objets en JavaScript sont partagés par référence : lorsque le composant parent transmet un objet au composant enfant, ce dernier obtient une référence au même objet, et toute modification de l'objet se reflète directement sur les données d'origine.
+
+ofa.js conserve cette caractéristique de JavaScript, de sorte que la transmission unidirectionnelle d'un objet équivaut en réalité à une transmission bidirectionnelle. Par exemple :
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "Jean", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+Dans le composant `child-comp`, si vous modifiez directement `userData.name`, le `userInfo.name` dans le composant parent sera également mis à jour, car ils pointent vers la même référence d'objet.
+
 ### Scènes courantes de liaison bidirectionnelle
 
 <o-playground name="Exemple de liaison bidirectionnelle de formulaire" style="--editor-height: 700px">

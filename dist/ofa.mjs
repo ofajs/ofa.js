@@ -1,4 +1,4 @@
-//! ofa.js - v4.6.21 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.6.22 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -5139,7 +5139,10 @@ ${scriptContent}`;
 
     // Determine the starting line number of the source file.
     const originStarRowIndex = originLineArr.findIndex(
-      (lineContent) => lineContent.trim() === "<script>"
+      (lineContent) => {
+        const trimmed = lineContent.trim();
+        return trimmed === "<script>" || trimmed.startsWith("<script ");
+      }
     );
 
     // Determine the ending line number of the source file.
@@ -7229,7 +7232,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.6.21";
+const version = "ofa.js@4.6.22";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

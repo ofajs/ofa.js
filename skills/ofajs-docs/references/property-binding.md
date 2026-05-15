@@ -73,6 +73,27 @@ ofa.js 支持将数据绑定到元素实例化后对象的属性上，如 input 
 - DOM 元素变化 → 组件数据更新
 - 适用于需要用户输入和数据同步的场景
 
+### 对象的双向绑定
+
+对于对象类型的数据绑定，**不需要使用 `sync` 语法**，直接使用 `:` 单向传递即可。这是因为 JavaScript 的对象是引用共享的，当父组件将对象传递给子组件时，子组件获取到的是同一个对象的引用，对象的修改会直接反映到原始数据上。
+
+ofa.js 保留了 JavaScript 的这一特性，因此对象的单向传递实际上就相当于双向传递。例如：
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "张三", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+在 `child-comp` 组件中直接修改 `userData.name`，父组件中的 `userInfo.name` 也会同时更新，因为它们指向同一个对象引用。
+
 ### 常见的双向绑定场景
 
 ```html

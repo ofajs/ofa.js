@@ -45,6 +45,8 @@ En la ubicación donde se necesita utilizar el componente, carga de forma asínc
 
 `tag` es el nombre de la etiqueta del componente, **debe coincidir con el nombre de la etiqueta utilizada para el componente**. Por ejemplo, si el `tag` de tu componente se define como `"demo-comp"`, entonces al usarlo en HTML debes escribir `<demo-comp></demo-comp>`.
 
+Dado que los componentes son esencialmente Web Components, **el nombre de la etiqueta del componente debe contener un guion `-`**. Este es un requisito de la especificación de Web Components para evitar conflictos con los nombres de etiquetas de elementos HTML nativos. Por ejemplo, `demo-comp`, `my-button`, `user-card` son nombres de etiqueta válidos, mientras que `democomp`, `button`, `card` sin guion no son válidos.
+
 ### Referencia al módulo de componentes
 
 Se introduce el módulo de componente mediante la etiqueta `l-m`, y el módulo se registra automáticamente. Es similar a incluir un script con la etiqueta `script`, pero `l-m` está diseñada específicamente para cargar y registrar módulos de componentes.

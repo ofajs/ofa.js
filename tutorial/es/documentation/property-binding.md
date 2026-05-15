@@ -77,6 +77,27 @@ La vinculación bidireccional de atributos utiliza la sintaxis `sync:xxx`, logra
 - Cambio en elemento DOM → Actualización de datos del componente
 - Adecuado para escenarios que requieren entrada del usuario y sincronización de datos
 
+### Vinculación bidireccional de objetos
+
+Para el enlace de datos de tipo objeto, **no es necesario usar la sintaxis `sync`**, simplemente use `:` para la transmisión unidireccional. Esto se debe a que los objetos en JavaScript son compartidos por referencia; cuando el componente padre pasa un objeto al componente hijo, este último obtiene una referencia al mismo objeto, por lo que las modificaciones en el objeto se reflejarán directamente en los datos originales.
+
+ofa.js conserva esta característica de JavaScript, por lo que el paso unidireccional de objetos equivale en realidad a un paso bidireccional. Por ejemplo:
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "Zhang San", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+Al modificar directamente `userData.name` en el componente `child-comp`, `userInfo.name` en el componente padre también se actualizará al mismo tiempo, ya que apuntan a la misma referencia de objeto.
+
 ### Escenarios comunes de enlace bidireccional
 
 <o-playground name="Ejemplo de enlace bidireccional de formulario" style="--editor-height: 700px">

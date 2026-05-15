@@ -77,6 +77,27 @@ Die bidirektionale Eigenschaftsbindung verwendet die `sync:xxx`-Syntax und reali
 - Änderung des DOM-Elements → Aktualisierung der Komponentendaten
 - Geeignet für Szenarien, die Benutzereingaben und Datensynchronisation erfordern
 
+### Zweiseitige Datenbindung von Objekten
+
+Für die Datenbindung bei Objekttypen **ist die `sync`-Syntax nicht erforderlich**, verwenden Sie einfach die unidirektionale Übergabe mit `:`. Dies liegt daran, dass JavaScript-Objekte als Referenz geteilt werden. Wenn die Elternkomponente ein Objekt an die Kindkomponente übergibt, erhält die Kindkomponente eine Referenz auf dasselbe Objekt. Änderungen am Objekt wirken sich direkt auf die ursprünglichen Daten aus.
+
+ofa.js bewahrt diese Eigenschaft von JavaScript, daher entspricht die unidirektionale Übergabe von Objekten tatsächlich der bidirektionalen Übergabe. Zum Beispiel:
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "Zhang San", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+Im Kind-Komponenten `child-comp` wird direkt `userData.name` geändert, und im Eltern-Komponenten wird `userInfo.name` gleichzeitig aktualisiert, da sie auf dieselbe Objektreferenz verweisen.
+
 ### Häufige Szenarien für bidirektionale Bindung
 
 <o-playground name="Formular-Zwei-Wege-Bindung Beispiel" style="--editor-height: 700px">

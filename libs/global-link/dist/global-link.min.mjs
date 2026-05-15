@@ -1,3 +1,3 @@
-//! ofa.js - v4.6.21 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.6.22 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 const t=[],e=Symbol("oldHref");$.register({tag:"o-global-link",attrs:{href:""},watch:{href(){this._adjustLink()}},proto:{_removeOld(){if(this[e]){const s=t.indexOf(this[e]);s>-1&&t.splice(s,1)}},_adjustLink(){const s=new URL(this.href,location).href;this[e]!==s&&(this._removeOld(),this[e]=s,t.push(s))}},attached(){this._adjustLink()},detached(){this._removeOld()}}),$.extensions.afterAttached=e=>{"o-global-link"!==e.tag&&t.forEach((t=>e.shadow&&e.shadow.push(`<link rel="stylesheet" href="${t}">`)))};
 //# sourceMappingURL=global-link.min.mjs.map

@@ -150,6 +150,27 @@ Two-way binding can also be used directly with native form elements:
 </template>
 ```
 
+### Object Two-Way Binding
+
+For object type data binding, **you don't need to use the `sync` syntax**. Simply use `:` for one-way passing. This is because JavaScript objects are reference-shared. When a parent component passes an object to a child component, the child component gets a reference to the same object, so any modifications to the object are directly reflected in the original data.
+
+ofa.js preserves this JavaScript characteristic, so one-way passing of objects is effectively equivalent to two-way passing. For example:
+
+```html
+<template page>
+  <child-comp :userData="userInfo"></child-comp>
+  <script>
+    export default async () => {
+      return {
+        data: { userInfo: { name: "John", age: 25 } }
+      };
+    };
+  </script>
+</template>
+```
+
+In the `child-comp` component, if you modify `userData.name` directly, `userInfo.name` in the parent component will also update simultaneously, because they point to the same object reference.
+
 ## Property Binding vs Attribute Binding
 
 | Feature | Property Binding (`:`) | Attribute Binding (`attr:`) |

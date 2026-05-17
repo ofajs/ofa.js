@@ -1,6 +1,6 @@
 # 应用配置基础
 
-`app-config.js` 配置文件用于定义应用的基本行为。本章介绍最基础的配置项：首页地址和页面切换动画。
+`app-config.js` 配置文件用于定义应用的各种行为。本章介绍配置文件的基本结构和所有可用的配置项。
 
 ## 配置文件结构
 
@@ -27,7 +27,46 @@ export const pageAnime = {
     transform: "translate(-30px, 0)",
   },
 };
+
+// 加载状态（可选）
+export const loading = () => {
+  return "<div>Loading...</div>";
+};
+
+// 错误处理（可选）
+export const fail = ({ src, error }) => {
+  return `<div>Failed to load: ${src}</div>`;
+};
+
+// 应用初始化（可选）
+export const ready = function() {
+  console.log("App is ready");
+};
+
+// 原型扩展（可选）
+export const proto = {
+  customMethod() {
+    console.log("Custom method");
+  },
+};
+
+// 启用前进功能（可选）
+export const allowForward = true;
 ```
+
+## 配置项总览
+
+`app-config.js` 支持以下配置项：
+
+| 配置项 | 是否必需 | 说明 | 详细文档 |
+|--------|----------|------|----------|
+| `home` | ✅ 必需 | 应用首页地址 | 本章 |
+| `pageAnime` | 可选 | 页面切换动画配置 | [页面切换动画](./page-transition-animation.md) |
+| `loading` | 可选 | 页面加载时显示的内容 | [加载与错误处理](./app-loading-error.md) |
+| `fail` | 可选 | 页面加载失败时显示的内容 | [加载与错误处理](./app-loading-error.md) |
+| `ready` | 可选 | 应用初始化完成后的回调 | [应用初始化](./app-initialization.md) |
+| `proto` | 可选 | 添加到应用原型的方法和属性 | [应用初始化](./app-initialization.md) |
+| `allowForward` | 可选 | 是否启用浏览器前进功能 | [路由与导航](./app-navigation.md) |
 
 ## home - 首页地址
 

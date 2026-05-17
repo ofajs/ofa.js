@@ -143,7 +143,6 @@ export const pageAnime = {
 - `opacity` - 透明度
 - `transform` - 变换（位移、旋转、缩放等）
 - `width` / `height` - 宽高
-- `margin` / `padding` - 外边距/内边距
 - `background-color` - 背景色
 - 其他 CSS 可动画属性
 
@@ -157,7 +156,7 @@ export const pageAnime = {
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js@4.3.40/dist/ofa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js/dist/ofa.min.mjs" type="module"></script>
 </head>
 <body>
   <o-app src="./app-config.js"></o-app>

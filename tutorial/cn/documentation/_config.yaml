@@ -48,6 +48,8 @@
       url: ./micro-app.md
     - name: 应用配置基础
       url: ./app-config-basics.md
+    - name: 页面切换动画
+      url: ./page-transition-animation.md
     - name: 加载与错误处理
       url: ./app-loading-error.md
     - name: 应用初始化

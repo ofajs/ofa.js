@@ -46,13 +46,21 @@
   content:
     - name: 微應用
       url: ./micro-app.md
-    - name: 應用配置和相關函數
-      url: ./app-configuration.md
+    - name: 應用配置基礎
+      url: ./app-config-basics.md
+    - name: 頁面切換動畫
+      url: ./page-transition-animation.md
+    - name: 加載與錯誤處理
+      url: ./app-loading-error.md
+    - name: 應用初始化
+      url: ./app-initialization.md
+    - name: 路由與導航
+      url: ./app-navigation.md
     - name: 單頁面應用
       url: ./routes.md
-    - name: 嵌套頁面/路由
+    - name: 嵌套路由
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSR 與衕構渲染
       url: ./ssr.md
 - name: 狀態管理
   content:

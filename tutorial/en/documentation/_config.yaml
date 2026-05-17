@@ -4,7 +4,7 @@
   content:
     - name: Script Reference
       url: ./script-reference.md
-    - name: Create Your First App
+    - name: Create First App
       url: ./create-first-app.md
 - name: Quick Start
   url: ./quick-start.md
@@ -14,11 +14,11 @@
       url: ./content-rendering.md
     - name: Event Binding
       url: ./event-binding.md
-    - name: Property Response
+    - name: Property Reactivity
       url: ./property-response.md
     - name: Property Binding
       url: ./property-binding.md
-    - name: Class & Style Binding
+    - name: Class and Style Binding
       url: ./class-style-binding.md
     - name: Conditional Rendering
       url: ./conditional-rendering.md
@@ -34,7 +34,7 @@
   content:
     - name: Create Component
       url: ./create-component.md
-    - name: Pass Feature Attributes
+    - name: Inherit Attributes
       url: ./inherit-attributes.md
     - name: Slots
       url: ./slots.md
@@ -42,17 +42,25 @@
       url: ./deep-property-binding.md
     - name: Custom Events
       url: ./custom-events.md
-- name: Application & Scale
+- name: Application & Scaling
   content:
     - name: Micro App
       url: ./micro-app.md
-    - name: App Configuration & Related Functions
-      url: ./app-configuration.md
+    - name: App Configuration Basics
+      url: ./app-config-basics.md
+    - name: Page Transition Animation
+      url: ./page-transition-animation.md
+    - name: Loading & Error Handling
+      url: ./app-loading-error.md
+    - name: App Initialization
+      url: ./app-initialization.md
+    - name: Routing & Navigation
+      url: ./app-navigation.md
     - name: Single Page Application
       url: ./routes.md
-    - name: Nested Pages/Routes
+    - name: Nested Routes
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSR & Isomorphic Rendering
       url: ./ssr.md
 - name: State Management
   content:
@@ -66,7 +74,7 @@
   url: ./build-app.md
 - name: Other Components
   content:
-    - name: Inject Host Style
+    - name: Inject Host Styles
       url: ./inject-host-style.md
     - name: Non-Explicit Component
       url: ./non-explicit-component.md

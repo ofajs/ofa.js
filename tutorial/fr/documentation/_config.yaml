@@ -1,16 +1,16 @@
 - name: Introduction
   url: ./introduction.md
-- name: Pour commencer
+- name: Démarrage
   content:
     - name: Référence de script
       url: ./script-reference.md
-    - name: Créer votre première application
+    - name: Créer la première application
       url: ./create-first-app.md
 - name: Démarrage rapide
   url: ./quick-start.md
-- name: Syntaxe du modèle
+- name: Syntaxe de template
   content:
-    - name: Rendu du contenu
+    - name: Rendu de contenu
       url: ./content-rendering.md
     - name: Liaison d'événements
       url: ./event-binding.md
@@ -34,29 +34,37 @@
   content:
     - name: Créer un composant
       url: ./create-component.md
-    - name: Transmettre les attributs hérités
+    - name: Transmission des attributs héritables
       url: ./inherit-attributes.md
     - name: Slots
       url: ./slots.md
-    - name: Liaison profonde des propriétés
+    - name: Liaison de propriétés profondes
       url: ./deep-property-binding.md
     - name: Événements personnalisés
       url: ./custom-events.md
-- name: Application et passage à l'échelle
+- name: Application et mise à l'échelle
   content:
     - name: Micro-application
       url: ./micro-app.md
-    - name: Configuration de l'application et fonctions associées
-      url: ./app-configuration.md
+    - name: Bases de la configuration d'application
+      url: ./app-config-basics.md
+    - name: Animation de transition de page
+      url: ./page-transition-animation.md
+    - name: Chargement et gestion des erreurs
+      url: ./app-loading-error.md
+    - name: Initialisation de l'application
+      url: ./app-initialization.md
+    - name: Routage et navigation
+      url: ./app-navigation.md
     - name: Application monopage
       url: ./routes.md
-    - name: Pages/ Routes imbriquées
+    - name: Routes imbriquées
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSR et rendu isomorphique
       url: ./ssr.md
 - name: Gestion d'état
   content:
-    - name: Qu'est-ce que la gestion d'état
+    - name: Qu'est-ce que la gestion d'état ?
       url: ./state-management.md
     - name: État contextuel
       url: ./context-state.md
@@ -66,9 +74,9 @@
   url: ./build-app.md
 - name: Autres composants
   content:
-    - name: Injecter le style hôte
+    - name: Injection de styles hôte
       url: ./inject-host-style.md
-    - name: Composant non explicite
+    - name: Composants non explicites
       url: ./non-explicit-component.md
     - name: Composant replace-temp
       url: ./replace-template.md

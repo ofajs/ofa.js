@@ -1,10 +1,10 @@
 - name: 紹介
   url: ./introduction.md
-- name: 始め方
+- name: はじめに
   content:
     - name: スクリプト参照
       url: ./script-reference.md
-    - name: 最初のアプリを作成
+    - name: 最初のアプリを作成する
       url: ./create-first-app.md
 - name: クイックスタート
   url: ./quick-start.md
@@ -14,11 +14,11 @@
       url: ./content-rendering.md
     - name: イベントバインディング
       url: ./event-binding.md
-    - name: プロパティレスポンス
+    - name: 属性リアクティブ
       url: ./property-response.md
-    - name: プロパティバインディング
+    - name: 属性バインディング
       url: ./property-binding.md
-    - name: クラス・スタイルバインディング
+    - name: クラスとスタイルのバインディング
       url: ./class-style-binding.md
     - name: 条件付きレンダリング
       url: ./conditional-rendering.md
@@ -32,7 +32,7 @@
       url: ./lifecycle.md
 - name: コンポーネント
   content:
-    - name: コンポーネント作成
+    - name: コンポーネントの作成
       url: ./create-component.md
     - name: 属性の継承
       url: ./inherit-attributes.md
@@ -42,17 +42,25 @@
       url: ./deep-property-binding.md
     - name: カスタムイベント
       url: ./custom-events.md
-- name: アプリケーションとスケーラビリティ
+- name: アプリとスケーリング
   content:
     - name: マイクロアプリ
       url: ./micro-app.md
-    - name: アプリ設定と関連関数
-      url: ./app-configuration.md
+    - name: アプリ設定の基本
+      url: ./app-config-basics.md
+    - name: ページトランジションアニメーション
+      url: ./page-transition-animation.md
+    - name: 読み込みとエラーハンドリング
+      url: ./app-loading-error.md
+    - name: アプリ初期化
+      url: ./app-initialization.md
+    - name: ルーティングとナビゲーション
+      url: ./app-navigation.md
     - name: シングルページアプリケーション
       url: ./routes.md
-    - name: ネストされたページ/ルート
+    - name: ネストされたルート
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSRと同型レンダリング
       url: ./ssr.md
 - name: 状態管理
   content:
@@ -62,13 +70,13 @@
       url: ./context-state.md
     - name: スタイルクエリ
       url: ./match-var.md
-- name: ビルドとデプロイ
+- name: 本番環境とデプロイ
   url: ./build-app.md
 - name: その他のコンポーネント
   content:
     - name: ホストスタイルの注入
       url: ./inject-host-style.md
-    - name: 非明示コンポーネント
+    - name: 非明示的コンポーネント
       url: ./non-explicit-component.md
     - name: replace-temp コンポーネント
       url: ./replace-template.md

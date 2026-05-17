@@ -1,24 +1,24 @@
 - name: Introducción
   url: ./introduction.md
-- name: Comenzar
+- name: Primeros pasos
   content:
-    - name: Referencia de script
+    - name: Referencia del script
       url: ./script-reference.md
     - name: Crear la primera aplicación
       url: ./create-first-app.md
 - name: Inicio rápido
   url: ./quick-start.md
-- name: Sintaxis de plantilla
+- name: Sintaxis de plantillas
   content:
     - name: Renderizado de contenido
       url: ./content-rendering.md
-    - name: Enlace de eventos
+    - name: Vinculación de eventos
       url: ./event-binding.md
-    - name: Respuesta de propiedades
+    - name: Reactividad de propiedades
       url: ./property-response.md
-    - name: Enlace de propiedades
+    - name: Vinculación de propiedades
       url: ./property-binding.md
-    - name: Enlace de clases y estilos
+    - name: Vinculación de clases y estilos
       url: ./class-style-binding.md
     - name: Renderizado condicional
       url: ./conditional-rendering.md
@@ -32,27 +32,35 @@
       url: ./lifecycle.md
 - name: Componentes
   content:
-    - name: Crear componentes
+    - name: Crear un componente
       url: ./create-component.md
-    - name: Pasar atributos heredados
+    - name: Pasar atributos heredables
       url: ./inherit-attributes.md
-    - name: Slots
+    - name: Ranuras
       url: ./slots.md
-    - name: Enlace profundo de propiedades
+    - name: Vinculación de propiedades profundas
       url: ./deep-property-binding.md
     - name: Eventos personalizados
       url: ./custom-events.md
-- name: Aplicaciones y escalabilidad
+- name: Aplicación y escalado
   content:
-    - name: Micro aplicaciones
+    - name: Microaplicaciones
       url: ./micro-app.md
-    - name: Configuración de la aplicación y funciones relacionadas
-      url: ./app-configuration.md
-    - name: Aplicaciones de una sola página
+    - name: Configuración básica de la app
+      url: ./app-config-basics.md
+    - name: Animación de transición de página
+      url: ./page-transition-animation.md
+    - name: Carga y manejo de errores
+      url: ./app-loading-error.md
+    - name: Inicialización de la app
+      url: ./app-initialization.md
+    - name: Rutas y navegación
+      url: ./app-navigation.md
+    - name: Aplicación de una sola página
       url: ./routes.md
-    - name: Páginas/Rutas anidadas
+    - name: Rutas anidadas
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSR y renderizado isomórfico
       url: ./ssr.md
 - name: Gestión de estado
   content:
@@ -66,9 +74,9 @@
   url: ./build-app.md
 - name: Otros componentes
   content:
-    - name: Inyectar estilos del host
+    - name: Inyección de estilos del host
       url: ./inject-host-style.md
-    - name: Componentes no explícitos
+    - name: Componente no explícito
       url: ./non-explicit-component.md
     - name: Componente replace-temp
       url: ./replace-template.md

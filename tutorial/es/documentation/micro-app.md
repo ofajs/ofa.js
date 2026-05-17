@@ -1,17 +1,34 @@
 # Microaplicación
 
-Usa `o-app` para aplicación, esta etiqueta representa una microaplicación, que cargará el archivo de configuración `app-config.js`, el cual define la dirección de la página de inicio y la configuración de animación de cambio de página.
+`o-app` es el componente contenedor central en ofa.js, utilizado para crear microaplicaciones independientes. Cargará el archivo de configuración `app-config.js`, que define varios comportamientos de la aplicación.
+
+## Uso básico
+
+En HTML, use la etiqueta `o-app` para crear una micro aplicación:
 
 ```html
-<o-app src="./app-config.js"></o-app>
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js/dist/ofa.min.mjs" type="module"></script>
+</head>
+<body>
+  <o-app src="./app-config.js"></o-app>
+</body>
+</html>
 ```
+
+## Crear archivo de configuración
+
+Crea el archivo `app-config.js` y define la configuración básica de la aplicación:
 
 ```javascript
 // app-config.js
-// Dirección de la página de inicio de la aplicación
+
+// Dirección de la página de inicio de la aplicación (obligatorio)
 export const home = "./home.html";
 
-// Configuración de animación de cambio de página
+// Configuración de animación de cambio de página (opcional)
 export const pageAnime = {
   current: {
     opacity: 1,
@@ -101,55 +118,99 @@ export const pageAnime = {
   </code>
 </o-playground>
 
-## home - dirección de la página de inicio
-
-Especifica la ruta del módulo de la página de inicio que se carga al iniciar la aplicación, compatible con rutas relativas y absolutas.
-
-```javascript
-export const home = "./pages/home.html";
-```
-
-## pageAnime - Animación de transición de página
-
-Controla los efectos de animación de transición al cambiar de página, incluye tres estados:
-
-| Estado | Descripción |
-|------|------|
-| `current` | Estilo de la página actual después de la animación |
-| `next` | Estilo inicial al entrar en una nueva página |
-| `previous` | Estilo objetivo al salir de la página anterior |```javascript
-export const pageAnime = {
-  current: {
-    opacity: 1,
-    transform: "translate(0, 0)",
-  },
-  next: {
-    opacity: 0,
-    transform: "translate(30px, 0)",
-  },
-  previous: {
-    opacity: 0,
-    transform: "translate(-30px, 0)",
-  },
-};
-```
-
-## Forma de pasar parámetros
-
-En `o-app`, la navegación entre páginas admite pasar parámetros a través de la URL Query, y la página de destino los recibe mediante el parámetro `query` de la función del módulo.
-
 ## Navegación de página
 
-Dentro de o-app, cada módulo de página puede usar la etiqueta `<a>` con el atributo `olink` para cambiar de página. Esta etiqueta activa el cambio de ruta de la aplicación, incluye animaciones de transición y no recarga toda la página.
+### Usar el atributo olink
+
+Dentro de `o-app`, utilice la etiqueta `<a>` con el atributo `olink` para cambiar de página:
 
 ```html
 <a href="./about.html" olink>Ir a la página acerca</a>
 ```
 
-En el componente de página, puedes utilizar el método `back()` para volver a la página anterior:
+`olink` activa el cambio de ruta de la aplicación, con animaciones de transición, y sin recargar toda la página.
+
+### Navegación programática
+
+En los componentes de página, se pueden usar métodos de navegación:
+
+```javascript
+// Ir a la página especificada
+this.goto("./about.html");
+
+// Reemplazar la página actual (no se añade al historial)
+this.replace("./about.html");
+
+// Volver a la página anterior
+this.back();
+```
+
+## Paso de parámetros de página
+
+Pasar parámetros a través de URL Query, la página de destino los recibe mediante el parámetro `query` de la función del módulo:
+
+**Página de envío:**
+
+```html
+<a href="./detail.html?id=123" olink>Ver detalles</a>
+```
+
+**Página de recepción:**
 
 ```html
 <template page>
-  <button on:click="back()">Volver</button>
+  <script>
+    export default async ({ query }) => {
+      console.log(query.id); // "123"
+      return {
+        data: {
+          id: query.id
+        }
+      };
+    };
+  </script>
 </template>
 ```
+
+## Explicación detallada del archivo de configuración
+
+`app-config.js` admite múltiples opciones de configuración para controlar el comportamiento de la aplicación:
+
+| Configuración | ¿Es obligatorio? | Descripción |
+|--------|----------|------|
+| `home` | Requerido | Dirección de la página de inicio de la aplicación |
+| `pageAnime` | Opcional | Configuración de la animación de cambio de página |
+| `loading` | Opcional | Contenido mostrado al cargar la página |
+| `fail` | Opcional | Contenido mostrado cuando falla la carga de la página |
+| `ready` | Opcional | Función de devolución de llamada después de que se completa la inicialización de la aplicación |
+| `proto` | Opcional | Métodos y propiedades agregados al prototipo de la aplicación |
+| `allowForward` | Opcional | Si se habilita la función de avance del navegador |## Características de la microaplicación
+
+### Independencia
+
+Cada instancia de `o-app` es una microaplicación independiente, con su propia:- historial de enrutamiento
+- pila de páginas
+- gestión de estado
+- opciones de configuración
+
+### Uso anidado
+
+`o-app` se puede anidar para implementar estructuras de aplicaciones complejas:
+
+```html
+<template page>
+  <o-app src="./sub-app-config.js"></o-app>
+</template>
+```
+
+### Diferencias con los componentes
+
+`o-app` se diferencia de los componentes normales principalmente en que:
+
+| Característica | o-app | Componente normal |
+|------|-------|----------|
+| Gestión de enrutamiento | ✅ Sistema de enrutamiento integrado | ❌ No |
+| Pila de páginas | ✅ Administra el historial de páginas | ❌ No |
+| Archivo de configuración | ✅ Configuración independiente | ❌ No |
+| Animación de transición entre páginas | ✅ Soporte | ❌ No |
+| Escenario de uso | Contenedor de nivel de aplicación | Componente funcional |

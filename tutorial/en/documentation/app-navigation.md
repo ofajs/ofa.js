@@ -20,6 +20,16 @@ When enabled:
 
 In addition to links that use the `olink` attribute, navigation methods can also be called in JavaScript.
 
+> **Important Notes**:
+> - The `goto`, `replace`, and `back` methods are available on both **page instance** and **app instance**
+> - The `forward` method is only available on the **app instance**
+> - In pages: use `this.goto()` or `this.app.goto()`
+> - In components: use `this.app.goto()` (must be called via the app instance)
+> 
+> **Path Relativity Notes**:
+> - When using `goto` or `replace` on a **page module**, the path is relative to the address of the **current page module**
+> - When using `goto` or `replace` on the **app instance**, the path is relative to the address of the **current application navigation**
+
 ### goto - Page Navigation
 
 Navigate to specified page and add to history:

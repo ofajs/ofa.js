@@ -20,6 +20,16 @@ Nach der Aktivierung:
 
 Neben Links, die das `olink`-Attribut verwenden, können Navigationsmethoden auch in JavaScript aufgerufen werden.
 
+> **Wichtiger Hinweis**:
+> - Die Methoden `goto`, `replace` und `back` sind sowohl auf der **Seiteninstanz (page)** als auch auf der **App-Instanz (app)** verfügbar.
+> - Die Methode `forward` ist nur auf der **App-Instanz (app)** verfügbar.
+> - Verwendung in einer Seite: `this.goto()` oder `this.app.goto()`
+> - Verwendung in einer Komponente: `this.app.goto()` (Aufruf über die App-Instanz erforderlich)
+> 
+> **Hinweise zur Pfadrelativität**:
+> - Bei Verwendung von `goto` oder `replace` auf einem **Seitenmodul** ist der Pfad relativ zur Adresse des **aktuellen Seitenmoduls**.
+> - Bei Verwendung von `goto` oder `replace` auf der **App-Instanz (app)** ist der Pfad relativ zur **aktuellen App-Navigation**.
+
 ### goto - Seite wechseln
 
 Zur angegebenen Seite navigieren und zum Verlauf hinzufügen:

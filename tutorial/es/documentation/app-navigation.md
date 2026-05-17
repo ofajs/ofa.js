@@ -20,6 +20,16 @@ Al habilitar:
 
 Además de usar enlaces con el atributo `olink`, también se pueden invocar métodos de navegación en JavaScript.
 
+> **Nota importante**:
+> - Los métodos `goto`, `replace`, `back` están disponibles tanto en la **instancia de página (page)** como en la **instancia de aplicación (app)**
+> - El método `forward` solo está disponible en la **instancia de aplicación (app)**
+> - En una página, use: `this.goto()` o `this.app.goto()`
+> - En un componente, use: `this.app.goto()` (es necesario llamarlo a través de la instancia app)
+> 
+> **Nota sobre la relatividad de las rutas**:
+> - Al usar `goto` o `replace` en un **módulo de página**, la ruta es relativa a la dirección del **módulo de página actual**
+> - Al usar `goto` o `replace` en la **instancia de aplicación (app)**, la ruta es relativa a la dirección de la **navegación de la aplicación actual**
+
 ### goto - Ir a página
 
 Ir a la página especificada y añadir al historial:

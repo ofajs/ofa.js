@@ -26,6 +26,16 @@ export const allowForward = true;
 
 除瞭使用 `olink` 屬性的鏈接，還可以在 JavaScript 中調用導航方法。
 
+> **重要說明**：
+> - `goto`、`replace`、`back` 方法在**頁面實例（page）**和**應用實例（app）**上都可用
+> - `forward` 方法隻在**應用實例（app）**上可用
+> - 在頁面中使用：`this.goto()` 或 `this.app.goto()`
+> - 在組件中使用：`this.app.goto()`（需要通過 app 實例調用）
+> 
+> **路徑相對性說明**：
+> - 在**頁面模塊**上使用 `goto` 或 `replace`，路徑是相對於**當前頁面模塊**的地址
+> - 在**應用實例（app）**上使用 `goto` 或 `replace`，路徑是相對於**當前應用導航**的地址
+
 ### goto - 跳轉頁面
 
 

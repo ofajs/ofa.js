@@ -20,6 +20,16 @@ export const allowForward = true;
 
 除了使用 `olink` 属性的链接，还可以在 JavaScript 中调用导航方法。
 
+> **重要说明**：
+> - `goto`、`replace`、`back` 方法在**页面实例（page）**和**应用实例（app）**上都可用
+> - `forward` 方法只在**应用实例（app）**上可用
+> - 在页面中使用：`this.goto()` 或 `this.app.goto()`
+> - 在组件中使用：`this.app.goto()`（需要通过 app 实例调用）
+> 
+> **路径相对性说明**：
+> - 在**页面模块**上使用 `goto` 或 `replace`，路径是相对于**当前页面模块**的地址
+> - 在**应用实例（app）**上使用 `goto` 或 `replace`，路径是相对于**当前应用导航**的地址
+
 ### goto - 跳转页面
 
 跳转到指定页面，并添加到历史记录：

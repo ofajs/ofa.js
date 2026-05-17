@@ -1,17 +1,34 @@
 # 微应用
 
-使用 `o-app` 进行应用化，这个标签就代表着一个微应用，它会加载 `app-config.js` 配置文件，该文件定义了应用的首页地址和页面切换动画配置。
+`o-app` 是 ofa.js 中的核心容器组件，用于创建独立的微应用。它会加载 `app-config.js` 配置文件，该文件定义了应用的各种行为。
+
+## 基本使用
+
+在 HTML 中使用 `o-app` 标签创建微应用：
 
 ```html
-<o-app src="./app-config.js"></o-app>
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js@4.3.40/dist/ofa.min.js"></script>
+</head>
+<body>
+  <o-app src="./app-config.js"></o-app>
+</body>
+</html>
 ```
+
+## 创建配置文件
+
+创建 `app-config.js` 文件，定义应用的基本配置：
 
 ```javascript
 // app-config.js
-// 应用首页地址
+
+// 应用首页地址（必需）
 export const home = "./home.html";
 
-// 页面切换动画配置
+// 页面切换动画配置（可选）
 export const pageAnime = {
   current: {
     opacity: 1,
@@ -101,57 +118,104 @@ export const pageAnime = {
   </code>
 </o-playground>
 
-## home - 首页地址
-
-指定应用启动时加载的首页模块路径，支持相对路径和绝对路径。
-
-```javascript
-export const home = "./pages/home.html";
-```
-
-## pageAnime - 页面切换动画
-
-控制页面切换时的过渡动画效果，包含三个状态：
-
-| 状态 | 说明 |
-|------|------|
-| `current` | 当前页面动画结束后的样式 |
-| `next` | 新页面进入时的起始样式 |
-| `previous` | 旧页面离开时的目标样式 |
-
-```javascript
-export const pageAnime = {
-  current: {
-    opacity: 1,
-    transform: "translate(0, 0)",
-  },
-  next: {
-    opacity: 0,
-    transform: "translate(30px, 0)",
-  },
-  previous: {
-    opacity: 0,
-    transform: "translate(-30px, 0)",
-  },
-};
-```
-
-## 传参方式
-
-在 `o-app` 中，页面跳转支持通过 URL Query 传递参数，目标页面通过模块函数的 `query` 参数接收。
-
 ## 页面导航
 
-在 o-app 内，每个页面模块可以使用带有 `olink` 属性的 `<a>` 标签进行页面切换。这个标签会触发应用的路由切换，带上过渡动画，且不会刷新整个页面。
+### 使用 olink 属性
+
+在 `o-app` 内，使用带有 `olink` 属性的 `<a>` 标签进行页面切换：
 
 ```html
 <a href="./about.html" olink>跳转到关于页面</a>
 ```
 
-在页面组件中，可以使用 `back()` 方法返回上一页：
+`olink` 会触发应用的路由切换，带上过渡动画，且不会刷新整个页面。
+
+### 编程式导航
+
+在页面组件中，可以使用导航方法：
+
+```javascript
+// 跳转到指定页面
+this.goto("./about.html");
+
+// 替换当前页面（不添加到历史记录）
+this.replace("./about.html");
+
+// 返回上一页
+this.back();
+```
+
+## 页面传参
+
+通过 URL Query 传递参数，目标页面通过模块函数的 `query` 参数接收：
+
+**发送页面：**
+
+```html
+<a href="./detail.html?id=123" olink>查看详情</a>
+```
+
+**接收页面：**
 
 ```html
 <template page>
-  <button on:click="back()">返回</button>
+  <script>
+    export default async ({ query }) => {
+      console.log(query.id); // "123"
+      return {
+        data: {
+          id: query.id
+        }
+      };
+    };
+  </script>
 </template>
 ```
+
+## 配置文件详解
+
+`app-config.js` 支持多种配置选项，用于控制应用的行为：
+
+| 配置项 | 是否必需 | 说明 |
+|--------|----------|------|
+| `home` | 必需 | 应用首页地址 |
+| `pageAnime` | 可选 | 页面切换动画配置 |
+| `loading` | 可选 | 页面加载时显示的内容 |
+| `fail` | 可选 | 页面加载失败时显示的内容 |
+| `ready` | 可选 | 应用初始化完成后的回调 |
+| `proto` | 可选 | 添加到应用原型的方法和属性 |
+| `allowForward` | 可选 | 是否启用浏览器前进功能 |
+
+详细的配置说明请参考 [应用配置](./app-configuration.md) 章节。
+
+## 微应用特性
+
+### 独立性
+
+每个 `o-app` 实例都是独立的微应用，拥有自己的：
+- 路由历史
+- 页面栈
+- 状态管理
+- 配置选项
+
+### 嵌套使用
+
+`o-app` 可以嵌套使用，实现复杂的应用结构：
+
+```html
+<template page>
+  <o-app src="./sub-app-config.js"></o-app>
+</template>
+```
+
+### 与组件的区别
+
+`o-app` 与普通组件的主要区别：
+
+| 特性 | o-app | 普通组件 |
+|------|-------|----------|
+| 路由管理 | ✅ 内置路由系统 | ❌ 无 |
+| 页面栈 | ✅ 管理页面历史 | ❌ 无 |
+| 配置文件 | ✅ 独立配置 | ❌ 无 |
+| 页面切换动画 | ✅ 支持 | ❌ 无 |
+| 适用场景 | 应用级容器 | 功能组件 |

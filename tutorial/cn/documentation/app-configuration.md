@@ -300,7 +300,7 @@ app.on("router-change", (e) => {
       <o-app src="./app-config.js"></o-app>
     </template>
   </code>
-  <code path="app-config.js">
+  <code path="app-config.js" active>
     // 应用首页地址
     export const home = "./home.html";
     // 页面切换动画配置
@@ -342,7 +342,7 @@ app.on("router-change", (e) => {
   return loadingEl;
 };
   </code>
-  <code path="home.html" active>
+  <code path="home.html">
     <template page>
       <style>
         :host {

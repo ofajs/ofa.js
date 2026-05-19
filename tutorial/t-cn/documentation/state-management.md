@@ -18,7 +18,7 @@
 
 通過 `$.stanz({})` 來創建一個響應式的狀態對象。這個方法接收一個普通對象作爲初始數據，返迴一個響應式的狀態代理。
 
-### 基本用法
+### 基本用法（全侷狀態）
 
 
 
@@ -182,20 +182,20 @@ const store = $.stanz({ count: 0 });
 // 在組件中
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // 所有引用瞭 store.count 的組件都會自動更新
-    }
+      store.count++; // 所有引用瞭 store.count 的組件都會自動更新
+    },
   },
   attached() {
     // 直接引用狀態對象的屬性
     this.store = store;
   },
-  detached(){
+  detached() {
     this.store = {}; // 組件銷毀時，清空掛載的狀態數據
-  }
+  },
 };
 ```
 
@@ -210,10 +210,10 @@ const store = $.stanz({
   user: {
     name: "張三",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
 // 脩改嵌套屬性也會觸發更新
@@ -235,7 +235,7 @@ store.list.push({ id: 1, title: "新任務" });
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
     // 將共享狀態掛載到組件的 data 上
@@ -244,7 +244,7 @@ export default {
   detached() {
     // 組件銷毀時，清空掛載的狀態數據，防止內存洩漏
     this.list = [];
-  }
+  },
 };
 ```
 
@@ -252,15 +252,39 @@ export default {
 
 
 
-- **全侷狀態**：適用於整個應用都需要訪問的數據（如用戶信息、全侷配置）
-- **模塊狀態**：適用於特定功能模塊內部共享的數據
+狀態的作用域取決於**定義位置和導齣方式**：
+
+**獨立 JS 文件中 `export` 導齣的狀態**：全侷狀態，整個應用都可以訪問和脩改，通過 `import` 或 `load` 導入後使用。
 
 ```javascript
-// 全侷調用狀態
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// 模塊內使用的狀態
-const cartStore = $.stanz({ total: 0 });
+**頁面或組件模塊內部定義的狀態**：模塊狀態，僅在該模塊內部使用。
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // 組件銷毀時，清空掛載的狀態數據
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## 模塊內狀態管理
@@ -352,4 +376,3 @@ const cartStore = $.stanz({ total: 0 });
 3. **大型數據結構**：對於大型數據結構，考慮使用計算屬性或分片管理，避免不必要的性能開銷。
 
 4. **狀態一緻性**：在異步操作中註意狀態的一緻性，可以使用事務或批量更新來保證數據的完整性。
-

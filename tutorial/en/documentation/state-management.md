@@ -12,7 +12,7 @@ When multiple components or pages need to share the same data, the traditional a
 
 Create a reactive state object by using `$.stanz({})`. This method accepts a plain object as initial data and returns a reactive state proxy.
 
-### Basic Usage
+### Basic Usage (Global State)
 
 <o-playground name="State Management Example" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -170,20 +170,20 @@ const store = $.stanz({ count: 0 });
 // In the component
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // All components that reference store.count will automatically update
-    }
+      store.count++; // All components that reference store.count will automatically update
+    },
   },
   attached() {
-    // Directly reference the properties of the state object
+    // Directly reference the property of the state object
     this.store = store;
   },
-  detached(){
-    this.store = {}; // When component is destroyed, clear the mounted state data
-  }
+  detached() {
+    this.store = {}; // When the component is destroyed, clear the mounted state data
+  },
 };
 ```
 
@@ -196,13 +196,13 @@ const store = $.stanz({
   user: {
     name: "Zhang San",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
-// Modifying nested properties also triggers updates
+// Modifying nested properties will also trigger updates
 store.user.name = "Li Si";
 store.user.settings.theme = "light";
 store.list.push({ id: 1, title: "New Task" });
@@ -217,30 +217,54 @@ It is recommended to mount the shared state in the component's `attached` lifecy
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
-    // Mount the shared state onto the component's data
+    // Mount shared state onto the component's data
     this.list = data.list;
   },
   detached() {
     // When the component is destroyed, clear the mounted state data to prevent memory leaks
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. Reasonably Manage State Scope
 
-- **Global state**: Suitable for data that needs to be accessed by the entire application (e.g., user information, global configuration)
-- **Module state**: Suitable for data shared within a specific functional module
+The scope of state depends on the **definition location and export method**:
+
+**States exported via `export` in standalone JS files**: Global states that can be accessed and modified throughout the entire application after being imported via `import` or `load`.
 
 ```javascript
-// Global call state
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// State used within the module
-const cartStore = $.stanz({ total: 0 });
+**State defined within a page or component module**：Module state，used only within that module。
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // When the component is destroyed, clear the mounted state data
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## Module-Level State Management
@@ -321,11 +345,10 @@ const cartStore = $.stanz({ total: 0 });
 
 ## Notes
 
-1. **State Cleanup**: In the component's `detached` lifecycle, promptly clean up references to state data to avoid memory leaks.
+1. **State Cleanup**: During the component's `detached` lifecycle, promptly clear references to state data to avoid memory leaks.
 
 2. **Avoid Circular Dependencies**: Do not form circular references between state objects, as this may cause issues with the reactive system.
 
-3. **Large Data Structures**: For large data structures, consider using computed properties or chunked management to avoid unnecessary performance overhead.
+3. **Large Data Structures**: For large data structures, consider using computed properties or sharding management to avoid unnecessary performance overhead.
 
 4. **State Consistency**: Pay attention to state consistency in asynchronous operations, and use transactions or batch updates to ensure data integrity.
-

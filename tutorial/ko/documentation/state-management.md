@@ -12,7 +12,7 @@ ofa.js에서 **상태**는 컴포넌트 또는 페이지 모듈 자체의 `data`
 
 `$.stanz({})`를 사용하여 반응형 상태 객체를 생성합니다. 이 메서드는 일반 객체를 초기 데이터로 받아 반응형 상태 프록시를 반환합니다.
 
-### 기본 사용법
+### 기본 사용법(전역 상태)
 
 <o-playground name="상태 관리 예제" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -167,23 +167,23 @@ ofa.js에서 **상태**는 컴포넌트 또는 페이지 모듈 자체의 `data`
 ```javascript
 const store = $.stanz({ count: 0 });
 
-// 컴포넌트에서
+// 컴포넌트 내에서
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // store.count를 참조하는 모든 컴포넌트가 자동으로 업데이트됩니다
-    }
+      store.count++; // store.count를 참조하는 모든 컴포넌트가 자동으로 업데이트됩니다.
+    },
   },
   attached() {
-    // 상태 객체의 속성을 직접 참조
+    // 상태 객체의 속성을 직접 참조합니다.
     this.store = store;
   },
-  detached(){
-    this.store = {}; // 컴포넌트가 소멸될 때 마운트된 상태 데이터를 비웁니다
-  }
+  detached() {
+    this.store = {}; // 컴포넌트 소멸 시, 마운트된 상태 데이터를 비웁니다.
+  },
 };
 ```
 
@@ -196,14 +196,14 @@ const store = $.stanz({
   user: {
     name: "장삼",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
-// 중첩 속성을 수정해도 업데이트가 트리거됩니다.
-store.user.name = "이사";
+// 중첩 속성을 수정해도 업데이트가 트리거됩니다
+store.user.name = "리쓰";
 store.user.settings.theme = "light";
 store.list.push({ id: 1, title: "새 작업" });
 ```
@@ -217,30 +217,54 @@ store.list.push({ id: 1, title: "새 작업" });
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
     // 공유 상태를 컴포넌트의 data에 마운트합니다.
     this.list = data.list;
   },
   detached() {
-    // 컴포넌트가 소멸될 때 마운트된 상태 데이터를 비워 메모리 누수를 방지합니다.
+    // 컴포넌트가 제거될 때, 마운트된 상태 데이터를 초기화하여 메모리 누수를 방지합니다.
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. 상태 범위를 합리적으로 관리하기
 
-- **전역 상태**: 전체 애플리케이션이 접근해야 하는 데이터에 적합(예: 사용자 정보, 전역 설정)
-- **모듈 상태**: 특정 기능 모듈 내부에서 공유하는 데이터에 적합
+상태의 스코프는 **정의 위치와 내보내기 방식**에 따라 결정됩니다:
+
+**독립 JS 파일에서 `export`로 내보낸 상태**: 전역 상태로, 전체 애플리케이션에서 접근 및 수정이 가능하며, `import` 또는 `load`를 통해 가져와 사용합니다.
 
 ```javascript
-// 전역 호출 상태
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// 모듈 내에서 사용하는 상태
-const cartStore = $.stanz({ total: 0 });
+**페이지 또는 컴포넌트 모듈 내부에 정의된 상태**: 모듈 상태, 해당 모듈 내부에서만 사용됩니다.
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // 컴포넌트가 소멸될 때, 마운트된 상태 데이터를 비웁니다
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## 모듈 내 상태 관리
@@ -321,11 +345,10 @@ const cartStore = $.stanz({ total: 0 });
 
 ## 주의사항
 
-1. **상태 정리**: 컴포넌트의 `detached` 라이프사이클에서 상태 데이터에 대한 참조를 즉시 정리하여 메모리 누수를 방지합니다.
+1. **상태 정리**: 컴포넌트의 `detached` 라이프사이클에서 상태 데이터에 대한 참조를 적시에 정리하여 메모리 누수를 방지하세요.
 
-2. **순환 의존 방지**: 상태 객체 간에 순환 참조를 형성하지 마세요. 이는 반응형 시스템에 문제를 일으킬 수 있습니다.
+2. **순환 참조 방지**: 상태 객체 간에 순환 참조가 발생하지 않도록 하세요. 이는 반응형 시스템에 문제를 일으킬 수 있습니다.
 
-3. **대용량 데이터 구조**: 대용량 데이터 구조의 경우 계산된 속성이나 분할 관리를 고려하여 불필요한 성능 오버헤드를 방지합니다.
+3. **대규모 데이터 구조**: 대규모 데이터 구조의 경우 계산된 속성을 사용하거나 분할 관리를 고려하여 불필요한 성능 오버헤드를 방지하세요.
 
-4. **상태 일관성**: 비동기 작업에서 상태의 일관성에 주의하고, 트랜잭션이나 일괄 업데이트를 사용하여 데이터의 무결성을 보장할 수 있습니다.
-
+4. **상태 일관성**: 비동기 작업 시 상태의 일관성에 주의하고, 트랜잭션 또는 배치 업데이트를 사용하여 데이터의 무결성을 보장할 수 있습니다.

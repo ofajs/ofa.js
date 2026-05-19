@@ -12,7 +12,7 @@ Wenn mehrere Komponenten oder Seiten dieselben Daten gemeinsam nutzen müssen, w
 
 Erstellen Sie mit `$.stanz({})` ein reaktives Zustandsobjekt. Diese Methode nimmt ein einfaches Objekt als Ausgangsdaten entgegen und gibt einen reaktiven Zustandsproxy zurück.
 
-### Grundlegende Verwendung
+### Grundlegende Verwendung (Globaler Status)
 
 <o-playground name="Zustandsverwaltungsbeispiel" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -170,20 +170,20 @@ const store = $.stanz({ count: 0 });
 // In der Komponente
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // Alle Komponenten, die store.count referenzieren, werden automatisch aktualisiert
-    }
+      store.count++; // Alle Komponenten, die auf store.count verweisen, werden automatisch aktualisiert
+    },
   },
   attached() {
-    // Direktes Referenzieren der Eigenschaften des Zustandsobjekts
+    // Direkt auf die Eigenschaft des Zustandsobjekts verweisen
     this.store = store;
   },
-  detached(){
-    this.store = {}; // Beim Zerstören der Komponente die gemounteten Zustandsdaten leeren
-  }
+  detached() {
+    this.store = {}; // Wenn die Komponente zerstört wird, die angehängten Zustandsdaten leeren
+  },
 };
 ```
 
@@ -194,16 +194,16 @@ Zustandsobjekte unterstützen tiefe Reaktivität, Änderungen in verschachtelten
 ```javascript
 const store = $.stanz({
   user: {
-    name: "Zhang San",
+    name: "ZhangSan",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
-// Das Ändern verschachtelter Eigenschaften löst ebenfalls Aktualisierungen aus
-store.user.name = "Li Si";
+// Das Ändern verschachtelter Eigenschaften löst ebenfalls ein Update aus
+store.user.name = "LiSI";
 store.user.settings.theme = "light";
 store.list.push({ id: 1, title: "Neue Aufgabe" });
 ```
@@ -217,30 +217,54 @@ Es wird empfohlen, den gemeinsamen Zustand im `attached`-Lebenszyklus der Kompon
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
-    // Den gemeinsamen Zustand in die data der Komponente einhängen
+    // Gemeinsamen Zustand an die data-Komponente anhängen
     this.list = data.list;
   },
   detached() {
-    // Beim Zerstören der Komponente den eingehängten Zustand leeren, um Speicherlecks zu verhindern
+    // Beim Zerstören der Komponente die angehängten Zustandsdaten leeren, um Speicherverluste zu vermeiden
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. Sinnvolle Verwaltung des Zustandsbereichs
 
-- **Globaler Zustand**: Geeignet für Daten, auf die die gesamte Anwendung zugreifen muss (z. B. Benutzerinformationen, globale Konfiguration)
-- **Modulzustand**: Geeignet für Daten, die innerhalb eines bestimmten Funktionsmoduls gemeinsam genutzt werden
+Der Gültigkeitsbereich des Zustands hängt von der **Definitionsposition und der Exportmethode** ab:
+
+**In einer eigenständigen JS-Datei exportierter Zustand**:Globaler Zustand, auf den die gesamte Anwendung zugreifen und ihn ändern kann, nach dem Import mit `import` oder `load`.
 
 ```javascript
-// Globaler Aufrufzustand
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// Im Modul verwendeter Zustand
-const cartStore = $.stanz({ total: 0 });
+**Zustand, der innerhalb von Seiten- oder Komponentenmodulen definiert ist**: Modulzustand, der nur innerhalb dieses Moduls verwendet wird.
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // Beim Zerstören der Komponente die eingehängten Zustandsdaten leeren
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## Statusverwaltung innerhalb des Moduls
@@ -321,11 +345,10 @@ const cartStore = $.stanz({ total: 0 });
 
 ## Hinweise
 
-1. **Zustandsbereinigung**: Entfernen Sie rechtzeitig Verweise auf Zustandsobjekte im `detached`-Lebenszyklus der Komponente, um Speicherlecks zu vermeiden.
+1. **Zustandsbereinigung**: Bereinigen Sie im Lebenszyklus "detached" der Komponente rechtzeitig die Verweise auf Zustandsdaten, um Speicherlecks zu vermeiden.
 
-2. **Vermeidung zirkulärer Abhängigkeiten**: Bilden Sie keine zirkulären Referenzen zwischen Zustandsobjekten, da dies zu Problemen im reaktiven System führen kann.
+2. **Zirkuläre Abhängigkeiten vermeiden**: Zwischen Zustandsobjekten sollten keine zirkulären Verweise entstehen, da dies zu Problemen im reaktiven System führen kann.
 
-3. **Große Datenstrukturen**: Verwenden Sie für große Datenstrukturen berechnete Eigenschaften oder verwalten Sie diese in Teilen, um unnötige Leistungseinbußen zu vermeiden.
+3. **Große Datenstrukturen**: Ziehen Sie bei großen Datenstrukturen die Verwendung von berechneten Eigenschaften oder fragmentiertes Management in Betracht, um unnötige Leistungseinbußen zu vermeiden.
 
 4. **Zustandskonsistenz**: Achten Sie bei asynchronen Operationen auf die Konsistenz des Zustands und verwenden Sie Transaktionen oder Batch-Updates, um die Datenintegrität zu gewährleisten.
-

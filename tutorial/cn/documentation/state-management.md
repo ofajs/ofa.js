@@ -12,7 +12,7 @@
 
 通过 `$.stanz({})` 来创建一个响应式的状态对象。这个方法接收一个普通对象作为初始数据，返回一个响应式的状态代理。
 
-### 基本用法
+### 基本用法（全局状态）
 
 <o-playground name="状态管理示例" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -170,20 +170,20 @@ const store = $.stanz({ count: 0 });
 // 在组件中
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // 所有引用了 store.count 的组件都会自动更新
-    }
+      store.count++; // 所有引用了 store.count 的组件都会自动更新
+    },
   },
   attached() {
     // 直接引用状态对象的属性
     this.store = store;
   },
-  detached(){
+  detached() {
     this.store = {}; // 组件销毁时，清空挂载的状态数据
-  }
+  },
 };
 ```
 
@@ -196,10 +196,10 @@ const store = $.stanz({
   user: {
     name: "张三",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
 // 修改嵌套属性也会触发更新
@@ -217,7 +217,7 @@ store.list.push({ id: 1, title: "新任务" });
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
     // 将共享状态挂载到组件的 data 上
@@ -226,21 +226,45 @@ export default {
   detached() {
     // 组件销毁时，清空挂载的状态数据，防止内存泄漏
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. 合理管理状态作用域
 
-- **全局状态**：适用于整个应用都需要访问的数据（如用户信息、全局配置）
-- **模块状态**：适用于特定功能模块内部共享的数据
+状态的作用域取决于**定义位置和导出方式**：
+
+**独立 JS 文件中 `export` 导出的状态**：全局状态，整个应用都可以访问和修改，通过 `import` 或 `load` 导入后使用。
 
 ```javascript
-// 全局调用状态
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// 模块内使用的状态
-const cartStore = $.stanz({ total: 0 });
+**页面或组件模块内部定义的状态**：模块状态，仅在该模块内部使用。
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // 组件销毁时，清空挂载的状态数据
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## 模块内状态管理
@@ -328,4 +352,3 @@ const cartStore = $.stanz({ total: 0 });
 3. **大型数据结构**：对于大型数据结构，考虑使用计算属性或分片管理，避免不必要的性能开销。
 
 4. **状态一致性**：在异步操作中注意状态的一致性，可以使用事务或批量更新来保证数据的完整性。
-

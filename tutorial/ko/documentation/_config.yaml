@@ -10,15 +10,15 @@
   url: ./quick-start.md
 - name: 템플릿 문법
   content:
-    - name: 내용 렌더링
+    - name: 콘텐츠 렌더링
       url: ./content-rendering.md
     - name: 이벤트 바인딩
       url: ./event-binding.md
-    - name: 속성 반응
+    - name: 속성 반응성
       url: ./property-response.md
     - name: 속성 바인딩
       url: ./property-binding.md
-    - name: 클래스 및 스타일 바인딩
+    - name: 클래스와 스타일 바인딩
       url: ./class-style-binding.md
     - name: 조건부 렌더링
       url: ./conditional-rendering.md
@@ -34,33 +34,41 @@
   content:
     - name: 컴포넌트 생성
       url: ./create-component.md
-    - name: 상속 속성 전달
+    - name: 특성 속성 전달
       url: ./inherit-attributes.md
     - name: 슬롯
       url: ./slots.md
     - name: 깊은 속성 바인딩
       url: ./deep-property-binding.md
-    - name: 사용자 정의 이벤트
+    - name: 커스텀 이벤트
       url: ./custom-events.md
-- name: 애플리케이션 및 확장
+- name: 애플리케이션과 확장
   content:
     - name: 마이크로 앱
       url: ./micro-app.md
-    - name: 앱 구성 및 관련 함수
-      url: ./app-configuration.md
+    - name: 앱 설정 기초
+      url: ./app-config-basics.md
+    - name: 페이지 전환 애니메이션
+      url: ./page-transition-animation.md
+    - name: 로딩 및 에러 처리
+      url: ./app-loading-error.md
+    - name: 앱 초기화
+      url: ./app-initialization.md
+    - name: 라우트와 네비게이션
+      url: ./app-navigation.md
     - name: 단일 페이지 애플리케이션
       url: ./routes.md
-    - name: 중첩 페이지/라우트
+    - name: 중첩 라우트
       url: ./nested-routes.md
-    - name: SSR
+    - name: SSR과 동형 렌더링
       url: ./ssr.md
 - name: 상태 관리
   content:
-    - name: 상태 관리란 무엇인가
+    - name: 상태 관리는 무엇인가
       url: ./state-management.md
     - name: 컨텍스트 상태
       url: ./context-state.md
-    - name: 스타일 쿼리
+    - name: 스타일 조회
       url: ./match-var.md
 - name: 빌드 및 배포
   url: ./build-app.md

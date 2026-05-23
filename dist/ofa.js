@@ -1,4 +1,4 @@
-//! ofa.js - v4.6.22 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.6.23 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -3771,47 +3771,47 @@ try{
       return this.ele.style;
     }
 
-    get width() {
-      return parseInt(getComputedStyle(this.ele).width) || 0;
-    }
+    // get width() {
+    //   return parseInt(getComputedStyle(this.ele).width) || 0;
+    // }
 
-    get height() {
-      return parseInt(getComputedStyle(this.ele).height) || 0;
-    }
+    // get height() {
+    //   return parseInt(getComputedStyle(this.ele).height) || 0;
+    // }
 
-    get clientWidth() {
-      return this.ele.clientWidth;
-    }
+    // get clientWidth() {
+    //   return this.ele.clientWidth;
+    // }
 
-    get clientHeight() {
-      return this.ele.clientHeight;
-    }
+    // get clientHeight() {
+    //   return this.ele.clientHeight;
+    // }
 
-    get offsetWidth() {
-      return this.ele.offsetWidth;
-    }
+    // get offsetWidth() {
+    //   return this.ele.offsetWidth;
+    // }
 
-    get offsetHeight() {
-      return this.ele.offsetHeight;
-    }
+    // get offsetHeight() {
+    //   return this.ele.offsetHeight;
+    // }
 
-    get outerWidth() {
-      let computedStyle = getComputedStyle(this.ele);
-      return (
-        this.ele.offsetWidth +
-        parseInt(computedStyle["margin-left"]) +
-        parseInt(computedStyle["margin-right"])
-      );
-    }
+    // get outerWidth() {
+    //   let computedStyle = getComputedStyle(this.ele);
+    //   return (
+    //     this.ele.offsetWidth +
+    //     parseInt(computedStyle["margin-left"]) +
+    //     parseInt(computedStyle["margin-right"])
+    //   );
+    // }
 
-    get outerHeight() {
-      let computedStyle = getComputedStyle(this.ele);
-      return (
-        this.ele.offsetHeight +
-        parseInt(computedStyle["margin-top"]) +
-        parseInt(computedStyle["margin-bottom"])
-      );
-    }
+    // get outerHeight() {
+    //   let computedStyle = getComputedStyle(this.ele);
+    //   return (
+    //     this.ele.offsetHeight +
+    //     parseInt(computedStyle["margin-top"]) +
+    //     parseInt(computedStyle["margin-bottom"])
+    //   );
+    // }
 
     is(expr) {
       if (typeof expr === "string") {
@@ -7239,7 +7239,7 @@ ${scriptContent}`;
     });
   };
 
-  const version = "ofa.js@4.6.22";
+  const version = "ofa.js@4.6.23";
   $.version = version.replace("ofa.js@", "");
 
   let isDebug = false;

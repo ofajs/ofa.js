@@ -12,7 +12,7 @@ Cuando varios componentes o páginas necesitan compartir los mismos datos, el en
 
 Para crear un objeto de estado reactivo mediante `$.stanz({})`. Este método recibe un objeto normal como datos iniciales y devuelve un proxy de estado reactivo.
 
-### Uso básico
+### Uso básico (estado global)
 
 <o-playground name="Ejemplo de gestión de estado" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -170,20 +170,20 @@ const store = $.stanz({ count: 0 });
 // En el componente
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // Todos los componentes que hacen referencia a store.count se actualizarán automáticamente
-    }
+      store.count++; // Todos los componentes que hacen referencia a store.count se actualizarán automáticamente
+    },
   },
   attached() {
-    // Hacer referencia directa a la propiedad del objeto de estado
+    // Referencia directa a la propiedad del objeto de estado
     this.store = store;
   },
-  detached(){
-    this.store = {}; // Al destruir el componente, limpiar los datos de estado montados
-  }
+  detached() {
+    this.store = {}; // Cuando el componente se destruye, limpia los datos de estado montados
+  },
 };
 ```
 
@@ -194,18 +194,18 @@ El objeto de estado admite reactividad profunda; los cambios en objetos y arrays
 ```javascript
 const store = $.stanz({
   user: {
-    name: "Zhang San",
+    name: "ZhangSan",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
-// Modificar propiedades anidadas también desencadena una actualización
-store.user.name = "Li Si";
+// Modificar propiedades anidadas también desencadena actualizaciones
+store.user.name = "LiSi";
 store.user.settings.theme = "light";
-store.list.push({ id: 1, title: "nueva tarea" });
+store.list.push({ id: 1, title: "Nueva tarea" });
 ```
 
 ## Mejores prácticas
@@ -217,30 +217,54 @@ Se recomienda montar el estado compartido en el ciclo de vida `attached` del com
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
-    // Montar el estado compartido en los datos del componente
+    // Monta el estado compartido en los datos del componente
     this.list = data.list;
   },
   detached() {
-    // Al destruir el componente, limpiar los datos de estado montados para evitar fugas de memoria
+    // Al destruir el componente, limpia los datos de estado montados para evitar fugas de memoria
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. Gestión razonable del ámbito del estado
 
-- **Estado global**: adecuado para datos que toda la aplicación necesita acceder (como información del usuario, configuración global)
-- **Estado del módulo**: adecuado para datos compartidos dentro de un módulo de funcionalidad específica
+El alcance del estado depende de la **ubicación de definición y el método de exportación**:
+
+**Estado exportado con `export` en archivos JS independientes**: estado global, accesible y modificable desde toda la aplicación, se utiliza tras importarlo con `import` o `load`.
 
 ```javascript
-// Estado de llamada global
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// user-store.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// Estado utilizado dentro del módulo
-const cartStore = $.stanz({ total: 0 });
+**Estado definido internamente en la página o módulo del componente**: estado del módulo, utilizado únicamente dentro de ese módulo.
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // Cuando el componente se destruye, limpiar los datos de estado montados
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## Gestión de estado dentro del módulo
@@ -321,11 +345,10 @@ const cartStore = $.stanz({ total: 0 });
 
 ## Notas importantes
 
-1. **Limpieza de estado**: en el ciclo de vida `detached` del componente, limpia oportunamente las referencias a los datos de estado para evitar fugas de memoria.
+1. **Limpieza de estado**: En el ciclo de vida `detached` del componente, limpie oportunamente las referencias a los datos de estado para evitar fugas de memoria.
 
-2. **Evita dependencias cíclicas**: los objetos de estado no deben formar referencias cíclicas, ya que podrían causar problemas en el sistema reactivo.
+2. **Evitar dependencias circulares**: No forme referencias circulares entre objetos de estado, ya que esto puede causar problemas en el sistema reactivo.
 
-3. **Estructuras de datos grandes**: para estructuras de datos grandes, considera usar propiedades computadas o gestión por fragmentos para evitar sobrecargas de rendimiento innecesarias.
+3. **Estructuras de datos grandes**: Para estructuras de datos grandes, considere usar propiedades computadas o gestión por fragmentos para evitar costes de rendimiento innecesarios.
 
-4. **Consistencia del estado**: en operaciones asíncronas, presta atención a la consistencia del estado; puedes usar transacciones o actualizaciones por lotes para garantizar la integridad de los datos.
-
+4. **Consistencia del estado**: Preste atención a la consistencia del estado en operaciones asíncronas; puede usar transacciones o actualizaciones por lotes para garantizar la integridad de los datos.

@@ -12,7 +12,7 @@ Lorsque plusieurs composants ou pages doivent partager les mêmes données, l'ap
 
 Créez un objet d'état réactif via `$.stanz({})`. Cette méthode prend un objet ordinaire comme données initiales et renvoie un proxy d'état réactif.
 
-### Utilisation de base
+### Utilisation de base (État global)
 
 <o-playground name="Exemple de gestion d'état" style="--editor-height: 500px">
   <code path="demo.html" preview unimportant>
@@ -170,20 +170,20 @@ const store = $.stanz({ count: 0 });
 // Dans le composant
 export default {
   data: {
-    store: {}
+    store: {},
   },
-  proto:{
+  proto: {
     increment() {
-        store.count++; // Tous les composants qui référencent store.count seront mis à jour automatiquement
-    }
+      store.count++; // Tous les composants qui font référence à store.count seront automatiquement mis à jour
+    },
   },
   attached() {
-    // Référencez directement la propriété de l'objet d'état
+    // Référence directe à la propriété de l'objet d'état
     this.store = store;
   },
-  detached(){
-    this.store = {}; // Lorsque le composant est détruit, videz les données d'état montées
-  }
+  detached() {
+    this.store = {}; // Lorsque le composant est détruit, effacez les données d'état montées
+  },
 };
 ```
 
@@ -194,18 +194,18 @@ L'objet d'état prend en charge la réactivité profonde, les changements dans l
 ```javascript
 const store = $.stanz({
   user: {
-    name: "ZhangShan",
+    name: "ZhangSan",
     settings: {
-      theme: "dark"
-    }
+      theme: "dark",
+    },
   },
-  list: []
+  list: [],
 });
 
-// La modification de propriétés imbriquées déclenche également la mise à jour
+// La modification de propriétés imbriquées déclenchera également la mise à jour
 store.user.name = "LiSi";
 store.user.settings.theme = "light";
-store.list.push({ id: 1, title: "Nouvelle tâche" });
+store.list.push({ id: 1, title: "New Task" });
 ```
 
 ## Meilleures pratiques
@@ -217,30 +217,54 @@ Il est recommandé de monter l'état partagé dans le cycle de vie `attached` du
 ```javascript
 export default {
   data: {
-    list: []
+    list: [],
   },
   attached() {
-    // Attacher l'état partagé aux données du composant
+    // Monter l'état partagé sur les données du composant
     this.list = data.list;
   },
   detached() {
-    // Lors de la destruction du composant, vider les données d'état attachées pour éviter les fuites mémoire
+    // Lorsque le composant est détruit, effacer les données d'état montées pour éviter les fuites de mémoire
     this.list = [];
-  }
+  },
 };
 ```
 
 ### 2. Gérer raisonnablement la portée de l'état
 
-- **État global** : convient pour les données auxquelles toute l’application doit accéder (comme les informations utilisateur, la configuration globale)
-- **État du module** : convient pour les données partagées à l’intérieur d’un module fonctionnel spécifique
+La portée d'un état dépend de **l'emplacement de sa définition et de la manière dont il est exporté** :
+
+**État exporté via `export` dans un fichier JS indépendant** : état global, accessible et modifiable par toute l'application, utilisé après importation via `import` ou `load`.
 
 ```javascript
-// État d'appel global
-export const globalStore = $.stanz({ user: null, theme: "light" });
+// boutique-utilisateur.js
+export const userStore = $.stanz({ user: null, theme: "light" });
+```
 
-// État utilisé dans le module
-const cartStore = $.stanz({ total: 0 });
+**État défini à l’intérieur d’une page ou d’un module composant** : état du module, utilisé uniquement en interne dans ce module.
+
+```html
+<template component>
+  ...
+  <script>
+    const localStore = $.stanz({ total: 0 });
+
+    export default async () => {
+      return {
+        data: {
+          localStore: {}
+        },
+        attached() {
+          this.localStore = localStore;
+        },
+        detached() {
+          // Lorsque le composant est détruit, vider les données d'état montées
+          this.localStore = {};
+        }
+      };
+    };
+  </script>
+</template>
 ```
 
 ## Gestion d'état au sein du module
@@ -321,11 +345,10 @@ const cartStore = $.stanz({ total: 0 });
 
 ## Points d'attention
 
-1. **Nettoyage de l'état** : Dans le cycle de vie `detached` du composant, nettoyez rapidement les références aux données d'état pour éviter les fuites de mémoire.
+1. **Nettoyage de l'état**：Dans le cycle de vie `detached` du composant, nettoyez rapidement les références aux données d'état pour éviter les fuites de mémoire.
 
-2. **Éviter les dépendances circulaires** : Ne formez pas de références circulaires entre les objets d'état, cela pourrait causer des problèmes dans le système réactif.
+2. **Éviter les dépendances circulaires**：Ne créez pas de références circulaires entre les objets d'état, ce qui peut entraîner des problèmes dans le système réactif.
 
-3. **Structures de données volumineuses** : Pour les grandes structures de données, envisagez d'utiliser des propriétés calculées ou une gestion par fragments pour éviter des surcoûts de performance inutiles.
+3. **Structures de données volumineuses**：Pour les grandes structures de données, envisagez d'utiliser des propriétés calculées ou une gestion fragmentée pour éviter des coûts de performance inutiles.
 
-4. **Cohérence de l'état** : Dans les opérations asynchrones, faites attention à la cohérence de l'état, vous pouvez utiliser des transactions ou des mises à jour par lots pour garantir l'intégrité des données.
-
+4. **Cohérence de l'état**：Dans les opérations asynchrones, veillez à la cohérence de l'état ; vous pouvez utiliser des transactions ou des mises à jour par lots pour garantir l'intégrité des données.

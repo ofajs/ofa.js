@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.1 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.0 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -7320,7 +7320,7 @@ ${scriptContent}`;
     });
   };
 
-  const version = "ofa.js@4.7.1";
+  const version = "ofa.js@4.7.0";
   $.version = version.replace("ofa.js@", "");
 
   let isDebug = false;

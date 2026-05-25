@@ -360,6 +360,13 @@
                 <span>¥{{formatMoney($data.startBalance)}}</span>
                 <span>¥{{$host.formatMoney($data.interest)}}</span>
                 <span>¥{{$host.formatMoney($data.endBalance)}}</span>
+                <div>
+                  <o-fill :value="$data.arr" :_$parent="$data">
+                    <div attr:aa="$data.a">
+                      {{$data.a}} - {{$parent.startBalance}}
+                    </div>
+                  </o-fill>
+                </div>
               </li>
             </o-fill>
           </ul>
@@ -450,6 +457,7 @@
                   startBalance: balance,
                   interest: yearlyInterest,
                   endBalance: balance + yearlyInterest,
+                  arr: [{ a: "1" }, { a: "2" }],
                 });
                 balance += yearlyInterest;
               }

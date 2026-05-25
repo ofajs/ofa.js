@@ -61,6 +61,7 @@ $.register({
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
 
           frag.appendChild($ele.ele);
@@ -151,6 +152,7 @@ $.register({
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
 
           selfEl.insertBefore($ele.ele, children[i]);

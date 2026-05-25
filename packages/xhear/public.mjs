@@ -70,3 +70,22 @@ export function mergeObjects(obj1, obj2) {
 
 export const isSafariBrowser = () =>
   /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+export const getRenderErrorSupplementary = (data) => {
+  if (!data) {
+    return "";
+  }
+
+  let supplementary = "";
+  if (data.$host || data.$data) {
+    supplementary = "Please check the usage of $host or $data, ";
+  }
+
+  const fromSrc = data.$host?.PATH || data.PATH;
+
+  if (fromSrc) {
+    supplementary += `from file: ${fromSrc}, `;
+  }
+
+  return supplementary;
+};

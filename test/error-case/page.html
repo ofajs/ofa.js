@@ -339,7 +339,7 @@
     </div>
 
     <!-- 逐年明细 -->
-    <div class="card" class:ada="kkkk">
+    <div class="card" on:ada="kkkk">
       <div class="card-title">📋 逐年明细</div>
       <div class="table-wrap">
         <div class="year-list">
@@ -351,7 +351,7 @@
           </div>
           <ul class="year-list">
             <o-fill :value="yearData">
-              <li class="year-list-item">
+              <li class="year-list-item" on:ddd="ppp">
                 <span>
                   第 {{$data.year}} 年
                   <div attr:aa="year.a"></div>

@@ -9,6 +9,7 @@ import {
   isEmptyObject,
   searchEle,
   removeArrayValue as remove,
+  getRenderErrorSupplementary,
 } from "../public.mjs";
 import { eleX } from "../util.mjs";
 
@@ -21,25 +22,6 @@ export const renderExtends = {
 
 const getRevokes = (target) => target.__revokes || (target.__revokes = []);
 const addRevoke = (target, revoke) => getRevokes(target).push(revoke);
-
-const getRenderErrorSupplementary = (data) => {
-  if (!data) {
-    return "";
-  }
-
-  let supplementary = "";
-  if (data.$host || data.$data) {
-    supplementary = "Please check the usage of $host or $data, ";
-  }
-
-  const fromSrc = data.$host?.PATH || data.PATH;
-
-  if (fromSrc) {
-    supplementary += `from file: ${fromSrc}, `;
-  }
-
-  return supplementary;
-};
 
 const convertToFunc = (expr, data, opts) => {
   const funcStr = `

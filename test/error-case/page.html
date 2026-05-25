@@ -1,0 +1,609 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #4f6ef7, #6c5ce7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: #666;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: "";
+      width: 4px;
+      height: 20px;
+      background: #4f6ef7;
+      border-radius: 2px;
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 180px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: #666;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.2s;
+      background: #fafafa;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #4f6ef7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .toggle-row span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #666;
+    }
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .toggle input {
+      display: none;
+    }
+    .toggle .slider {
+      position: absolute;
+      inset: 0;
+      background: #d0d0d0;
+      border-radius: 26px;
+      transition: 0.3s;
+    }
+    .toggle .slider::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .slider {
+      background: #4f6ef7;
+    }
+    .toggle input:checked + .slider::after {
+      transform: translateX(22px);
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: #4f6ef7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+    }
+    .result-item {
+      background: #eef1ff;
+      padding: 18px 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .result-item.interest-item {
+      background: #e8f5e9;
+    }
+    .result-item.total-item {
+      background: #fff3e0;
+    }
+    .result-item .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4f6ef7;
+    }
+    .result-item.interest-item .value {
+      color: #27ae60;
+    }
+    .result-item.total-item .value {
+      color: #e67e22;
+    }
+    .result-item .label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .chart-container {
+      position: relative;
+      height: 320px;
+      margin-top: 8px;
+    }
+    .year-list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0;
+      font-size: 14px;
+    }
+    .year-list-header {
+      display: flex;
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .year-list-header span {
+      flex: 1;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    .year-list-item {
+      display: flex;
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.2s;
+    }
+    .year-list-item:hover {
+      background: #fafbff;
+    }
+    .year-list-item span {
+      flex: 1;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    .error-msg {
+      color: #e74c3c;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+
+  <div class="container">
+    <div class="header">
+      <h1>💰 利息计算器</h1>
+      <p>快速计算存款与贷款利息，直观查看逐年变化</p>
+    </div>
+
+    <!-- 输入表单 -->
+    <div class="card">
+      <div class="card-title">📋 输入参数</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>计算类型</label>
+          <select sync:value="calcType">
+            <option value="deposit">存款利息</option>
+            <option value="loan">贷款利息</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>利息方式</label>
+          <select sync:value="interestType">
+            <option value="simple">单利计算</option>
+            <option value="compound">复利计算</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>本金（元）</label>
+          <input
+            type="number"
+            sync:value="principalInput"
+            placeholder="请输入本金"
+            min="0"
+            step="1000"
+          />
+        </div>
+        <div class="form-group">
+          <label>年利率（%）</label>
+          <input
+            type="number"
+            sync:value="rateInput"
+            placeholder="例如 2.1"
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label>期限（年）</label>
+          <input
+            type="number"
+            sync:value="yearsInput"
+            placeholder="请输入年限"
+            min="1"
+            step="1"
+          />
+        </div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" sync:checked="showChart" />
+          <span class="slider"></span>
+        </label>
+        <span>显示逐年变化图表</span>
+      </div>
+      <button class="btn" on:click="calculate">💰 开始计算</button>
+      <div
+        class="error-msg"
+        class:error-show="hasError"
+        :style.display="hasError ? 'block' : 'none'"
+      >
+        请填写有效的本金、利率和年限！
+      </div>
+    </div>
+
+    <!-- 计算结果 -->
+    <div class="card">
+      <div class="card-title">📊 计算结果</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="value">¥{{formatMoney(principal)}}</div>
+          <div class="label">本金</div>
+        </div>
+        <div class="result-item">
+          <div class="value">{{rate}}%</div>
+          <div class="label">年利率 / {{interestTypeLabel}}</div>
+        </div>
+        <div class="result-item">
+          <div class="value">{{years}} 年</div>
+          <div class="label">期限</div>
+        </div>
+        <div class="result-item interest-item">
+          <div class="value">¥{{formatMoney(totalInterest)}}</div>
+          <div class="label">总利息</div>
+        </div>
+        <div class="result-item total-item">
+          <div class="value">¥{{formatMoney(finalAmount)}}</div>
+          <div class="label">本息合计</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="card">
+      <div class="card-title">📈 逐年变化图</div>
+      <div class="chart-container">
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- 逐年明细 -->
+    <div class="card" on:ada="kkkk">
+      <div class="card-title">📋 逐年明细</div>
+      <div class="table-wrap">
+        <div class="year-list">
+          <div class="year-list-header">
+            <span>年份</span>
+            <span>年初本金</span>
+            <span>年利息</span>
+            <span>年末本息和</span>
+          </div>
+          <ul class="year-list">
+            <o-fill :value="yearData">
+              <li class="year-list-item" on:ddd="ppp">
+                <span>
+                  第 {{$data.year}} 年
+                  <div attr:aa="year.a"></div>
+                  <div :cc="year.cc"></div>
+                </span>
+                <span>¥{{formatMoney($data.startBalance)}}</span>
+                <span>¥{{$host.formatMoney($data.interest)}}</span>
+                <span>¥{{$host.formatMoney($data.endBalance)}}</span>
+                <div>
+                  <o-fill :value="$data.arr" :_$parent="$data">
+                    <div attr:aa="$data.a">
+                      {{$data.a}} - {{$parent.startBalance}}
+                    </div>
+                  </o-fill>
+                </div>
+              </li>
+            </o-fill>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    export default async () => {
+      // 全局 chart 引用
+      let chartInstance = null;
+
+      return {
+        data: {
+          calcType: "deposit",
+          interestType: "simple",
+          principalInput: "200000",
+          rateInput: "2.1",
+          yearsInput: "5",
+          showChart: true,
+          principal: 200000,
+          rate: 2.1,
+          years: 5,
+          totalInterest: 0,
+          finalAmount: 0,
+          yearData: [],
+          hasError: false,
+        },
+
+        watch: {
+          showChart(val) {
+            if (val) {
+              this.renderChart();
+            } else if (chartInstance) {
+              chartInstance.destroy();
+              chartInstance = null;
+            }
+          },
+        },
+
+        proto: {
+          get interestTypeLabel() {
+            return this.interestType === "simple" ? "单利" : "复利";
+          },
+
+          formatMoney(num) {
+            if (isNaN(num) || num === undefined || num === null) return "0.00";
+            return num.toLocaleString("zh-CN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+          },
+
+          calculate() {
+            const principal = parseFloat(this.principalInput);
+            const rate = parseFloat(this.rateInput);
+            const years = parseInt(this.yearsInput);
+
+            if (
+              !principal ||
+              principal <= 0 ||
+              !rate ||
+              rate <= 0 ||
+              !years ||
+              years <= 0
+            ) {
+              this.hasError = true;
+              return;
+            }
+
+            this.hasError = false;
+            this.principal = principal;
+            this.rate = rate;
+            this.years = years;
+
+            const rateDecimal = rate / 100;
+            const yearData = [];
+            let totalInterest = 0;
+            let finalAmount = 0;
+
+            if (this.interestType === "simple") {
+              const yearlyInterest = principal * rateDecimal;
+              let balance = principal;
+              for (let y = 1; y <= years; y++) {
+                yearData.push({
+                  year: y,
+                  startBalance: balance,
+                  interest: yearlyInterest,
+                  endBalance: balance + yearlyInterest,
+                  arr: [{ a: "1" }, { a: "2" }],
+                });
+                balance += yearlyInterest;
+              }
+              totalInterest = yearlyInterest * years;
+              finalAmount = principal + totalInterest;
+            } else {
+              let balance = principal;
+              for (let y = 1; y <= years; y++) {
+                const startBalance = balance;
+                const interest = balance * rateDecimal;
+                balance += interest;
+                yearData.push({
+                  year: y,
+                  startBalance: startBalance,
+                  interest: interest,
+                  endBalance: balance,
+                });
+              }
+              totalInterest = balance - principal;
+              finalAmount = balance;
+            }
+
+            this.totalInterest = totalInterest;
+            this.finalAmount = finalAmount;
+            this.yearData = yearData;
+
+            if (this.showChart) {
+              // 延迟渲染图表，等 DOM 更新完毕
+              setTimeout(() => this.renderChart(), 50);
+            }
+          },
+
+          renderChart() {
+            const canvas = this.shadow.$("#chartCanvas");
+            if (!canvas || !canvas.ele) return;
+
+            if (chartInstance) {
+              chartInstance.destroy();
+            }
+
+            const yearData = this.yearData;
+            if (!yearData || yearData.length === 0) return;
+
+            const labels = yearData.map((d) => `第${d.year}年`);
+            const balanceData = yearData.map((d) => d.endBalance);
+            const interestData = yearData.map((d) => d.interest);
+            const cumulativeInterest = [];
+            let cum = 0;
+            interestData.forEach((v) => {
+              cum += v;
+              cumulativeInterest.push(cum);
+            });
+
+            const ctx = canvas.ele.getContext("2d");
+            chartInstance = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: "年末本息和",
+                    data: balanceData,
+                    backgroundColor: "rgba(79,110,247,0.25)",
+                    borderColor: "#4f6ef7",
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    order: 2,
+                  },
+                  {
+                    label: "累计利息",
+                    data: cumulativeInterest,
+                    type: "line",
+                    borderColor: "#e67e22",
+                    backgroundColor: "rgba(230,126,34,0.1)",
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: "#e67e22",
+                    fill: true,
+                    tension: 0.3,
+                    order: 1,
+                  },
+                  {
+                    label: "年利息",
+                    data: interestData,
+                    type: "line",
+                    borderColor: "#27ae60",
+                    backgroundColor: "transparent",
+                    borderWidth: 2,
+                    borderDash: [6, 3],
+                    pointRadius: 4,
+                    pointBackgroundColor: "#27ae60",
+                    fill: false,
+                    tension: 0.3,
+                    order: 1,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      usePointStyle: true,
+                      padding: 24,
+                      font: { size: 12 },
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (ctx) {
+                        const self =
+                          ctx.chart.canvas._$host || ctx.chart.canvas;
+                        return (
+                          ctx.dataset.label +
+                          ": ¥" +
+                          ctx.raw.toLocaleString("zh-CN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        );
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  y: {
+                    ticks: {
+                      callback: function (val) {
+                        return "¥" + (val / 10000).toFixed(1) + "万";
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          },
+        },
+
+        ready() {
+          // 初始化时自动计算
+          this.calculate();
+        },
+      };
+    };
+  </script>
+</template>

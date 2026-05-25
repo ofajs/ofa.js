@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>利息计算器</title>
+  <script src="https://cdn.jsdelivr.net/npm/ofa.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #666;
+      --border: #e0e0e0;
+      --accent: #4f6ef7;
+      --accent-light: #eef1ff;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #4f6ef7, #6c5ce7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: "";
+      width: 4px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 180px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.2s;
+      background: #fafafa;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,110,247,0.08);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .toggle-row label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+    }
+    .toggle input { display: none; }
+    .toggle .slider {
+      position: absolute;
+      inset: 0;
+      background: #d0d0d0;
+      border-radius: 26px;
+      transition: 0.3s;
+    }
+    .toggle .slider::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .slider {
+      background: var(--accent);
+    }
+    .toggle input:checked + .slider::after {
+      transform: translateX(22px);
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+    }
+    .result-item {
+      background: var(--accent-light);
+      padding: 18px 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .result-item .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .result-item .label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .chart-container {
+      position: relative;
+      height: 320px;
+      margin-top: 8px;
+    }
+    .year-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .year-table th, .year-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .year-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    .year-table tr:hover td {
+      background: #fafbff;
+    }
+    .no-chart-hint {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 30px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💰 利息计算器</h1>
+      <p>快速计算存款与贷款利息，直观查看逐年变化</p>
+    </div>
+
+    <!-- 输入表单 -->
+    <div class="card">
+      <div class="card-title">📋 输入参数</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>计算类型</label>
+          <select id="calcType">
+            <option value="deposit">存款利息</option>
+            <option value="loan">贷款利息</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>利息方式</label>
+          <select id="interestType">
+            <option value="simple">单利计算</option>
+            <option value="compound">复利计算</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>本金（元）</label>
+          <input type="number" id="principal" placeholder="请输入本金" min="0" step="1000">
+        </div>
+        <div class="form-group">
+          <label>年利率（%）</label>
+          <input type="number" id="rate" placeholder="例如 2.1" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>期限（年）</label>
+          <input type="number" id="years" placeholder="请输入年限" min="1" step="1">
+        </div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="showChart" checked>
+          <span class="slider"></span>
+        </label>
+        <label for="showChart">显示逐年变化图表</label>
+      </div>
+      <button class="btn" id="calcBtn">💰 开始计算</button>
+    </div>
+
+    <!-- 计算结果 -->
+    <div class="card" id="resultCard">
+      <div class="card-title">📊 计算结果</div>
+      <div class="result-grid" id="resultGrid"></div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="card" id="chartCard">
+      <div class="card-title">📈 逐年变化图</div>
+      <div class="chart-container">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="no-chart-hint" id="noChartHint" style="display:none;">请勾选"显示逐年变化图表"以查看图表</div>
+    </div>
+
+    <!-- 逐年明细 -->
+    <div class="card" id="tableCard">
+      <div class="card-title">📋 逐年明细</div>
+      <div style="overflow-x:auto;">
+        <table class="year-table">
+          <thead>
+            <tr>
+              <th>年份</th>
+              <th>年初本金</th>
+              <th>年利息</th>
+              <th>年末本息和</th>
+            </tr>
+          </thead>
+          <tbody id="yearTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let chartInstance = null;
+
+    // 设置默认值
+    document.getElementById("calcType").value = "deposit";
+    document.getElementById("interestType").value = "simple";
+    document.getElementById("principal").value = "200000";
+    document.getElementById("rate").value = "2.1";
+    document.getElementById("years").value = "5";
+
+    function formatMoney(num) {
+      return num.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function calculate() {
+      const calcType = document.getElementById("calcType").value;
+      const interestType = document.getElementById("interestType").value;
+      const principal = parseFloat(document.getElementById("principal").value) || 0;
+      const rate = parseFloat(document.getElementById("rate").value) || 0;
+      const years = parseInt(document.getElementById("years").value) || 0;
+      const showChart = document.getElementById("showChart").checked;
+
+      if (principal <= 0 || rate <= 0 || years <= 0) {
+        alert("请填写有效的本金、利率和年限！");
+        return;
+      }
+
+      const rateDecimal = rate / 100;
+      let yearData = [];
+      let totalInterest = 0;
+      let finalAmount = 0;
+
+      if (interestType === "simple") {
+        // 单利：每年利息相同
+        const yearlyInterest = principal * rateDecimal;
+        let balance = principal;
+        for (let y = 1; y <= years; y++) {
+          yearData.push({
+            year: y,
+            startBalance: balance,
+            interest: yearlyInterest,
+            endBalance: balance + yearlyInterest
+          });
+          balance += yearlyInterest;
+        }
+        totalInterest = yearlyInterest * years;
+        finalAmount = principal + totalInterest;
+      } else {
+        // 复利
+        let balance = principal;
+        for (let y = 1; y <= years; y++) {
+          const startBalance = balance;
+          const interest = balance * rateDecimal;
+          balance += interest;
+          yearData.push({
+            year: y,
+            startBalance: startBalance,
+            interest: interest,
+            endBalance: balance
+          });
+        }
+        totalInterest = balance - principal;
+        finalAmount = balance;
+      }
+
+      // 显示结果
+      const calcTypeLabel = calcType === "deposit" ? "存款利息计算" : "贷款利息计算";
+      const interestLabel = interestType === "simple" ? "单利" : "复利";
+
+      document.getElementById("resultGrid").innerHTML = `
+        <div class="result-item">
+          <div class="value">¥${formatMoney(principal)}</div>
+          <div class="label">本金</div>
+        </div>
+        <div class="result-item">
+          <div class="value">${rate}%</div>
+          <div class="label">年利率 / ${interestLabel}</div>
+        </div>
+        <div class="result-item">
+          <div class="value">${years} 年</div>
+          <div class="label">期限</div>
+        </div>
+        <div class="result-item" style="background:#e8f5e9;">
+          <div class="value" style="color:#27ae60;">¥${formatMoney(totalInterest)}</div>
+          <div class="label">总利息</div>
+        </div>
+        <div class="result-item" style="background:#fff3e0;">
+          <div class="value" style="color:#e67e22;">¥${formatMoney(finalAmount)}</div>
+          <div class="label">本息合计</div>
+        </div>
+      `;
+
+      // 逐年明细表
+      let tableHtml = "";
+      yearData.forEach(d => {
+        tableHtml += `
+          <tr>
+            <td>第 ${d.year} 年</td>
+            <td>¥${formatMoney(d.startBalance)}</td>
+            <td>¥${formatMoney(d.interest)}</td>
+            <td>¥${formatMoney(d.endBalance)}</td>
+          </tr>
+        `;
+      });
+      document.getElementById("yearTableBody").innerHTML = tableHtml;
+
+      // 图表
+      if (showChart) {
+        document.getElementById("chartCard").style.display = "";
+        document.getElementById("noChartHint").style.display = "none";
+        renderChart(yearData, principal);
+      } else {
+        document.getElementById("chartCard").style.display = "";
+        document.getElementById("noChartHint").style.display = "";
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+      }
+    }
+
+    function renderChart(yearData, principal) {
+      const ctx = document.getElementById("chart").getContext("2d");
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      const labels = yearData.map(d => `第${d.year}年`);
+      const balanceData = yearData.map(d => d.endBalance);
+      const interestData = yearData.map(d => d.interest);
+      const cumulativeInterest = [];
+      let cum = 0;
+      interestData.forEach(v => {
+        cum += v;
+        cumulativeInterest.push(cum);
+      });
+
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "年末本息和",
+              data: balanceData,
+              backgroundColor: "rgba(79,110,247,0.25)",
+              borderColor: "#4f6ef7",
+              borderWidth: 2,
+              borderRadius: 8,
+              borderSkipped: false,
+              order: 2
+            },
+            {
+              label: "累计利息",
+              data: cumulativeInterest,
+              type: "line",
+              borderColor: "#e67e22",
+              backgroundColor: "rgba(230,126,34,0.1)",
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: "#e67e22",
+              fill: true,
+              tension: 0.3,
+              order: 1
+            },
+            {
+              label: "年利息",
+              data: interestData,
+              type: "line",
+              borderColor: "#27ae60",
+              backgroundColor: "transparent",
+              borderWidth: 2,
+              borderDash: [6, 3],
+              pointRadius: 4,
+              pointBackgroundColor: "#27ae60",
+              fill: false,
+              tension: 0.3,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                usePointStyle: true,
+                padding: 24,
+                font: { size: 12 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ": ¥" + formatMoney(ctx.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: function(val) {
+                  return "¥" + (val / 10000).toFixed(1) + "万";
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", calculate);
+    document.getElementById("showChart").addEventListener("change", calculate);
+
+    // 页面加载时自动计算
+    calculate();
+  </script>
+</body>
+</html>

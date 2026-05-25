@@ -4,7 +4,7 @@
   content:
     - name: 스크립트 참조
       url: ./script-reference.md
-    - name: 첫 번째 앱 만들기
+    - name: 첫 애플리케이션 만들기
       url: ./create-first-app.md
 - name: 빠른 시작
   url: ./quick-start.md
@@ -14,7 +14,7 @@
       url: ./content-rendering.md
     - name: 이벤트 바인딩
       url: ./event-binding.md
-    - name: 속성 반응성
+    - name: 속성 반응
       url: ./property-response.md
     - name: 속성 바인딩
       url: ./property-binding.md
@@ -40,9 +40,9 @@
       url: ./slots.md
     - name: 깊은 속성 바인딩
       url: ./deep-property-binding.md
-    - name: 커스텀 이벤트
+    - name: 사용자 정의 이벤트
       url: ./custom-events.md
-- name: 애플리케이션과 확장
+- name: 애플리케이션과 규모 확장
   content:
     - name: 마이크로 앱
       url: ./micro-app.md
@@ -50,27 +50,27 @@
       url: ./app-config-basics.md
     - name: 페이지 전환 애니메이션
       url: ./page-transition-animation.md
-    - name: 로딩 및 에러 처리
+    - name: 로딩과 오류 처리
       url: ./app-loading-error.md
     - name: 앱 초기화
       url: ./app-initialization.md
-    - name: 라우트와 네비게이션
+    - name: 라우팅과 내비게이션
       url: ./app-navigation.md
     - name: 단일 페이지 애플리케이션
       url: ./routes.md
-    - name: 중첩 라우트
+    - name: 중첩 라우팅
       url: ./nested-routes.md
     - name: SSR과 동형 렌더링
       url: ./ssr.md
 - name: 상태 관리
   content:
-    - name: 상태 관리는 무엇인가
+    - name: 상태 관리란?
       url: ./state-management.md
     - name: 컨텍스트 상태
       url: ./context-state.md
-    - name: 스타일 조회
+    - name: 스타일 쿼리
       url: ./match-var.md
-- name: 빌드 및 배포
+- name: 프로덕션과 배포
   url: ./build-app.md
 - name: 기타 컴포넌트
   content:
@@ -80,3 +80,5 @@
       url: ./non-explicit-component.md
     - name: replace-temp 컴포넌트
       url: ./replace-template.md
+    - name: global-link 컴포넌트
+      url: ./global-link.md

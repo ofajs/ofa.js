@@ -4,7 +4,7 @@
   content:
     - name: スクリプト参照
       url: ./script-reference.md
-    - name: 最初のアプリを作成する
+    - name: 最初のアプリを作成
       url: ./create-first-app.md
 - name: クイックスタート
   url: ./quick-start.md
@@ -38,21 +38,21 @@
       url: ./inherit-attributes.md
     - name: スロット
       url: ./slots.md
-    - name: ディーププロパティバインディング
+    - name: 深い属性バインディング
       url: ./deep-property-binding.md
     - name: カスタムイベント
       url: ./custom-events.md
-- name: アプリとスケーリング
+- name: アプリケーションとスケーリング
   content:
     - name: マイクロアプリ
       url: ./micro-app.md
     - name: アプリ設定の基本
       url: ./app-config-basics.md
-    - name: ページトランジションアニメーション
+    - name: ページ遷移アニメーション
       url: ./page-transition-animation.md
     - name: 読み込みとエラーハンドリング
       url: ./app-loading-error.md
-    - name: アプリ初期化
+    - name: アプリの初期化
       url: ./app-initialization.md
     - name: ルーティングとナビゲーション
       url: ./app-navigation.md
@@ -60,7 +60,7 @@
       url: ./routes.md
     - name: ネストされたルート
       url: ./nested-routes.md
-    - name: SSRと同型レンダリング
+    - name: SSR と アイソモーフィックレンダリング
       url: ./ssr.md
 - name: 状態管理
   content:
@@ -80,3 +80,5 @@
       url: ./non-explicit-component.md
     - name: replace-temp コンポーネント
       url: ./replace-template.md
+    - name: global-link コンポーネント
+      url: ./global-link.md

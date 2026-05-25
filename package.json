@@ -1,6 +1,6 @@
 {
   "name": "ofa.js",
-  "version": "4.6.23",
+  "version": "4.7.0",
   "description": "pure web front-end componentized framework that does not require the use of nodejs",
   "scripts": {
     "reset-full-coverage": "node skills-helper/scripts/reset-full-coverage.js",
@@ -25,14 +25,14 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.47.2",
+    "@playwright/test": "^1.60.0",
     "@rollup/plugin-terser": "^1.0.0",
-    "jasmine-core": "^5.3.0",
-    "koa": "^2.15.3",
+    "jasmine-core": "^6.2.0",
+    "koa": "^3.2.1",
     "koa-static": "^5.0.0",
-    "open": "^10.1.0",
-    "rollup": "^4.24.0",
-    "shelljs": "^0.8.5"
+    "open": "^11.0.0",
+    "rollup": "^4.60.4",
+    "shelljs": "^0.10.0"
   },
   "main": "dist/ofa.js",
   "directories": {
@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "drill.js": "^5.3.12",
-    "xhear": "^7.5.33"
+    "xhear": "^7.6.0"
   },
   "repository": {
     "type": "git",

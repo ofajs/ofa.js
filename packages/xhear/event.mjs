@@ -1,4 +1,4 @@
-import { getErr } from "../ofa-error/main.js";
+import { getRenderErrorSupplementary } from "./public.mjs";
 
 function getBindOptions(name, func, options) {
   let revoker;
@@ -8,15 +8,20 @@ function getBindOptions(name, func, options) {
     if (!/[^\d\w_\$\.]/.test(beforeValue)) {
       func = options.data.get(beforeValue);
       if (!func) {
-        const tag = options.data.tag;
-        const err = getErr("not_found_func", {
-          name: beforeValue,
-          tag: tag ? `"${tag}"` : "",
+        const supplementary = getRenderErrorSupplementary(options.data);
+
+        const err = new Error(
+          `Event binding error: function "${beforeValue}" not found in expression on:${name}="${beforeValue}", ${supplementary}`,
+        );
+
+        console.error(err, {
+          target: options.data,
         });
-        console.warn(err, " target =>", options.data);
-        throw err;
+
+        // throw err;
+      } else {
+        func = func.bind(options.data);
       }
-      func = func.bind(options.data);
     }
 
     revoker = () => this.ele.removeEventListener(name, func);

@@ -1,4 +1,4 @@
-//! ofa.js - v4.6.23 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.0 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -419,6 +419,25 @@ function mergeObjects(obj1, obj2) {
 
 const isSafariBrowser = () =>
   /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+const getRenderErrorSupplementary = (data) => {
+  if (!data) {
+    return "";
+  }
+
+  let supplementary = "";
+  if (data.$host || data.$data) {
+    supplementary = "Please check the usage of $host or $data, ";
+  }
+
+  const fromSrc = data.$host?.PATH || data.PATH;
+
+  if (fromSrc) {
+    supplementary += `from file: ${fromSrc}, `;
+  }
+
+  return supplementary;
+};
 
 const { assign: assign$1, freeze } = Object;
 
@@ -1245,13 +1264,29 @@ function render({
       const matchs = Array.from(new Set(originStyle.match(/data\(.+?\)/g))).map(
         (dataExpr) => {
           const expr = dataExpr.replace(/data\((.+)\)/, "$1");
-          const func = convertToFunc(expr, data);
+          const func = convertToFunc(expr, data, {
+            errCall: (error) => {
+              const supplementary = getRenderErrorSupplementary(data);
+
+              const err = new Error(
+                `Error evaluating data() expression in style: "${expr}", ${supplementary}`,
+                {
+                  cause: error,
+                },
+              );
+
+              console.error(err, {
+                style: originStyle,
+                target,
+              });
+            },
+          });
 
           return {
             dataExpr,
             func,
           };
-        }
+        },
       );
 
       const renderStyle = () => {
@@ -1286,7 +1321,25 @@ function render({
     parentNode.insertBefore(textEl, el);
     parentNode.removeChild(el);
 
-    const func = convertToFunc(el.getAttribute("expr"), data);
+    const func = convertToFunc(el.getAttribute("expr"), data, {
+      errCall: (error) => {
+        const supplementary = getRenderErrorSupplementary(data);
+
+        const err = new Error(
+          `Error evaluating text expression: '${el.getAttribute("expr")}', ${supplementary}`,
+          {
+            cause: error,
+          },
+        );
+
+        console.error(err, {
+          element: textEl,
+          parent: parentNode,
+        });
+
+        return false;
+      },
+    });
     const renderFunc = () => {
       const content = func();
       if (textEl.textContent !== String(content)) {
@@ -1329,20 +1382,19 @@ function render({
 
             const func = convertToFunc(expr, data, {
               errCall: (error) => {
-                const errorExpr = `:${key}="${expr}"`;
-                const err = getErr(
-                  "render_el_error",
+                const errorExpr = `${actionName === "prop" ? "" : actionName}:${key}="${expr}"`;
+                const supplementary = getRenderErrorSupplementary(data);
+
+                const err = new Error(
+                  `Error evaluating element expression: '${errorExpr}', ${supplementary}`,
                   {
-                    expr: errorExpr,
+                    cause: error,
                   },
-                  error
                 );
 
-                console.warn(err, {
-                  target: $el.ele,
-                  errorExpr,
+                console.error(err, {
+                  element: $el.ele,
                 });
-                console.error(err);
 
                 return false;
               },
@@ -1407,7 +1459,7 @@ function render({
               arg0: args[0],
               arg1: args[1],
             },
-            error
+            error,
           );
           console.warn(err, el);
           throw err;
@@ -1528,7 +1580,7 @@ const convert = (template) => {
     /{{(.+?)}}/g,
     (str, match) => {
       return `<xtext expr="${match}"></xtext>`;
-    }
+    },
   );
 
   const tempName = template.getAttribute("name");
@@ -1551,7 +1603,7 @@ const convert = (template) => {
           tempName,
           len: tempChilds.length,
           wrapName,
-        })
+        }),
       );
     }
     temps[tempName] = template;
@@ -1795,15 +1847,20 @@ function getBindOptions(name, func, options) {
     if (!/[^\d\w_\$\.]/.test(beforeValue)) {
       func = options.data.get(beforeValue);
       if (!func) {
-        const tag = options.data.tag;
-        const err = getErr("not_found_func", {
-          name: beforeValue,
-          tag: tag ? `"${tag}"` : "",
+        const supplementary = getRenderErrorSupplementary(options.data);
+
+        const err = new Error(
+          `Event binding error: function "${beforeValue}" not found in expression on:${name}="${beforeValue}", ${supplementary}`,
+        );
+
+        console.error(err, {
+          target: options.data,
         });
-        console.warn(err, " target =>", options.data);
-        throw err;
+
+        // throw err;
+      } else {
+        func = func.bind(options.data);
       }
-      func = func.bind(options.data);
     }
 
     revoker = () => this.ele.removeEventListener(name, func);
@@ -3266,7 +3323,7 @@ register({
         console.warn(
           getErr("fill_type", {
             type: getType(arrayData),
-          })
+          }),
         );
 
         childs &&
@@ -3299,7 +3356,7 @@ register({
             targetTemp,
             data.$host || data,
             i,
-            keyName
+            keyName,
           );
           frag.appendChild($ele.ele);
         });
@@ -3324,7 +3381,7 @@ register({
 
             const val = e[keyName];
             return val === undefined ? e : val;
-          })
+          }),
         );
 
         const { parentNode } = this._fake;
@@ -3374,7 +3431,7 @@ register({
                   targetTemp,
                   data.$host || data,
                   count,
-                  keyName
+                  keyName,
                 );
 
                 count++;
@@ -3402,7 +3459,7 @@ register({
           }
 
           const oldId = positionKeys.indexOf(
-            isObj ? currentVal[keyName] : currentVal
+            isObj ? currentVal[keyName] : currentVal,
           );
           if (oldId > -1) {
             // If the key originally exists, perform key displacement.
@@ -3434,7 +3491,7 @@ register({
               targetTemp,
               data.$host || data,
               count,
-              keyName
+              keyName,
             );
 
             // target.parentNode.insertBefore($ele.ele, target);
@@ -3497,12 +3554,30 @@ register({
   },
 });
 
-const createItem = ($data, temps, targetTemp, $host, $index, keyName) => {
+/**
+ * 为 x-fill 渲染创建列表项元素
+ * @param {Object} $data - 列表项的数据对象
+ * @param {Object} temps - 包含所有可用模板的模板集合
+ * @param {HTMLTemplateElement} targetTemp - 要渲染的目标模板元素
+ * @param {Object} $host - 包含 x-fill 指令的宿主元素
+ * @param {number} $index - 列表中项的索引
+ * @param {string} keyName - 用于标识列表项的键名
+ * @param {Object} $parent - 父元素的实例对象
+ * @returns {Object} 创建的元素，包含绑定的数据和项属性
+ */
+const createItem = (
+  $data,
+  temps,
+  targetTemp,
+  $host,
+  $index,
+  keyName,
+  $parent,
+) => {
   const $ele = createXEle(targetTemp.innerHTML);
 
   const itemData = new Stanz({
     $data,
-    // $ele,
     $host,
     $index,
   });
@@ -3515,6 +3590,10 @@ const createItem = ($data, temps, targetTemp, $host, $index, keyName) => {
       },
     },
   });
+
+  if ($parent) {
+    itemData.$parent = $parent;
+  }
 
   render({
     target: $ele.ele,
@@ -5222,7 +5301,7 @@ lm$1.use(["html", "htm"], async (ctx, next) => {
         {
           url: ctx.url,
         },
-        error
+        error,
       );
     }
     ctx.resultContent = content;
@@ -5258,7 +5337,7 @@ lm$1.use(["js", "mjs"], async (ctx, next) => {
           url: realUrl || url,
           tempSrc,
         },
-        error
+        error,
       );
       self.emit("error", { data: { error: err } });
       throw err;
@@ -5295,7 +5374,7 @@ setTimeout(() => {
         if (this.__init_src) {
           if (this.__init_src !== src) {
             throw Error(
-              "A page that has already been initialized cannot be set with the src attribute"
+              "A page that has already been initialized cannot be set with the src attribute",
             );
           }
           return;
@@ -5330,7 +5409,7 @@ setTimeout(() => {
           const failContent = getFailContent(
             src,
             target,
-            this?.app?._module?.fail
+            this?.app?._module?.fail,
           );
 
           this._renderDefault({
@@ -5403,7 +5482,7 @@ setTimeout(() => {
                   targetName: "proto",
                   name,
                 }),
-                defaults
+                defaults,
               );
             }
           });
@@ -5520,7 +5599,7 @@ const dispatchLoad = async (_this, loaded) => {
           el.addEventListener("load", (e) => {
             res();
           });
-        })
+        }),
     );
 
     const links = searchEle(shadow, `link`);
@@ -5547,7 +5626,7 @@ const dispatchLoad = async (_this, loaded) => {
               link.addEventListener("load", resolve);
               link.addEventListener("error", resolve);
             }
-          })
+          }),
         );
       }
     });
@@ -7042,6 +7121,7 @@ $.register({
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
 
           frag.appendChild($ele.ele);
@@ -7132,6 +7212,7 @@ $.register({
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
 
           selfEl.insertBefore($ele.ele, children[i]);
@@ -7232,7 +7313,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.6.23";
+const version = "ofa.js@4.7.0";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

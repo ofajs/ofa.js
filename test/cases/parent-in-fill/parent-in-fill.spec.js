@@ -74,7 +74,7 @@ test("$parent data binding consistency", async ({ page }) => {
   const initialParentText = await parentDataElement.textContent();
   expect(initialParentText).toContain("Start Balance: ¥10,000.00");
 
-  // 验证 fill 项中的组件数据与父级一致
+  // 验证 fill 项中通过 $host 访问组件数据
   const firstFillItem = await page.$('[data-testid="fill-item"]');
   const fillItemText = await firstFillItem.textContent();
   expect(fillItemText).toContain("Component Start Balance: ¥10,000.00");
@@ -87,7 +87,7 @@ test("$parent data binding consistency", async ({ page }) => {
   const updatedParentText = await parentDataElement.textContent();
   expect(updatedParentText).not.toContain("Start Balance: ¥10,000.00");
 
-  // 验证 fill 项中的组件数据也同步更新
+  // 验证 fill 项中通过 $host 访问的组件数据也同步更新
   const updatedFillItemText = await firstFillItem.textContent();
   expect(updatedFillItemText).not.toContain("Component Start Balance: ¥10,000.00");
   

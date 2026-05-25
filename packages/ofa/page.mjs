@@ -41,7 +41,7 @@ lm.use(["html", "htm"], async (ctx, next) => {
         {
           url: ctx.url,
         },
-        error
+        error,
       );
     }
     ctx.resultContent = content;
@@ -77,7 +77,7 @@ lm.use(["js", "mjs"], async (ctx, next) => {
           url: realUrl || url,
           tempSrc,
         },
-        error
+        error,
       );
       self.emit("error", { data: { error: err } });
       throw err;
@@ -114,7 +114,7 @@ setTimeout(() => {
         if (this.__init_src) {
           if (this.__init_src !== src) {
             throw Error(
-              "A page that has already been initialized cannot be set with the src attribute"
+              "A page that has already been initialized cannot be set with the src attribute",
             );
           }
           return;
@@ -149,7 +149,7 @@ setTimeout(() => {
           const failContent = getFailContent(
             src,
             target,
-            this?.app?._module?.fail
+            this?.app?._module?.fail,
           );
 
           this._renderDefault({
@@ -222,7 +222,7 @@ setTimeout(() => {
                   targetName: "proto",
                   name,
                 }),
-                defaults
+                defaults,
               );
             }
           });
@@ -258,6 +258,7 @@ setTimeout(() => {
             ele: this.ele,
             template,
             temps,
+            fromSrc: src,
           });
         } catch (error) {
           const err = getErr("page_failed", { src }, error);
@@ -339,7 +340,7 @@ export const dispatchLoad = async (_this, loaded) => {
           el.addEventListener("load", (e) => {
             res();
           });
-        })
+        }),
     );
 
     const links = searchEle(shadow, `link`);
@@ -366,7 +367,7 @@ export const dispatchLoad = async (_this, loaded) => {
               link.addEventListener("load", resolve);
               link.addEventListener("error", resolve);
             }
-          })
+          }),
         );
       }
     });

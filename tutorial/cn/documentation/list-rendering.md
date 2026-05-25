@@ -11,6 +11,7 @@
 - **索引访问**：通过 `$index` 访问当前项的索引
 - **数据访问**：通过 `$data` 访问当前项的数据
 - **宿主访问**：通过 `$host` 访问当前组件实例，可调用组件方法或访问组件数据
+- **父级访问**：在嵌套的 `o-fill` 中，通过 `$parent` 访问父级项的数据
 - **模板复用**：支持使用命名模板进行复杂列表渲染
 
 ## 直接渲染
@@ -134,6 +135,15 @@
 
 `o-fill` 支持嵌套使用，可以处理复杂的层次数据结构，如树形菜单、分类列表等。
 
+### 使用 $parent 访问父级数据
+
+在嵌套的 `o-fill` 中，可以使用 `$parent` 来访问父级项的数据。要启用 `$parent`，需要在嵌套的 `o-fill` 上添加 `:_$parent="$data"` 属性。
+
+**重要规则：**
+- 第一层 `o-fill` 不需要 `_$parent`，使用 `$host` 访问组件数据
+- 嵌套的 `o-fill`（第二层开始）使用 `:_$parent="$data"` 传递父级数据
+- `_$parent` 只接受 `$data`，确保数据流向清晰
+
 <o-playground name="o-fill - 嵌套列表渲染" style="--editor-height: 800px">
   <code>
     <template page>
@@ -234,6 +244,57 @@
   </code>
 </o-playground>
 
+### $parent 使用示例
+
+下面的示例展示了如何在嵌套的 `o-fill` 中使用 `$parent` 访问父级项的数据：
+
+<o-playground name="o-fill - $parent 使用示例" style="--editor-height: 600px">
+  <code>
+    <template page>
+      <style>
+        :host { display: block; padding: 20px; }
+        .category { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .item { background: #fff; padding: 8px; margin: 5px 0; border-radius: 4px; border-left: 3px solid #2196f3; }
+      </style>
+      <h3>分类列表</h3>
+      <o-fill :value="categories">
+        <div class="category">
+          <h4>分类: {{$data.name}}</h4>
+          <o-fill :value="$data.items" :_$parent="$data">
+            <div class="item">
+              <div>商品: {{$data}}</div>
+              <div>所属分类: {{$parent.name}}</div>
+            </div>
+          </o-fill>
+        </div>
+      </o-fill>
+      <script>
+        export default async () => {
+          return {
+            data: {
+              categories: [
+                {
+                  name: "水果",
+                  items: ["苹果", "香蕉", "橙子"]
+                },
+                {
+                  name: "蔬菜",
+                  items: ["西红柿", "黄瓜", "茄子"]
+                }
+              ]
+            }
+          };
+        };
+      </script>
+    </template>
+  </code>
+</o-playground>
+
+在这个简单的示例中：
+- **第一层 o-fill**：遍历分类数组，`$data.name` 是分类名称
+- **嵌套 o-fill**：使用 `:_$parent="$data"` 传递父级分类数据
+- **$parent 访问**：在嵌套层中，通过 `$parent.name` 访问父级分类的名称
+
 ## 性能优化和键值管理
 
 对于需要频繁更新的列表，可以通过 `fill-key` 属性指定唯一标识符，以提高渲染性能。
@@ -249,9 +310,41 @@
 
 ## 列表渲染最佳实践
 
-
 1. **事件处理**：在列表项中使用事件时，注意 `$host` 指向当前组件实例，`$data` 指向当前项数据
 2. **选择合适的渲染方式**：简单列表使用直接渲染，复杂结构使用模板渲染
 3. **性能考虑**：对于大列表或频繁更新的列表，使用 `fill-key` 指定键值
 4. **数据结构**：确保数组中的每一项都是有效的数据对象
 5. **避免深层嵌套**：虽然支持嵌套，但应避免过深的嵌套层级
+6. **正确使用 $parent**：
+   - 只在嵌套的 `o-fill` 中使用 `$parent`
+   - 必须使用 `:_$parent="$data"` 来启用 `$parent`
+   - 第一层 `o-fill` 使用 `$host` 访问组件数据，不要使用 `$parent`
+   - `_$parent` 只接受 `$data`，不要传递其他值
+
+## 变量使用总结
+
+在 `o-fill` 中，不同的变量有不同的用途和使用场景：
+
+| 变量 | 用途 | 使用场景 | 示例 |
+|------|------|----------|------|
+| `$host` | 访问组件实例的数据和方法 | 第一层 `o-fill` | `{{$host.totalAmount}}` |
+| `$data` | 当前迭代项的数据 | 所有层级的 `o-fill` | `{{$data.name}}` |
+| `$index` | 当前项的索引 | 所有层级的 `o-fill` | `{{$index + 1}}` |
+| `$parent` | 父级项的数据 | 嵌套 `o-fill`（第二层开始） | `{{$parent.orderName}}` |
+
+### 数据访问层级示例
+
+```
+组件 data (totalAmount, orders)
+  │
+  └─ 第一层 o-fill: :value="orders"
+      │  使用 $host 访问组件数据: {{$host.totalAmount}}
+      │  使用 $data 访问当前订单: {{$data.orderName}}
+      │
+      └─ 第二层 o-fill: :value="$data.items" :_$parent="$data"
+          │  $parent 指向第一层的订单数据
+          │  $data 是 items 的每一项
+          │  可以访问: {{$parent.orderName}}, {{$data.name}}
+```
+
+通过正确使用这些变量，可以轻松处理复杂的嵌套列表渲染场景。

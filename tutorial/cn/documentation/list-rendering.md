@@ -135,15 +135,6 @@
 
 `o-fill` 支持嵌套使用，可以处理复杂的层次数据结构，如树形菜单、分类列表等。
 
-### 使用 $parent 访问父级数据
-
-在嵌套的 `o-fill` 中，可以使用 `$parent` 来访问父级项的数据。要启用 `$parent`，需要在嵌套的 `o-fill` 上添加 `:_$parent="$data"` 属性。
-
-**重要规则：**
-- 第一层 `o-fill` 不需要 `_$parent`，使用 `$host` 访问组件数据
-- 嵌套的 `o-fill`（第二层开始）使用 `:_$parent="$data"` 传递父级数据
-- `_$parent` 只接受 `$data`，确保数据流向清晰
-
 <o-playground name="o-fill - 嵌套列表渲染" style="--editor-height: 800px">
   <code>
     <template page>
@@ -243,6 +234,19 @@
     </template>
   </code>
 </o-playground>
+
+上面的示例展示了基本的嵌套列表渲染。如果你需要在嵌套的 `o-fill` 中访问父级项的数据，可以使用 `$parent`。
+
+### 使用 $parent 访问父级数据
+
+> **版本要求**：`$parent` 特性需要 ofa.js v4.7.0 及以上版本支持。
+
+在嵌套的 `o-fill` 中，可以使用 `$parent` 来访问父级项的数据。要启用 `$parent`，需要在嵌套的 `o-fill` 上添加 `:_$parent="$data"` 属性。
+
+**重要规则：**
+- 第一层 `o-fill` 不需要 `_$parent`，使用 `$host` 访问组件数据
+- 嵌套的 `o-fill`（第二层开始）使用 `:_$parent="$data"` 传递父级数据
+- `_$parent` 只接受 `$data`，确保数据流向清晰
 
 ### $parent 使用示例
 

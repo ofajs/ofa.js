@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parent in Fill - Simple Test</title>
+    <script src="../../../packages/ofa/main.mjs#debug" type="module"></script>
+  </head>
+  <body>
+    <h2>Simple $parent Test</h2>
+    
+    <l-m src="./test-comp.html"></l-m>
+    
+    <parent-test></parent-test>
+    
+    <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+      <h3>Instructions:</h3>
+      <ul>
+        <li>First level o-fill: directly accesses component data (no $parent needed)</li>
+        <li>Nested o-fill: uses <code>:_$parent="$data"</code> to pass parent item data</li>
+        <li>In nested fills, $parent refers to the parent item's data</li>
+        <li>Click "Change Start Balance" to update component data</li>
+        <li>Click "Change Items" to replace the entire items array</li>
+        <li>Click "Add Nested Item" to add a nested item to the first parent item</li>
+      </ul>
+    </div>
+  </body>
+</html>

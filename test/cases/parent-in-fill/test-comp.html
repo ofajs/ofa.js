@@ -1,0 +1,129 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+      padding: 20px;
+    }
+    .parent-data {
+      background: #f0f0f0;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .fill-item {
+      background: #e0e0e0;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    .nested-item {
+      background: #d0d0d0;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      padding-left: 20px;
+    }
+  </style>
+
+  <div class="parent-data">
+    <h3>Parent Data:</h3>
+    <div>Start Balance: ¥{{formatMoney(startBalance)}}</div>
+    <div>Interest Rate: {{interestRate}}%</div>
+  </div>
+
+  <div>
+    <h3>Items with Parent Access:</h3>
+    <o-fill :value="items">
+      <div class="fill-item" data-testid="fill-item">
+        <div>Item: {{$data.name}}</div>
+        <div>Item Value: {{$data.value}}</div>
+        <div>
+          Component Start Balance: ¥{{$host.formatMoney($host.startBalance)}}
+        </div>
+        <div>Component Interest Rate: {{$host.interestRate}}%</div>
+
+        <div style="margin-top: 10px">
+          <strong>Nested Items:</strong>
+          <o-fill :value="$data.nestedArr" :_$parent="$data">
+            <div class="nested-item" data-testid="nested-item">
+              <div>Nested: {{$data.nestedName}}</div>
+              <div>Access Parent Item Name: {{$parent.name}}</div>
+              <div>Access Parent Item Value: {{$parent.value}}</div>
+            </div>
+          </o-fill>
+        </div>
+      </div>
+    </o-fill>
+  </div>
+
+  <div style="margin-top: 20px">
+    <button on:click="changeStartBalance" data-testid="change-balance">
+      Change Start Balance
+    </button>
+    <button on:click="changeItems" data-testid="change-items">
+      Change Items
+    </button>
+    <button on:click="addNestedItem" data-testid="add-nested">
+      Add Nested Item
+    </button>
+  </div>
+
+  <script>
+    export default {
+      tag: "parent-test",
+      data: {
+        startBalance: 10000,
+        interestRate: 5.5,
+        items: [
+          {
+            name: "Item 1",
+            value: 100,
+            nestedArr: [
+              { nestedName: "Nested 1-1" },
+              { nestedName: "Nested 1-2" },
+            ],
+          },
+          {
+            name: "Item 2",
+            value: 200,
+            nestedArr: [{ nestedName: "Nested 2-1" }],
+          },
+          {
+            name: "Item 3",
+            value: 300,
+            nestedArr: [],
+          },
+        ],
+      },
+      proto: {
+        formatMoney(value) {
+          return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        },
+        changeStartBalance() {
+          this.startBalance = Math.floor(Math.random() * 100000);
+        },
+        changeItems() {
+          this.items = [
+            {
+              name: "New Item 1",
+              value: 500,
+              nestedArr: [{ nestedName: "New Nested 1" }],
+            },
+            {
+              name: "New Item 2",
+              value: 600,
+              nestedArr: [],
+            },
+          ];
+        },
+        addNestedItem() {
+          if (this.items.length > 0) {
+            this.items[0].nestedArr.push({
+              nestedName: `New Nested ${Date.now()}`,
+            });
+          }
+        },
+      },
+    };
+  </script>
+</template>

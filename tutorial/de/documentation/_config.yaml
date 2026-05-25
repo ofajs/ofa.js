@@ -2,7 +2,7 @@
   url: ./introduction.md
 - name: Erste Schritte
   content:
-    - name: Skript-Referenz
+    - name: Skriptreferenz
       url: ./script-reference.md
     - name: Erste App erstellen
       url: ./create-first-app.md
@@ -10,23 +10,23 @@
   url: ./quick-start.md
 - name: Template-Syntax
   content:
-    - name: Inhaltsrendering
+    - name: Inhalt rendern
       url: ./content-rendering.md
-    - name: Event-Bindung
+    - name: Ereignisbindung
       url: ./event-binding.md
-    - name: Attributreaktion
+    - name: Attributreaktivität
       url: ./property-response.md
-    - name: Attribut-Bindung
+    - name: Attributbindung
       url: ./property-binding.md
     - name: Klassen- und Stilbindung
       url: ./class-style-binding.md
-    - name: Konditionales Rendering
+    - name: Bedingtes Rendern
       url: ./conditional-rendering.md
-    - name: Listen-Rendering
+    - name: Listenrendering
       url: ./list-rendering.md
     - name: Berechnete Eigenschaften
       url: ./computed-properties.md
-    - name: Beobachter
+    - name: Watcher
       url: ./watchers.md
     - name: Lebenszyklus
       url: ./lifecycle.md
@@ -34,7 +34,7 @@
   content:
     - name: Komponente erstellen
       url: ./create-component.md
-    - name: Attribute vererben
+    - name: Vererbung von Attributen
       url: ./inherit-attributes.md
     - name: Slots
       url: ./slots.md
@@ -42,41 +42,43 @@
       url: ./deep-property-binding.md
     - name: Benutzerdefinierte Ereignisse
       url: ./custom-events.md
-- name: App und Skalierung
+- name: Anwendung und Skalierung
   content:
-    - name: Micro-App
+    - name: Mikro-Apps
       url: ./micro-app.md
-    - name: App-Konfiguration Grundlagen
+    - name: Grundlagen der App-Konfiguration
       url: ./app-config-basics.md
-    - name: Seitenwechsel-Animation
+    - name: Seitenübergangsanimation
       url: ./page-transition-animation.md
-    - name: Laden und Fehlerbehandlung
+    - name: Lade- und Fehlerbehandlung
       url: ./app-loading-error.md
     - name: App-Initialisierung
       url: ./app-initialization.md
     - name: Routing und Navigation
       url: ./app-navigation.md
-    - name: Single-Page-App
+    - name: Single-Page-Applikation
       url: ./routes.md
     - name: Verschachtelte Routen
       url: ./nested-routes.md
-    - name: SSR und isomorphes Rendering
+    - name: SSR & isomorphes Rendering
       url: ./ssr.md
 - name: Zustandsverwaltung
   content:
-    - name: Was ist Zustandsverwaltung
+    - name: Was ist Zustandsverwaltung?
       url: ./state-management.md
-    - name: Kontext-Zustand
+    - name: Kontextzustand
       url: ./context-state.md
-    - name: Stilabfrage
+    - name: Stilabfragen
       url: ./match-var.md
-- name: Produktion und Bereitstellung
+- name: Produktion & Deployment
   url: ./build-app.md
-- name: Andere Komponenten
+- name: Weitere Komponenten
   content:
     - name: Host-Stile injizieren
       url: ./inject-host-style.md
-    - name: Nicht-explizite Komponente
+    - name: Nicht explizite Komponenten
       url: ./non-explicit-component.md
     - name: replace-temp-Komponente
       url: ./replace-template.md
+    - name: global-link-Komponente
+      url: ./global-link.md

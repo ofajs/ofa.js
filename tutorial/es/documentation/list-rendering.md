@@ -8,11 +8,12 @@ En ofa.js, el componente `o-fill` proporciona potentes capacidades de renderizad
 
 ### Características principales:
 
-- **Actualización eficiente**: rastrea los cambios en la matriz mediante valores clave y actualiza solo las partes que necesitan cambios.
-- **Acceso por índice**: accede al índice del elemento actual a través de `$index`.
-- **Acceso a datos**: accede a los datos del elemento actual a través de `$data`.
-- **Acceso al anfitrión**: accede a la instancia del componente actual a través de `$host`, puede llamar a métodos del componente o acceder a datos del componente.
-- **Reutilización de plantillas**: admite el uso de plantillas con nombre para renderizado de listas complejas.
+- **Actualización eficiente**: mediante el seguimiento de cambios en el array a través de claves, solo se actualizan las partes que han cambiado
+- **Acceso al índice**: se accede al índice del elemento actual mediante `$index`
+- **Acceso a datos**: se accede a los datos del elemento actual mediante `$data`
+- **Acceso al host**: se accede a la instancia del componente actual mediante `$host`, pudiendo llamar a métodos del componente o acceder a sus datos
+- **Acceso al padre**: en un `o-fill` anidado, se accede a los datos del elemento padre mediante `$parent`
+- **Reutilización de plantillas**: admite el uso de plantillas con nombre para renderizado complejo de listas
 
 ## Renderizado directo
 
@@ -234,6 +235,68 @@ Para estructuras de elementos de lista más complejas, se puede utilizar el mét
   </code>
 </o-playground>
 
+El ejemplo anterior muestra el renderizado básico de lista anidada. Si necesitas acceder a los datos del elemento padre dentro un `o-fill` anidado, puedes usar `$parent`.
+
+### Usar $parent para acceder a los datos del padre
+
+> **Requisito de versión**: La funcionalidad `$parent` necesita ofa.js v4.7.0 o superior.
+
+En un `o-fill` anidado, se puede usar `$parent` para acceder a los datos del elemento padre. Para habilitar `$parent`, es necesario añadir el atributo `:_$parent="$data"` en el `o-fill` anidado.
+
+**Reglas importantes:**- La primera capa `o-fill` no necesita `_$parent`, use `$host` para acceder a los datos del componente
+- Los `o-fill` anidados (a partir de la segunda capa) usan `:_$parent="$data"` para pasar los datos del padre
+- `_$parent` solo acepta `$data`, garantizando un flujo de datos claro
+
+### $parent Ejemplo de uso
+
+El siguiente ejemplo muestra cómo usar `$parent` en un `o-fill` anidado para acceder a los datos del elemento principal:
+
+<o-playground name="o-fill - ejemplo de uso de $parent" style="--editor-height: 600px">
+  <code>
+    <template page>
+      <style>
+        :host { display: block; padding: 20px; }
+        .category { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .item { background: #fff; padding: 8px; margin: 5px 0; border-radius: 4px; border-left: 3px solid #2196f3; }
+      </style>
+      <h3>Lista de categorías</h3>
+      <o-fill :value="categories">
+        <div class="category">
+          <h4>Categoría: {{$data.name}}</h4>
+          <o-fill :value="$data.items" :_$parent="$data">
+            <div class="item">
+              <div>Producto: {{$data}}</div>
+              <div>Categoría padre: {{$parent.name}}</div>
+            </div>
+          </o-fill>
+        </div>
+      </o-fill>
+      <script>
+        export default async () => {
+          return {
+            data: {
+              categories: [
+                {
+                  name: "Frutas",
+                  items: ["manzana", "plátano", "naranja"]
+                },
+                {
+                  name: "Verduras",
+                  items: ["tomate", "pepino", "berenjena"]
+                }
+              ]
+            }
+          };
+        };
+      </script>
+    </template>
+  </code>
+</o-playground>
+
+En este sencillo ejemplo:- **Primera capa o-fill**: recorre el array de categorías, `$data.name` es el nombre de la categoría
+- **o-fill anidado**: usa `:_$parent="$data"` para pasar los datos de la categoría padre
+- **Acceso a $parent**: en la capa anidada, accede al nombre de la categoría padre mediante `$parent.name`
+
 ## Optimización del rendimiento y gestión de claves-valor
 
 Para listas que requieren actualizaciones frecuentes, puedes especificar un identificador único mediante el atributo `fill-key` para mejorar el rendimiento de renderizado.
@@ -247,10 +310,41 @@ Para listas que requieren actualizaciones frecuentes, puedes especificar un iden
 
 En el ejemplo anterior, `fill-key="id"` le dice a ofa.js que use el atributo `id` de cada elemento de datos como identificador único, de modo que incluso si el orden de la matriz cambia, pueda identificar y actualizar correctamente los elementos correspondientes.
 
-## Mejores prácticas de renderizado de listas
+## Mejores prácticas para el renderizado de listas
 
-1. **Manejo de eventos**: Al utilizar eventos en elementos de lista, tenga en cuenta que `$host` apunta a la instancia del componente actual, y `$data` apunta a los datos del elemento actual.
-2. **Seleccione el método de renderizado adecuado**: Para listas simples, use renderizado directo; para estructuras complejas, use renderizado de plantillas.
+1. **Manejo de eventos**: Al usar eventos en elementos de lista, tenga en cuenta que `$host` apunta a la instancia del componente actual y `$data` apunta a los datos del elemento actual.
+2. **Elija el método de renderizado adecuado**: Para listas simples use renderizado directo, para estructuras complejas use renderizado con plantillas.
 3. **Consideraciones de rendimiento**: Para listas grandes o que se actualizan con frecuencia, use `fill-key` para especificar el valor clave.
-4. **Estructura de datos**: Asegúrese de que cada elemento en la matriz sea un objeto de datos válido.
-5. **Evite anidamientos profundos**: Aunque se admiten anidamientos, evite niveles de anidamiento demasiado profundos.
+4. **Estructura de datos**: Asegúrese de que cada elemento del array sea un objeto de datos válido.
+5. **Evite anidamientos profundos**: Aunque se admite el anidamiento, debe evitarse una profundidad excesiva de anidamiento.
+6. **Uso correcto de $parent**:
+   - Use `$parent` solo dentro de un `o-fill` anidado.
+   - Debe usar `:_$parent="$data"` para habilitar `$parent`.
+   - En el primer nivel de `o-fill`, use `$host` para acceder a los datos del componente, no use `$parent`.
+   - `_$parent` solo acepta `$data`, no pase otros valores.
+
+## Resumen sobre el uso de variables
+
+En `o-fill`, diferentes variables tienen diferentes usos y escenarios de uso:
+
+| Variable | Propósito | Escenario de uso | Ejemplo |
+|------|------|----------|------|
+| `$host` | Acceder a los datos y métodos de la instancia del componente | Primer nivel de `o-fill` | `{{$host.totalAmount}}` |
+| `$data` | Datos del elemento actual de la iteración | Todos los niveles de `o-fill` | `{{$data.name}}` |
+| `$index` | Índice del elemento actual | Todos los niveles de `o-fill` | `{{$index + 1}}` |
+| `$parent` | Datos del elemento padre | `o-fill` anidado (a partir del segundo nivel) | `{{$parent.orderName}}` |### Ejemplo de capa de acceso a datos
+
+```
+componente data (totalAmount, orders)
+  │
+  └─ primer nivel o-fill: :value="orders"
+      │  usando $host para acceder a los datos del componente: {{$host.totalAmount}}
+      │  usando $data para acceder al pedido actual: {{$data.orderName}}
+      │
+      └─ segundo nivel o-fill: :value="$data.items" :_$parent="$data"
+          │  $parent apunta a los datos del pedido del primer nivel
+          │  $data es cada elemento de items
+          │  puede acceder a: {{$parent.orderName}}, {{$data.name}}
+```
+
+Al utilizar correctamente estas variables, se pueden manejar fácilmente escenarios complejos de renderizado de listas anidadas.

@@ -8,11 +8,12 @@ In ofa.js, the `o-fill` component provides powerful list rendering capabilities,
 
 ### Main Features:
 
-- **Efficient Updates**: Track array changes via key values, only update the parts that need to change
+- **Efficient Updates**: Tracks array changes via keys, updating only the parts that need to change
 - **Index Access**: Access the index of the current item via `$index`
 - **Data Access**: Access the data of the current item via `$data`
-- **Host Access**: Access the current component instance via `$host`, allowing calls to component methods or access to component data
-- **Template Reuse**: Support complex list rendering using named templates
+- **Host Access**: Access the current component instance via `$host`, allowing calls to component methods or data
+- **Parent Access**: In nested `o-fill`, access the data of the parent item via `$parent`
+- **Template Reuse**: Supports using named templates for complex list rendering
 
 ## Direct Rendering
 
@@ -234,6 +235,68 @@ For more complex list-item structures, you can use named templates. Define the t
   </code>
 </o-playground>
 
+The above example demonstrates basic nested list rendering. If you need to access the data of the parent item within the nested `o-fill`, you can use `$parent`.
+
+### Using $parent to Access Parent Data
+
+> **Version Requirement**: The `$parent` feature requires ofa.js v4.7.0 or later.
+
+In nested `o-fill`, you can use `$parent` to access the data of the parent item. To enable `$parent`, you need to add the `:_$parent="$data"` attribute on the nested `o-fill`.
+
+**Important Rules:**- The first layer `o-fill` does not need `_$parent`, use `$host` to access component data
+- Nested `o-fill` (starting from the second layer) uses `:_$parent="$data"` to pass parent data
+- `_$parent` only accepts `$data`, ensuring clear data flow direction
+
+### $parent Usage Example
+
+The following example demonstrates how to use `$parent` in a nested `o-fill` to access the data of the parent item:
+
+<o-playground name="o-fill - $parent usage example" style="--editor-height: 600px">
+  <code>
+    <template page>
+      <style>
+        :host { display: block; padding: 20px; }
+        .category { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .item { background: #fff; padding: 8px; margin: 5px 0; border-radius: 4px; border-left: 3px solid #2196f3; }
+      </style>
+      <h3>Category List</h3>
+      <o-fill :value="categories">
+        <div class="category">
+          <h4>Category: {{$data.name}}</h4>
+          <o-fill :value="$data.items" :_$parent="$data">
+            <div class="item">
+              <div>Product: {{$data}}</div>
+              <div>Belongs to Category: {{$parent.name}}</div>
+            </div>
+          </o-fill>
+        </div>
+      </o-fill>
+      <script>
+        export default async () => {
+          return {
+            data: {
+              categories: [
+                {
+                  name: "Fruits",
+                  items: ["Apple", "Banana", "Orange"]
+                },
+                {
+                  name: "Vegetables",
+                  items: ["Tomato", "Cucumber", "Eggplant"]
+                }
+              ]
+            }
+          };
+        };
+      </script>
+    </template>
+  </code>
+</o-playground>
+
+In this simple example:- **First layer o-fill**: Iterate through the category array, `$data.name` is the category name
+- **Nested o-fill**: Use `:_$parent="$data"` to pass the parent category data
+- **$parent access**: In the nested layer, access the parent category name via `$parent.name`
+
 ## Performance Optimization and Key-Value Management
 
 For lists that require frequent updates, you can specify a unique identifier through the `fill-key` attribute to improve rendering performance.
@@ -247,10 +310,41 @@ For lists that require frequent updates, you can specify a unique identifier thr
 
 In the example above, `fill-key="id"` tells ofa.js to use the `id` property of each data item as the unique identifier, so that even if the order of the array changes, the corresponding elements can still be correctly identified and updated.
 
-## Best Practices for List Rendering
+## List Rendering Best Practices
 
-1. **Event Handling**: When using events in list items, note that `$host` points to the current component instance and `$data` points to the current item data.
-2. **Choose the Appropriate Rendering Method**: Use direct rendering for simple lists and template rendering for complex structures.
-3. **Performance Considerations**: For large lists or lists that update frequently, use `fill-key` to specify a key value.
-4. **Data Structure**: Ensure that every item in the array is a valid data object.
+1. **Event Handling**: When using events in list items, note that `$host` refers to the current component instance, and `$data` refers to the current item data.
+2. **Choose the Appropriate Rendering Method**: Use direct rendering for simple lists, and template rendering for complex structures.
+3. **Performance Considerations**: For large or frequently updated lists, use `fill-key` to specify the key value.
+4. **Data Structure**: Ensure that each item in the array is a valid data object.
 5. **Avoid Deep Nesting**: Although nesting is supported, excessively deep nesting levels should be avoided.
+6. **Use `$parent` Correctly**:
+   - Only use `$parent` in nested `o-fill` components.
+   - You must use `:_$parent="$data"` to enable `$parent`.
+   - First-level `o-fill` uses `$host` to access component data; do not use `$parent`.
+   - `_$parent` only accepts `$data`; do not pass other values.
+
+## Summary of Variable Usage
+
+In `o-fill`, different variables have different purposes and use cases:
+
+| Variable | Purpose | Usage Scenario | Example |
+|------|------|----------|------|
+| `$host` | Access the data and methods of the component instance | First level `o-fill` | `{{$host.totalAmount}}` |
+| `$data` | Data of the current iteration item | All levels of `o-fill` | `{{$data.name}}` |
+| `$index` | Index of the current item | All levels of `o-fill` | `{{$index + 1}}` |
+| `$parent` | Data of the parent item | Nested `o-fill` (starting from the second level) | `{{$parent.orderName}}` |### Data Access Layer Example
+
+```
+Component data (totalAmount, orders)
+  │
+  └─ Layer 1 o-fill: :value="orders"
+      │  Access component data via $host: {{$host.totalAmount}}
+      │  Access current order via $data: {{$data.orderName}}
+      │
+      └─ Layer 2 o-fill: :value="$data.items" :_$parent="$data"
+          │  $parent points to the order data from Layer 1
+          │  $data is each item of items
+          │  Accessible: {{$parent.orderName}}, {{$data.name}}
+```
+
+By correctly using these variables, you can easily handle complex nested list rendering scenarios.

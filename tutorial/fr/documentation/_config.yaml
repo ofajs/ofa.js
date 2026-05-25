@@ -1,16 +1,16 @@
 - name: Introduction
   url: ./introduction.md
-- name: Démarrage
+- name: Premiers pas
   content:
-    - name: Référence de script
+    - name: Référence du script
       url: ./script-reference.md
     - name: Créer la première application
       url: ./create-first-app.md
 - name: Démarrage rapide
   url: ./quick-start.md
-- name: Syntaxe de template
+- name: Syntaxe du template
   content:
-    - name: Rendu de contenu
+    - name: Rendu du contenu
       url: ./content-rendering.md
     - name: Liaison d'événements
       url: ./event-binding.md
@@ -18,11 +18,11 @@
       url: ./property-response.md
     - name: Liaison de propriétés
       url: ./property-binding.md
-    - name: Liaison de classes et de styles
+    - name: Liaison de classes et styles
       url: ./class-style-binding.md
     - name: Rendu conditionnel
       url: ./conditional-rendering.md
-    - name: Rendu de listes
+    - name: Rendu de liste
       url: ./list-rendering.md
     - name: Propriétés calculées
       url: ./computed-properties.md
@@ -34,7 +34,7 @@
   content:
     - name: Créer un composant
       url: ./create-component.md
-    - name: Transmission des attributs héritables
+    - name: Transmission d'attributs de caractéristiques
       url: ./inherit-attributes.md
     - name: Slots
       url: ./slots.md
@@ -46,11 +46,11 @@
   content:
     - name: Micro-application
       url: ./micro-app.md
-    - name: Bases de la configuration d'application
+    - name: Bases de configuration d'application
       url: ./app-config-basics.md
     - name: Animation de transition de page
       url: ./page-transition-animation.md
-    - name: Chargement et gestion des erreurs
+    - name: Gestion du chargement et des erreurs
       url: ./app-loading-error.md
     - name: Initialisation de l'application
       url: ./app-initialization.md
@@ -60,11 +60,11 @@
       url: ./routes.md
     - name: Routes imbriquées
       url: ./nested-routes.md
-    - name: SSR et rendu isomorphique
+    - name: SSR et rendu isomorphe
       url: ./ssr.md
 - name: Gestion d'état
   content:
-    - name: Qu'est-ce que la gestion d'état ?
+    - name: Qu'est-ce que la gestion d'état
       url: ./state-management.md
     - name: État contextuel
       url: ./context-state.md
@@ -74,9 +74,11 @@
   url: ./build-app.md
 - name: Autres composants
   content:
-    - name: Injection de styles hôte
+    - name: Injection de style hôte
       url: ./inject-host-style.md
-    - name: Composants non explicites
+    - name: Composant non explicite
       url: ./non-explicit-component.md
     - name: Composant replace-temp
       url: ./replace-template.md
+    - name: Composant global-link
+      url: ./global-link.md

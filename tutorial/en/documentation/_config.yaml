@@ -4,7 +4,7 @@
   content:
     - name: Script Reference
       url: ./script-reference.md
-    - name: Create First App
+    - name: Create Your First App
       url: ./create-first-app.md
 - name: Quick Start
   url: ./quick-start.md
@@ -18,7 +18,7 @@
       url: ./property-response.md
     - name: Property Binding
       url: ./property-binding.md
-    - name: Class and Style Binding
+    - name: Class & Style Binding
       url: ./class-style-binding.md
     - name: Conditional Rendering
       url: ./conditional-rendering.md
@@ -32,9 +32,9 @@
       url: ./lifecycle.md
 - name: Components
   content:
-    - name: Create Component
+    - name: Creating Components
       url: ./create-component.md
-    - name: Inherit Attributes
+    - name: Inheriting Attributes
       url: ./inherit-attributes.md
     - name: Slots
       url: ./slots.md
@@ -76,7 +76,9 @@
   content:
     - name: Inject Host Styles
       url: ./inject-host-style.md
-    - name: Non-Explicit Component
+    - name: Non-Explicit Components
       url: ./non-explicit-component.md
     - name: replace-temp Component
       url: ./replace-template.md
+    - name: global-link Component
+      url: ./global-link.md

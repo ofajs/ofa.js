@@ -32,29 +32,29 @@
       url: ./lifecycle.md
 - name: Componentes
   content:
-    - name: Crear un componente
+    - name: Crear componente
       url: ./create-component.md
-    - name: Pasar atributos heredables
+    - name: Heredar atributos
       url: ./inherit-attributes.md
-    - name: Ranuras
+    - name: Slots
       url: ./slots.md
-    - name: Vinculación de propiedades profundas
+    - name: Enlace profundo de propiedades
       url: ./deep-property-binding.md
     - name: Eventos personalizados
       url: ./custom-events.md
 - name: Aplicación y escalado
   content:
-    - name: Microaplicaciones
+    - name: Microaplicación
       url: ./micro-app.md
-    - name: Configuración básica de la app
+    - name: Conceptos básicos de configuración de la aplicación
       url: ./app-config-basics.md
-    - name: Animación de transición de página
+    - name: Animación de transición de páginas
       url: ./page-transition-animation.md
     - name: Carga y manejo de errores
       url: ./app-loading-error.md
-    - name: Inicialización de la app
+    - name: Inicialización de la aplicación
       url: ./app-initialization.md
-    - name: Rutas y navegación
+    - name: Enrutamiento y navegación
       url: ./app-navigation.md
     - name: Aplicación de una sola página
       url: ./routes.md
@@ -62,11 +62,11 @@
       url: ./nested-routes.md
     - name: SSR y renderizado isomórfico
       url: ./ssr.md
-- name: Gestión de estado
+- name: Gestión del estado
   content:
-    - name: ¿Qué es la gestión de estado?
+    - name: ¿Qué es la gestión del estado?
       url: ./state-management.md
-    - name: Estado de contexto
+    - name: Estado del contexto
       url: ./context-state.md
     - name: Consulta de estilos
       url: ./match-var.md
@@ -74,9 +74,11 @@
   url: ./build-app.md
 - name: Otros componentes
   content:
-    - name: Inyección de estilos del host
+    - name: Inyectar estilo del host
       url: ./inject-host-style.md
     - name: Componente no explícito
       url: ./non-explicit-component.md
     - name: Componente replace-temp
       url: ./replace-template.md
+    - name: Componente global-link
+      url: ./global-link.md

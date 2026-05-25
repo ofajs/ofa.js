@@ -17,6 +17,7 @@
 - **索引訪問**：通過 `$index` 訪問當前項的索引
 - **數據訪問**：通過 `$data` 訪問當前項的數據
 - **宿主訪問**：通過 `$host` 訪問當前組件實例，可調用組件方法或訪問組件數據
+- **父級訪問**：在嵌套的 `o-fill` 中，通過 `$parent` 訪問父級項的數據
 - **模闆復用**：支持使用命名模闆進行復雜列錶渲染
 
 ## 直接渲染
@@ -246,6 +247,74 @@
   </code>
 </o-playground>
 
+上面的示例展示瞭基本的嵌套列錶渲染。如菓妳需要在嵌套的 `o-fill` 中訪問父級項的數據，可以使用 `$parent`。
+
+### 使用 $parent 訪問父級數據
+
+
+
+> **版本要求**：`$parent` 特性需要 ofa.js v4.7.0 及以上版本支持。
+
+在嵌套的 `o-fill` 中，可以使用 `$parent` 來訪問父級項的數據。要啓用 `$parent`，需要在嵌套的 `o-fill` 上添加 `:_$parent="$data"` 屬性。
+
+**重要規則：**
+- 第一層 `o-fill` 不需要 `_$parent`，使用 `$host` 訪問組件數據
+- 嵌套的 `o-fill`（第二層開始）使用 `:_$parent="$data"` 傳遞父級數據
+- `_$parent` 隻接受 `$data`，確保數據流向清晰
+
+### $parent 使用示例
+
+
+
+下面的示例展示瞭如何在嵌套的 `o-fill` 中使用 `$parent` 訪問父級項的數據：
+
+<o-playground name="o-fill - $parent 使用示例" style="--editor-height: 600px">
+  <code>
+    <template page>
+      <style>
+        :host { display: block; padding: 20px; }
+        .category { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .item { background: #fff; padding: 8px; margin: 5px 0; border-radius: 4px; border-left: 3px solid #2196f3; }
+      </style>
+      <h3>分類列錶</h3>
+      <o-fill :value="categories">
+        <div class="category">
+          <h4>分類: {{$data.name}}</h4>
+          <o-fill :value="$data.items" :_$parent="$data">
+            <div class="item">
+              <div>商品: {{$data}}</div>
+              <div>所屬分類: {{$parent.name}}</div>
+            </div>
+          </o-fill>
+        </div>
+      </o-fill>
+      <script>
+        export default async () => {
+          return {
+            data: {
+              categories: [
+                {
+                  name: "水菓",
+                  items: ["蘋菓", "香蕉", "橙子"]
+                },
+                {
+                  name: "蔬菜",
+                  items: ["西紅柿", "黃瓜", "茄子"]
+                }
+              ]
+            }
+          };
+        };
+      </script>
+    </template>
+  </code>
+</o-playground>
+
+在這個簡單的示例中：
+- **第一層 o-fill**：遍歷分類數組，`$data.name` 是分類名稱
+- **嵌套 o-fill**：使用 `:_$parent="$data"` 傳遞父級分類數據
+- **$parent 訪問**：在嵌套層中，通過 `$parent.name` 訪問父級分類的名稱
+
 ## 性能優化和鍵值管理
 
 
@@ -265,9 +334,45 @@
 
 
 
-
 1. **事件處理**：在列錶項中使用事件時，註意 `$host` 指向當前組件實例，`$data` 指向當前項數據
 2. **選擇閤適的渲染方式**：簡單列錶使用直接渲染，復雜結構使用模闆渲染
 3. **性能考慮**：對於大列錶或頻繁更新的列錶，使用 `fill-key` 指定鍵值
 4. **數據結構**：確保數組中的每一項都是有效的數據對象
 5. **避免深層嵌套**：雖然支持嵌套，但應避免過深的嵌套層級
+6. **正確使用 $parent**：
+   - 隻在嵌套的 `o-fill` 中使用 `$parent`
+   - 必須使用 `:_$parent="$data"` 來啓用 `$parent`
+   - 第一層 `o-fill` 使用 `$host` 訪問組件數據，不要使用 `$parent`
+   - `_$parent` 隻接受 `$data`，不要傳遞其他值
+
+## 變量使用總結
+
+
+
+在 `o-fill` 中，不衕的變量有不衕的用途和使用場景：
+
+| 變量 | 用途 | 使用場景 | 示例 |
+|------|------|----------|------|
+| `$host` | 訪問組件實例的數據和方法 | 第一層 `o-fill` | `{{$host.totalAmount}}` |
+| `$data` | 當前迭代項的數據 | 所有層級的 `o-fill` | `{{$data.name}}` |
+| `$index` | 當前項的索引 | 所有層級的 `o-fill` | `{{$index + 1}}` |
+| `$parent` | 父級項的數據 | 嵌套 `o-fill`（第二層開始） | `{{$parent.orderName}}` |
+
+### 數據訪問層級示例
+
+
+
+```
+組件 data (totalAmount, orders)
+  │
+  └─ 第一層 o-fill: :value="orders"
+      │  使用 $host 訪問組件數據: {{$host.totalAmount}}
+      │  使用 $data 訪問當前訂單: {{$data.orderName}}
+      │
+      └─ 第二層 o-fill: :value="$data.items" :_$parent="$data"
+          │  $parent 指向第一層的訂單數據
+          │  $data 是 items 的每一項
+          │  可以訪問: {{$parent.orderName}}, {{$data.name}}
+```
+
+通過正確使用這些變量，可以輕鬆處理復雜的嵌套列錶渲染場景。

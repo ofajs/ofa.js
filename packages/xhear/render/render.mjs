@@ -57,7 +57,6 @@ export function render({
   template,
   temps,
   isRenderSelf, // 是否将当前target元素也渲染处理
-  fromSrc, // 是否从src文件渲染（方便定位错误）
   ...otherOpts
 }) {
   try {
@@ -145,6 +144,8 @@ export function render({
           supplementary = "Please check the usage of $host or $data, ";
         }
 
+        const fromSrc = data.$host.PATH || data.PATH;
+
         if (fromSrc) {
           supplementary += `from file: ${fromSrc}, `;
         } else {
@@ -157,6 +158,8 @@ export function render({
           `parent:`,
           parentNode,
         );
+
+        return false
       },
     });
     const renderFunc = () => {
@@ -205,7 +208,15 @@ export function render({
 
                 let supplementary = "";
                 if (data.$host || data.$data) {
-                  supplementary = "Please check the usage of $host or $data";
+                  supplementary = "Please check the usage of $host or $data, ";
+                }
+
+                const fromSrc = data.$host.PATH || data.PATH;
+
+                if (fromSrc) {
+                  supplementary += `from file: ${fromSrc}, `;
+                } else {
+                  debugger;
                 }
 
                 const err = getErr(

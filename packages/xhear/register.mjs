@@ -11,7 +11,7 @@ import $ from "./dollar.mjs";
 
 const COMPS = {};
 
-export const renderElement = ({ defaults, ele, template, temps, fromSrc }) => {
+export const renderElement = ({ defaults, ele, template, temps }) => {
   let $ele;
 
   try {
@@ -47,7 +47,6 @@ export const renderElement = ({ defaults, ele, template, temps, fromSrc }) => {
         target: root,
         data: $ele,
         temps,
-        fromSrc,
       });
     }
 

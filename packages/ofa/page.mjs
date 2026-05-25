@@ -258,7 +258,6 @@ setTimeout(() => {
             ele: this.ele,
             template,
             temps,
-            fromSrc: src,
           });
         } catch (error) {
           const err = getErr("page_failed", { src }, error);

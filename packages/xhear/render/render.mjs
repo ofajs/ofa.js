@@ -23,6 +23,10 @@ const getRevokes = (target) => target.__revokes || (target.__revokes = []);
 const addRevoke = (target, revoke) => getRevokes(target).push(revoke);
 
 const getRenderErrorSupplementary = (data) => {
+  if (!data) {
+    return "";
+  }
+
   let supplementary = "";
   if (data.$host || data.$data) {
     supplementary = "Please check the usage of $host or $data, ";
@@ -32,8 +36,6 @@ const getRenderErrorSupplementary = (data) => {
 
   if (fromSrc) {
     supplementary += `from file: ${fromSrc}, `;
-  } else {
-    debugger;
   }
 
   return supplementary;

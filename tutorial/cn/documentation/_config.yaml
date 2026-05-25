@@ -80,3 +80,5 @@
       url: ./non-explicit-component.md
     - name: replace-temp 组件
       url: ./replace-template.md
+    - name: global-link 组件
+      url: ./global-link.md

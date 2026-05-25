@@ -139,8 +139,13 @@ export function render({
 
     const func = convertToFunc(el.getAttribute("expr"), data, {
       errCall: (error) => {
+        let supplementary = "";
+        if (data.$host || data.$data) {
+          supplementary = "Please check the usage of $host or $data, ";
+        }
+
         console.error(
-          `Error evaluating text expression: "${el.getAttribute("expr")}", element:`,
+          `Error evaluating text expression: "${el.getAttribute("expr")}", ${supplementary}element:`,
           textEl,
           `parent:`,
           parentNode,
@@ -190,18 +195,27 @@ export function render({
             const func = convertToFunc(expr, data, {
               errCall: (error) => {
                 const errorExpr = `${actionName === "prop" ? "" : actionName}:${key}="${expr}"`;
+
+                let supplementary = "";
+                if (data.$host || data.$data) {
+                  supplementary = "Please check the usage of $host or $data";
+                }
+
                 const err = getErr(
                   "render_el_error",
                   {
                     expr: errorExpr,
                   },
-                  error,
+                  supplementary
+                    ? new Error(supplementary, { cause: error })
+                    : error,
                 );
 
                 console.warn(err, {
                   target: $el.ele,
                   errorExpr,
                 });
+
                 console.error(err);
 
                 return false;

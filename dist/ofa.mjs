@@ -1178,6 +1178,23 @@ const renderExtends = {
 const getRevokes = (target) => target.__revokes || (target.__revokes = []);
 const addRevoke = (target, revoke) => getRevokes(target).push(revoke);
 
+const getRenderErrorSupplementary = (data) => {
+  let supplementary = "";
+  if (data.$host || data.$data) {
+    supplementary = "Please check the usage of $host or $data, ";
+  }
+
+  const fromSrc = data.$host?.PATH || data.PATH;
+
+  if (fromSrc) {
+    supplementary += `from file: ${fromSrc}, `;
+  } else {
+    debugger;
+  }
+
+  return supplementary;
+};
+
 const convertToFunc = (expr, data, opts) => {
   const funcStr = `
 const dataRevoked = ${dataRevoked.toString()};
@@ -1245,13 +1262,29 @@ function render({
       const matchs = Array.from(new Set(originStyle.match(/data\(.+?\)/g))).map(
         (dataExpr) => {
           const expr = dataExpr.replace(/data\((.+)\)/, "$1");
-          const func = convertToFunc(expr, data);
+          const func = convertToFunc(expr, data, {
+            errCall: (error) => {
+              const supplementary = getRenderErrorSupplementary(data);
+
+              const err = new Error(
+                `Error evaluating data() expression in style: "${expr}", ${supplementary}`,
+                {
+                  cause: error,
+                },
+              );
+
+              console.error(err, {
+                style: originStyle,
+                target,
+              });
+            },
+          });
 
           return {
             dataExpr,
             func,
           };
-        }
+        },
       );
 
       const renderStyle = () => {
@@ -1286,7 +1319,25 @@ function render({
     parentNode.insertBefore(textEl, el);
     parentNode.removeChild(el);
 
-    const func = convertToFunc(el.getAttribute("expr"), data);
+    const func = convertToFunc(el.getAttribute("expr"), data, {
+      errCall: (error) => {
+        const supplementary = getRenderErrorSupplementary(data);
+
+        const err = new Error(
+          `Error evaluating text expression: '${el.getAttribute("expr")}', ${supplementary}`,
+          {
+            cause: error,
+          },
+        );
+
+        console.error(err, {
+          element: textEl,
+          parent: parentNode,
+        });
+
+        return false;
+      },
+    });
     const renderFunc = () => {
       const content = func();
       if (textEl.textContent !== String(content)) {
@@ -1329,20 +1380,19 @@ function render({
 
             const func = convertToFunc(expr, data, {
               errCall: (error) => {
-                const errorExpr = `:${key}="${expr}"`;
-                const err = getErr(
-                  "render_el_error",
+                const errorExpr = `${actionName === "prop" ? "" : actionName}:${key}="${expr}"`;
+                const supplementary = getRenderErrorSupplementary(data);
+
+                const err = new Error(
+                  `Error evaluating element expression: '${errorExpr}', ${supplementary}`,
                   {
-                    expr: errorExpr,
+                    cause: error,
                   },
-                  error
                 );
 
-                console.warn(err, {
-                  target: $el.ele,
-                  errorExpr,
+                console.error(err, {
+                  element: $el.ele,
                 });
-                console.error(err);
 
                 return false;
               },
@@ -1407,7 +1457,7 @@ function render({
               arg0: args[0],
               arg1: args[1],
             },
-            error
+            error,
           );
           console.warn(err, el);
           throw err;
@@ -1528,7 +1578,7 @@ const convert = (template) => {
     /{{(.+?)}}/g,
     (str, match) => {
       return `<xtext expr="${match}"></xtext>`;
-    }
+    },
   );
 
   const tempName = template.getAttribute("name");
@@ -1551,7 +1601,7 @@ const convert = (template) => {
           tempName,
           len: tempChilds.length,
           wrapName,
-        })
+        }),
       );
     }
     temps[tempName] = template;
@@ -2475,7 +2525,7 @@ const renderElement = ({ defaults, ele, template, temps }) => {
       {
         tag: ele.tagName.toLowerCase(),
       },
-      error
+      error,
     );
   }
 
@@ -2493,7 +2543,7 @@ const renderElement = ({ defaults, ele, template, temps }) => {
               names.map((name) => $ele[name]),
               {
                 watchers: e,
-              }
+              },
             );
           }
         } else {
@@ -2512,7 +2562,7 @@ const renderElement = ({ defaults, ele, template, temps }) => {
         func.call(
           $ele,
           names.map((name) => $ele[name]),
-          {}
+          {},
         );
       } else {
         func.call($ele, $ele[name], {});
@@ -2568,7 +2618,7 @@ const register = (opts = {}) => {
             targetName: "proto",
             name,
           }),
-          opts
+          opts,
         );
       }
     });
@@ -2716,7 +2766,7 @@ const register = (opts = {}) => {
       (f = () => {
         customElements.define(defaults.tag, XElement);
         document.removeEventListener(READYSTATE, f);
-      })
+      }),
     );
   }
 };
@@ -3266,7 +3316,7 @@ register({
         console.warn(
           getErr("fill_type", {
             type: getType(arrayData),
-          })
+          }),
         );
 
         childs &&
@@ -3299,7 +3349,7 @@ register({
             targetTemp,
             data.$host || data,
             i,
-            keyName
+            keyName,
           );
           frag.appendChild($ele.ele);
         });
@@ -3324,7 +3374,7 @@ register({
 
             const val = e[keyName];
             return val === undefined ? e : val;
-          })
+          }),
         );
 
         const { parentNode } = this._fake;
@@ -3374,7 +3424,7 @@ register({
                   targetTemp,
                   data.$host || data,
                   count,
-                  keyName
+                  keyName,
                 );
 
                 count++;
@@ -3402,7 +3452,7 @@ register({
           }
 
           const oldId = positionKeys.indexOf(
-            isObj ? currentVal[keyName] : currentVal
+            isObj ? currentVal[keyName] : currentVal,
           );
           if (oldId > -1) {
             // If the key originally exists, perform key displacement.
@@ -3434,7 +3484,7 @@ register({
               targetTemp,
               data.$host || data,
               count,
-              keyName
+              keyName,
             );
 
             // target.parentNode.insertBefore($ele.ele, target);
@@ -3497,7 +3547,24 @@ register({
   },
 });
 
-const createItem = ($data, temps, targetTemp, $host, $index, keyName) => {
+/**
+ * 创建一个x-fill元素的子元素
+ * @param {*} $data 子元素的数据
+ * @param {*} temps 模板数据
+ * @param {*} targetTemp 子元素的模板
+ * @param {*} $host 子元素的host
+ * @param {*} $index 子元素的索引
+ * @param {*} keyName 子元素的key名
+ * @returns 子元素
+ */
+const createItem = (
+  $data,
+  temps,
+  targetTemp,
+  $host,
+  $index,
+  keyName,
+) => {
   const $ele = createXEle(targetTemp.innerHTML);
 
   const itemData = new Stanz({
@@ -5222,7 +5289,7 @@ lm$1.use(["html", "htm"], async (ctx, next) => {
         {
           url: ctx.url,
         },
-        error
+        error,
       );
     }
     ctx.resultContent = content;
@@ -5258,7 +5325,7 @@ lm$1.use(["js", "mjs"], async (ctx, next) => {
           url: realUrl || url,
           tempSrc,
         },
-        error
+        error,
       );
       self.emit("error", { data: { error: err } });
       throw err;
@@ -5295,7 +5362,7 @@ setTimeout(() => {
         if (this.__init_src) {
           if (this.__init_src !== src) {
             throw Error(
-              "A page that has already been initialized cannot be set with the src attribute"
+              "A page that has already been initialized cannot be set with the src attribute",
             );
           }
           return;
@@ -5330,7 +5397,7 @@ setTimeout(() => {
           const failContent = getFailContent(
             src,
             target,
-            this?.app?._module?.fail
+            this?.app?._module?.fail,
           );
 
           this._renderDefault({
@@ -5403,7 +5470,7 @@ setTimeout(() => {
                   targetName: "proto",
                   name,
                 }),
-                defaults
+                defaults,
               );
             }
           });
@@ -5520,7 +5587,7 @@ const dispatchLoad = async (_this, loaded) => {
           el.addEventListener("load", (e) => {
             res();
           });
-        })
+        }),
     );
 
     const links = searchEle(shadow, `link`);
@@ -5547,7 +5614,7 @@ const dispatchLoad = async (_this, loaded) => {
               link.addEventListener("load", resolve);
               link.addEventListener("error", resolve);
             }
-          })
+          }),
         );
       }
     });

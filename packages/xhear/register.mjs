@@ -57,7 +57,7 @@ export const renderElement = ({ defaults, ele, template, temps }) => {
       {
         tag: ele.tagName.toLowerCase(),
       },
-      error,
+      error
     );
   }
 
@@ -75,7 +75,7 @@ export const renderElement = ({ defaults, ele, template, temps }) => {
               names.map((name) => $ele[name]),
               {
                 watchers: e,
-              },
+              }
             );
           }
         } else {
@@ -94,7 +94,7 @@ export const renderElement = ({ defaults, ele, template, temps }) => {
         func.call(
           $ele,
           names.map((name) => $ele[name]),
-          {},
+          {}
         );
       } else {
         func.call($ele, $ele[name], {});
@@ -150,7 +150,7 @@ export const register = (opts = {}) => {
             targetName: "proto",
             name,
           }),
-          opts,
+          opts
         );
       }
     });
@@ -298,7 +298,7 @@ export const register = (opts = {}) => {
       (f = () => {
         customElements.define(defaults.tag, XElement);
         document.removeEventListener(READYSTATE, f);
-      }),
+      })
     );
   }
 };

@@ -38,7 +38,7 @@ register({
         console.warn(
           getErr("fill_type", {
             type: getType(arrayData),
-          }),
+          })
         );
 
         childs &&
@@ -71,7 +71,7 @@ register({
             targetTemp,
             data.$host || data,
             i,
-            keyName,
+            keyName
           );
           frag.appendChild($ele.ele);
         });
@@ -96,7 +96,7 @@ register({
 
             const val = e[keyName];
             return val === undefined ? e : val;
-          }),
+          })
         );
 
         const { parentNode } = this._fake;
@@ -146,7 +146,7 @@ register({
                   targetTemp,
                   data.$host || data,
                   count,
-                  keyName,
+                  keyName
                 );
 
                 count++;
@@ -174,7 +174,7 @@ register({
           }
 
           const oldId = positionKeys.indexOf(
-            isObj ? currentVal[keyName] : currentVal,
+            isObj ? currentVal[keyName] : currentVal
           );
           if (oldId > -1) {
             // If the key originally exists, perform key displacement.
@@ -206,7 +206,7 @@ register({
               targetTemp,
               data.$host || data,
               count,
-              keyName,
+              keyName
             );
 
             // target.parentNode.insertBefore($ele.ele, target);
@@ -269,24 +269,7 @@ register({
   },
 });
 
-/**
- * 创建一个x-fill元素的子元素
- * @param {*} $data 子元素的数据
- * @param {*} temps 模板数据
- * @param {*} targetTemp 子元素的模板
- * @param {*} $host 子元素的host
- * @param {*} $index 子元素的索引
- * @param {*} keyName 子元素的key名
- * @returns 子元素
- */
-export const createItem = (
-  $data,
-  temps,
-  targetTemp,
-  $host,
-  $index,
-  keyName,
-) => {
+export const createItem = ($data, temps, targetTemp, $host, $index, keyName) => {
   const $ele = createXEle(targetTemp.innerHTML);
 
   const itemData = new Stanz({

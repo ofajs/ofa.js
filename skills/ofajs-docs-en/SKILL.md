@@ -25,9 +25,9 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 
 ## Core Syntax Points
 
-- **Page Module**: `<template page>` + `export default async () => ({...})`
-- **Component Module**: `<template component>` + returned object must include `tag` field
-- **Computed Properties**: Use `get xxx() {}` instead of `computed`
+- **Page Module**: `<template page>` contains `<style>`, template content, and `<script>`, script must be inside template
+- **Component Module**: `<template component>` contains `<style>`, template content, and `<script>`, script must be inside template, returned object must include `tag` field
+- **Computed Properties**: Use `get xxx() {}` in `proto` instead of `computed`
 - **Reactive Data**: Create using `$.stanz()`
 - **Event Binding**: `on:click="methodName"` or `on:click="count++"`
 - **List Rendering**: Use `<o-fill>` component
@@ -36,11 +36,58 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 
 ---
 
+## Module Structure Examples
+
+### Page Module Correct Structure
+```html
+<template page>
+  <style>
+    :host { display: block; }
+  </style>
+  <div>{{message}}</div>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: { message: "Hello" },
+        proto: { handleClick() {} }
+      };
+    };
+  </script>
+</template>
+```
+
+### Component Module Correct Structure
+```html
+<template component>
+  <style>
+    :host { display: block; }
+  </style>
+  <div>{{value}}</div>
+  <script>
+    export default async () => {
+      return {
+        tag: "my-component",
+        attrs: { value: "default" },
+        data: { count: 0 },
+        proto: { increment() {} }
+      };
+    };
+  </script>
+</template>
+```
+
+**Important Reminders**:
+- `<script>` must be placed inside `<template>`, not outside
+- `<style>`, template content, and `<script>` are all within the same `<template>` tag
+- This is the standard structure of ofa.js, different from Vue/React single-file component structure
+
+---
+
 ## Common Error Comparison Table
 
 | ❌ Wrong Way | ✅ Correct Way | Description |
 |------------|-----------|------|
-| `computed: { double() {} }` | `get double() {}` | ofa.js uses getter to define computed properties |
+| `computed: { double() {} }` | `proto: { get double() {} }` | ofa.js uses getter to define computed properties, must be in proto |
 | `this.$route.query.id` | `{ query }` parameter | Get query parameters through function parameter |
 | `v-if="show"` | `<o-if :value="show">` | Use o-if component for conditional rendering |
 | `v-for="item in list"` | `<o-fill :value="list">` | Use o-fill component for list rendering |
@@ -53,6 +100,8 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
 | `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
 | Same key in `attrs` and `data` | Keep unique | `attrs` and `data` keys cannot be duplicated |
+| `<script>` outside `<template>` | `<script>` inside `<template>` | ofa.js script must be placed inside template tag |
+| `export default async () => ({...})` | `export default async ({ query }) => ({...})` | Page module should use parameter form to receive query |
 
 ---
 

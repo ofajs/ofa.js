@@ -1,5 +1,62 @@
 # List Rendering
 
+## ⚠️ Important Reminder
+
+Inside o-fill, **you must use the following special variables**:
+
+- **`$data`** - Current item's data object
+- **`$index`** - Current item's index (starting from 0)
+- **`$host`** - Current component instance, can call component methods or access component data
+
+**Do not use other variable names** (like item, element, row, etc.), these variables are invalid inside o-fill.
+
+### Example Comparison
+
+❌ **Wrong Way** (using wrong variable names):
+```html
+<o-fill :value="messages">
+  <div class="message">
+    {{item.text}} - {{item.time}}  <!-- Wrong: using item -->
+  </div>
+</o-fill>
+```
+
+✅ **Correct Way** (using $data):
+```html
+<o-fill :value="messages">
+  <div class="message">
+    {{$data.text}} - {{$data.time}}  <!-- Correct: using $data -->
+  </div>
+</o-fill>
+```
+
+### Complete Example
+
+```html
+<o-fill :value="products">
+  <div>
+    {{$index + 1}}. {{$data.name}} - ¥{{$data.price}}
+    <button on:click="$host.removeItem($index)">Delete</button>
+  </div>
+</o-fill>
+```
+
+In this example:
+- `$index` gets the current item's index
+- `$data.name` and `$data.price` get the current item's data
+- `$host.removeItem()` calls the component's method
+
+### Why Must Use $data?
+
+1. **ofa.js Convention** - `$data` is a special variable injected by ofa.js inside o-fill
+2. **Scope Limitation** - o-fill has an independent scope, can only access `$data`, `$index`, `$host`
+3. **Reactive Tracking** - Using `$data` correctly tracks data changes and updates the view
+4. **Avoid Confusion** - Unified variable names prevent errors from developer-defined variable names
+
+---
+
+## o-fill Component Introduction
+
 In ofa.js, the `o-fill` component provides powerful list rendering functionality, capable of efficiently rendering array data as multiple similar elements. It supports two main usage methods: direct rendering and template rendering.
 
 ## o-fill Component Introduction

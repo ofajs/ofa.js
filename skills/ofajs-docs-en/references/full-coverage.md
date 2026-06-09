@@ -566,8 +566,11 @@ data: {
 **Explanation**:
 - `<o-fill>` is used for list rendering
 - `:value` binds array data
-- `$index` is the current item index
-- `$data` is the current item data object
+- **`$index`** is the current item index (starting from 0)
+- **`$data`** is the current item data object
+- **`$host`** is the parent component instance reference
+
+**⚠️ Important**: Inside o-fill, **you must use `$data`, `$index`, `$host`** these special variables, cannot use other variable names (like item, element, row, etc.).
 
 #### 2. List Operations
 ```javascript

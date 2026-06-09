@@ -1,5 +1,62 @@
 # 列表渲染
 
+## ⚠️ 重要提醒
+
+在 o-fill 内部，**必须使用以下特殊变量**：
+
+- **`$data`** - 当前项的数据对象
+- **`$index`** - 当前项的索引（从 0 开始）
+- **`$host`** - 当前组件实例，可调用组件方法或访问组件数据
+
+**不要使用其他变量名**（如 item、element、row 等），这些变量在 o-fill 内部是无效的。
+
+### 示例对比
+
+❌ **错误写法**（使用错误的变量名）：
+```html
+<o-fill :value="messages">
+  <div class="message">
+    {{item.text}} - {{item.time}}  <!-- 错误：使用了 item -->
+  </div>
+</o-fill>
+```
+
+✅ **正确写法**（使用 $data）：
+```html
+<o-fill :value="messages">
+  <div class="message">
+    {{$data.text}} - {{$data.time}}  <!-- 正确：使用 $data -->
+  </div>
+</o-fill>
+```
+
+### 完整示例
+
+```html
+<o-fill :value="products">
+  <div>
+    {{$index + 1}}. {{$data.name}} - ¥{{$data.price}}
+    <button on:click="$host.removeItem($index)">删除</button>
+  </div>
+</o-fill>
+```
+
+在这个例子中：
+- `$index` 获取当前项的索引
+- `$data.name` 和 `$data.price` 获取当前项的数据
+- `$host.removeItem()` 调用组件的方法
+
+### 为什么必须使用 $data？
+
+1. **ofa.js 的约定** - `$data` 是 ofa.js 在 o-fill 内部注入的特殊变量
+2. **作用域限制** - o-fill 内部有独立的作用域，只能访问 `$data`、`$index`、`$host`
+3. **响应式追踪** - 使用 `$data` 才能正确追踪数据变化并更新视图
+4. **避免混淆** - 统一的变量名避免开发者自定义变量名导致的错误
+
+---
+
+## o-fill 组件介绍
+
 在 ofa.js 中，`o-fill` 组件提供了强大的列表渲染功能，能够高效地将数组数据渲染为多个相似的元素。它支持两种主要的使用方式：直接渲染和模板渲染。
 
 ## o-fill 组件介绍

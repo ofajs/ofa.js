@@ -312,6 +312,22 @@ detached() {
 | Variable | Purpose | Available Location |
 |------|------|---------|
 | `$event` | Event object | In event handlers |
-| `$index` | List item index | Inside o-fill / x-fill |
-| `$data` | List item data | Inside o-fill / x-fill |
-| `$host` | Component instance | Inside o-fill / x-fill |
+| `$index` | List item index (starting from 0) | Inside o-fill / x-fill |
+| `$data` | List item data object | Inside o-fill / x-fill |
+| `$host` | Component instance reference | Inside o-fill / x-fill |
+
+**⚠️ Important Reminder**: Inside o-fill / x-fill, **you must use `$data`, `$index`, `$host`** these special variables, **cannot use other variable names** (like item, element, row, etc.).
+
+**Wrong Example**:
+```html
+<o-fill :value="items">
+  <div>{{item.name}}</div>  <!-- ❌ Wrong: using item -->
+</o-fill>
+```
+
+**Correct Example**:
+```html
+<o-fill :value="items">
+  <div>{{$data.name}}</div>  <!-- ✅ Correct: using $data -->
+</o-fill>
+```

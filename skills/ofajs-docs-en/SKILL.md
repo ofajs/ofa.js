@@ -40,6 +40,10 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
 | `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
 | Same key in `attrs` and `data` | Keep unique | `attrs` and `data` keys cannot be duplicated |
+| `{{item.text}}` | `{{$data.text}}` | Must use $data to access data inside o-fill |
+| `{{element.name}}` | `{{$data.name}}` | Must use $data to access data inside o-fill |
+| `{{row.price}}` | `{{$data.price}}` | Must use $data to access data inside o-fill |
+| `:class="item.type"` | `attr:type="$data.type"` | Property binding must also use $data |
 | `.hide()` `.show()` | `.style.display = "none"` / `""` | No jQuery-style show/hide methods |
 | `.html("xxx")` `.text("xxx")` | `.html = "xxx"` `.text = "xxx"` | Set properties directly, not call methods |
 | `<script>` outside `<template>` | `<script>` inside `<template>` | script must be placed inside template tag |

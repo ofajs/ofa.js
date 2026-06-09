@@ -312,6 +312,22 @@ detached() {
 | 变量 | 用途 | 可用位置 |
 |------|------|---------|
 | `$event` | 事件对象 | 事件处理器中 |
-| `$index` | 列表项索引 | o-fill / x-fill 内部 |
-| `$data` | 列表项数据 | o-fill / x-fill 内部 |
-| `$host` | 组件实例 | o-fill / x-fill 内部 |
+| `$index` | 列表项索引（从 0 开始） | o-fill / x-fill 内部 |
+| `$data` | 列表项数据对象 | o-fill / x-fill 内部 |
+| `$host` | 组件实例引用 | o-fill / x-fill 内部 |
+
+**⚠️ 重要提醒**：在 o-fill / x-fill 内部，**必须使用 `$data`、`$index`、`$host`** 这些特殊变量，**不能使用其他变量名**（如 item、element、row 等）。
+
+**错误示例**：
+```html
+<o-fill :value="items">
+  <div>{{item.name}}</div>  <!-- ❌ 错误：使用了 item -->
+</o-fill>
+```
+
+**正确示例**：
+```html
+<o-fill :value="items">
+  <div>{{$data.name}}</div>  <!-- ✅ 正确：使用 $data -->
+</o-fill>
+```

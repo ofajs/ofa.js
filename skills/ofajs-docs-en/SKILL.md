@@ -23,22 +23,41 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 
 ---
 
-## Core Syntax Points
+## Common Error Comparison Table
 
-- **Page Module**: `<template page>` contains `<style>`, template content, and `<script>`, script must be inside template
-- **Component Module**: `<template component>` contains `<style>`, template content, and `<script>`, script must be inside template, returned object must include `tag` field
-- **Computed Properties**: Use `get xxx() {}` in `proto` instead of `computed`
-- **Reactive Data**: Create using `$.stanz()`
-- **Event Binding**: `on:click="methodName"` or `on:click="count++"`
-- **List Rendering**: Use `<o-fill>` component
-- **Conditional Rendering**: Use `<o-if>` / `<o-else-if>` / `<o-else>` components
-- **Property Passing**: `:toKey="fromKey"` one-way passing, `sync:toKey="fromKey"` two-way binding
+| ❌ Wrong Way | ✅ Correct Way | Description |
+|------------|-----------|------|
+| `computed: { double() {} }` | `proto: { get double() {} }` | Computed properties defined with getter in proto |
+| `this.$route.query.id` | `{ query }` parameter | Get query parameters through function parameter |
+| `v-if="show"` | `<o-if :value="show">` | Use o-if component for conditional rendering |
+| `v-for="item in list"` | `<o-fill :value="list">` | Use o-fill component for list rendering |
+| `@click="handle"` | `on:click="handle"` | Event binding uses on: prefix |
+| `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
+| `style="width: {{val}}"` | `:style.width="val"` | Inline style binding uses `:style.` prefix |
+| `v-model="value"` | `sync:value="value"` | Two-way binding uses sync: syntax |
+| `props: { msg: String }` | `attrs: { msg: 'default' }` | Component properties use attrs definition |
+| `methods: { foo() {} }` | `proto: { foo() {} }` | Methods are defined in proto object |
+| `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
+| `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
+| Same key in `attrs` and `data` | Keep unique | `attrs` and `data` keys cannot be duplicated |
+| `.hide()` `.show()` | `.style.display = "none"` / `""` | No jQuery-style show/hide methods |
+| `.html("xxx")` `.text("xxx")` | `.html = "xxx"` `.text = "xxx"` | Set properties directly, not call methods |
+| `<script>` outside `<template>` | `<script>` inside `<template>` | script must be placed inside template tag |
+| `export default async () => ({...})` | `export default async ({ query }) => ({...})` | Page module should use parameter form to receive query |
+| `<o-fill><template><div>...</div></template></o-fill>` | `<o-fill><div>...</div></o-fill>` | Direct rendering doesn't need template wrapper |
+| `<template>` inside o-fill | `<template>` outside o-fill + `name` attribute | Template rendering requires template outside with name attribute |
 
 ---
 
-## Module Structure Examples
+## Core Syntax Points
 
-### Page Module Correct Structure
+### Module Structure
+
+- **Page Module**: `<template page>` contains `<style>`, template content, and `<script>`, script must be inside template
+- **Component Module**: `<template component>` contains `<style>`, template content, and `<script>`, script must be inside template, returned object must include `tag` field
+
+### Page Module
+
 ```html
 <template page>
   <style>
@@ -56,7 +75,8 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 </template>
 ```
 
-### Component Module Correct Structure
+### Component Module
+
 ```html
 <template component>
   <style>
@@ -76,40 +96,47 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 </template>
 ```
 
-**Important Reminders**:
-- `<script>` must be placed inside `<template>`, not outside
-- `<style>`, template content, and `<script>` are all within the same `<template>` tag
-- This is the standard structure of ofa.js, different from Vue/React single-file component structure
+### Template Syntax Quick Reference
 
----
+| Syntax | Purpose | Example |
+|------|------|------|
+| `{{var}}` | Text rendering | `<span>{{name}}</span>` |
+| `:html` | HTML content rendering | `<div :html="htmlContent"></div>` |
+| `:prop="key"` | One-way property binding | `<input :value="name">` |
+| `sync:prop="key"` | Two-way property binding | `<input sync:value="name">` |
+| `attr:name="key"` | HTML attribute binding | `<a attr:href="url">` |
+| `class:name="bool"` | Conditional class binding | `<div class:active="isActive">` |
+| `:style.prop="value"` | Style property binding | `<p :style.color="textColor">` |
+| `on:event="handler"` | Event binding | `<button on:click="handleClick">` |
+| `on:event="expr"` | Expression event | `<button on:click="count++">` |
+| `$event` | Event object | `on:click="handle($event)"` |
 
-## Common Error Comparison Table
+### Core Features
 
-| ❌ Wrong Way | ✅ Correct Way | Description |
-|------------|-----------|------|
-| `computed: { double() {} }` | `proto: { get double() {} }` | ofa.js uses getter to define computed properties, must be in proto |
-| `this.$route.query.id` | `{ query }` parameter | Get query parameters through function parameter |
-| `v-if="show"` | `<o-if :value="show">` | Use o-if component for conditional rendering |
-| `v-for="item in list"` | `<o-fill :value="list">` | Use o-fill component for list rendering |
-| `@click="handle"` | `on:click="handle"` | Event binding uses on: prefix |
-| `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
-| `style="width: {{val}}"` | `:style.width="val"` | Inline style binding uses `:style.` prefix |
-| `v-model="value"` | `sync:value="value"` | Two-way binding uses sync: syntax |
-| `props: { msg: String }` | `attrs: { msg: 'default' }` | Component properties use attrs definition |
-| `methods: { foo() {} }` | `proto: { foo() {} }` | Methods are defined in proto object |
-| `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
-| `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
-| Same key in `attrs` and `data` | Keep unique | `attrs` and `data` keys cannot be duplicated |
-| `<script>` outside `<template>` | `<script>` inside `<template>` | ofa.js script must be placed inside template tag |
-| `export default async () => ({...})` | `export default async ({ query }) => ({...})` | Page module should use parameter form to receive query |
+- **Computed Properties**: Use `get xxx() {}` in `proto` instead of `computed`
+- **Reactive Data**: Create using `$.stanz()`
+- **List Rendering**: Use `<o-fill>` component
+- **Conditional Rendering**: Use `<o-if>` / `<o-else-if>` / `<o-else>` components
+- **Non-explicit Components**: `<x-if>` / `<x-fill>` have same functionality but don't render to DOM
+- **Property Passing**: `:toKey="fromKey"` one-way, `sync:toKey="fromKey"` two-way
+- **Watchers**: `watch: { prop() {} }`
+- **Lifecycle**: `ready()` `attached()` `detached()`
+- **Custom Events**: `this.emit('event-name', { data: {...} })`
+- **Slots**: `<slot></slot>` receives external content
 
 ---
 
 ## Development Decision Guide
 
-When users need to develop features, judge in the following order:
+### Module Type
 
-### Data Management Decision
+```
+Need reusable components?
+├─ Yes → Use component module (<template component> + tag field)
+└─ No → Use page module (<template page>)
+```
+
+### Data Management
 
 ```
 Need to share data?
@@ -119,30 +146,75 @@ Need to share data?
 └─ No → Use data to define local data
 ```
 
-### Rendering Method Decision
+### Rendering Method
 
 ```
-Need list rendering?
+List rendering?
 ├─ Yes → Use o-fill component
-│   └─ Need recursive rendering?
-│       ├─ Yes → Use name attribute to define template
-│       └─ No → Write template directly inside o-fill
+│   ├─ Direct rendering (simple structure) → Template content directly inside o-fill, no <template> wrapper needed
+│   └─ Template rendering (complex structure/reuse) → <template> defined outside o-fill, use name attribute to bind
 └─ No → Write template normally
 
-Need conditional rendering?
+Conditional rendering?
 ├─ Yes → Use o-if/o-else-if/o-else components
 └─ No → Write template normally
 ```
 
-### Module Type Decision
-
+**o-fill Direct Rendering** (recommended for simple structures):
+```html
+<o-fill :value="messages">
+  <div class="message" attr:type="$data.type">
+    [{{$data.time}}] {{$data.text}}
+  </div>
+</o-fill>
 ```
-Need reusable components?
-├─ Yes → Use component module (<template component> + tag field)
-└─ No → Use page module (<template page>)
+- Use `$data`, `$index`, `$host` to access data
+
+**o-fill Template Rendering** (for complex structures or reuse):
+```html
+<o-fill :value="products" name="product-template"></o-fill>
+<template name="product-template">
+  <div class="product-card">{{$data.name}} - ¥{{$data.price}}</div>
+</template>
 ```
 
-### Routing Decision
+### Dynamic Class Name vs Attribute Binding
+
+**Scenario Judgment:**
+- **Data inherent properties** (like type, status, level) → Use `attr:` + attribute selector
+- **Style state switching** (like active, disabled, visible) → Use `class:` + class selector
+
+❌ **Wrong Way** (using data property as class name):
+```html
+<div class="message" :class="$data.type">
+  {{$data.text}}
+</div>
+
+<style>
+.message.sent { color: blue; }
+.message.received { color: green; }
+</style>
+```
+
+✅ **Correct Way** (using attribute binding):
+```html
+<div class="message" attr:type="$data.type">
+  {{$data.text}}
+</div>
+
+<style>
+.message[type="sent"] { color: blue; }
+.message[type="received"] { color: green; }
+</style>
+```
+
+**Why is this better?**
+- **Clear semantics** - `type` is a property of message type, not a style class
+- **Data-driven** - Directly bind data property to HTML attribute
+- **More precise CSS** - Attribute selectors are more semantic than class selectors
+- **Maintainable code** - Property names match data field names, easier to understand
+
+### Routing
 
 ```
 Need multi-page application?
@@ -157,20 +229,29 @@ Need multi-page application?
 
 ## Documentation Index
 
-### Core Reference
-- **🚨 [Template Syntax Examples and Syntax Explanation](./references/full-coverage.md)**: Complete examples and detailed explanations of all template syntax (**Highest priority recommendation**)
-- [Quick Reference Table](./references/cheat-sheet.md): API and syntax quick reference
-- [API Reference Manual](./references/api.md): Complete API documentation
-- [Common Patterns and Best Practices](./references/patterns.md): Common code patterns
+### Core Reference (Priority)
+
+| Document | Description |
+|------|------|
+| [Template Syntax Examples and Syntax Explanation](./references/full-coverage.md) | Complete examples and detailed explanations of all template syntax (**Highest priority**) |
+| [Quick Reference Table](./references/cheat-sheet.md) | API and syntax quick reference |
+| [API Reference Manual](./references/api.md) | Complete API documentation |
+| [Common Patterns and Best Practices](./references/patterns.md) | Common code patterns |
 
 ### Getting Started Guide
-- [Introduction](./references/introduction.md): Framework core concepts and advantages
-- [Script Introduction](./references/script-introduction.md): Import methods
-- [Getting Started](./references/getting-started.md): Create your first application
 
-### Topic Documentation
-| Quick Syntax | Corresponding Documentation |
-|----------|----------|
+| Document | Description |
+|------|------|
+| [Introduction](./references/introduction.md) | Framework core concepts and advantages |
+| [Script Reference](./references/script-reference.md) | Import methods |
+| [Quick Start](./references/quick-start.md) | Quick start guide |
+| [Create First App](./references/create-first-app.md) | Create project using OFA Studio |
+| [Production and Deployment](./references/build-app.md) | Development environment, production deployment, minification |
+
+### Template and Rendering
+
+| Quick Syntax | Document |
+|----------|------|
 | `{{variable}}` `:html` | [Content Rendering](./references/content-rendering.md) |
 | `on:click="handler"` | [Event Binding](./references/event-binding.md) |
 | `:prop="value"` `sync:prop="value"` | [Property Binding](./references/property-binding.md) |
@@ -178,15 +259,38 @@ Need multi-page application?
 | `<o-if :value="condition">` | [Conditional Rendering](./references/conditional-rendering.md) |
 | `<o-fill :value="list">` | [List Rendering](./references/list-rendering.md) |
 | `get computedProp() {}` | [Computed Properties](./references/computed-properties.md) |
-| `watch: { prop() {} }` | [Watchers](./references/watch.md) |
+| `watch: { prop() {} }` | [Watchers](./references/watchers.md) |
 | `ready() attached() detached()` | [Lifecycle](./references/lifecycle.md) |
+
+### Component Development
+
+| Quick Syntax | Document |
+|----------|------|
 | `<template component>` `tag` `attrs` | [Create Component](./references/create-component.md) |
 | `export default async ({ load, url, query })` | [Module Return Object Properties](./references/module-return.md) |
+| `<slot></slot>` | [Slots](./references/slots.md) |
+| `this.emit('event')` | [Custom Events](./references/custom-events.md) |
+| `attrs: { msg: 'default' }` | [Inherit Attributes](./references/inherit-attributes.md) |
+| `:toProp="fromProp"` | [Deep Property Binding](./references/deep-property-binding.md) |
+| `{{obj.nested.prop}}` | [Property Response](./references/property-response.md) |
+| `<inject-host>` | [Inject Host Style](./references/inject-host-style.md) |
+| `<x-if>` `<x-fill>` | [Non-explicit Component](./references/non-explicit-component.md) |
+| `<template is="replace-temp">` | [Replace Template](./references/replace-template.md) |
+| `<match-var>` | [Match Var](./references/match-var.md) |
+
+### State and Routing
+
+| Quick Syntax | Document |
+|----------|------|
 | `o-provider` `o-consumer` | [Context State](./references/context-state.md) |
 | `$.stanz()` | [State Management](./references/state-management.md) |
-| `o-app` `o-router` | [Routes](./references/routes.md), [Micro App](./references/micro-app.md) |
+| `o-app` `o-router` | [Routes](./references/routes.md) |
+| Parent page `<slot>` child page `parent` | [Nested Routes](./references/nested-routes.md) |
+| `app-config.js` | [App Configuration](./references/app-configuration.md) |
+| `o-app` micro app | [Micro App](./references/micro-app.md) |
+| SCSR isomorphic rendering | [SSR and Isomorphic Rendering](./references/ssr.md) |
 
-## Examples
+### Examples
 
 | Example | Feature Points | Entry | Key Files |
 |------|----------|------|----------|

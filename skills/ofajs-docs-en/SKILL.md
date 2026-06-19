@@ -37,7 +37,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
 | `style="width: {{val}}"` | `:style.width="val"` | Inline style binding uses `:style.` prefix |
 | `v-model="value"` | `sync:value="value"` | Two-way binding uses sync: syntax |
-| `props: { msg: String }` | `attrs: { msg: 'default' }` | Component properties use attrs definition |
+| `props: { msg: String }` | `attrs: { msg: 'default' }` | Simple scalars (string) use attrs; complex data (array/object) use data |
 | `methods: { foo() {} }` | `proto: { foo() {} }` | Methods are defined in proto object |
 | `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
 | `attrs` and `data` same key | Keep unique | `attrs` and `data` keys cannot be duplicated |
@@ -256,6 +256,8 @@ Inline style strings are not supported in `attr:style`. Dynamic styles must use 
 </template>
 ```
 
+> **`attrs` vs `data` note**: `attrs` is for simple scalar values (string). Its values reflect to HTML attributes, suitable for `attr:xxx` CSS selectors. `data` is for complex data (arrays, objects). When bound via `:prop` from outside, `attrs` values get serialized to strings causing type loss, so complex data like arrays and objects must be placed in `data`. Keys in `attrs` and `data` cannot overlap.
+
 ### Template Syntax Quick Reference
 
 | Syntax | Purpose | Example |
@@ -304,6 +306,17 @@ Need to share data?
 │   ├─ Yes → Use o-provider/o-consumer
 │   └─ No → Use sync: two-way binding or : one-way passing
 └─ No → Use data to define local data
+```
+
+### attrs vs data Selection
+
+```
+When defining component properties, should the value go in attrs or data?
+├─ Simple scalar values (string) → Use attrs
+│   └─ Reflects to HTML attribute, usable with attr:xxx in CSS selectors
+├─ Complex data (arrays, objects) → Use data
+│   └─ When bound via :prop from outside, attrs serializes to string causing type loss
+└─ Example: <n-line-chart :points="someArray"> → points is an array, must be in data
 ```
 
 ### Rendering Method

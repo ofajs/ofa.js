@@ -25,6 +25,8 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 
 ## Common Error Comparison Table
 
+### Syntax Comparison
+
 | ❌ Wrong Way | ✅ Correct Way | Description |
 |------------|-----------|------|
 | `computed: { double() {} }` | `proto: { get double() {} }` | Computed properties defined with getter in proto |
@@ -35,21 +37,175 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
 | `style="width: {{val}}"` | `:style.width="val"` | Inline style binding uses `:style.` prefix |
 | `v-model="value"` | `sync:value="value"` | Two-way binding uses sync: syntax |
-| `props: { msg: String }` | `attrs: { msg: 'default' }` | Component properties use attrs definition |
+| `props: { msg: String }` | `attrs: { msg: 'default' }` | Simple scalars (string) use attrs; complex data (array/object) use data |
 | `methods: { foo() {} }` | `proto: { foo() {} }` | Methods are defined in proto object |
 | `data() { return { count: 0 } }` | `data: { count: 0 }` | data is an object not a function |
-| `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
-| Same key in `attrs` and `data` | Keep unique | `attrs` and `data` keys cannot be duplicated |
+| `attrs` and `data` same key | Keep unique | `attrs` and `data` keys cannot be duplicated |
 | `{{item.text}}` | `{{$data.text}}` | Must use $data to access data inside o-fill |
 | `{{element.name}}` | `{{$data.name}}` | Must use $data to access data inside o-fill |
 | `{{row.price}}` | `{{$data.price}}` | Must use $data to access data inside o-fill |
 | `:class="item.type"` | `attr:type="$data.type"` | Property binding must also use $data |
+| `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | Custom methods don't use `$` prefix |
+| `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | Dynamic style uses `:style.`, value is a full expression |
+
+### API Comparison
+
+| ❌ Wrong Way | ✅ Correct Way | Description |
+|------------|-----------|------|
+| `.click(handler)` | `.on("click", handler)` | Event binding uses .on() method |
 | `.hide()` `.show()` | `.style.display = "none"` / `""` | No jQuery-style show/hide methods |
 | `.html("xxx")` `.text("xxx")` | `.html = "xxx"` `.text = "xxx"` | Set properties directly, not call methods |
+| `ofaElement.addEventListener()` | `ofaElement.on()` | ofa.js objects use on() method |
+| `this.shadow.getElementById("id")` | `this.shadow.$("#id")` | shadow is an ofa.js object, use $() method |
+| `this.shadow.querySelector(".class")` | `this.shadow.$(".class")` | Use $() method to select elements |
+| `ofaElement.scrollTop` etc. | `ofaElement.ele.scrollTop` | ofa.js objects access native properties via .ele |
+
+### Structure Comparison
+
+| ❌ Wrong Way | ✅ Correct Way | Description |
+|------------|-----------|------|
 | `<script>` outside `<template>` | `<script>` inside `<template>` | script must be placed inside template tag |
 | `export default async () => ({...})` | `export default async ({ query }) => ({...})` | Page module should use parameter form to receive query |
 | `<o-fill><template><div>...</div></template></o-fill>` | `<o-fill><div>...</div></o-fill>` | Direct rendering doesn't need template wrapper |
 | `<template>` inside o-fill | `<template>` outside o-fill + `name` attribute | Template rendering requires template outside with name attribute |
+
+---
+
+### Detailed Example: Dynamic Class Name vs Attribute Binding
+
+**Data inherent properties** (like type, status, level) should use `attr:` + attribute selector; **style state switching** (like active, disabled) should use `class:` + class selector.
+
+❌ **Wrong Way** (using data property as class name):
+```html
+<div class="message" :class="$data.type">
+  {{$data.text}}
+</div>
+
+<style>
+.message.sent { color: blue; }
+.message.received { color: green; }
+</style>
+```
+
+✅ **Correct Way** (using attribute binding):
+```html
+<div class="message" attr:type="$data.type">
+  {{$data.text}}
+</div>
+
+<style>
+.message[type="sent"] { color: blue; }
+.message[type="received"] { color: green; }
+</style>
+```
+
+**Why is this better?**
+- **Clear semantics** - `type` is a property of message type, not a style class
+- **Data-driven** - Directly bind data property to HTML attribute
+- **More precise CSS** - Attribute selectors are more semantic than class selectors
+- **Maintainable code** - Property names match data field names, easier to understand
+
+### Detailed Example: ofa.js Object vs Native DOM Element
+
+Elements obtained via `$()` are **ofa.js wrapper objects** with enhanced methods and reactive features; access native DOM elements via the `.ele` property.
+
+**Shadow object selector methods**: `this.shadow` returns an ofa.js instantiated object, not a native ShadowRoot.
+
+❌ **Wrong Way** (using native API):
+```javascript
+const messagesDiv = this.shadow.getElementById("messages");
+const element = this.shadow.querySelector(".class");
+```
+
+✅ **Correct Way** (using ofa.js API):
+```javascript
+const messagesDiv = this.shadow.$("#messages");
+const element = this.shadow.$(".class");
+```
+
+**Native DOM property access**: `element.$()` returns an ofa.js wrapper object; native properties need to be accessed via `.ele`.
+
+❌ **Wrong Way** (operating directly on ofa.js object):
+```javascript
+const messagesDiv = this.shadow.$("#messages");
+messagesDiv.scrollTop = messagesDiv.scrollHeight;  // scrollTop is a native property
+```
+
+✅ **Correct Way** (accessing native properties via .ele):
+```javascript
+const messagesDiv = this.shadow.$("#messages");
+messagesDiv.ele.scrollTop = messagesDiv.ele.scrollHeight;
+```
+
+**Use cases**:
+- **ofa.js methods**: Use ofa.js object methods (e.g., `.on()`, `.text`, `.html`, etc.)
+- **Native properties**: Access native DOM properties via `.ele` (e.g., `.scrollTop`, `.scrollHeight`, `.clientWidth`, etc.)
+
+### Detailed Example: Method Naming Convention
+
+`$` is a reserved prefix for ofa.js built-in special variables (`$data`, `$index`, `$host`, `$event`). Custom `proto` methods must NOT use the `$` prefix.
+
+❌ **Wrong Way** (method name with `$` prefix):
+```javascript
+export default async () => {
+  return {
+    tag: "my-component",
+    data: { size: 1024 },
+    proto: {
+      $formatBytes(val) {
+        return (val / 1024).toFixed(2) + " KB";
+      }
+    }
+  };
+};
+```
+```html
+<span>{{$formatBytes(size)}}</span>
+```
+
+✅ **Correct Way** (direct naming without prefix):
+```javascript
+export default async () => {
+  return {
+    tag: "my-component",
+    data: { size: 1024 },
+    proto: {
+      formatBytes(val) {
+        return (val / 1024).toFixed(2) + " KB";
+      }
+    }
+  };
+};
+```
+```html
+<span>{{formatBytes(size)}}</span>
+```
+
+**Calling via `$host` in o-fill also without `$`:**
+```html
+<o-fill :value="files">
+  <span>{{$host.formatBytes($data.size)}}</span>
+</o-fill>
+```
+
+### Detailed Example: Dynamic Style Syntax
+
+Inline style strings are not supported in `attr:style`. Dynamic styles must use `:style.property` syntax with complete expressions.
+
+❌ **Wrong Way** (using `attr:style` to concatenate style string):
+```html
+<div attr:style="width: {{pct}}%"></div>
+```
+
+✅ **Correct Way** (using `:style.` to bind individual style property):
+```html
+<div :style.width="pct + '%'"></div>
+```
+
+**Why is this better?**
+- **Correct syntax** - `attr:` is for HTML attribute binding, does not support template interpolation concatenation
+- **Full expression** - `:style.` value is a JavaScript expression, can freely concatenate strings
+- **Better performance** - Only updates individual style properties, not the entire style string
 
 ---
 
@@ -99,6 +255,8 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
   </script>
 </template>
 ```
+
+> **`attrs` vs `data` note**: `attrs` is for simple scalar values (string). Its values reflect to HTML attributes, suitable for `attr:xxx` CSS selectors. `data` is for complex data (arrays, objects). When bound via `:prop` from outside, `attrs` values get serialized to strings causing type loss, so complex data like arrays and objects must be placed in `data`. Keys in `attrs` and `data` cannot overlap.
 
 ### Template Syntax Quick Reference
 
@@ -150,6 +308,17 @@ Need to share data?
 └─ No → Use data to define local data
 ```
 
+### attrs vs data Selection
+
+```
+When defining component properties, should the value go in attrs or data?
+├─ Simple scalar values (string) → Use attrs
+│   └─ Reflects to HTML attribute, usable with attr:xxx in CSS selectors
+├─ Complex data (arrays, objects) → Use data
+│   └─ When bound via :prop from outside, attrs serializes to string causing type loss
+└─ Example: <n-line-chart :points="someArray"> → points is an array, must be in data
+```
+
 ### Rendering Method
 
 ```
@@ -182,41 +351,13 @@ Conditional rendering?
 </template>
 ```
 
-### Dynamic Class Name vs Attribute Binding
+### Dynamic Style
 
-**Scenario Judgment:**
-- **Data inherent properties** (like type, status, level) → Use `attr:` + attribute selector
-- **Style state switching** (like active, disabled, visible) → Use `class:` + class selector
-
-❌ **Wrong Way** (using data property as class name):
-```html
-<div class="message" :class="$data.type">
-  {{$data.text}}
-</div>
-
-<style>
-.message.sent { color: blue; }
-.message.received { color: green; }
-</style>
 ```
-
-✅ **Correct Way** (using attribute binding):
-```html
-<div class="message" attr:type="$data.type">
-  {{$data.text}}
-</div>
-
-<style>
-.message[type="sent"] { color: blue; }
-.message[type="received"] { color: green; }
-</style>
+Need to set styles based on data?
+├─ Data inherent properties (like type, status, level) → Use attr: + attribute selector
+└─ Style state switching (like active, disabled) → Use class: + class selector
 ```
-
-**Why is this better?**
-- **Clear semantics** - `type` is a property of message type, not a style class
-- **Data-driven** - Directly bind data property to HTML attribute
-- **More precise CSS** - Attribute selectors are more semantic than class selectors
-- **Maintainable code** - Property names match data field names, easier to understand
 
 ### Routing
 

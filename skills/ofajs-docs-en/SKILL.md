@@ -60,6 +60,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `this.shadow.getElementById("id")` | `this.shadow.$("#id")` | shadow is an ofa.js object, use $() method |
 | `this.shadow.querySelector(".class")` | `this.shadow.$(".class")` | Use $() method to select elements |
 | `ofaElement.scrollTop` etc. | `ofaElement.ele.scrollTop` | ofa.js objects access native properties via .ele |
+| `document.querySelector("#id")` | `$("#id")` | Use `$()` to get element instances globally; `document.querySelector` returns native elements lacking ofa.js enhanced methods and reactive features |
 
 ### Structure Comparison
 
@@ -302,6 +303,7 @@ The sub-page receives the `userId` parameter via `export default async ({ query 
 | `on:event="handler"` | Event binding | `<button on:click="handleClick">` |
 | `on:event="expr"` | Expression event | `<button on:click="count++">` |
 | `$event` | Event object | `on:click="handle($event)"` |
+| `$("#id")` | Get element instance | `const el = $("#myComponent")` |
 
 ### Core Features
 

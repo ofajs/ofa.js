@@ -20,6 +20,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 3. ❌ Do not use `computed` to define computed properties (ofa.js uses `get` keyword)
 4. ❌ Do not use routing parameter retrieval methods other than `query` parameter in page modules
 5. ❌ Do not use the same key in `attrs` and `data`
+6. ❌ Do not use `<o-app src="./page.html">` to load a page module directly; `<o-app>` only accepts `app-config.js` type config files
 
 ---
 
@@ -68,6 +69,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `export default async () => ({...})` | `export default async ({ query }) => ({...})` | Page module should use parameter form to receive query |
 | `<o-fill><template><div>...</div></template></o-fill>` | `<o-fill><div>...</div></o-fill>` | Direct rendering doesn't need template wrapper |
 | `<template>` inside o-fill | `<template>` outside o-fill + `name` attribute | Template rendering requires template outside with name attribute |
+| `<o-app src="./page.html?key=val">` to embed a sub-page inside a page | `<o-page src="./page.html?key=val">` | Embed a page module with `<o-page>`; `<o-app>` is for micro-apps with `app-config.js` |
 
 ---
 
@@ -216,6 +218,34 @@ Inline style strings are not supported in `attr:style`. Dynamic styles must use 
 - **Page Module**: `<template page>` contains `<style>`, template content, and `<script>`, script must be inside template
 - **Component Module**: `<template component>` contains `<style>`, template content, and `<script>`, script must be inside template, returned object must include `tag` field
 
+### Page Embedding vs Micro-app
+
+| Tag | Purpose | src Points To |
+|------|------|---------|
+| `<o-page>` | Embed a page module in an entry HTML or inside another page template | Directly to a page module file (.html) |
+| `<o-app>` | Create a micro-app that manages multi-page navigation and transitions | An app config file (app-config.js) |
+
+**Key differences**:
+- `<o-page>` is a "page-level component" that loads and renders a page module. It can be used in the entry HTML or inside another page's template to embed a sub-page.
+- `<o-app>` is a "micro-app container" for creating independent application instances. It loads `app-config.js` to configure the home page and page transition animations. **Do not use `<o-app>` to directly load page module files**.
+
+**Embedding a sub-page example** (embedding a page module inside another page's template):
+```html
+<template page>
+  <p-dialog>
+    <o-page src="./user-traffic-page.html?userId=123"></o-page>
+  </p-dialog>
+  <script>
+    export default async () => {
+      return {
+        data: { ... }
+      };
+    };
+  </script>
+</template>
+```
+The sub-page receives the `userId` parameter via `export default async ({ query })`.
+
 ### Page Module
 
 ```html
@@ -296,6 +326,12 @@ Inline style strings are not supported in `attr:style`. Dynamic styles must use 
 Need reusable components?
 ├─ Yes → Use component module (<template component> + tag field)
 └─ No → Use page module (<template page>)
+
+Need to embed another page module inside a page?
+├─ Yes → Use <o-page src="./sub-page.html"> in the template
+│   ├─ Pass params via query in the src URL, e.g. src="./sub-page.html?userId=123"
+│   └─ The sub-page receives params via export default async ({ query }) => { ... }
+└─ No → Use page module normally
 ```
 
 ### Data Management

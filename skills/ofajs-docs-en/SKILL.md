@@ -71,6 +71,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `<o-fill><template><div>...</div></template></o-fill>` | `<o-fill><div>...</div></o-fill>` | Direct rendering doesn't need template wrapper |
 | `<template>` inside o-fill | `<template>` outside o-fill + `name` attribute | Template rendering requires template outside with name attribute |
 | `<o-app src="./page.html?key=val">` to embed a sub-page inside a page | `<o-page src="./page.html?key=val">` | Embed a page module with `<o-page>`; `<o-app>` is for micro-apps with `app-config.js` |
+| Use `autoInstall` in HTML | Use `auto-install` in HTML | Component attrs use camelCase in definitions, but must be converted to kebab-case (hyphenated) when used in HTML |
 
 ---
 

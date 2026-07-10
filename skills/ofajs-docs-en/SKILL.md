@@ -47,7 +47,8 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `{{row.price}}` | `{{$data.price}}` | Must use $data to access data inside o-fill |
 | `:class="item.type"` | `attr:type="$data.type"` | Property binding must also use $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | Custom methods don't use `$` prefix |
-| `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | Dynamic style uses `:style.`, value is a full expression |
+| `title="{{name}}"` / `:title="name"` | `attr:title="name"` | `{{...}}` in attribute values is NOT parsed; dynamic attributes must use `attr:` |
+| `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | `{{...}}` is NOT parsed in attribute values; dynamic styles use `:style.` |
 
 ### API Comparison
 
@@ -73,7 +74,32 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `<o-app src="./page.html?key=val">` to embed a sub-page inside a page | `<o-page src="./page.html?key=val">` | Embed a page module with `<o-page>`; `<o-app>` is for micro-apps with `app-config.js` |
 | Use `autoInstall` in HTML | Use `auto-install` in HTML | Component attrs use camelCase in definitions, but must be converted to kebab-case (hyphenated) when used in HTML |
 
----
+### Detailed Example: `{{...}}` Scope (Important)
+
+`{{expr}}` **only works in element text content**. Writing it in HTML attribute values **will NOT be parsed** - the browser treats the entire curly braces as a static string.
+
+❌ **Wrong Way** (using `{{}}` in attribute values):
+```html
+<span title="{{$data.appId}}">{{$data.appId}}</span>
+<a href="{{url}}">Link</a>
+<img alt="{{name}}" src="/x.png">
+<div data-id="{{id}}"></div>
+```
+
+✅ **Correct Way** (attributes always use `attr:` / `:prop` / `class:` / `:style.`):
+```html
+<span attr:title="$data.appId">{{$data.appId}}</span>
+<a attr:href="url">Link</a>
+<img attr:alt="name" src="/x.png">
+<div attr:data-id="id"></div>
+```
+
+**Memory rule**: `{{}}` only goes between `>...<`; all dynamic values inside the angle brackets use `attr:` / `:prop` / `class:` / `:style.` directives.
+
+**Why can't `{{}}` work in attribute values?**
+- The browser first parses HTML into a DOM tree, and attribute values become static strings at this point
+- ofa.js template engine can only process DOM nodes, it cannot re-parse `{{}}` in attribute values
+- Only text nodes (content between `>...<`) are correctly parsed and reactively updated by ofa.js
 
 ### Detailed Example: Dynamic Class Name vs Attribute Binding
 
@@ -194,9 +220,13 @@ export default async () => {
 
 ### Detailed Example: Dynamic Style Syntax
 
-Inline style strings are not supported in `attr:style`. Dynamic styles must use `:style.property` syntax with complete expressions.
+**`{{...}}` is NOT parsed in attribute values**. For dynamic values:
+- Regular attributes → `attr:attributeName="expression"`
+- Component properties → `:propertyName="expression"` / `sync:propertyName="expression"`
+- Class names → `class:className="booleanExpression"`
+- Styles → `:style.propertyName="expression"`
 
-❌ **Wrong Way** (using `attr:style` to concatenate style string):
+❌ **Wrong Way** (using `{{}}` in attribute value, will NOT be parsed):
 ```html
 <div attr:style="width: {{pct}}%"></div>
 ```
@@ -207,7 +237,7 @@ Inline style strings are not supported in `attr:style`. Dynamic styles must use 
 ```
 
 **Why is this better?**
-- **Correct syntax** - `attr:` is for HTML attribute binding, does not support template interpolation concatenation
+- **Correct syntax** - `{{...}}` in attribute values is NOT parsed, must use directive binding
 - **Full expression** - `:style.` value is a JavaScript expression, can freely concatenate strings
 - **Better performance** - Only updates individual style properties, not the entire style string
 
@@ -294,11 +324,11 @@ The sub-page receives the `userId` parameter via `export default async ({ query 
 
 | Syntax | Purpose | Example |
 |------|------|------|
-| `{{var}}` | Text rendering | `<span>{{name}}</span>` |
+| `{{var}}` | Text node rendering (**only in element content, NOT in attribute values**) | `<span>{{name}}</span>` |
 | `:html` | HTML content rendering | `<div :html="htmlContent"></div>` |
 | `:prop="key"` | One-way property binding | `<input :value="name">` |
 | `sync:prop="key"` | Two-way property binding | `<input sync:value="name">` |
-| `attr:name="key"` | HTML attribute binding | `<a attr:href="url">` |
+| `attr:name="key"` | HTML attribute binding (**title/href/alt/data-* etc. always use this**) | `<a attr:href="url" attr:title="tip">` |
 | `class:name="bool"` | Conditional class binding | `<div class:active="isActive">` |
 | `:style.prop="value"` | Style property binding | `<p :style.color="textColor">` |
 | `on:event="handler"` | Event binding | `<button on:click="handleClick">` |

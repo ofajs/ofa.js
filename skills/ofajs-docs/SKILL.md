@@ -47,7 +47,8 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `{{row.price}}` | `{{$data.price}}` | o-fill 内必须使用 $data 访问数据 |
 | `:class="item.type"` | `attr:type="$data.type"` | 属性绑定也必须使用 $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | 自定义方法不加 `$` 前缀 |
-| `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | 动态样式用 `:style.`，值写完整表达式 |
+| `title="{{name}}"` / `:title="name"` | `attr:title="name"` | 属性值内 `{{...}}` 不解析，动态属性必须用 `attr:` |
+| `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | 属性值内一律不解析 `{{...}}`，动态样式用 `:style.` |
 
 ### API 对照
 
@@ -60,6 +61,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `this.shadow.getElementById("id")` | `this.shadow.$("#id")` | shadow 是 ofa.js 对象，使用 $() 方法 |
 | `this.shadow.querySelector(".class")` | `this.shadow.$(".class")` | 使用 $() 方法选择元素 |
 | `ofaElement.scrollTop` 等 | `ofaElement.ele.scrollTop` | ofa.js 对象通过 .ele 访问原生属性 |
+| `document.querySelector("#id")` | `$("#id")` | 全局获取元素实例使用 `$()`，`document.querySelector` 返回原生元素，缺少 ofa.js 增强方法和响应式特性 |
 
 ### 结构对照
 
@@ -70,6 +72,34 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `<o-fill><template><div>...</div></template></o-fill>` | `<o-fill><div>...</div></o-fill>` | 直接渲染不需要 template 包裹 |
 | `<template>` 在 o-fill 内部 | `<template>` 在 o-fill 外部 + `name` 属性 | 模板渲染时 template 必须在外部 |
 | `<o-app src="./page.html?key=val">` 在页面内嵌入子页面 | `<o-page src="./page.html?key=val">` | 嵌入页面模块用 `<o-page>`；`<o-app>` 仅用于加载 app-config.js 的微应用 |
+| HTML 中使用 `autoInstall` | HTML 中使用 `auto-install` | 组件 attrs 定义时用 camelCase，但在 HTML 中使用时必须转为 kebab-case（横杠命名） |
+
+### 详细示例：`{{...}}` 的适用范围（重要）
+
+`{{expr}}` **只在元素文本内容中生效**。写进 HTML 属性值里 **不会被解析**，浏览器会把整段花括号当成字符串原样显示。
+
+❌ **错误写法**（属性值内使用 `{{}}`）：
+```html
+<span title="{{$data.appId}}">{{$data.appId}}</span>
+<a href="{{url}}">链接</a>
+<img alt="{{name}}" src="/x.png">
+<div data-id="{{id}}"></div>
+```
+
+✅ **正确写法**（属性一律用 `attr:` / `:prop` / `class:` / `:style.`）：
+```html
+<span attr:title="$data.appId">{{$data.appId}}</span>
+<a attr:href="url">链接</a>
+<img attr:alt="name" src="/x.png">
+<div attr:data-id="id"></div>
+```
+
+**记忆口诀**：`{{}}` 只放尖括号 `>...<` 之间；尖括号里面的一切动态值都用 `attr:` / `:prop` / `class:` / `:style.` 系列指令。
+
+**为什么属性值不能用 `{{}}`？**
+- 浏览器会先将 HTML 解析为 DOM 树，属性值在此时已成为静态字符串
+- ofa.js 的模板引擎只能处理 DOM 节点，无法二次解析属性值中的 `{{}}`
+- 只有文本节点（`>...<` 之间的内容）才会被 ofa.js 正确解析和响应式更新
 
 ### 详细示例：动态类名 vs 属性绑定
 
@@ -190,9 +220,13 @@ export default async () => {
 
 ### 详细示例：动态样式语法
 
-不支持将样式字符串写在 `attr:style` 属性中，动态样式必须使用 `:style.property` 语法，值写为完整表达式。
+**属性值内一律不解析 `{{...}}`**。需要动态值时：
+- 普通属性 → `attr:属性名="表达式"`
+- 组件属性 → `:属性名="表达式"` / `sync:属性名="表达式"`
+- 类名 → `class:类名="布尔表达式"`
+- 样式 → `:style.属性名="表达式"`
 
-❌ **错误写法**（使用 `attr:style` 拼接样式字符串）：
+❌ **错误写法**（属性值内使用 `{{}}`，不会被解析）：
 ```html
 <div attr:style="width: {{pct}}%"></div>
 ```
@@ -203,7 +237,7 @@ export default async () => {
 ```
 
 **为什么这样更好？**
-- **语法正确** - `attr:` 用于绑定 HTML 属性值，不支持模板插值拼接
+- **语法正确** - 属性值内 `{{...}}` 不会被解析，必须使用指令绑定
 - **表达式完整** - `:style.` 的值是 JavaScript 表达式，可自由拼接字符串
 - **性能更优** - 只更新单个样式属性，而非整个 style 字符串
 
@@ -290,16 +324,17 @@ export default async () => {
 
 | 语法 | 用途 | 示例 |
 |------|------|------|
-| `{{var}}` | 文本渲染 | `<span>{{name}}</span>` |
+| `{{var}}` | 文本节点渲染（**仅限元素内容，不可用于属性值**） | `<span>{{name}}</span>` |
 | `:html` | HTML 内容渲染 | `<div :html="htmlContent"></div>` |
 | `:prop="key"` | 单向属性绑定 | `<input :value="name">` |
 | `sync:prop="key"` | 双向属性绑定 | `<input sync:value="name">` |
-| `attr:name="key"` | HTML 属性绑定 | `<a attr:href="url">` |
+| `attr:name="key"` | HTML 属性绑定（**title/href/alt/data-* 等一律走这里**） | `<a attr:href="url" attr:title="tip">` |
 | `class:name="bool"` | 条件类绑定 | `<div class:active="isActive">` |
 | `:style.prop="value"` | 样式属性绑定 | `<p :style.color="textColor">` |
 | `on:event="handler"` | 事件绑定 | `<button on:click="handleClick">` |
 | `on:event="expr"` | 表达式事件 | `<button on:click="count++">` |
 | `$event` | 事件对象 | `on:click="handle($event)"` |
+| `$("#id")` | 获取元素实例 | `const el = $("#myComponent")` |
 
 ### 核心特性
 

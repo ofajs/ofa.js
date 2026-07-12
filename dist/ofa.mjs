@@ -1579,6 +1579,11 @@ const convert = (template) => {
   template.innerHTML = template.innerHTML.replace(
     /{{(.+?)}}/g,
     (str, match) => {
+      match = match
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
       return `<xtext expr="${match}"></xtext>`;
     },
   );

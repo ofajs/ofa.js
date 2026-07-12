@@ -405,7 +405,12 @@ export const convert = (template) => {
   template.innerHTML = template.innerHTML.replace(
     /{{(.+?)}}/g,
     (str, match) => {
-      match = match.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+      match = match
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
       return `<xtext expr="${match}"></xtext>`;
     },
   );

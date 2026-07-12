@@ -486,7 +486,23 @@ const pageOutAnime = ({ page, key }) =>
 
     if (targetAnime) {
       nextAnimeFrame(() => {
-        page.one("transitionend", resolve);
+        let resolved = false;
+        const finish = () => {
+          if (resolved) {
+            return;
+          }
+          resolved = true;
+          clearTimeout(timer);
+          resolve();
+        };
+
+        const timer = setTimeout(finish, 350);
+
+        page.one("transitionend", finish);
+
+        // Ensure the current style is computed before changing it,
+        // so the transition starts reliably on Firefox.
+        void page.ele.offsetHeight;
 
         page.css = {
           ...page.css,

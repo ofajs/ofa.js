@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.0 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.1 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -1586,6 +1586,11 @@ try{
     template.innerHTML = template.innerHTML.replace(
       /{{(.+?)}}/g,
       (str, match) => {
+        match = match
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
         return `<xtext expr="${match}"></xtext>`;
       },
     );
@@ -6304,7 +6309,23 @@ ${scriptContent}`;
 
       if (targetAnime) {
         nextAnimeFrame(() => {
-          page.one("transitionend", resolve);
+          let resolved = false;
+          const finish = () => {
+            if (resolved) {
+              return;
+            }
+            resolved = true;
+            clearTimeout(timer);
+            resolve();
+          };
+
+          const timer = setTimeout(finish, 350);
+
+          page.one("transitionend", finish);
+
+          // Ensure the current style is computed before changing it,
+          // so the transition starts reliably on Firefox.
+          void page.ele.offsetHeight;
 
           page.css = {
             ...page.css,
@@ -7320,7 +7341,7 @@ ${scriptContent}`;
     });
   };
 
-  const version = "ofa.js@4.7.0";
+  const version = "ofa.js@4.7.1";
   $.version = version.replace("ofa.js@", "");
 
   let isDebug = false;

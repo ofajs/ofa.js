@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.1 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.2 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -1328,12 +1328,13 @@ try{
       parentNode.insertBefore(textEl, el);
       parentNode.removeChild(el);
 
-      const func = convertToFunc(el.getAttribute("expr"), data, {
+      const expr = decodeURIComponent(el.getAttribute("expr"));
+      const func = convertToFunc(expr, data, {
         errCall: (error) => {
           const supplementary = getRenderErrorSupplementary(data);
 
           const err = new Error(
-            `Error evaluating text expression: '${el.getAttribute("expr")}', ${supplementary}`,
+            `Error evaluating text expression: '${expr}', ${supplementary}`,
             {
               cause: error,
             },
@@ -1584,14 +1585,9 @@ try{
     });
 
     template.innerHTML = template.innerHTML.replace(
-      /{{(.+?)}}/g,
+      /{{([\s\S]+?)}}/g,
       (str, match) => {
-        match = match
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-        return `<xtext expr="${match}"></xtext>`;
+        return `<xtext expr="${encodeURIComponent(match)}"></xtext>`;
       },
     );
 
@@ -7341,7 +7337,7 @@ ${scriptContent}`;
     });
   };
 
-  const version = "ofa.js@4.7.1";
+  const version = "ofa.js@4.7.2";
   $.version = version.replace("ofa.js@", "");
 
   let isDebug = false;

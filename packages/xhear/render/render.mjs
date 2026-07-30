@@ -147,12 +147,13 @@ export function render({
     parentNode.insertBefore(textEl, el);
     parentNode.removeChild(el);
 
-    const func = convertToFunc(el.getAttribute("expr"), data, {
+    const expr = decodeURIComponent(el.getAttribute("expr"));
+    const func = convertToFunc(expr, data, {
       errCall: (error) => {
         const supplementary = getRenderErrorSupplementary(data);
 
         const err = new Error(
-          `Error evaluating text expression: '${el.getAttribute("expr")}', ${supplementary}`,
+          `Error evaluating text expression: '${expr}', ${supplementary}`,
           {
             cause: error,
           },
@@ -403,14 +404,9 @@ export const convert = (template) => {
   });
 
   template.innerHTML = template.innerHTML.replace(
-    /{{(.+?)}}/g,
+    /{{([\s\S]+?)}}/g,
     (str, match) => {
-      match = match
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-      return `<xtext expr="${match}"></xtext>`;
+      return `<xtext expr="${encodeURIComponent(match)}"></xtext>`;
     },
   );
 

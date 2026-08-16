@@ -77,6 +77,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `<o-app src="./page.html?key=val">` to embed a sub-page inside a page | `<o-page src="./page.html?key=val">` | Embed a page module with `<o-page>`; `<o-app>` is for micro-apps with `app-config.js` |
 | Use `autoInstall` in HTML | Use `auto-install` in HTML | Component attrs use camelCase in definitions, but must be converted to kebab-case (hyphenated) when used in HTML |
 | `location.origin + location.pathname + "#./pages/x.html"` | `location.origin + "/#/pages/x.html"` | Hash routing format is `#/pages/xxx.html` (a `/` directly after `#`, no `./` prefix, no extra pathname); use `location.origin + "/#/..."` when building external share links |
+| Setting `src` on `<o-page>` after initialization (including `:src="url"` dynamic binding, changing query to pass params) | Keep `<o-page>` resident + host calls a method exposed by the sub-page to pass params | The `src` of `<o-page>` is **immutable after initialization**; assigning it again throws `A page that has already been initialized cannot be set with the src attribute`; to destroy and recreate, wrap with `o-if` to toggle |
 
 ### Detailed Example: `{{...}}` Scope (Important)
 
@@ -356,6 +357,80 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 
 **Memory rule**: A `/` immediately follows `#`, then the path starting from `pages`. For external share links, use `location.origin + "/#/..."`.
 
+### Detailed Example: Splitting a Complex Single Page into Multiple Page Modules (Important)
+
+When a single page module accumulates too much business (main list + dialog forms + multiple sub-flows), split independent business units (especially dialog forms) into separate page modules. The host embeds them with a resident `<o-page>`, communicating via "**method call to pass params down + event bubbling to pass results up**":
+
+- **Host → sub-page**: call a method exposed by the sub-page (e.g., `openForm(params)`) to pass params
+- **Sub-page → host**: `this.emit("xxx-save", { data, bubbles: true, composed: true })`; the host listens with `on:xxx-save` on the `<o-page>` tag and reads from `event.data`
+- `composed: true` is mandatory: the sub-page lives inside the host's Shadow DOM; when left as the default `false`, the event cannot cross the boundary and the host won't hear it
+
+❌ **Wrong Way** (changing `src` after initialization to switch params — throws at runtime):
+
+```html
+<o-page :src="'./form.html?id=' + editingId"></o-page>
+```
+
+The `src` of `<o-page>` is **immutable after initialization**; the source code throws directly on reassignment: `A page that has already been initialized cannot be set with the src attribute`.
+
+✅ **Correct Way**:
+
+```html
+<!-- Host page -->
+<template page>
+  <o-page id="form-page" src="./form.html" on:form-save="onSave"></o-page>
+  <script>
+    export default async () => ({
+      proto: {
+        openForm(item) {
+          // $() returns an ofa.js wrapper object; call the sub-page method directly
+          this.shadow.$("#form-page")?.openForm(item);
+        },
+        onSave(event) {
+          console.log(event.data); // form values emitted by the sub-page
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+```html
+<!-- Sub-page form.html: carries its own p-dialog, exposes openForm for the host -->
+<template page>
+  <p-dialog sync:open="dialogOpen" auto-close><!-- form controls sync:value="form.xxx" --></p-dialog>
+  <script>
+    export default async () => ({
+      data: { dialogOpen: false, form: {} },
+      proto: {
+        openForm(params) {
+          Object.assign(this.form, params); // fill in params
+          this.dialogOpen = true;
+        },
+        save() {
+          if (!this.form.name.trim()) return; // sub-page only validates non-empty
+          this.emit("form-save", {
+            data: { ...this.form },
+            bubbles: true,
+            composed: true, // cross Shadow DOM so the host can hear it
+          });
+          this.dialogOpen = false;
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+**Division of responsibility**: the sub-page only handles form completeness and UI state; business normalization, id generation, and persistence belong to the host. Cancel/backdrop close only flips the sub-page's own `dialogOpen` and does not notify the host.
+
+**When a fresh instance is needed each time**: if the sub-page is allowed to lose state, wrap `<o-page>` with `o-if` — closing destroys it, reopening recreates it (`o-if` toggling clears and re-renders its children); after reopening, params must be passed again via method call.
+
+**When to split**:
+- The dialog contains an independent form / multi-step flow → split
+- The page's `data` is polluted with lots of temporary state unrelated to the main content (`form` / `dialogOpen` / `editingId` …) → split
+- Small purely-presentational fragments with no independent business state → use a component module, don't split into a page
+
 ---
 
 ## Core Syntax Points
@@ -392,6 +467,8 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 </template>
 ```
 The sub-page receives the `userId` parameter via `export default async ({ query })`.
+
+> ⚠️ The `src` of `<o-page>` (including query) **only takes effect at initialization**; assigning it again after initialization throws an error. For runtime param passing, call a method exposed by the sub-page, and pass results back via event bubbling (`bubbles` + `composed`) — see the "Splitting a Complex Single Page into Multiple Page Modules" example above.
 
 ### Page Module
 
@@ -475,11 +552,12 @@ Need reusable components?
 ├─ Yes → Use component module (<template component> + tag field)
 └─ No → Use page module (<template page>)
 
-Need to embed another page module inside a page?
-├─ Yes → Use <o-page src="./sub-page.html"> in the template
-│   ├─ Pass params via query in the src URL, e.g. src="./sub-page.html?userId=123"
-│   └─ The sub-page receives params via export default async ({ query }) => { ... }
-└─ No → Use page module normally
+Is the single page too heavy (main list + dialog form + multiple sub-flows mixed in one module)?
+├─ Yes → Split into multiple page modules: the host embeds sub-pages with a resident <o-page>
+│   ├─ Pass params on first initialization: query in the src URL, e.g. src="./sub-page.html?userId=123"
+│   ├─ Pass params at runtime: host calls a method exposed by the sub-page (src is immutable after initialization; never change src/query)
+│   └─ Pass results back: sub-page emits a bubbling event (bubbles + composed), host listens with on:eventName
+└─ No → Keep a single page module
 ```
 
 ### Data Management
@@ -565,7 +643,7 @@ Need multi-page application?
 | [Template Syntax Examples and Syntax Explanation](./references/full-coverage.md) | Complete examples and detailed explanations of all template syntax (**Highest priority**) |
 | [Quick Reference Table](./references/cheat-sheet.md) | API and syntax quick reference |
 | [API Reference Manual](./references/api.md) | Complete API documentation |
-| [Common Patterns and Best Practices](./references/patterns.md) | Common code patterns |
+| [Common Patterns and Best Practices](./references/patterns.md) | Common code patterns (including single-page business splitting / embedded sub-page pattern) |
 
 ### Getting Started Guide
 

@@ -77,6 +77,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `<o-app src="./page.html?key=val">` 在页面内嵌入子页面 | `<o-page src="./page.html?key=val">` | 嵌入页面模块用 `<o-page>`；`<o-app>` 仅用于加载 app-config.js 的微应用 |
 | HTML 中使用 `autoInstall` | HTML 中使用 `auto-install` | 组件 attrs 定义时用 camelCase，但在 HTML 中使用时必须转为 kebab-case（横杠命名） |
 | `location.origin + location.pathname + "#./pages/x.html"` | `location.origin + "/#/pages/x.html"` | hash 路由格式为 `#/pages/xxx.html`（`#` 后直接 `/`，不带 `./` 前缀，也不带多余 pathname）；构建外部分享链接用 `location.origin + "/#/..."` |
+| `<o-page>` 初始化后再次设置 `src`（含 `:src="url"` 动态绑定、改 query 传参） | 常驻 `<o-page>` + 宿主调用子页面方法传参 | `o-page` 的 `src` **初始化后不可变**，再赋值直接抛错 `A page that has already been initialized cannot be set with the src attribute`；确需销毁重建时外层包 `o-if` 切换 |
 
 ### 详细示例：`{{...}}` 的适用范围（重要）
 
@@ -356,6 +357,80 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 
 **记忆口诀**：`#` 后面紧跟一个 `/`，再接从 `pages` 开始的路径；外部分享链接用 `location.origin + "/#/..."` 即可。
 
+### 详细示例：复杂单页面拆分为多个 page 模块（重要）
+
+单个页面模块堆积过多业务（主列表 + 弹窗表单 + 多个子流程）时，应把独立业务单元（尤其是弹窗表单）拆成独立页面模块，宿主用 `<o-page>` 常驻内嵌，按「**方法调用下发参数 + 事件冒泡上抛结果**」通信：
+
+- **宿主 → 子页面**：调用子页面暴露的方法（如 `openForm(params)`）传参
+- **子页面 → 宿主**：`this.emit("xxx-save", { data, bubbles: true, composed: true })`，宿主在 `<o-page>` 标签上 `on:xxx-save` 监听，从 `event.data` 取值
+- `composed: true` 必须带：子页面处于 Shadow DOM 内，缺省 `false` 时事件穿不出边界，宿主监听不到
+
+❌ **错误写法**（初始化后改 `src` 切换参数，运行时抛错）：
+
+```html
+<o-page :src="'./form.html?id=' + editingId"></o-page>
+```
+
+`o-page` 的 `src` **初始化后不可变**，源码中再次赋值会直接抛错：`A page that has already been initialized cannot be set with the src attribute`。
+
+✅ **正确写法**：
+
+```html
+<!-- 宿主页面 -->
+<template page>
+  <o-page id="form-page" src="./form.html" on:form-save="onSave"></o-page>
+  <script>
+    export default async () => ({
+      proto: {
+        openForm(item) {
+          // $() 拿到的是 ofa.js 包装对象，可直接调用子页面方法
+          this.shadow.$("#form-page")?.openForm(item);
+        },
+        onSave(event) {
+          console.log(event.data); // 子页面上抛的表单值
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+```html
+<!-- 子页面 form.html：自带 p-dialog，暴露 openForm 供宿主打开 -->
+<template page>
+  <p-dialog sync:open="dialogOpen" auto-close><!-- 表单控件 sync:value="form.xxx" --></p-dialog>
+  <script>
+    export default async () => ({
+      data: { dialogOpen: false, form: {} },
+      proto: {
+        openForm(params) {
+          Object.assign(this.form, params); // 回填参数
+          this.dialogOpen = true;
+        },
+        save() {
+          if (!this.form.name.trim()) return; // 子页面只管非空校验
+          this.emit("form-save", {
+            data: { ...this.form },
+            bubbles: true,
+            composed: true, // 穿透 Shadow DOM，宿主才能监听
+          });
+          this.dialogOpen = false;
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+**分工建议**：子页面只负责表单完整性与 UI 状态；业务归一化、id 生成、持久化由宿主处理。取消/遮罩关闭只改子页面自身 `dialogOpen`，不通知宿主。
+
+**需要每次全新实例时**：子页面允许状态丢失的话，用 `o-if` 包裹 `<o-page>`，关闭即销毁、再开重建（`o-if` 切换会清空并重新渲染子节点），重开后需重新调用方法传参。
+
+**拆分时机**：
+- 弹窗内含独立表单 / 多步流程 → 拆
+- 页面 `data` 混入大量与主内容无关的临时状态（`form` / `dialogOpen` / `editingId` …）→ 拆
+- 纯展示、无独立业务状态的小片段 → 用组件模块，不要拆 page
+
 ---
 
 ## 核心语法要点
@@ -392,6 +467,8 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 </template>
 ```
 子页面通过 `export default async ({ query })` 接收 `userId` 参数。
+
+> ⚠️ `<o-page>` 的 `src`（含 query）**只在初始化时生效**，初始化后再次赋值会抛错；运行时传参请调用子页面暴露的方法，结果回传用事件冒泡（`bubbles` + `composed`），详见上方「复杂单页面拆分为多个 page 模块」示例。
 
 ### 页面模块
 
@@ -475,11 +552,12 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 ├─ 是 → 使用组件模块（<template component> + tag 字段）
 └─ 否 → 使用页面模块（<template page>）
 
-是否需要在一个页面中嵌入另一个页面模块？
-├─ 是 → 在模板中使用 <o-page src="./sub-page.html"> 标签
-│   ├─ 传参方式：src URL 中直接带 query 参数，如 src="./sub-page.html?userId=123"
-│   └─ 子页面通过 export default async ({ query }) => { ... } 接收参数
-└─ 否 → 正常使用页面模块
+单页面业务是否过重（主列表 + 弹窗表单 + 多个子流程混在一个模块）？
+├─ 是 → 拆分成多个页面模块：宿主 <o-page> 常驻内嵌子页面
+│   ├─ 首次初始化传参：src URL 带 query，如 src="./sub-page.html?userId=123"
+│   ├─ 运行时传参：宿主调用子页面暴露的方法（src 初始化后不可变，禁止改 src/query）
+│   └─ 结果回传：子页面 emit 事件冒泡（bubbles + composed），宿主 on:事件名 监听
+└─ 否 → 保持单页面模块
 ```
 
 ### 数据管理
@@ -565,7 +643,7 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 | [模板语法案例与语法说明](./references/full-coverage.md) | 所有模板语法的完整案例和详细说明（**最高优先级**） |
 | [快速参考表](./references/cheat-sheet.md) | API 和语法速查表 |
 | [API 参考手册](./references/api.md) | 完整 API 文档 |
-| [常见模式与最佳实践](./references/patterns.md) | 常用代码模式 |
+| [常见模式与最佳实践](./references/patterns.md) | 常用代码模式（含单页面业务拆分/内嵌子页面模式） |
 
 ### 入门指南
 

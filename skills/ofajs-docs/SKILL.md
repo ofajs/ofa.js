@@ -66,6 +66,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `document.querySelector("o-app").goto(...)` | `$("o-app").goto(...)` 或 `this.app.goto(...)` | `goto()`/`replace()` 等导航方法只存在于 `$()` 包装对象上，原生 DOM 元素上没有；页面模块内部用 `this.app.goto(...)` |
 | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` 返回的也是 ofa.js 包装对象，原生属性（shadowRoot、querySelector 等）必须通过 `.ele` 中转；ofa.js 自身属性（如 `.src`、`.data`、`.app`）可直接访问 |
 | `get xxx() { return this.obj.field }` + 模板 `{{xxx}}`（依赖异步数据） | data 中预定义 `xxx: ""`，在 ready/异步回调中赋值 | getter 在模板初始化阶段（ready 执行前）就被求值，若依赖的 data 字段尚未赋值（尤其 null/undefined 链式访问）会抛 TypeError 导致整页渲染崩溃；getter 仅适合依赖同步已有数据（有初始值）的简单计算 |
+| 模板表达式引用未声明的变量（`{{flag}}` / `:value="flag"` / `class:active="flag"`…） | 所有模板引用的键先在 `data` / `attrs` 中声明（给安全默认值） | 未声明的键不是 `undefined`，初始化求值直接抛 `Error evaluating element expression ... ReferenceError: flag is not defined`，整页渲染中断；常见于改模板加新绑定、忘了同步 data |
 
 ### 结构对照
 
@@ -362,6 +363,44 @@ export default async ({ query }) => {
 - 此时 getter 被读取，触发 getter 内部对 `this.xxx` 的访问，建立依赖追踪
 - 而 `ready()` 在初始化完成后才执行，异步数据此时还未到达
 - 若 getter 体内访问的字段为 null/undefined，链式读取即抛错，整个模板渲染被中断
+
+### 详细示例：模板引用的变量必须先在 data/attrs 声明（重要）
+
+模板中所有表达式（`{{xxx}}`、`:prop`、`sync:`、`class:`、`:style.`、`attr:`）在**模块初始化阶段立即求值**，引用的每个键都必须在 `data` / `attrs` 中已声明。引用未声明的变量**不会得到 `undefined`，而是直接抛错并中断整页渲染**：
+
+```
+Error: Error evaluating element expression: ':value="flag"', from file: ...
+Caused by: ReferenceError: flag is not defined
+```
+
+典型场景：**给已有页面新增功能时，模板加了新绑定，忘了在 `data` 里补字段**。报错在首次渲染时出现，且该页面/组件整体渲染失败。
+
+❌ **错误写法**（模板用了 `noBg`，`data` 没声明）：
+
+```html
+<x-if :value="noBg === 'off'">...</x-if>
+<p-switch sync:value="noBg">无底色</p-switch>
+
+<script>
+  export default async () => ({
+    data: { dialogOpen: false }, // ❌ 缺 noBg 声明
+  });
+</script>
+```
+
+✅ **正确写法**（`data` 补上声明，给安全默认值）：
+
+```html
+<script>
+  export default async () => ({
+    data: { dialogOpen: false, noBg: "off" }, // ✅ 模板引用的键全部声明
+  });
+</script>
+```
+
+**排查口诀**：`Error evaluating element/class/... expression` + `ReferenceError: xxx is not defined` → 必是模板表达式引用了 `data` / `attrs` 中不存在的键。先 grep 模板里引用 `xxx` 的绑定，再到 `data` 补声明。
+
+**与 getter 陷阱的区别**：getter 陷阱是字段**已声明但值未到达**（抛 TypeError）；本陷阱是字段**根本没声明**（抛 ReferenceError），后者在改模板时最易犯。
 
 ### 详细示例：Hash 路由 URL 格式
 

@@ -66,6 +66,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `document.querySelector("o-app").goto(...)` | `$("o-app").goto(...)` or `this.app.goto(...)` | Navigation methods like `goto()`/`replace()` only exist on `$()` wrapper objects, not on native DOM elements; inside page modules use `this.app.goto(...)` |
 | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` also returns an ofa.js wrapper object; native properties (shadowRoot, querySelector, etc.) must go through `.ele`, while ofa.js own properties (`.src`, `.data`, `.app`) can be accessed directly |
 | `get xxx() { return this.obj.field }` + template `{{xxx}}` (depends on async data) | Predefine `xxx: ""` in data, assign in ready/async callback | Getters are evaluated during module init (before `ready()`); if dependent data fields aren't assigned yet (especially null/undefined chained access), a TypeError will crash the entire page render. Getters are only suitable for simple computations depending on sync existing data (with initial values) |
+| Template expression referencing an undeclared variable (`{{flag}}` / `:value="flag"` / `class:active="flag"`...) | Declare every referenced key in `data` / `attrs` first (with safe defaults) | An undeclared key is NOT `undefined` — initialization throws `Error evaluating element expression ... ReferenceError: flag is not defined` and the whole page render is interrupted; commonly happens when adding new bindings to a template without syncing `data` |
 
 ### Structure Comparison
 
@@ -362,6 +363,44 @@ export default async ({ query }) => {
 - The getter is read at this point, triggering access to `this.xxx` inside the getter and establishing dependency tracking
 - `ready()` only runs after initialization completes; async data hasn't arrived yet
 - If the field accessed inside the getter body is null/undefined, chained reading throws an error, interrupting the entire template render
+
+### Detailed Example: Template Variables Must Be Declared in data/attrs First (Important)
+
+All template expressions (`{{xxx}}`, `:prop`, `sync:`, `class:`, `:style.`, `attr:`) are **evaluated immediately during module initialization**, and every key they reference must already be declared in `data` / `attrs`. Referencing an undeclared variable does **NOT yield `undefined` — it throws directly and interrupts the whole page render**:
+
+```
+Error: Error evaluating element expression: ':value="flag"', from file: ...
+Caused by: ReferenceError: flag is not defined
+```
+
+Typical scenario: **adding a new feature to an existing page — the template gets new bindings but you forget to add the field to `data`**. The error appears on first render, and the entire page/component render fails.
+
+❌ **Wrong Way** (template uses `noBg`, not declared in `data`):
+
+```html
+<x-if :value="noBg === 'off'">...</x-if>
+<p-switch sync:value="noBg">No background</p-switch>
+
+<script>
+  export default async () => ({
+    data: { dialogOpen: false }, // ❌ noBg declaration missing
+  });
+</script>
+```
+
+✅ **Correct Way** (declare it in `data` with a safe default):
+
+```html
+<script>
+  export default async () => ({
+    data: { dialogOpen: false, noBg: "off" }, // ✅ every template-referenced key is declared
+  });
+</script>
+```
+
+**Debugging mnemonic**: `Error evaluating element/class/... expression` + `ReferenceError: xxx is not defined` → a template expression references a key that doesn't exist in `data` / `attrs`. Grep the template for `xxx` bindings first, then add the declaration to `data`.
+
+**Difference from the getter pitfall**: the getter pitfall is a field **declared but its value not arrived yet** (throws TypeError); this pitfall is a field **never declared at all** (throws ReferenceError) — the latter is the easiest to hit when editing templates.
 
 ### Detailed Example: Hash Routing URL Format
 

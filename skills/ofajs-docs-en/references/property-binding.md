@@ -185,6 +185,7 @@ In the `child-comp` component, if you modify `userData.name` directly, `userInfo
 2. **Initial Values**: Ensure data has appropriate initial values
 3. **Type Consistency**: Maintain data type consistency in two-way binding
 4. **Boolean Attributes Must Not Use `:prop`**: For boolean attributes like `disabled` / `checked` / `readonly` / `hidden` / `open`, use `attr:disabled="isLoading"` instead of `:disabled="isLoading"` — `:prop` renders `false` as the attribute string `"false"`, and HTML boolean attributes take effect whenever present (the button stays disabled forever); `attr:` cancels the attribute setting entirely when the value is `false`
+5. **Bound keys must be declared in data/attrs first**: Binding expressions like `:prop` / `sync:` are evaluated immediately during initialization; referencing an undeclared key throws `Error evaluating element expression ... ReferenceError: xxx is not defined` (NOT `undefined`) and interrupts the whole page render. When adding new bindings to a template, remember to add the field to `data` as well
 
 ## Key Points
 

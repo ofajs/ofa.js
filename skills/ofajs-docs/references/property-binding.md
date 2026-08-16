@@ -172,6 +172,7 @@ ofa.js 保留了 JavaScript 的这一特性，因此对象的单向传递实际�
 3. **初始值设置**：确保绑定的数据有合适的初始值，避免 undefined 显示问题
 4. **事件冲突**：避免在同一元素上同时使用双向绑定和手动事件处理，以免造成冲突
 5. **布尔属性禁用 `:prop`**：`disabled` / `checked` / `readonly` / `hidden` / `open` 等布尔属性必须用 `attr:disabled="isLoading"` 而非 `:disabled="isLoading"`——`:prop` 会把 `false` 渲染成属性字符串 `"false"`，HTML 布尔属性只要存在就生效（按钮永远禁用）；`attr:` 在值为 `false` 时直接取消属性设置
+6. **绑定的键必须先在 data/attrs 声明**：`:prop` / `sync:` 等绑定表达式在初始化阶段立即求值，引用未声明的键会抛 `Error evaluating element expression ... ReferenceError: xxx is not defined`（不是 `undefined`），整页渲染中断；给模板新增绑定时记得同步在 `data` 补字段
 
 ## 关键要点
 

@@ -184,6 +184,7 @@ In the `child-comp` component, if you modify `userData.name` directly, `userInfo
 1. **Avoid Circular Binding**: Don't bind the same property to itself, this will cause infinite update loops
 2. **Initial Values**: Ensure data has appropriate initial values
 3. **Type Consistency**: Maintain data type consistency in two-way binding
+4. **Boolean Attributes Must Not Use `:prop`**: For boolean attributes like `disabled` / `checked` / `readonly` / `hidden` / `open`, use `attr:disabled="isLoading"` instead of `:disabled="isLoading"` — `:prop` renders `false` as the attribute string `"false"`, and HTML boolean attributes take effect whenever present (the button stays disabled forever); `attr:` cancels the attribute setting entirely when the value is `false`
 
 ## Key Points
 

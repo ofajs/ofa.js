@@ -49,6 +49,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | Custom methods don't use `$` prefix |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | `{{...}}` in attribute values is NOT parsed; dynamic attributes must use `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | `{{...}}` is NOT parsed in attribute values; dynamic styles use `:style.` |
+| `:disabled="isLoading"` (boolean attributes like disabled/checked/readonly) | `attr:disabled="isLoading"` | `:prop` renders `false` as the attribute string `"false"`; HTML boolean attributes take effect whenever present, so the button stays disabled forever; `attr:` cancels the attribute setting entirely when the value is `false` |
 
 ### API Comparison
 
@@ -105,6 +106,31 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 - The browser first parses HTML into a DOM tree, and attribute values become static strings at this point
 - ofa.js template engine can only process DOM nodes, it cannot re-parse `{{}}` in attribute values
 - Only text nodes (content between `>...<`) are correctly parsed and reactively updated by ofa.js
+
+### Detailed Example: Boolean Attributes Must Use `attr:` (Important)
+
+HTML boolean attributes like `disabled` / `checked` / `readonly` / `hidden` / `open` are **presence-based** — the attribute value doesn't matter; as long as the attribute exists, it takes effect. When binding a boolean state to such attributes, you must use `attr:`, not `:prop`.
+
+❌ **Wrong Way** (`:prop` renders `false` as the attribute string `"false"`, the attribute still exists, so the button stays disabled forever):
+
+```html
+<p-button color="primary" :disabled="analyzing">Analyze</p-button>
+<!-- When analyzing === false, it renders disabled="false" — still disabled! -->
+```
+
+✅ **Correct Way** (the `attr:` rendering syntax removes the attribute setting entirely when it sees `false`):
+
+```html
+<p-button color="primary" attr:disabled="analyzing">Analyze</p-button>
+<!-- analyzing === false → no disabled attribute; analyzing === true → attribute present, disabled -->
+```
+
+**Why does `:prop` bite?**
+- A `:prop`-bound `false` gets serialized into the string `"false"` and lands on the attribute
+- HTML boolean attributes are judged by presence: both `disabled="false"` and `disabled="true"` count as present (disabled)
+- The `attr:` directive treats `false` specially: it removes the attribute entirely — no attribute means enabled again
+
+**Scope**: all "present = on, absent = off" native boolean attributes, as well as boolean component properties defined via `attrs` and forwarded inside the shadow template with `attr:xxx="xxx"` (e.g. the `disabled` of punch-ui's `p-button`).
 
 ### Detailed Example: Dynamic Class Name vs Attribute Binding
 

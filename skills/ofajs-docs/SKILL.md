@@ -49,6 +49,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | 自定义方法不加 `$` 前缀 |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | 属性值内 `{{...}}` 不解析，动态属性必须用 `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | 属性值内一律不解析 `{{...}}`，动态样式用 `:style.` |
+| `:disabled="isLoading"`（disabled/checked/readonly 等布尔属性） | `attr:disabled="isLoading"` | `:prop` 会把 `false` 渲染成属性字符串 `"false"`，HTML 布尔属性只要存在就生效，按钮永远禁用；`attr:` 在值为 `false` 时直接取消属性设置 |
 
 ### API 对照
 
@@ -105,6 +106,31 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 - 浏览器会先将 HTML 解析为 DOM 树，属性值在此时已成为静态字符串
 - ofa.js 的模板引擎只能处理 DOM 节点，无法二次解析属性值中的 `{{}}`
 - 只有文本节点（`>...<` 之间的内容）才会被 ofa.js 正确解析和响应式更新
+
+### 详细示例：布尔属性绑定必须用 `attr:`（重要）
+
+`disabled` / `checked` / `readonly` / `hidden` / `open` 这类 HTML 布尔属性是「**存在即生效**」的——属性值是什么无所谓，只要属性存在就算启用。给这类属性绑定布尔状态时必须用 `attr:`，不能用 `:prop`。
+
+❌ **错误写法**（`:prop` 把 `false` 渲染成属性字符串 `"false"`，属性依然存在，按钮永远禁用）：
+
+```html
+<p-button color="primary" :disabled="analyzing">AI 识别</p-button>
+<!-- analyzing === false 时渲染出 disabled="false"，照样禁用 -->
+```
+
+✅ **正确写法**（`attr:` 渲染语法判断到 `false` 会直接取消该属性的设置）：
+
+```html
+<p-button color="primary" attr:disabled="analyzing">AI 识别</p-button>
+<!-- analyzing === false → 不设置 disabled 属性；analyzing === true → 属性存在，禁用 -->
+```
+
+**为什么 `:prop` 会坑？**
+- `:prop` 绑定的 `false` 会被序列化成字符串 `"false"` 落到属性上
+- HTML 布尔属性按「存在性」判断：`disabled="false"` 与 `disabled="true"` 都算存在、都禁用
+- `attr:` 指令对 `false` 有特殊处理：直接移除属性，属性不存在即恢复可用
+
+**适用范围**：所有「有则生效、无则失效」的原生布尔属性，以及组件内用 `attrs` 定义、shadow 模板里以 `attr:xxx="xxx"` 转发的布尔型组件属性（如 punch-ui 的 `p-button` 的 `disabled`）。
 
 ### 详细示例：动态类名 vs 属性绑定
 

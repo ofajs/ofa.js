@@ -62,3 +62,30 @@ The `composed` property controls whether the event can cross Shadow DOM boundari
 - **Bubbling Mechanism**: `bubbles: true` allows events to bubble up
 - **Penetrating Shadow DOM**: `composed: true` allows events to cross Shadow DOM boundaries
 - **Listening to Events**: Use `on:eventName` to listen to custom events
+
+## Bubbling Up Across Shadow DOM (Embedded o-page Scenario)
+
+When a page module is embedded by a host via `<o-page>`, it lives inside the host page's Shadow DOM. When the sub-page passes results up to the host, `emit` must enable both `bubbles` and `composed`, so the host can hear it via `on:eventName` on the `<o-page>` tag:
+
+```javascript
+// inside the sub-page
+this.emit("form-save", {
+  data: { id: this.editingId, name: this.form.name },
+  bubbles: true,   // bubble up the DOM
+  composed: true,  // cross the Shadow DOM boundary (defaults to false; the host won't hear it)
+});
+```
+
+```html
+<!-- host page -->
+<o-page id="form-page" src="./form.html" on:form-save="onFormSave"></o-page>
+```
+
+```javascript
+// the host handler reads the bubbled-up values from event.data
+onFormSave(event) {
+  const { id, name } = event.data;
+}
+```
+
+> For the companion pattern (method call to pass params down + event bubbling to pass results up, the immutable `src` of `<o-page>` after initialization, etc.), see the "Single-Page Business Splitting (Embedded Sub-page Pattern)" section in [patterns.md](./patterns.md).

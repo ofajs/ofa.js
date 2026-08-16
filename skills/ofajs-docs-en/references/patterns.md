@@ -352,6 +352,141 @@ This document summarizes common code patterns and best practices in ofa.js devel
 
 ---
 
+## Single-Page Business Splitting (Embedded Sub-page Pattern)
+
+### When to Split
+
+When a single page module carries "main list + dialog form + multiple sub-flows" at the same time, `data` / `proto` bloat quickly and responsibilities blur. Criteria:
+
+- The dialog contains an **independent form or multi-step flow** → split into a separate page module
+- The page's `data` is polluted with lots of temporary state unrelated to the main content (`form` / `dialogOpen` / `editingId` …) → split
+- Small purely-presentational fragments with no independent business state → use a component module (`<template component>`), don't split into a page
+
+### Communication Pattern: Method Call Down + Event Bubbling Up
+
+```
+Host page                                Sub-page (e.g. form.html)
+   │                                        │
+   │  this.shadow.$("#x").openForm(params)  │  ← method call to pass params down
+   │ ────────────────────────────────────▶  │
+   │                                        │
+   │  emit("form-save", { data,             │  ← event bubbling to pass results up
+   │    bubbles: true, composed: true })    │
+   │ ◀────────────────────────────────────  │
+   │  on:form-save="onFormSave" → event.data│
+```
+
+Key rules:
+
+1. **The `src` of `<o-page>` is immutable after initialization**. Assigning it at runtime (including `:src` dynamic binding, changing query to pass params) throws `A page that has already been initialized cannot be set with the src attribute`. Therefore runtime param passing **must go through method calls**, never by changing src/query
+2. **Events passed up must use `bubbles: true, composed: true`**: the sub-page lives inside the host's Shadow DOM; `composed` defaults to `false`, and the host's `on:xxx` listener on the `<o-page>` tag won't fire
+3. **Division of responsibility**: the sub-page only handles form completeness (non-empty validation, interaction state); normalization, id/timestamp generation, and persistence all happen in the host
+4. **Cancel/close does not notify the host**: only flip the sub-page's own `dialogOpen = false`, no side effects
+
+### Complete Example
+
+Host page (list + resident embedded dialog page):
+
+```html
+<template page>
+  <style>:host { display: block; }</style>
+
+  <!-- Resident embedded sub-page; on:form-save catches the bubbled-up event -->
+  <o-page id="form-page" src="./form.html" on:form-save="onFormSave"></o-page>
+
+  <button on:click="openAdd">Add</button>
+  <script>
+    export default async () => ({
+      data: { items: [] },
+      proto: {
+        getForm() {
+          const page = this.shadow.$("#form-page");
+          return page?.openForm ? page : null; // defense when the sub-page isn't ready
+        },
+        openAdd() {
+          this.getForm()?.openForm({ count: this.items.length });
+        },
+        openEdit(event, item) {
+          event.stopPropagation();
+          this.getForm()?.openForm({ id: item.id, name: item.name });
+        },
+        onFormSave(event) {
+          const { id, name } = event.data;
+          if (id) {
+            const target = this.items.find((it) => it.id === id);
+            if (target) target.name = name;
+          } else {
+            this.items.push({ id: `${Date.now()}`, name });
+          }
+          // business normalization and persistence all happen in the host
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+Sub-page (carries its own `p-dialog`, owns the form state):
+
+```html
+<template page>
+  <style>:host { display: block; }</style>
+
+  <p-dialog sync:open="dialogOpen" auto-close>
+    <span slot="title">{{editingId ? 'Edit' : 'Add'}}</span>
+    <!-- form controls sync:value="form.xxx" -->
+    <div slot="bottom">
+      <p-button variant="text" on:click="dialogOpen = false">Cancel</p-button>
+      <p-button color="primary" on:click="save">Save</p-button>
+    </div>
+  </p-dialog>
+
+  <script>
+    export default async ({ load }) => {
+      // the sub-page loads its own dependencies on demand (toast, etc.), independent of the host
+      return {
+        data: {
+          dialogOpen: false,
+          editingId: "",
+          form: { name: "" },
+        },
+        proto: {
+          // entry point called by the host: fill params and open the dialog
+          openForm({ id = "", name = "" } = {}) {
+            this.editingId = id;
+            this.form.name = name;
+            this.dialogOpen = true;
+          },
+          save() {
+            if (!this.form.name.trim()) return; // only non-empty validation
+            this.emit("form-save", {
+              data: { id: this.editingId, name: this.form.name },
+              bubbles: true,
+              composed: true, // cross Shadow DOM so the host can hear it
+            });
+            this.dialogOpen = false;
+          },
+        },
+      };
+    };
+  </script>
+</template>
+```
+
+### Needing a Fresh Instance Each Time (Destroy and Recreate)
+
+When the sub-page is allowed to lose state and you want a clean start each time, wrap it with `o-if` (toggling `o-if` clears and re-renders its internal nodes, so the `o-page` is destroyed and recreated accordingly, bypassing the immutable-src restriction):
+
+```html
+<o-if :value="formVisible">
+  <o-page src="./form.html" on:form-save="onFormSave"></o-page>
+</o-if>
+```
+
+Note: after recreation it is a brand-new instance; params must be passed again via method call. For dialog scenarios, the **resident + `openForm()` state-reset** approach is preferred.
+
+---
+
 ## State Management
 
 ### Global State

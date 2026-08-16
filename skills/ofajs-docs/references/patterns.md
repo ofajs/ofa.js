@@ -352,6 +352,141 @@
 
 ---
 
+## 单页面业务拆分（内嵌子页面模式）
+
+### 何时拆分
+
+一个页面模块同时承载「主列表 + 弹窗表单 + 多个子流程」时，`data` / `proto` 会迅速膨胀且职责不清。判断标准：
+
+- 弹窗内含**独立表单或多步流程** → 拆成独立页面模块
+- 页面 `data` 混入大量与主内容无关的临时状态（`form` / `dialogOpen` / `editingId` …）→ 拆
+- 纯展示、无独立业务状态的小片段 → 用组件模块（`<template component>`），不要拆 page
+
+### 通信模式：方法下发 + 事件上抛
+
+```
+宿主页面                                子页面（如 form.html）
+   │                                        │
+   │  this.shadow.$("#x").openForm(params)  │  ← 方法调用下发参数
+   │ ────────────────────────────────────▶  │
+   │                                        │
+   │  emit("form-save", { data,             │  ← 事件冒泡上抛结果
+   │    bubbles: true, composed: true })    │
+   │ ◀────────────────────────────────────  │
+   │  on:form-save="onFormSave" → event.data│
+```
+
+关键规则：
+
+1. **`<o-page>` 的 `src` 初始化后不可变**。运行时再赋值（含 `:src` 动态绑定、改 query 传参）会抛错 `A page that has already been initialized cannot be set with the src attribute`。因此运行时传参**必须走方法调用**，不能靠改 src/query
+2. **上抛事件必须 `bubbles: true, composed: true`**：子页面处于宿主 Shadow DOM 内，`composed` 缺省为 `false`，宿主在 `<o-page>` 标签上的 `on:xxx` 监听不到
+3. **分工**：子页面只管表单完整性（非空校验、交互状态）；归一化、id/时间戳生成、写库都在宿主
+4. **取消/关闭不通知宿主**：只置子页面自身 `dialogOpen = false`，无副作用
+
+### 完整示例
+
+宿主页面（列表 + 常驻内嵌弹窗页）：
+
+```html
+<template page>
+  <style>:host { display: block; }</style>
+
+  <!-- 常驻内嵌子页面；on:form-save 接住上抛事件 -->
+  <o-page id="form-page" src="./form.html" on:form-save="onFormSave"></o-page>
+
+  <button on:click="openAdd">新增</button>
+  <script>
+    export default async () => ({
+      data: { items: [] },
+      proto: {
+        getForm() {
+          const page = this.shadow.$("#form-page");
+          return page?.openForm ? page : null; // 子页面未就绪时防御
+        },
+        openAdd() {
+          this.getForm()?.openForm({ count: this.items.length });
+        },
+        openEdit(event, item) {
+          event.stopPropagation();
+          this.getForm()?.openForm({ id: item.id, name: item.name });
+        },
+        onFormSave(event) {
+          const { id, name } = event.data;
+          if (id) {
+            const target = this.items.find((it) => it.id === id);
+            if (target) target.name = name;
+          } else {
+            this.items.push({ id: `${Date.now()}`, name });
+          }
+          // 业务归一化与持久化都在宿主处理
+        },
+      },
+    });
+  </script>
+</template>
+```
+
+子页面（自带 `p-dialog`，自持表单状态）：
+
+```html
+<template page>
+  <style>:host { display: block; }</style>
+
+  <p-dialog sync:open="dialogOpen" auto-close>
+    <span slot="title">{{editingId ? '编辑' : '新增'}}</span>
+    <!-- 表单控件 sync:value="form.xxx" -->
+    <div slot="bottom">
+      <p-button variant="text" on:click="dialogOpen = false">取消</p-button>
+      <p-button color="primary" on:click="save">保存</p-button>
+    </div>
+  </p-dialog>
+
+  <script>
+    export default async ({ load }) => {
+      // 子页面自己按需 load 依赖（toast 等），不依赖宿主
+      return {
+        data: {
+          dialogOpen: false,
+          editingId: "",
+          form: { name: "" },
+        },
+        proto: {
+          // 宿主调用的打开入口：回填参数并打开弹窗
+          openForm({ id = "", name = "" } = {}) {
+            this.editingId = id;
+            this.form.name = name;
+            this.dialogOpen = true;
+          },
+          save() {
+            if (!this.form.name.trim()) return; // 只管非空校验
+            this.emit("form-save", {
+              data: { id: this.editingId, name: this.form.name },
+              bubbles: true,
+              composed: true, // 穿透 Shadow DOM，宿主才能监听
+            });
+            this.dialogOpen = false;
+          },
+        },
+      };
+    };
+  </script>
+</template>
+```
+
+### 需要每次全新实例（销毁重建）
+
+子页面允许状态丢失、想每次全新开始时，用 `o-if` 包裹（`o-if` 切换会清空并重新渲染内部节点，`o-page` 随之销毁重建，可规避 src 不可变限制）：
+
+```html
+<o-if :value="formVisible">
+  <o-page src="./form.html" on:form-save="onFormSave"></o-page>
+</o-if>
+```
+
+注意：重建后是全新实例，需重新调用方法传参；弹窗场景更推荐**常驻 + `openForm()` 重置状态**的方式。
+
+---
+
 ## 状态管理
 
 ### 全局状态

@@ -62,3 +62,7 @@ this.emit('data-changed', {
 - **冒泡机制**：`bubbles: true` 允许事件向上冒泡
 - **穿透 Shadow DOM**：`composed: true` 允许事件穿越 Shadow DOM 边界
 - **监听事件**：使用 `on:事件名` 监听自定义事件
+
+## 跨 Shadow DOM 上抛（内嵌 o-page 场景）
+
+页面模块被宿主以 `<o-page>` 内嵌时，处于宿主页面的 Shadow DOM 内。子页面向宿主上抛结果时，`emit` 必须同时开启 `bubbles` 和 `composed`，宿主

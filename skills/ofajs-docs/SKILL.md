@@ -62,6 +62,9 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `this.shadow.querySelector(".class")` | `this.shadow.$(".class")` | 使用 $() 方法选择元素 |
 | `ofaElement.scrollTop` 等 | `ofaElement.ele.scrollTop` | ofa.js 对象通过 .ele 访问原生属性 |
 | `document.querySelector("#id")` | `$("#id")` | 全局获取元素实例使用 `$()`，`document.querySelector` 返回原生元素，缺少 ofa.js 增强方法和响应式特性 |
+| `document.querySelector("o-app").goto(...)` | `$("o-app").goto(...)` 或 `this.app.goto(...)` | `goto()`/`replace()` 等导航方法只存在于 `$()` 包装对象上，原生 DOM 元素上没有；页面模块内部用 `this.app.goto(...)` |
+| `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` 返回的也是 ofa.js 包装对象，原生属性（shadowRoot、querySelector 等）必须通过 `.ele` 中转；ofa.js 自身属性（如 `.src`、`.data`、`.app`）可直接访问 |
+| `get xxx() { return this.obj.field }` + 模板 `{{xxx}}`（依赖异步数据） | data 中预定义 `xxx: ""`，在 ready/异步回调中赋值 | getter 在模板初始化阶段（ready 执行前）就被求值，若依赖的 data 字段尚未赋值（尤其 null/undefined 链式访问）会抛 TypeError 导致整页渲染崩溃；getter 仅适合依赖同步已有数据（有初始值）的简单计算 |
 
 ### 结构对照
 
@@ -73,6 +76,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `<template>` 在 o-fill 内部 | `<template>` 在 o-fill 外部 + `name` 属性 | 模板渲染时 template 必须在外部 |
 | `<o-app src="./page.html?key=val">` 在页面内嵌入子页面 | `<o-page src="./page.html?key=val">` | 嵌入页面模块用 `<o-page>`；`<o-app>` 仅用于加载 app-config.js 的微应用 |
 | HTML 中使用 `autoInstall` | HTML 中使用 `auto-install` | 组件 attrs 定义时用 camelCase，但在 HTML 中使用时必须转为 kebab-case（横杠命名） |
+| `location.origin + location.pathname + "#./pages/x.html"` | `location.origin + "/#/pages/x.html"` | hash 路由格式为 `#/pages/xxx.html`（`#` 后直接 `/`，不带 `./` 前缀，也不带多余 pathname）；构建外部分享链接用 `location.origin + "/#/..."` |
 
 ### 详细示例：`{{...}}` 的适用范围（重要）
 
@@ -171,6 +175,32 @@ messagesDiv.ele.scrollTop = messagesDiv.ele.scrollHeight;
 - **ofa.js 方法**：使用 ofa.js 对象的方法（如 `.on()`, `.text`, `.html` 等）
 - **原生属性**：通过 `.ele` 访问原生 DOM 属性（如 `.scrollTop`, `.scrollHeight`, `.clientWidth` 等）
 
+**Playwright 测试 / 浏览器控制台中的高频踩坑点**：`$("o-app").current` 返回的也是 ofa.js 包装对象，不是原生 DOM 元素。访问 shadow DOM 时容易写错。
+
+❌ **错误写法**（直接在包装对象上访问原生属性）：
+```javascript
+// Playwright 测试或浏览器控制台中
+const cur = $("o-app").current;
+cur.shadowRoot                    // → undefined（shadowRoot 是原生属性）
+cur.shadowRoot.querySelector(...) // → 报错 not a function
+```
+
+✅ **正确写法**（通过 `.ele` 中转访问原生属性；ofa.js 自身属性可直接访问）：
+```javascript
+const cur = $("o-app").current;
+cur.ele.shadowRoot                          // ✅ 通过 .ele 访问原生 shadowRoot
+cur.ele.shadowRoot.querySelector(".item")   // ✅ 原生查询
+cur.src                                     // ✅ ofa.js 包装对象的属性可直接访问
+cur.data                                    // ✅ ofa.js data 可直接访问
+```
+
+| 场景 | ❌ 错误写法 | ✅ 正确写法 |
+|------|------------|------------|
+| Playwright/浏览器中获取当前页面 shadow DOM | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` |
+| 测试中查询当前页面内部元素 | `$("o-app").current.shadowRoot.querySelector(...)` | `$("o-app").current.ele.shadowRoot.querySelector(...)` |
+
+**记忆口诀**：`$()` 返回 ofa.js 包装对象，`.current` 也是包装对象；ofa.js 自己加的属性（`.src`/`.data`/`.app`）直接用，浏览器原生的属性和方法（`.shadowRoot`/`.querySelector`/`.scrollTop`）一律走 `.ele`。
+
 ### 详细示例：方法命名规范
 
 `$` 是 ofa.js 内置特殊变量的保留前缀（`$data`、`$index`、`$host`、`$event`），自定义 `proto` 方法禁止使用 `$` 前缀。
@@ -240,6 +270,91 @@ export default async () => {
 - **语法正确** - 属性值内 `{{...}}` 不会被解析，必须使用指令绑定
 - **表达式完整** - `:style.` 的值是 JavaScript 表达式，可自由拼接字符串
 - **性能更优** - 只更新单个样式属性，而非整个 style 字符串
+
+### 详细示例：getter 模板陷阱（重要）
+
+页面模块中用 `get xxx() {}` 定义计算属性供模板 `{{xxx}}` 使用时，**getter 会在模块初始化阶段被立即求值**，此时 `ready()` 尚未执行。如果 getter 内部访问了 `this.data` 中尚未初始化的对象/数组字段（尤其是 null/undefined 或深层链式访问），就会抛 `TypeError` 导致整页渲染崩溃。
+
+**典型报错**：
+```
+Error: Error evaluating text expression: 'roleText'
+```
+
+❌ **错误写法**（getter 依赖异步获取的数据）：
+```javascript
+export default async ({ query }) => {
+  return {
+    data: {
+      userInfo: {},  // 初始为空对象
+    },
+    get roleText() {
+      // 模板初始化时立刻求值，此时 userInfo 还是 {}
+      // 若 userInfo 是 null/undefined 或做深层链式访问就会 TypeError
+      return ROLE_TEXT[this.userInfo.role] || "";
+    },
+    ready() {
+      this.loadInfo(); // 异步赋值 userInfo，但来不及
+    },
+    proto: {
+      async loadInfo() { /* ... */ }
+    }
+  };
+};
+// 模板：{{roleText}}
+```
+
+✅ **正确写法**（用 data 字段预定义安全默认值，在异步回调中赋值）：
+```javascript
+export default async ({ query }) => {
+  return {
+    data: {
+      userInfo: {},
+      roleText: "",  // 预定义为安全默认值
+    },
+    ready() {
+      this.loadInfo();
+    },
+    proto: {
+      async loadInfo() {
+        const info = await api.getInfo();
+        this.userInfo = info;
+        this.roleText = ROLE_TEXT[info.role] || info.role || ""; // 异步回调中赋值
+      },
+    },
+  };
+};
+// 模板：{{roleText}}
+```
+
+**getter 适用边界**：
+- ✅ **适合**：只依赖**同步已有数据**且有初始值的简单计算，如 `get double() { return this.count * 2 }`（count 有初始值 0）
+- ❌ **不适合**：计算结果依赖**异步获取**的数据（API 返回后才填充的对象/数组），改用 data 字段在异步回调中赋值
+
+**为什么 getter 会立即求值？**
+- ofa.js 模板引擎在模块初始化阶段会扫描模板中所有 `{{xxx}}` 表达式并建立响应式依赖
+- 此时 getter 被读取，触发 getter 内部对 `this.xxx` 的访问，建立依赖追踪
+- 而 `ready()` 在初始化完成后才执行，异步数据此时还未到达
+- 若 getter 体内访问的字段为 null/undefined，链式读取即抛错，整个模板渲染被中断
+
+### 详细示例：Hash 路由 URL 格式
+
+构建外部分享链接（邀请链接、邮件链接等）或测试中直接用 URL 导航时，hash 格式容易写错。
+
+ofa.js hash 路由格式：**`#/pages/xxx.html`**（`#` 后直接 `/`，不带 `./` 前缀）。
+
+❌ **错误写法**（带多余的 pathname 和 `./` 前缀）：
+```javascript
+const link = location.origin + location.pathname + "#./pages/set-password.html?token=xxx";
+// 结果：http://host/index.html#./pages/set-password.html?token=xxx  ← 错误
+```
+
+✅ **正确写法**（`#` 后直接 `/`，不带 pathname）：
+```javascript
+const link = location.origin + "/#/pages/set-password.html?token=xxx";
+// 结果：http://host/#/pages/set-password.html?token=xxx  ← 正确
+```
+
+**记忆口诀**：`#` 后面紧跟一个 `/`，再接从 `pages` 开始的路径；外部分享链接用 `location.origin + "/#/..."` 即可。
 
 ---
 

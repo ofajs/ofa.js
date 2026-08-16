@@ -62,6 +62,9 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `this.shadow.querySelector(".class")` | `this.shadow.$(".class")` | Use $() method to select elements |
 | `ofaElement.scrollTop` etc. | `ofaElement.ele.scrollTop` | ofa.js objects access native properties via .ele |
 | `document.querySelector("#id")` | `$("#id")` | Use `$()` to get element instances globally; `document.querySelector` returns native elements lacking ofa.js enhanced methods and reactive features |
+| `document.querySelector("o-app").goto(...)` | `$("o-app").goto(...)` or `this.app.goto(...)` | Navigation methods like `goto()`/`replace()` only exist on `$()` wrapper objects, not on native DOM elements; inside page modules use `this.app.goto(...)` |
+| `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` also returns an ofa.js wrapper object; native properties (shadowRoot, querySelector, etc.) must go through `.ele`, while ofa.js own properties (`.src`, `.data`, `.app`) can be accessed directly |
+| `get xxx() { return this.obj.field }` + template `{{xxx}}` (depends on async data) | Predefine `xxx: ""` in data, assign in ready/async callback | Getters are evaluated during module init (before `ready()`); if dependent data fields aren't assigned yet (especially null/undefined chained access), a TypeError will crash the entire page render. Getters are only suitable for simple computations depending on sync existing data (with initial values) |
 
 ### Structure Comparison
 
@@ -73,6 +76,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `<template>` inside o-fill | `<template>` outside o-fill + `name` attribute | Template rendering requires template outside with name attribute |
 | `<o-app src="./page.html?key=val">` to embed a sub-page inside a page | `<o-page src="./page.html?key=val">` | Embed a page module with `<o-page>`; `<o-app>` is for micro-apps with `app-config.js` |
 | Use `autoInstall` in HTML | Use `auto-install` in HTML | Component attrs use camelCase in definitions, but must be converted to kebab-case (hyphenated) when used in HTML |
+| `location.origin + location.pathname + "#./pages/x.html"` | `location.origin + "/#/pages/x.html"` | Hash routing format is `#/pages/xxx.html` (a `/` directly after `#`, no `./` prefix, no extra pathname); use `location.origin + "/#/..."` when building external share links |
 
 ### Detailed Example: `{{...}}` Scope (Important)
 
@@ -171,6 +175,32 @@ messagesDiv.ele.scrollTop = messagesDiv.ele.scrollHeight;
 - **ofa.js methods**: Use ofa.js object methods (e.g., `.on()`, `.text`, `.html`, etc.)
 - **Native properties**: Access native DOM properties via `.ele` (e.g., `.scrollTop`, `.scrollHeight`, `.clientWidth`, etc.)
 
+**Common pitfall in Playwright tests / browser console**: `$("o-app").current` also returns an ofa.js wrapper object, NOT a native DOM element. Accessing shadow DOM is easy to get wrong here.
+
+❌ **Wrong Way** (accessing native properties directly on wrapper object):
+```javascript
+// In Playwright tests or browser console
+const cur = $("o-app").current;
+cur.shadowRoot                    // → undefined (shadowRoot is a native property)
+cur.shadowRoot.querySelector(...) // → throws "not a function"
+```
+
+✅ **Correct Way** (go through `.ele` for native properties; ofa.js own properties can be accessed directly):
+```javascript
+const cur = $("o-app").current;
+cur.ele.shadowRoot                          // ✅ Access native shadowRoot via .ele
+cur.ele.shadowRoot.querySelector(".item")   // ✅ Native query
+cur.src                                     // ✅ ofa.js wrapper properties can be accessed directly
+cur.data                                    // ✅ ofa.js data can be accessed directly
+```
+
+| Scenario | ❌ Wrong Way | ✅ Correct Way |
+|----------|--------------|----------------|
+| Get current page's shadow DOM in Playwright/browser | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` |
+| Query elements inside current page in tests | `$("o-app").current.shadowRoot.querySelector(...)` | `$("o-app").current.ele.shadowRoot.querySelector(...)` |
+
+**Memory rule**: `$()` returns an ofa.js wrapper object, and `.current` is also a wrapper object. ofa.js own properties (`.src`/`.data`/`.app`) are used directly; browser-native properties and methods (`.shadowRoot`/`.querySelector`/`.scrollTop`) must always go through `.ele`.
+
 ### Detailed Example: Method Naming Convention
 
 `$` is a reserved prefix for ofa.js built-in special variables (`$data`, `$index`, `$host`, `$event`). Custom `proto` methods must NOT use the `$` prefix.
@@ -240,6 +270,91 @@ export default async () => {
 - **Correct syntax** - `{{...}}` in attribute values is NOT parsed, must use directive binding
 - **Full expression** - `:style.` value is a JavaScript expression, can freely concatenate strings
 - **Better performance** - Only updates individual style properties, not the entire style string
+
+### Detailed Example: Getter Template Pitfall (Important)
+
+When using `get xxx() {}` to define a computed property for template `{{xxx}}` in a page module, **the getter is evaluated immediately during module initialization**, before `ready()` runs. If the getter accesses an object/array field in `this.data` that hasn't been initialized yet (especially null/undefined or deep chained access), a `TypeError` will be thrown and the entire page render will crash.
+
+**Typical error**:
+```
+Error: Error evaluating text expression: 'roleText'
+```
+
+❌ **Wrong Way** (getter depends on asynchronously fetched data):
+```javascript
+export default async ({ query }) => {
+  return {
+    data: {
+      userInfo: {},  // Initially an empty object
+    },
+    get roleText() {
+      // Evaluated immediately at template init, userInfo is still {}
+      // Throws TypeError if userInfo is null/undefined or via deep chained access
+      return ROLE_TEXT[this.userInfo.role] || "";
+    },
+    ready() {
+      this.loadInfo(); // Asynchronously assigns userInfo, but too late
+    },
+    proto: {
+      async loadInfo() { /* ... */ }
+    }
+  };
+};
+// Template: {{roleText}}
+```
+
+✅ **Correct Way** (predefine a safe default in data, assign in async callback):
+```javascript
+export default async ({ query }) => {
+  return {
+    data: {
+      userInfo: {},
+      roleText: "",  // Predefine a safe default value
+    },
+    ready() {
+      this.loadInfo();
+    },
+    proto: {
+      async loadInfo() {
+        const info = await api.getInfo();
+        this.userInfo = info;
+        this.roleText = ROLE_TEXT[info.role] || info.role || ""; // Assign in async callback
+      },
+    },
+  };
+};
+// Template: {{roleText}}
+```
+
+**Getter applicability boundaries**:
+- ✅ **Suitable**: Simple computations depending only on **synchronously available data** with initial values, e.g., `get double() { return this.count * 2 }` (count has initial value 0)
+- ❌ **Not suitable**: Computations whose results depend on **asynchronously fetched** data (objects/arrays filled only after an API returns). Use a data field and assign it in an async callback instead
+
+**Why is the getter evaluated immediately?**
+- The ofa.js template engine scans all `{{xxx}}` expressions in the template during module initialization and establishes reactive dependencies
+- The getter is read at this point, triggering access to `this.xxx` inside the getter and establishing dependency tracking
+- `ready()` only runs after initialization completes; async data hasn't arrived yet
+- If the field accessed inside the getter body is null/undefined, chained reading throws an error, interrupting the entire template render
+
+### Detailed Example: Hash Routing URL Format
+
+When building external share links (invitation links, email links, etc.) or using URLs to navigate directly in tests, the hash format is easy to get wrong.
+
+ofa.js hash routing format: **`#/pages/xxx.html`** (a `/` directly after `#`, no `./` prefix).
+
+❌ **Wrong Way** (extra pathname and `./` prefix):
+```javascript
+const link = location.origin + location.pathname + "#./pages/set-password.html?token=xxx";
+// Result: http://host/index.html#./pages/set-password.html?token=xxx  ← Wrong
+```
+
+✅ **Correct Way** (`/` directly after `#`, no pathname):
+```javascript
+const link = location.origin + "/#/pages/set-password.html?token=xxx";
+// Result: http://host/#/pages/set-password.html?token=xxx  ← Correct
+```
+
+**Memory rule**: A `/` immediately follows `#`, then the path starting from `pages`. For external share links, use `location.origin + "/#/..."`.
 
 ---
 

@@ -58,6 +58,39 @@ ofa.js 提供了强大的模板渲染引擎，包含丰富的模板语法，能�
 </template>
 ```
 
+## `<code>` / `<pre>` 等元素内 `{{}}` 不解析（重要）
+
+`{{变量名}}` 只在**普通元素的文本节点**中生效。**`<code>`、`<pre>`（以及 `<script>`、`<style>`、`<textarea>`）等元素内的内容被当作"原样代码/文本"，`{{}}` 不会被解析**，会原样显示成字面字符串。
+
+❌ **错误写法**（`<code>` 内 `{{$data.code}}` 显示为字面文本）：
+
+```html
+<o-fill :value="rows">
+  <div class="td"><code>{{$data.code}}</code></div>
+</o-fill>
+```
+
+✅ **正确写法**（改用普通元素 + 样式模拟等宽字体）：
+
+```html
+<o-fill :value="rows">
+  <div class="td"><span class="mono">{{$data.code}}</span></div>
+</o-fill>
+```
+
+```css
+.mono {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 13px;
+  background: #f5f5f5;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+```
+
+- 踩坑特征：页面其余 `{{}}` 都正常渲染，唯独 `<code>`/`<pre>` 内的值显示为 `{{xxx}}` 字面、控制台无报错
+- 排查口诀：凡是"代码/预格式化/脚本/样式"语义的标签，动态值一律换普通元素（`span`/`div`）或用 `:html` 注入
+
 ## 关键要点
 
 - **数据对象**：每个页面都有 `data` 对象用于存储变量

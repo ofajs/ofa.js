@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.2 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.3 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -5849,6 +5849,12 @@ ${scriptContent}`;
       app.push(loadingEl);
     }
 
+    const oriNextPages = await getPagesData(src);
+
+    // Snapshot current pages after await;
+    // concurrent navigations (e.g. the initial hash goto racing with a
+    // popstate-driven goto) would otherwise both see "no current page"
+    // and append the same page twice.
     const currentPages = [];
     {
       const { current } = app;
@@ -5863,8 +5869,6 @@ ${scriptContent}`;
         }
       }
     }
-
-    const oriNextPages = await getPagesData(src);
 
     let container = app;
 
@@ -7337,7 +7341,7 @@ ${scriptContent}`;
     });
   };
 
-  const version = "ofa.js@4.7.2";
+  const version = "ofa.js@4.7.3";
   $.version = version.replace("ofa.js@", "");
 
   let isDebug = false;

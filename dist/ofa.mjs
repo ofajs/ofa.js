@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.2 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.3 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -5842,6 +5842,12 @@ const appendPage = async ({ src, app }) => {
     app.push(loadingEl);
   }
 
+  const oriNextPages = await getPagesData(src);
+
+  // Snapshot current pages after await;
+  // concurrent navigations (e.g. the initial hash goto racing with a
+  // popstate-driven goto) would otherwise both see "no current page"
+  // and append the same page twice.
   const currentPages = [];
   {
     const { current } = app;
@@ -5856,8 +5862,6 @@ const appendPage = async ({ src, app }) => {
       }
     }
   }
-
-  const oriNextPages = await getPagesData(src);
 
   let container = app;
 
@@ -7330,7 +7334,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.7.2";
+const version = "ofa.js@4.7.3";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

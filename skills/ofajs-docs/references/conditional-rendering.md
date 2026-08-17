@@ -191,6 +191,33 @@
 </template>
 ```
 
+## o-fill 内部使用 o-if（作用域约束）
+
+`o-if` 放在 `o-fill` 内部时，其 `:value` 表达式同样受到 o-fill 的**独立作用域**约束（详见[列表渲染](./list-rendering.md)）：只能访问 `$data`、`$index`、`$host`，**不能直接引用页面 data 中的变量名**。
+
+❌ **错误写法**（直接引用页面 data 变量 `canEditPrice` → 条件恒为 undefined，内容不渲染且控制台无报错，难以排查）：
+
+```html
+<o-fill :value="products">
+  <o-if :value="canEditPrice">
+    <button>改价</button>
+  </o-if>
+</o-fill>
+```
+
+✅ **正确写法**（通过 `$host` 访问页面数据 / 调用方法）：
+
+```html
+<o-fill :value="products">
+  <o-if :value="$host.canEditPrice">
+    <button>改价</button>
+  </o-if>
+</o-fill>
+```
+
+- `:value` 中访问当前列表项数据用 `$data.xxx`；访问页面级数据或调用方法用 `$host.xxx`
+- 踩坑特征：页面其余部分正常渲染、唯独 `o-if` 内容一直不出现、控制台无报错——优先检查是否忘了 `$host` 前缀
+
 ## 条件渲染最佳实践
 
 1. **使用场景**：当元素在不同条件下很少切换时，使用 `o-if` 更合适，因为这样可以完全移除不需要的元素，节省内存。

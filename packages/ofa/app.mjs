@@ -30,6 +30,12 @@ const appendPage = async ({ src, app }) => {
     app.push(loadingEl);
   }
 
+  const oriNextPages = await getPagesData(src);
+
+  // Snapshot current pages after await;
+  // concurrent navigations (e.g. the initial hash goto racing with a
+  // popstate-driven goto) would otherwise both see "no current page"
+  // and append the same page twice.
   const currentPages = [];
   {
     const { current } = app;
@@ -44,8 +50,6 @@ const appendPage = async ({ src, app }) => {
       }
     }
   }
-
-  const oriNextPages = await getPagesData(src);
 
   let container = app;
 

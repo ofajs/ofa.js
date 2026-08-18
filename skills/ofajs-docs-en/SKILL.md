@@ -540,6 +540,45 @@ The `src` of `<o-page>` is **immutable after initialization**; the source code t
 - The page's `data` is polluted with lots of temporary state unrelated to the main content (`form` / `dialogOpen` / `editingId` …) → split
 - Small purely-presentational fragments with no independent business state → use a component module, don't split into a page
 
+### Detailed Example: Directive Values Are JS Expressions — Bare Literals (Especially Reserved Words) Throw Errors (Important)
+
+The **values** of `attr:` / `:prop` / `sync:` / `class:` / `:style.` / `on:` are **always parsed as JavaScript expressions**. You cannot write bare identifiers or bare string literals. Strings must be quoted; JS reserved words (`in` / `class` / `for`, etc.) on their own are illegal as expressions and throw a SyntaxError immediately.
+
+**Typical error** (console keeps logging the error, some page functionality breaks):
+```
+SyntaxError: Unexpected token 'in'
+```
+
+❌ **Wrong Way** (writing `attr:data-type="in"` as a plain attribute value with a bare literal — `in` is a JS reserved word parsed as an expression):
+```html
+<button attr:data-type="in">Stock in</button>
+<!-- ofa.js treats the value "in" as an expression → SyntaxError: Unexpected token 'in' -->
+```
+
+✅ **Correct Way** (method name / string literal inside expression):
+```html
+<button on:click="$host.stockIn($event)">Stock in</button>
+<!-- Bind the event to a method name to avoid writing bare literals in directive values -->
+
+<button attr:data-type="'in'">Stock in</button>
+<!-- When you really need to pass a literal, quote it as a string expression -->
+```
+
+**Debugging mnemonic**: `SyntaxError: Unexpected token '<xxx>'` (words like `in`/`for`/`if`) → a bare identifier was written in a directive attribute value. Prefer refactoring "type-identifying" scenarios into method dispatch (e.g. `on:click="$host.stockIn($event)"`), and quote string literals when placing them in `attr:` values (`attr:data-type="'in'"`).
+
+### Detailed Example: Page Module Cache Makes Code Changes Not Take Effect (Easiest to Misdiagnose When Debugging/Testing)
+
+ofa.js has an **in-memory module cache** for already-loaded page modules (reusing component/page module definitions for the same URL), and pages pull their template files via `fetch` — if the static server sends HTTP caching headers (e.g. `http-server` without `-c-1`), the browser also hits the disk cache. The combined effect of both caches: **you change the page file, but hash navigation (without a full page reload) still renders the old version**, with no errors in the console — extremely easy to misdiagnose as "my code is wrong" and waste time debugging.
+
+**Typical scenario**: in Playwright tests or a browser, navigating directly to `#/pages/xxx.html` for debugging; after repeatedly modifying the page template, the effect never changes. Even corrupting the file into an obviously broken version still renders the old logic normally.
+
+✅ **Correct approach**:
+- The dev server **must disable HTTP caching**: `http-server . -p 5173 -c-1` (`-c-1` = disable cache; `npm run dev` already includes it, `npm start` does not).
+- To force a reload in tests/debugging, **do a full-page refresh with a complete URL carrying a query**: `http://localhost:5173/index.html?t=v1#/pages/xxx.html` — when the query changes, `fetch` treats it as a new URL and bypasses the cache.
+- In Playwright, don't rely on "navigate the hash then wait for the module to update"; use `page.goto(url)` to load the whole page directly.
+
+**Debugging mnemonic**: code changes not taking effect + no console errors → suspect caching first (module cache / HTTP cache); force-refresh with a query-bearing URL to rule it out. Don't bisect your own code first.
+
 ---
 
 ## Core Syntax Points

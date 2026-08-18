@@ -581,6 +581,32 @@ ofa.js has an **in-memory module cache** for already-loaded page modules (reusin
 
 ---
 
+### Detailed Example: `$host` / `$data` Are Only Available in o-fill's item Scope — Use Method Names Directly at Root Level (Important)
+
+`$host` / `$data` are injected by ofa.js into the item scope **when x-fill (o-fill) renders list items** (`createItem` creates `{ $data, $host, $index }`). **The root-level scope (top of the page template, outside o-fill) has no `$host` / `$data`** — `on:click="$host.xxx()"` throws `Error evaluating element expression: 'on:click="$host.xxx()"'`; clicks do nothing and the console logs an error.
+
+✅ **Correct Way**:
+```html
+<!-- Root level: write the method name directly (proto methods live on the page instance) -->
+<button on:click="openStockHelp()">?</button>
+<button on:click="goToPage(currentPage - 1)">Previous</button>
+```
+```html
+<!-- Inside o-fill: $data / $host / $index are available -->
+<o-fill :value="rows">
+  <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
+</o-fill>
+```
+
+❌ **Wrong Way (using `$host` at root level)**:
+```html
+<button on:click="$host.openStockHelp()">?</button>  <!-- throws -->
+```
+
+**Debugging mnemonic**: an event expression like `on:click` reports `Error evaluating element expression` → first check whether the element is inside an o-fill. If it isn't, drop the `$host.` and write the method name directly (keep `$host` only for things like numeric page buttons inside an o-fill). For property bindings (`:disabled="page <= 1"`) at root level, use the data field name directly — no `$host` needed.
+
+---
+
 ## Core Syntax Points
 
 ### Module Structure

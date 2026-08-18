@@ -581,6 +581,32 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 
 ---
 
+### 详细示例：`$host` / `$data` 只在 o-fill 的 item 作用域可用，根级元素直接用方法名（重要）
+
+`$host` / `$data` 由 ofa.js 在 **x-fill（o-fill）渲染列表项时**注入到 item 作用域（`createItem` 创建 `{ $data, $host, $index }`）。**根级（页面模板顶层、非 o-fill 内）作用域没有 `$host` / `$data`**，`on:click="$host.xxx()"` 会抛 `Error evaluating element expression: 'on:click="$host.xxx()"'`，点击无反应且 console 报错。
+
+✅ **正确写法**：
+```html
+<!-- 根级：直接写方法名（proto 方法挂在页面实例上） -->
+<button on:click="openStockHelp()">?</button>
+<button on:click="goToPage(currentPage - 1)">上一页</button>
+```
+```html
+<!-- o-fill 内：才有 $data / $host / $index -->
+<o-fill :value="rows">
+  <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
+</o-fill>
+```
+
+❌ **错误写法（根级用 `$host`）**：
+```html
+<button on:click="$host.openStockHelp()">?</button>  <!-- 报错 -->
+```
+
+**排查口诀**：`on:click` 等事件表达式报 `Error evaluating element expression` → 先看元素是否在 o-fill 内；不在 o-fill 内就去掉 `$host.` 直接写方法名（o-fill 内的数字页码按钮等才保留 `$host`）。属性绑定（`:disabled="page <= 1"`）根级直接用 data 字段名，无需 `$host`。
+
+---
+
 ## 核心语法要点
 
 ### 模块结构

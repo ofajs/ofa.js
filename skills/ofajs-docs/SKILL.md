@@ -540,6 +540,45 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 - 页面 `data` 混入大量与主内容无关的临时状态（`form` / `dialogOpen` / `editingId` …）→ 拆
 - 纯展示、无独立业务状态的小片段 → 用组件模块，不要拆 page
 
+### 详细示例：模板指令的值是 JS 表达式，裸字面量（尤其保留字）报错（重要）
+
+`attr:` / `:prop` / `sync:` / `class:` / `:style.` / `on:` 的**值一律按 JavaScript 表达式解析**，不能写裸标识符或裸字符串字面量。字符串必须加引号；JS 保留字（`in` / `class` / `for` 等）单独作表达式本身就非法，会直接报 SyntaxError。
+
+**典型报错**（控制台持续报错，页面部分功能失效）：
+```
+SyntaxError: Unexpected token 'in'
+```
+
+❌ **错误写法**（把 `attr:data-type="in"` 当普通属性值写裸字面量，`in` 是 JS 保留字被当作表达式解析）：
+```html
+<button attr:data-type="in">入库</button>
+<!-- ofa.js 将值 "in" 当作表达式 → SyntaxError: Unexpected token 'in' -->
+```
+
+✅ **正确写法**（方法名 / 表达式内字符串字面量）：
+```html
+<button on:click="$host.stockIn($event)">入库</button>
+<!-- 事件绑到方法名，避免在指令值里写裸字面量 -->
+
+<button attr:data-type="'in'">入库</button>
+<!-- 确需传字面量时加引号，作为字符串表达式 -->
+```
+
+**排查口诀**：`SyntaxError: Unexpected token '<xxx>'`（`in`/`for`/`if` 等词）→ 必是指令属性值里写了裸标识符。优先把需要"标识类型"的场景改成方法名分发（如 `on:click="$host.stockIn($event)"`），把字符串字面量放进 `attr:` 值时要加引号（`attr:data-type="'in'"`）。
+
+### 详细示例：页面模块缓存导致改代码不生效（调试/测试时最容易误判）
+
+ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用组件/页面模块定义），且页面通过 `fetch` 拉取模板文件——若静态服务器带 HTTP 缓存（如 `http-server` 不带 `-c-1`），浏览器还会命中磁盘缓存。两个缓存叠加的表现：**改了页面文件，但 hash 导航（不整页刷新）仍渲染旧版本**，console 无任何报错，极易误判为"代码没改对"而浪费时间排查。
+
+**典型场景**：Playwright 测试或浏览器里用 `#/pages/xxx.html` 直接导航调试，反复修改页面模板后效果不变；甚至把文件改坏成明显错误的版本，页面仍正常渲染旧逻辑。
+
+✅ **正确做法**：
+- 开发服务器**必须禁用 HTTP 缓存**：`http-server . -p 5173 -c-1`（`-c-1` = 禁用缓存；`npm run dev` 已内置，`npm start` 不带）。
+- 测试/调试需要强制重新加载时，**用带 query 的完整 URL 整页刷新**：`http://localhost:5173/index.html?t=v1#/pages/xxx.html`——query 变了 fetch 视为新 URL，绕过缓存。
+- Playwright 中不要靠"导航 hash 后再等模块更新"，直接 `page.goto(url)` 整页加载。
+
+**排查口诀**：改代码不生效 + console 无报错 → 先怀疑缓存（模块缓存 / HTTP 缓存），用带 query 的 URL 强刷排除；不要先用二分法怀疑自己的代码。
+
 ---
 
 ## 核心语法要点

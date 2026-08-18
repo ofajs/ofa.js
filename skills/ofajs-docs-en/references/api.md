@@ -743,6 +743,8 @@ Go back to the previous page.
 page.back();
 ```
 
+> ⚠️ `goto` / `replace` / `back` (as well as `src` / `pageAnime` / `pageIsReady`) are **built-in members** of the o-page instance. Page modules' `proto` methods and `data` fields **must not use these names**, otherwise module registration fails (e.g. "'back' on 'proto' is already taken") and the whole page cannot render. See [SKILL.md](../SKILL.md) "proto / data Must Not Collide with Built-in Reserved Names".
+
 ---
 
 ## formData

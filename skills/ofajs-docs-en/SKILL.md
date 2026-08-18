@@ -47,6 +47,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `{{row.price}}` | `{{$data.price}}` | Must use $data to access data inside o-fill |
 | `:class="item.type"` | `attr:type="$data.type"` | Property binding must also use $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | Custom methods don't use `$` prefix |
+| `proto: { back() {} }` / `data: { back: "" }` (colliding with a built-in reserved name) | Avoid `back` / `goto` / `replace` / `pageAnime` / `pageIsReady` / `src` and any method on `$.fn` for custom methods/fields | These names are already taken by ofa.js: `back()` / `goto()` / `replace()` are the page instance's built-in navigation methods (`back()` is equivalent to `this.app.back()`), `src` is the page address property, and the generic `$.fn` methods (`on` / `emit` / `$` / `text`, etc.) are unavailable too. On collision, newer versions throw a registration error like "'back' on 'proto' is already taken" and the whole page fails to register; a `data` field collision throws directly. See the detailed example below |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | `{{...}}` in attribute values is NOT parsed; dynamic attributes must use `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | `{{...}}` is NOT parsed in attribute values; dynamic styles use `:style.` |
 | `:disabled="isLoading"` (boolean attributes like disabled/checked/readonly) | `attr:disabled="isLoading"` | `:prop` renders `false` as the attribute string `"false"`; HTML boolean attributes take effect whenever present, so the button stays disabled forever; `attr:` cancels the attribute setting entirely when the value is `false` |
@@ -275,6 +276,49 @@ export default async () => {
   <span>{{$host.formatBytes($data.size)}}</span>
 </o-fill>
 ```
+
+### Detailed Example: proto / data Must Not Collide with Built-in Reserved Names (Important)
+
+The `proto` methods and `data` fields of a page module **must not use names already occupied by ofa.js**, otherwise module registration fails outright (the whole page cannot render). Newer versions log:
+
+```
+Page http://.../xxx.html has invalid registration parameters: 'back' on 'proto' is already taken, please rename 'back' to something else.
+```
+
+**Reserved built-in names (provided by the page instance)**:
+- Page navigation methods: `back()` (go back; equivalent to `this.app.back()`), `goto()`, `replace()`
+- Page properties: `src` (page address), `pageAnime` (transition animation), `pageIsReady`
+- Generic `$.fn` methods (`on` / `off` / `emit` / `$` / `text` / `html` / `css` / `data`, etc.)
+
+A `data` field colliding with a reserved name **throws directly** (`page_invalid_key`); a `proto` method collision **throws a registration error in newer versions**, while older versions only `console.warn` — but the method still gets overwritten by the built-in implementation, so behavior is equally unreliable.
+
+❌ **Wrong Way** (custom `back` collides with the built-in back-navigation method):
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    back() {           // ❌ Collides with built-in back() navigation
+      this.phase = "input";
+    },
+  },
+});
+```
+
+✅ **Correct Way** (use a non-colliding, semantic name):
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    backToInput() {    // ✅ Semantic name avoids collision with built-in back()
+      this.phase = "input";
+    },
+  },
+});
+```
+
+**Debugging mnemonic**: when the error says "'xxx' on 'proto' is already taken", that name is a built-in reserved name. First avoid `back` / `goto` / `replace` / `src` / `pageAnime` / `pageIsReady` and the generic methods on `$.fn` (see the built-in `proto` definitions in [packages/ofa/page.mjs](../../packages/ofa/page.mjs)); prefer business-semantic names for custom methods (e.g. `openXxx` / `saveXxx` / `backToInput`).
 
 ### Detailed Example: Dynamic Style Syntax
 

@@ -47,6 +47,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `{{row.price}}` | `{{$data.price}}` | o-fill 内必须使用 $data 访问数据 |
 | `:class="item.type"` | `attr:type="$data.type"` | 属性绑定也必须使用 $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | 自定义方法不加 `$` 前缀 |
+| `proto: { back() {} }` / `data: { back: "" }`（与内置保留名重名） | 自定义方法 / 字段避开 `back` / `goto` / `replace` / `pageAnime` / `pageIsReady` / `src` 及 `$.fn` 上的方法名 | 这些名称已被 ofa.js 占用：`back()` / `goto()` / `replace()` 是页面实例自带的导航方法（`back()` 等价 `this.app.back()`），`src` 是页面地址属性；`$.fn` 上的通用方法（`on` / `emit` / `$` / `text` 等）同样不可用。重名时新版直接报「注册参数有误，'proto'上的'xxx'已被占用」导致整页注册失败；`data` 字段冲突则直接 throw，详见下方详细示例 |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | 属性值内 `{{...}}` 不解析，动态属性必须用 `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | 属性值内一律不解析 `{{...}}`，动态样式用 `:style.` |
 | `:disabled="isLoading"`（disabled/checked/readonly 等布尔属性） | `attr:disabled="isLoading"` | `:prop` 会把 `false` 渲染成属性字符串 `"false"`，HTML 布尔属性只要存在就生效，按钮永远禁用；`attr:` 在值为 `false` 时直接取消属性设置 |
@@ -275,6 +276,49 @@ export default async () => {
   <span>{{$host.formatBytes($data.size)}}</span>
 </o-fill>
 ```
+
+### 详细示例：proto / data 禁止与内置保留名冲突（重要）
+
+页面模块的 `proto` 方法与 `data` 字段**不能使用 ofa.js 已占用的内置名称**，否则模块注册直接失败（整页无法渲染）。新版控制台报错：
+
+```
+页面 http://.../xxx.html 的注册参数有误，'proto'上的'back'已被占用，请将'back'改为其他名字。
+```
+
+**已占用的内置名称（页面实例自带）**：
+- 页面导航方法：`back()`（后退，等价 `this.app.back()`）、`goto()`、`replace()`
+- 页面属性：`src`（页面地址）、`pageAnime`（切换动画）、`pageIsReady`
+- `$.fn` 上的通用方法（`on` / `off` / `emit` / `$` / `text` / `html` / `css` / `data` 等）
+
+`data` 里的字段与这些保留名冲突时会**直接 throw**（`page_invalid_key`）；`proto` 里的方法重名在较新版本**直接报注册错误**，旧版本虽只是 `console.warn` 但方法会被内置实现覆盖，行为同样不可靠。
+
+❌ **错误写法**（自定义 `back` 与内置后退方法重名）：
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    back() {           // ❌ 与内置后退导航 back() 重名
+      this.phase = "input";
+    },
+  },
+});
+```
+
+✅ **正确写法**（改用不冲突的语义化命名）：
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    backToInput() {    // ✅ 语义化命名，避免与内置 back() 冲突
+      this.phase = "input";
+    },
+  },
+});
+```
+
+**排查口诀**：报错出现「'proto' 上的 'xxx' 已被占用」→ 该名字必是内置保留名。先规避 `back` / `goto` / `replace` / `src` / `pageAnime` / `pageIsReady` 及 `$.fn` 上的通用方法名（具体内置实现见 [packages/ofa/page.mjs](../../packages/ofa/page.mjs) 的 `proto` 定义）；自定义方法尽量用业务语义命名（如 `openXxx` / `saveXxx` / `backToInput`）。
 
 ### 详细示例：动态样式语法
 

@@ -47,6 +47,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `{{row.price}}` | `{{$data.price}}` | Must use $data to access data inside o-fill |
 | `:class="item.type"` | `attr:type="$data.type"` | Property binding must also use $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | Custom methods don't use `$` prefix |
+| `proto: { back() {} }` / `data: { back: "" }` (colliding with a built-in reserved name) | Avoid `back` / `goto` / `replace` / `pageAnime` / `pageIsReady` / `src` and any method on `$.fn` for custom methods/fields | These names are already taken by ofa.js: `back()` / `goto()` / `replace()` are the page instance's built-in navigation methods (`back()` is equivalent to `this.app.back()`), `src` is the page address property, and the generic `$.fn` methods (`on` / `emit` / `$` / `text`, etc.) are unavailable too. On collision, newer versions throw a registration error like "'back' on 'proto' is already taken" and the whole page fails to register; a `data` field collision throws directly. See the detailed example below |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | `{{...}}` in attribute values is NOT parsed; dynamic attributes must use `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | `{{...}}` is NOT parsed in attribute values; dynamic styles use `:style.` |
 | `:disabled="isLoading"` (boolean attributes like disabled/checked/readonly) | `attr:disabled="isLoading"` | `:prop` renders `false` as the attribute string `"false"`; HTML boolean attributes take effect whenever present, so the button stays disabled forever; `attr:` cancels the attribute setting entirely when the value is `false` |
@@ -276,6 +277,49 @@ export default async () => {
 </o-fill>
 ```
 
+### Detailed Example: proto / data Must Not Collide with Built-in Reserved Names (Important)
+
+The `proto` methods and `data` fields of a page module **must not use names already occupied by ofa.js**, otherwise module registration fails outright (the whole page cannot render). Newer versions log:
+
+```
+Page http://.../xxx.html has invalid registration parameters: 'back' on 'proto' is already taken, please rename 'back' to something else.
+```
+
+**Reserved built-in names (provided by the page instance)**:
+- Page navigation methods: `back()` (go back; equivalent to `this.app.back()`), `goto()`, `replace()`
+- Page properties: `src` (page address), `pageAnime` (transition animation), `pageIsReady`
+- Generic `$.fn` methods (`on` / `off` / `emit` / `$` / `text` / `html` / `css` / `data`, etc.)
+
+A `data` field colliding with a reserved name **throws directly** (`page_invalid_key`); a `proto` method collision **throws a registration error in newer versions**, while older versions only `console.warn` — but the method still gets overwritten by the built-in implementation, so behavior is equally unreliable.
+
+❌ **Wrong Way** (custom `back` collides with the built-in back-navigation method):
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    back() {           // ❌ Collides with built-in back() navigation
+      this.phase = "input";
+    },
+  },
+});
+```
+
+✅ **Correct Way** (use a non-colliding, semantic name):
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    backToInput() {    // ✅ Semantic name avoids collision with built-in back()
+      this.phase = "input";
+    },
+  },
+});
+```
+
+**Debugging mnemonic**: when the error says "'xxx' on 'proto' is already taken", that name is a built-in reserved name. First avoid `back` / `goto` / `replace` / `src` / `pageAnime` / `pageIsReady` and the generic methods on `$.fn` (see the built-in `proto` definitions in [packages/ofa/page.mjs](../../packages/ofa/page.mjs)); prefer business-semantic names for custom methods (e.g. `openXxx` / `saveXxx` / `backToInput`).
+
 ### Detailed Example: Dynamic Style Syntax
 
 **`{{...}}` is NOT parsed in attribute values**. For dynamic values:
@@ -495,6 +539,71 @@ The `src` of `<o-page>` is **immutable after initialization**; the source code t
 - The dialog contains an independent form / multi-step flow → split
 - The page's `data` is polluted with lots of temporary state unrelated to the main content (`form` / `dialogOpen` / `editingId` …) → split
 - Small purely-presentational fragments with no independent business state → use a component module, don't split into a page
+
+### Detailed Example: Directive Values Are JS Expressions — Bare Literals (Especially Reserved Words) Throw Errors (Important)
+
+The **values** of `attr:` / `:prop` / `sync:` / `class:` / `:style.` / `on:` are **always parsed as JavaScript expressions**. You cannot write bare identifiers or bare string literals. Strings must be quoted; JS reserved words (`in` / `class` / `for`, etc.) on their own are illegal as expressions and throw a SyntaxError immediately.
+
+**Typical error** (console keeps logging the error, some page functionality breaks):
+```
+SyntaxError: Unexpected token 'in'
+```
+
+❌ **Wrong Way** (writing `attr:data-type="in"` as a plain attribute value with a bare literal — `in` is a JS reserved word parsed as an expression):
+```html
+<button attr:data-type="in">Stock in</button>
+<!-- ofa.js treats the value "in" as an expression → SyntaxError: Unexpected token 'in' -->
+```
+
+✅ **Correct Way** (method name / string literal inside expression):
+```html
+<button on:click="$host.stockIn($event)">Stock in</button>
+<!-- Bind the event to a method name to avoid writing bare literals in directive values -->
+
+<button attr:data-type="'in'">Stock in</button>
+<!-- When you really need to pass a literal, quote it as a string expression -->
+```
+
+**Debugging mnemonic**: `SyntaxError: Unexpected token '<xxx>'` (words like `in`/`for`/`if`) → a bare identifier was written in a directive attribute value. Prefer refactoring "type-identifying" scenarios into method dispatch (e.g. `on:click="$host.stockIn($event)"`), and quote string literals when placing them in `attr:` values (`attr:data-type="'in'"`).
+
+### Detailed Example: Page Module Cache Makes Code Changes Not Take Effect (Easiest to Misdiagnose When Debugging/Testing)
+
+ofa.js has an **in-memory module cache** for already-loaded page modules (reusing component/page module definitions for the same URL), and pages pull their template files via `fetch` — if the static server sends HTTP caching headers (e.g. `http-server` without `-c-1`), the browser also hits the disk cache. The combined effect of both caches: **you change the page file, but hash navigation (without a full page reload) still renders the old version**, with no errors in the console — extremely easy to misdiagnose as "my code is wrong" and waste time debugging.
+
+**Typical scenario**: in Playwright tests or a browser, navigating directly to `#/pages/xxx.html` for debugging; after repeatedly modifying the page template, the effect never changes. Even corrupting the file into an obviously broken version still renders the old logic normally.
+
+✅ **Correct approach**:
+- The dev server **must disable HTTP caching**: `http-server . -p 5173 -c-1` (`-c-1` = disable cache; `npm run dev` already includes it, `npm start` does not).
+- To force a reload in tests/debugging, **do a full-page refresh with a complete URL carrying a query**: `http://localhost:5173/index.html?t=v1#/pages/xxx.html` — when the query changes, `fetch` treats it as a new URL and bypasses the cache.
+- In Playwright, don't rely on "navigate the hash then wait for the module to update"; use `page.goto(url)` to load the whole page directly.
+
+**Debugging mnemonic**: code changes not taking effect + no console errors → suspect caching first (module cache / HTTP cache); force-refresh with a query-bearing URL to rule it out. Don't bisect your own code first.
+
+---
+
+### Detailed Example: `$host` / `$data` Are Only Available in o-fill's item Scope — Use Method Names Directly at Root Level (Important)
+
+`$host` / `$data` are injected by ofa.js into the item scope **when x-fill (o-fill) renders list items** (`createItem` creates `{ $data, $host, $index }`). **The root-level scope (top of the page template, outside o-fill) has no `$host` / `$data`** — `on:click="$host.xxx()"` throws `Error evaluating element expression: 'on:click="$host.xxx()"'`; clicks do nothing and the console logs an error.
+
+✅ **Correct Way**:
+```html
+<!-- Root level: write the method name directly (proto methods live on the page instance) -->
+<button on:click="openStockHelp()">?</button>
+<button on:click="goToPage(currentPage - 1)">Previous</button>
+```
+```html
+<!-- Inside o-fill: $data / $host / $index are available -->
+<o-fill :value="rows">
+  <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
+</o-fill>
+```
+
+❌ **Wrong Way (using `$host` at root level)**:
+```html
+<button on:click="$host.openStockHelp()">?</button>  <!-- throws -->
+```
+
+**Debugging mnemonic**: an event expression like `on:click` reports `Error evaluating element expression` → first check whether the element is inside an o-fill. If it isn't, drop the `$host.` and write the method name directly (keep `$host` only for things like numeric page buttons inside an o-fill). For property bindings (`:disabled="page <= 1"`) at root level, use the data field name directly — no `$host` needed.
 
 ---
 

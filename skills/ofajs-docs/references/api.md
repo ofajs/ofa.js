@@ -743,6 +743,8 @@ page.replace("./new-page.html");
 page.back();
 ```
 
+> ⚠️ `goto` / `replace` / `back`（以及 `src` / `pageAnime` / `pageIsReady`）是 o-page 实例的**内置成员**，页面模块的 `proto` 方法与 `data` 字段**禁止重名**，否则模块注册报错（如「'proto'上的'back'已被占用」），整页无法渲染。详见 [SKILL.md](../SKILL.md)「proto / data 禁止与内置保留名冲突」。
+
 ---
 
 ## formData

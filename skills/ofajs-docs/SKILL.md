@@ -47,6 +47,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `{{row.price}}` | `{{$data.price}}` | o-fill 内必须使用 $data 访问数据 |
 | `:class="item.type"` | `attr:type="$data.type"` | 属性绑定也必须使用 $data |
 | `proto: { $formatBytes() {} }` | `proto: { formatBytes() {} }` | 自定义方法不加 `$` 前缀 |
+| `proto: { back() {} }` / `data: { back: "" }`（与内置保留名重名） | 自定义方法 / 字段避开 `back` / `goto` / `replace` / `pageAnime` / `pageIsReady` / `src` 及 `$.fn` 上的方法名 | 这些名称已被 ofa.js 占用：`back()` / `goto()` / `replace()` 是页面实例自带的导航方法（`back()` 等价 `this.app.back()`），`src` 是页面地址属性；`$.fn` 上的通用方法（`on` / `emit` / `$` / `text` 等）同样不可用。重名时新版直接报「注册参数有误，'proto'上的'xxx'已被占用」导致整页注册失败；`data` 字段冲突则直接 throw，详见下方详细示例 |
 | `title="{{name}}"` / `:title="name"` | `attr:title="name"` | 属性值内 `{{...}}` 不解析，动态属性必须用 `attr:` |
 | `attr:style="width: {{pct}}%"` | `:style.width="pct + '%'"` | 属性值内一律不解析 `{{...}}`，动态样式用 `:style.` |
 | `:disabled="isLoading"`（disabled/checked/readonly 等布尔属性） | `attr:disabled="isLoading"` | `:prop` 会把 `false` 渲染成属性字符串 `"false"`，HTML 布尔属性只要存在就生效，按钮永远禁用；`attr:` 在值为 `false` 时直接取消属性设置 |
@@ -276,6 +277,49 @@ export default async () => {
 </o-fill>
 ```
 
+### 详细示例：proto / data 禁止与内置保留名冲突（重要）
+
+页面模块的 `proto` 方法与 `data` 字段**不能使用 ofa.js 已占用的内置名称**，否则模块注册直接失败（整页无法渲染）。新版控制台报错：
+
+```
+页面 http://.../xxx.html 的注册参数有误，'proto'上的'back'已被占用，请将'back'改为其他名字。
+```
+
+**已占用的内置名称（页面实例自带）**：
+- 页面导航方法：`back()`（后退，等价 `this.app.back()`）、`goto()`、`replace()`
+- 页面属性：`src`（页面地址）、`pageAnime`（切换动画）、`pageIsReady`
+- `$.fn` 上的通用方法（`on` / `off` / `emit` / `$` / `text` / `html` / `css` / `data` 等）
+
+`data` 里的字段与这些保留名冲突时会**直接 throw**（`page_invalid_key`）；`proto` 里的方法重名在较新版本**直接报注册错误**，旧版本虽只是 `console.warn` 但方法会被内置实现覆盖，行为同样不可靠。
+
+❌ **错误写法**（自定义 `back` 与内置后退方法重名）：
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    back() {           // ❌ 与内置后退导航 back() 重名
+      this.phase = "input";
+    },
+  },
+});
+```
+
+✅ **正确写法**（改用不冲突的语义化命名）：
+
+```javascript
+export default async () => ({
+  data: { dialogOpen: false },
+  proto: {
+    backToInput() {    // ✅ 语义化命名，避免与内置 back() 冲突
+      this.phase = "input";
+    },
+  },
+});
+```
+
+**排查口诀**：报错出现「'proto' 上的 'xxx' 已被占用」→ 该名字必是内置保留名。先规避 `back` / `goto` / `replace` / `src` / `pageAnime` / `pageIsReady` 及 `$.fn` 上的通用方法名（具体内置实现见 [packages/ofa/page.mjs](../../packages/ofa/page.mjs) 的 `proto` 定义）；自定义方法尽量用业务语义命名（如 `openXxx` / `saveXxx` / `backToInput`）。
+
 ### 详细示例：动态样式语法
 
 **属性值内一律不解析 `{{...}}`**。需要动态值时：
@@ -495,6 +539,71 @@ const link = location.origin + "/#/pages/set-password.html?token=xxx";
 - 弹窗内含独立表单 / 多步流程 → 拆
 - 页面 `data` 混入大量与主内容无关的临时状态（`form` / `dialogOpen` / `editingId` …）→ 拆
 - 纯展示、无独立业务状态的小片段 → 用组件模块，不要拆 page
+
+### 详细示例：模板指令的值是 JS 表达式，裸字面量（尤其保留字）报错（重要）
+
+`attr:` / `:prop` / `sync:` / `class:` / `:style.` / `on:` 的**值一律按 JavaScript 表达式解析**，不能写裸标识符或裸字符串字面量。字符串必须加引号；JS 保留字（`in` / `class` / `for` 等）单独作表达式本身就非法，会直接报 SyntaxError。
+
+**典型报错**（控制台持续报错，页面部分功能失效）：
+```
+SyntaxError: Unexpected token 'in'
+```
+
+❌ **错误写法**（把 `attr:data-type="in"` 当普通属性值写裸字面量，`in` 是 JS 保留字被当作表达式解析）：
+```html
+<button attr:data-type="in">入库</button>
+<!-- ofa.js 将值 "in" 当作表达式 → SyntaxError: Unexpected token 'in' -->
+```
+
+✅ **正确写法**（方法名 / 表达式内字符串字面量）：
+```html
+<button on:click="$host.stockIn($event)">入库</button>
+<!-- 事件绑到方法名，避免在指令值里写裸字面量 -->
+
+<button attr:data-type="'in'">入库</button>
+<!-- 确需传字面量时加引号，作为字符串表达式 -->
+```
+
+**排查口诀**：`SyntaxError: Unexpected token '<xxx>'`（`in`/`for`/`if` 等词）→ 必是指令属性值里写了裸标识符。优先把需要"标识类型"的场景改成方法名分发（如 `on:click="$host.stockIn($event)"`），把字符串字面量放进 `attr:` 值时要加引号（`attr:data-type="'in'"`）。
+
+### 详细示例：页面模块缓存导致改代码不生效（调试/测试时最容易误判）
+
+ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用组件/页面模块定义），且页面通过 `fetch` 拉取模板文件——若静态服务器带 HTTP 缓存（如 `http-server` 不带 `-c-1`），浏览器还会命中磁盘缓存。两个缓存叠加的表现：**改了页面文件，但 hash 导航（不整页刷新）仍渲染旧版本**，console 无任何报错，极易误判为"代码没改对"而浪费时间排查。
+
+**典型场景**：Playwright 测试或浏览器里用 `#/pages/xxx.html` 直接导航调试，反复修改页面模板后效果不变；甚至把文件改坏成明显错误的版本，页面仍正常渲染旧逻辑。
+
+✅ **正确做法**：
+- 开发服务器**必须禁用 HTTP 缓存**：`http-server . -p 5173 -c-1`（`-c-1` = 禁用缓存；`npm run dev` 已内置，`npm start` 不带）。
+- 测试/调试需要强制重新加载时，**用带 query 的完整 URL 整页刷新**：`http://localhost:5173/index.html?t=v1#/pages/xxx.html`——query 变了 fetch 视为新 URL，绕过缓存。
+- Playwright 中不要靠"导航 hash 后再等模块更新"，直接 `page.goto(url)` 整页加载。
+
+**排查口诀**：改代码不生效 + console 无报错 → 先怀疑缓存（模块缓存 / HTTP 缓存），用带 query 的 URL 强刷排除；不要先用二分法怀疑自己的代码。
+
+---
+
+### 详细示例：`$host` / `$data` 只在 o-fill 的 item 作用域可用，根级元素直接用方法名（重要）
+
+`$host` / `$data` 由 ofa.js 在 **x-fill（o-fill）渲染列表项时**注入到 item 作用域（`createItem` 创建 `{ $data, $host, $index }`）。**根级（页面模板顶层、非 o-fill 内）作用域没有 `$host` / `$data`**，`on:click="$host.xxx()"` 会抛 `Error evaluating element expression: 'on:click="$host.xxx()"'`，点击无反应且 console 报错。
+
+✅ **正确写法**：
+```html
+<!-- 根级：直接写方法名（proto 方法挂在页面实例上） -->
+<button on:click="openStockHelp()">?</button>
+<button on:click="goToPage(currentPage - 1)">上一页</button>
+```
+```html
+<!-- o-fill 内：才有 $data / $host / $index -->
+<o-fill :value="rows">
+  <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
+</o-fill>
+```
+
+❌ **错误写法（根级用 `$host`）**：
+```html
+<button on:click="$host.openStockHelp()">?</button>  <!-- 报错 -->
+```
+
+**排查口诀**：`on:click` 等事件表达式报 `Error evaluating element expression` → 先看元素是否在 o-fill 内；不在 o-fill 内就去掉 `$host.` 直接写方法名（o-fill 内的数字页码按钮等才保留 `$host`）。属性绑定（`:disabled="page <= 1"`）根级直接用 data 字段名，无需 `$host`。
 
 ---
 

@@ -33,7 +33,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `computed: { double() {} }` | `proto: { get double() {} }` | 计算属性用 getter 定义，放在 proto 中 |
 | `this.$route.query.id` | `{ query }` 参数 | 通过函数参数获取查询参数 |
 | `v-if="show"` | `<o-if :value="show">` | 条件渲染使用 o-if 组件 |
-| `v-for="item in list"` | `<o-fill :value="list">` | 列表渲染使用 o-fill 组件 |
+| `v-for="item in list"` | `<o-fill :value="list" fill-key="id">` | 列表渲染使用 o-fill 组件；`fill-key` 为选填，但只要列表项有唯一字段（如 id），编写代码时应始终加上 |
 | `@click="handle"` | `on:click="handle"` | 事件绑定使用 on: 前缀 |
 | `:class="{ active: isActive }"` | `class:active="isActive"` | 动态类名使用 class: 语法 |
 | `style="width: {{val}}"` | `:style.width="val"` | 内联样式绑定使用 `:style.` 前缀 |
@@ -272,7 +272,7 @@ export default async () => {
 
 **o-fill 内通过 `$host` 调用时同样不加 `$`：**
 ```html
-<o-fill :value="files">
+<o-fill :value="files" fill-key="id">
   <span>{{$host.formatBytes($data.size)}}</span>
 </o-fill>
 ```
@@ -593,7 +593,7 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 ```
 ```html
 <!-- o-fill 内：才有 $data / $host / $index -->
-<o-fill :value="rows">
+<o-fill :value="rows" fill-key="id">
   <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
 </o-fill>
 ```
@@ -706,7 +706,7 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 
 - **计算属性**：在 `proto` 中使用 `get xxx() {}` 而非 `computed`
 - **响应式数据**：使用 `$.stanz()` 创建
-- **列表渲染**：使用 `<o-fill>` 组件
+- **列表渲染**：使用 `<o-fill>` 组件；`fill-key` 虽为选填，但只要列表项存在唯一标识字段（如 `id`），编写代码时应始终添加 `fill-key="字段名"`，以保证数组增删、排序时正确复用和更新列表项
 - **条件渲染**：使用 `<o-if>` / `<o-else-if>` / `<o-else>` 组件
 - **非显式组件**：`<x-if>` / `<x-fill>` 功能相同但不渲染到 DOM
 - **属性传递**：`:toKey="fromKey"` 单向，`sync:toKey="fromKey"` 双向
@@ -760,6 +760,7 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 ```
 列表渲染？
 ├─ 是 → 使用 o-fill 组件
+│   ├─ 列表项有唯一标识字段（如 id）→ 加上 fill-key="id"（选填属性，但编写代码时应始终填写）
 │   ├─ 直接渲染（简单结构）→ 模板内容直接写在 o-fill 内部，不需要 <template> 包裹
 │   └─ 模板渲染（复杂结构/复用）→ <template> 定义在 o-fill 外部，使用 name 属性绑定
 └─ 否 → 正常编写模板
@@ -771,17 +772,18 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 
 **o-fill 直接渲染**（推荐用于简单结构）：
 ```html
-<o-fill :value="messages">
+<o-fill :value="messages" fill-key="id">
   <div class="message" attr:type="$data.type">
     [{{$data.time}}] {{$data.text}}
   </div>
 </o-fill>
 ```
 - 使用 `$data`、`$index`、`$host` 访问数据
+- 列表项有唯一字段（如 `id`）时应加上 `fill-key`（选填，但建议始终填写）
 
 **o-fill 模板渲染**（用于复杂结构或复用）：
 ```html
-<o-fill :value="products" name="product-template"></o-fill>
+<o-fill :value="products" name="product-template" fill-key="id"></o-fill>
 <template name="product-template">
   <div class="product-card">{{$data.name}} - ¥{{$data.price}}</div>
 </template>
@@ -838,7 +840,7 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 | `:prop="value"` `sync:prop="value"` | [属性绑定](./references/property-binding.md) |
 | `class:active="isActive"` `:style.width="val"` | [类/样式绑定](./references/class-style-binding.md) |
 | `<o-if :value="condition">` | [条件渲染](./references/conditional-rendering.md) |
-| `<o-fill :value="list">` | [列表渲染](./references/list-rendering.md) |
+| `<o-fill :value="list" fill-key="id">` | [列表渲染](./references/list-rendering.md) |
 | `get computedProp() {}` | [计算属性](./references/computed-properties.md) |
 | `watch: { prop() {} }` | [侦听器](./references/watchers.md) |
 | `ready() attached() detached()` | [生命周期](./references/lifecycle.md) |

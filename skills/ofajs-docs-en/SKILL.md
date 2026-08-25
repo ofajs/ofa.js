@@ -33,7 +33,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `computed: { double() {} }` | `proto: { get double() {} }` | Computed properties defined with getter in proto |
 | `this.$route.query.id` | `{ query }` parameter | Get query parameters through function parameter |
 | `v-if="show"` | `<o-if :value="show">` | Use o-if component for conditional rendering |
-| `v-for="item in list"` | `<o-fill :value="list">` | Use o-fill component for list rendering |
+| `v-for="item in list"` | `<o-fill :value="list" fill-key="id">` | Use o-fill component for list rendering; `fill-key` is optional, but always add it when items have a unique field (e.g. id) |
 | `@click="handle"` | `on:click="handle"` | Event binding uses on: prefix |
 | `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
 | `style="width: {{val}}"` | `:style.width="val"` | Inline style binding uses `:style.` prefix |
@@ -272,7 +272,7 @@ export default async () => {
 
 **Calling via `$host` in o-fill also without `$`:**
 ```html
-<o-fill :value="files">
+<o-fill :value="files" fill-key="id">
   <span>{{$host.formatBytes($data.size)}}</span>
 </o-fill>
 ```
@@ -593,7 +593,7 @@ ofa.js has an **in-memory module cache** for already-loaded page modules (reusin
 ```
 ```html
 <!-- Inside o-fill: $data / $host / $index are available -->
-<o-fill :value="rows">
+<o-fill :value="rows" fill-key="id">
   <button on:click="$host.deleteRow($data.id)">{{$data.name}}</button>
 </o-fill>
 ```
@@ -706,7 +706,7 @@ The sub-page receives the `userId` parameter via `export default async ({ query 
 
 - **Computed Properties**: Use `get xxx() {}` in `proto` instead of `computed`
 - **Reactive Data**: Create using `$.stanz()`
-- **List Rendering**: Use `<o-fill>` component
+- **List Rendering**: Use `<o-fill>` component; `fill-key` is optional, but always add `fill-key="fieldName"` when list items have a unique identifier field (e.g. `id`), so items are correctly reused and updated when the array is added to, removed from, or reordered
 - **Conditional Rendering**: Use `<o-if>` / `<o-else-if>` / `<o-else>` components
 - **Non-explicit Components**: `<x-if>` / `<x-fill>` have same functionality but don't render to DOM
 - **Property Passing**: `:toKey="fromKey"` one-way, `sync:toKey="fromKey"` two-way
@@ -760,6 +760,7 @@ When defining component properties, should the value go in attrs or data?
 ```
 List rendering?
 ├─ Yes → Use o-fill component
+│   ├─ Items have a unique field (e.g. id) → Add fill-key="id" (optional attribute, but always include it when writing code)
 │   ├─ Direct rendering (simple structure) → Template content directly inside o-fill, no <template> wrapper needed
 │   └─ Template rendering (complex structure/reuse) → <template> defined outside o-fill, use name attribute to bind
 └─ No → Write template normally
@@ -771,17 +772,18 @@ Conditional rendering?
 
 **o-fill Direct Rendering** (recommended for simple structures):
 ```html
-<o-fill :value="messages">
+<o-fill :value="messages" fill-key="id">
   <div class="message" attr:type="$data.type">
     [{{$data.time}}] {{$data.text}}
   </div>
 </o-fill>
 ```
 - Use `$data`, `$index`, `$host` to access data
+- Add `fill-key` when items have a unique field (e.g. `id`) — optional, but recommended to always include
 
 **o-fill Template Rendering** (for complex structures or reuse):
 ```html
-<o-fill :value="products" name="product-template"></o-fill>
+<o-fill :value="products" name="product-template" fill-key="id"></o-fill>
 <template name="product-template">
   <div class="product-card">{{$data.name}} - ¥{{$data.price}}</div>
 </template>
@@ -838,7 +840,7 @@ Need multi-page application?
 | `:prop="value"` `sync:prop="value"` | [Property Binding](./references/property-binding.md) |
 | `class:active="isActive"` `:style.width="val"` | [Class/Style Binding](./references/class-style-binding.md) |
 | `<o-if :value="condition">` | [Conditional Rendering](./references/conditional-rendering.md) |
-| `<o-fill :value="list">` | [List Rendering](./references/list-rendering.md) |
+| `<o-fill :value="list" fill-key="id">` | [List Rendering](./references/list-rendering.md) |
 | `get computedProp() {}` | [Computed Properties](./references/computed-properties.md) |
 | `watch: { prop() {} }` | [Watchers](./references/watchers.md) |
 | `ready() attached() detached()` | [Lifecycle](./references/lifecycle.md) |

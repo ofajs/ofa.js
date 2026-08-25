@@ -50,9 +50,9 @@
 
 | 语法/属性 | 用途 | 示例 |
 |------|------|------|
-| `<o-fill :value="arr">` | 列表渲染 | `<o-fill :value="items">...</o-fill>` |
-| `name="tpl"` | 命名模板 | `<o-fill :value="items" name="item-tpl">` |
-| `fill-key="id"` | 指定键值提升性能 | `<o-fill :value="items" fill-key="id">` |
+| `<o-fill :value="arr" fill-key="id">` | 列表渲染（有唯一字段时应加 fill-key） | `<o-fill :value="items" fill-key="id">...</o-fill>` |
+| `name="tpl"` | 命名模板 | `<o-fill :value="items" name="item-tpl" fill-key="id">` |
+| `fill-key="id"` | 唯一键，增删/排序时正确复用列表项；选填，但编写代码时应始终填写 | `<o-fill :value="items" fill-key="id">` |
 | `$index` | 当前项索引 | `{{$index}}` |
 | `$data` | 当前项数据 | `{{$data.name}}` |
 | `$host` | 组件实例引用 | `on:click="$host.removeItem($index)"` |

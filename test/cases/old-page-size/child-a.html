@@ -1,0 +1,18 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+      height: 100%;
+    }
+    #wide {
+      width: 900px;
+      height: 100px;
+      background-color: rgb(255, 0, 0);
+    }
+  </style>
+  <div id="wide">Child A</div>
+  <a href="./child-b.html" olink>to child b</a>
+  <script>
+    export const parent = "./layout.html";
+  </script>
+</template>

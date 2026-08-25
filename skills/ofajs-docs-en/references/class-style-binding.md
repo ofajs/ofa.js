@@ -244,6 +244,11 @@ For boolean type attributes (like `disabled`, `hidden`), ofa.js will decide whet
 </template>
 ```
 
+> **Gotcha (booleans with custom `data-*` attributes)**:
+> **Built-in boolean attributes** like `attr:disabled="isDisabled"` (disabled / hidden, etc.) are rendered based on the truthiness of the bound value (added when true / removed when false);
+> but when you bind a **boolean to a custom `attr:data-xxx="boolValue"`**, a `true` value renders as a **valueless attribute** (e.g. `<button data-active>`), so `e.target.dataset.active` reads `""` (empty string) instead of `"true"`, and checks like `"" !== "true"` silently break your logic.
+> **Fix**: always convert booleans bound to `data-*` to explicit strings: `attr:data-active="$data.isActive ? 'true' : 'false'"`.
+
 ## data() Function
 
 You can use `data(key)` in styles to bind component data. This is very suitable for scenarios where styles need to be dynamically changed based on component data.

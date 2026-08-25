@@ -858,7 +858,7 @@ this.emit("change", { data: { value: this.currentValue } });
 |------------|-----------|------|
 | `computed: { double() {} }` | `get double() {}` | 使用 getter 定义计算属性 |
 | `v-if="show"` | `<o-if :value="show">` | 使用 o-if 组件 |
-| `v-for="item in list"` | `<o-fill :value="list">` | 使用 o-fill 组件 |
+| `v-for="item in list"` | `<o-fill :value="list" fill-key="id">` | 使用 o-fill 组件；fill-key 选填，但列表项有唯一字段时应始终加上 |
 | `@click="handle"` | `on:click="handle"` | 事件绑定使用 on: 前缀 |
 | `:class="{ active: isActive }"` | `class:active="isActive"` | 动态类名使用 class: 语法 |
 | `v-model="value"` | `sync:value="value"` | 双向绑定使用 sync: 语法 |

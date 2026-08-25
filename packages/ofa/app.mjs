@@ -525,10 +525,12 @@ const nextAnimeFrame = (func) =>
   });
 
 const resetOldPage = (needRemovePage) => {
+  // Measure while the page is still in flow, before applying position:absolute
+  const { offsetWidth, offsetHeight } = needRemovePage.ele;
   needRemovePage.css = {
     position: "absolute",
-    width: `${needRemovePage.width}px`,
-    height: `${needRemovePage.height}px`,
+    width: `${offsetWidth}px`,
+    height: `${offsetHeight}px`,
   };
   needRemovePage.data.willRemoved = 1;
 

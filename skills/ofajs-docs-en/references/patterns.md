@@ -589,13 +589,15 @@ export const cartStore = $.stanz({
 
 ### Use fill-key for List Rendering
 
+`fill-key` is optional, but when list items have a unique identifier field (e.g. `id`), always add it when writing code; without it, list items get rebuilt on array add/remove/reorder, losing in-item state.
+
 ```html
 <!-- Recommended: use unique identifier -->
 <o-fill :value="items" fill-key="id">
   <div>{{$data.name}}</div>
 </o-fill>
 
-<!-- Not recommended: no fill-key, poor performance when array order changes -->
+<!-- Not recommended: no fill-key, items rebuilt when array order changes -->
 <o-fill :value="items">
   <div>{{$data.name}}</div>
 </o-fill>

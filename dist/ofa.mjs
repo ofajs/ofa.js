@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.3 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.4 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -6337,10 +6337,12 @@ const nextAnimeFrame = (func) =>
   });
 
 const resetOldPage = (needRemovePage) => {
+  // Measure while the page is still in flow, before applying position:absolute
+  const { offsetWidth, offsetHeight } = needRemovePage.ele;
   needRemovePage.css = {
     position: "absolute",
-    width: `${needRemovePage.width}px`,
-    height: `${needRemovePage.height}px`,
+    width: `${offsetWidth}px`,
+    height: `${offsetHeight}px`,
   };
   needRemovePage.data.willRemoved = 1;
 
@@ -7334,7 +7336,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.7.3";
+const version = "ofa.js@4.7.4";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

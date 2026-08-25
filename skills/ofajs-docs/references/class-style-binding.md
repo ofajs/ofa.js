@@ -244,6 +244,11 @@
 </template>
 ```
 
+> **踩坑提示（布尔值与自定义 `data-*` 属性）**：
+> `attr:disabled="isDisabled"` 这类**内置布尔属性**（disabled / hidden 等）会按绑定值的真假渲染（true 添加属性 / false 移除属性）；
+> 但**自定义 `attr:data-xxx="boolValue"` 绑定布尔值时，`true` 会渲染成无值属性**（如 `<button data-active>`），JS 中 `e.target.dataset.active` 读到的是 `""`（空字符串）而非 `"true"`，`"" !== "true"` 会让取反逻辑判断出错。
+> **修复**：绑定到 `data-*` 的布尔值必须显式转字符串：`attr:data-active="$data.isActive ? 'true' : 'false'"`。
+
 ## data() 函数
 
 可以在样式中使用 `data(key)` 来绑定组件数据。这非常适合需要根据组件数据动态改变样式的场景。

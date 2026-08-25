@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>old page size demo</title>
+    <script src="../../../packages/ofa/main.mjs" type="module"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      o-app {
+        display: block;
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <o-app src="./app-config.js"></o-app>
+    <script type="module">
+      const app = $("o-app").app;
+      window.getAppState = () => app.current && app.current.src;
+    </script>
+  </body>
+</html>

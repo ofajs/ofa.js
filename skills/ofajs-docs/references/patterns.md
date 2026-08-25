@@ -589,13 +589,15 @@ export const cartStore = $.stanz({
 
 ### 列表渲染使用 fill-key
 
+`fill-key` 是选填属性，但列表项有唯一标识字段（如 `id`）时，编写代码时应始终添加；省略后数组增删/排序时列表项会被重建，项内状态丢失。
+
 ```html
 <!-- 推荐：使用唯一标识 -->
 <o-fill :value="items" fill-key="id">
   <div>{{$data.name}}</div>
 </o-fill>
 
-<!-- 不推荐：无 fill-key，数组顺序变化时性能差 -->
+<!-- 不推荐：无 fill-key，数组增删/排序时列表项被重建 -->
 <o-fill :value="items">
   <div>{{$data.name}}</div>
 </o-fill>

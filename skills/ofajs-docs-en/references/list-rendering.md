@@ -287,22 +287,24 @@ For more complex list item structures, you can use the named template method. De
 
 ## Performance Optimization and Key Management
 
-For lists that need frequent updates, you can specify unique identifiers through the `fill-key` attribute to improve rendering performance.
+`fill-key` is an **optional** attribute, but whenever list items have a unique identifier field (e.g. `id`), you should add `fill-key` to `<o-fill>` when writing code — this is the recommended standard practice, don't omit it.
 
 ```html
-<!-- Use custom key for performance improvement -->
+<!-- Recommended: use a unique key -->
 <o-fill :value="items" fill-key="id">
   <div>{{$data.name}}</div>
 </o-fill>
 ```
 
-In the above example, `fill-key="id"` tells ofa.js to use each data item's `id` property as a unique identifier, so even if the array order changes, corresponding elements can be correctly identified and updated.
+In the above example, `fill-key="id"` tells ofa.js to use each data item's `id` property as a unique identifier, so when the array is added to, removed from, or reordered, corresponding elements can be correctly identified and reused. Without `fill-key`, items are matched only by position, so additions, removals, and reordering may rebuild list items (losing in-item state such as form inputs).
+
+Only omit `fill-key` when list items are plain scalars (strings/numbers) with no unique field.
 
 ## List Rendering Best Practices
 
 1. **Event Handling**: When using events in list items, note that `$host` points to the current component instance, `$data` points to current item data
 2. **Choose Appropriate Rendering Method**: Use direct rendering for simple lists, use template rendering for complex structures
-3. **Performance Consideration**: For large lists or frequently updated lists, use `fill-key` to specify key values
+3. **Key Management**: When list items have a unique identifier field (e.g. `id`), add `fill-key` (optional attribute, but recommended to always include when writing code)
 4. **Data Structure**: Ensure each item in the array is a valid data object
 5. **Avoid Deep Nesting**: Although nesting is supported, avoid overly deep nesting levels
 
@@ -312,5 +314,5 @@ In the above example, `fill-key="id"` tells ofa.js to use each data item's `id` 
 - **Direct Rendering**: Write template content directly inside `o-fill` tag
 - **Template Rendering**: Use named templates for complex list rendering
 - **Special Variables**: `$index` (index), `$data` (data), `$host` (component instance)
-- **Performance Optimization**: Use `fill-key` to specify unique identifiers for better performance
+- **Performance Optimization**: Add `fill-key` when items have a unique field (e.g. `id`) — optional, but recommended to always include
 - **Nested Support**: Supports nested list rendering, handles hierarchical data structures

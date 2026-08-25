@@ -858,7 +858,7 @@ this.emit("change", { data: { value: this.currentValue } });
 |------------|-----------|------|
 | `computed: { double() {} }` | `get double() {}` | Use getter to define computed properties |
 | `v-if="show"` | `<o-if :value="show">` | Use o-if component |
-| `v-for="item in list"` | `<o-fill :value="list">` | Use o-fill component |
+| `v-for="item in list"` | `<o-fill :value="list" fill-key="id">` | Use o-fill component; fill-key is optional, but always add it when items have a unique field |
 | `@click="handle"` | `on:click="handle"` | Event binding uses on: prefix |
 | `:class="{ active: isActive }"` | `class:active="isActive"` | Dynamic class uses class: syntax |
 | `v-model="value"` | `sync:value="value"` | Two-way binding uses sync: syntax |

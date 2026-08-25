@@ -5,3 +5,4 @@
 /playwright/.cache/
 tutorial/website
 prompt.md
+.playwright-mcp

@@ -50,9 +50,9 @@ This document provides a quick reference to ofa.js core APIs and syntax, conveni
 
 | Syntax/Property | Purpose | Example |
 |------|------|------|
-| `<o-fill :value="arr">` | List rendering | `<o-fill :value="items">...</o-fill>` |
-| `name="tpl"` | Named template | `<o-fill :value="items" name="item-tpl">` |
-| `fill-key="id"` | Specify key for performance | `<o-fill :value="items" fill-key="id">` |
+| `<o-fill :value="arr" fill-key="id">` | List rendering (add fill-key when items have a unique field) | `<o-fill :value="items" fill-key="id">...</o-fill>` |
+| `name="tpl"` | Named template | `<o-fill :value="items" name="item-tpl" fill-key="id">` |
+| `fill-key="id"` | Unique key; items are correctly reused on add/remove/reorder — optional, but always include when writing code | `<o-fill :value="items" fill-key="id">` |
 | `$index` | Current item index | `{{$index}}` |
 | `$data` | Current item data | `{{$data.name}}` |
 | `$host` | Component instance reference | `on:click="$host.removeItem($index)"` |

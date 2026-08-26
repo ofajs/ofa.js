@@ -68,6 +68,7 @@ description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使�
 | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` 返回的也是 ofa.js 包装对象，原生属性（shadowRoot、querySelector 等）必须通过 `.ele` 中转；ofa.js 自身属性（如 `.src`、`.data`、`.app`）可直接访问 |
 | `get xxx() { return this.obj.field }` + 模板 `{{xxx}}`（依赖异步数据） | data 中预定义 `xxx: ""`，在 ready/异步回调中赋值 | getter 在模板初始化阶段（ready 执行前）就被求值，若依赖的 data 字段尚未赋值（尤其 null/undefined 链式访问）会抛 TypeError 导致整页渲染崩溃；getter 仅适合依赖同步已有数据（有初始值）的简单计算 |
 | 模板表达式引用未声明的变量（`{{flag}}` / `:value="flag"` / `class:active="flag"`…） | 所有模板引用的键先在 `data` / `attrs` 中声明（给安全默认值） | 未声明的键不是 `undefined`，初始化求值直接抛 `Error evaluating element expression ... ReferenceError: flag is not defined`，整页渲染中断；常见于改模板加新绑定、忘了同步 data |
+| o-fill 文本插值里写 `&&`（如 `{{ $data.a && $data.b ? ... : '' }}`） | 抽成 `$host.xxx($data)` 方法；或改用嵌套三元 / `===` / `!==` 形式 | o-fill 的 `{{}}` 表达式编译时 `&&` 会抛 `SyntaxError: Unexpected token '&'`，**整个 o-fill 区块不渲染**（列表项全消失、页面其它区域正常），仅 console 报错不中断整页 |
 
 ### 结构对照
 
@@ -604,6 +605,35 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 ```
 
 **排查口诀**：`on:click` 等事件表达式报 `Error evaluating element expression` → 先看元素是否在 o-fill 内；不在 o-fill 内就去掉 `$host.` 直接写方法名（o-fill 内的数字页码按钮等才保留 `$host`）。属性绑定（`:disabled="page <= 1"`）根级直接用 data 字段名，无需 `$host`。
+
+### 详细示例：o-fill 文本插值表达式不要写 `&&`（整块不渲染，重要）
+
+**症状**：给 o-fill 内某条文本插值加 `&&` 表达式（如 `{{ $data.x && $data.x !== '裸果' ? ' · 内包装 ' + $data.x : '' }}`）后，**整个 o-fill 区块不渲染**（列表项全消失），页面其它区域（标题/工具条/分页）正常，无整页报错，仅 console 有一条 `SyntaxError: Unexpected token '&'`（`new Function` 编译时抛错）。
+
+**最小复现对照**（`{{}}` 文本插值通道）：
+- `{{ $data.pack && $data.pack ? ... : '' }}`（含 `&&`）→ ❌ **整块 o-fill 不渲染**
+- `{{ $data.pack ? '·内 ' + $data.pack : '' }}`（三元 + 拼接）→ ✅
+- `{{ $data.pack === '裸果' ? '' : ... }}`（`===`）→ ✅
+- `{{ $data.pack !== '裸果' ? ... }}`（`!==`）→ ✅
+- `{{$host.xxx($data)}}`（方法调用）→ ✅
+
+**根因**：o-fill 的 item 模板把 `{{}}` 表达式经 `encodeURIComponent` 编码写入 `expr` 属性再取回编译，`&&` 在此链路中损坏（残留单个 `&`），`new Function` 编译失败；且失败发生在该 o-fill 的渲染循环中，导致整个区块中断。`!==`、`===`、三元、字符串拼接均不受影响。
+
+**修复**：文本插值里避免 `&&`，抽成 `$host` 方法（方法内 JS 不受模板编译限制）：
+```js
+// proto 中
+innerPackingText(d) {
+  const ip = d && d.inner_packing;
+  if (!ip || ip === "裸果") return "";
+  return " · 内包装 " + ip;
+}
+```
+```html
+<!-- 模板中 -->
+<div>{{$host.innerPackingText($data)}}</div>
+```
+
+**排查口诀**：o-fill 整块不渲染 + console 有 `SyntaxError: Unexpected token '&'` → 在该 o-fill 内 grep `&&` 的 `{{` 表达式，全部改方法调用。（`&&` 在属性绑定通道是否安全未验证，遇到同场景优先方法化，不赌。）
 
 ---
 

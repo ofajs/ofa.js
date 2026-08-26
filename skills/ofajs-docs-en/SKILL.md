@@ -68,6 +68,7 @@ description: Complete documentation knowledge base for ofa.js framework. Use whe
 | `$("o-app").current.shadowRoot` | `$("o-app").current.ele.shadowRoot` | `$("o-app").current` also returns an ofa.js wrapper object; native properties (shadowRoot, querySelector, etc.) must go through `.ele`, while ofa.js own properties (`.src`, `.data`, `.app`) can be accessed directly |
 | `get xxx() { return this.obj.field }` + template `{{xxx}}` (depends on async data) | Predefine `xxx: ""` in data, assign in ready/async callback | Getters are evaluated during module init (before `ready()`); if dependent data fields aren't assigned yet (especially null/undefined chained access), a TypeError will crash the entire page render. Getters are only suitable for simple computations depending on sync existing data (with initial values) |
 | Template expression referencing an undeclared variable (`{{flag}}` / `:value="flag"` / `class:active="flag"`...) | Declare every referenced key in `data` / `attrs` first (with safe defaults) | An undeclared key is NOT `undefined` — initialization throws `Error evaluating element expression ... ReferenceError: flag is not defined` and the whole page render is interrupted; commonly happens when adding new bindings to a template without syncing `data` |
+| Writing `&&` inside an o-fill text interpolation (e.g. `{{ $data.a && $data.b ? ... : '' }}`) | Extract a `$host.xxx($data)` method; or rewrite with nested ternaries / `===` / `!==` | Compiling the o-fill `{{}}` expression with `&&` throws `SyntaxError: Unexpected token '&'`, and the **entire o-fill block stops rendering** (all list items disappear while the rest of the page stays fine); only a console error, the page itself is not interrupted |
 
 ### Structure Comparison
 
@@ -604,6 +605,35 @@ ofa.js has an **in-memory module cache** for already-loaded page modules (reusin
 ```
 
 **Debugging mnemonic**: an event expression like `on:click` reports `Error evaluating element expression` → first check whether the element is inside an o-fill. If it isn't, drop the `$host.` and write the method name directly (keep `$host` only for things like numeric page buttons inside an o-fill). For property bindings (`:disabled="page <= 1"`) at root level, use the data field name directly — no `$host` needed.
+
+### Detailed example: don't write `&&` in an o-fill text interpolation (block stops rendering, important)
+
+**Symptom**: after adding a `&&` expression to a text interpolation inside an o-fill (e.g. `{{ $data.x && $data.x !== '裸果' ? ' · 内包装 ' + $data.x : '' }}`), the **entire o-fill block stops rendering** (all list items disappear), while other parts of the page (titles / toolbars / pagination) still work. There is no page-level error — only a console `SyntaxError: Unexpected token '&'` thrown when compiling with `new Function`.
+
+**Minimal repro comparison** (the `{{}}` text-interpolation channel):
+- `{{ $data.pack && $data.pack ? ... : '' }}` (contains `&&`) → ❌ **the whole o-fill does not render**
+- `{{ $data.pack ? '· ' + $data.pack : '' }}` (ternary + concat) → ✅
+- `{{ $data.pack === '裸果' ? '' : ... }}` (`===`) → ✅
+- `{{ $data.pack !== '裸果' ? ... }}` (`!==`) → ✅
+- `{{$host.xxx($data)}}` (method call) → ✅
+
+**Root cause**: the o-fill item template encodes the `{{}}` expression with `encodeURIComponent` into the `expr` attribute and decodes it back before compiling; `&&` gets corrupted in this pipeline (a lone `&` survives), so `new Function` fails to parse it. The failure happens inside that o-fill's render loop, which aborts the whole block. `!==`, `===`, ternaries and string concatenation are all unaffected.
+
+**Fix**: avoid `&&` in text interpolations and extract a `$host` method instead (regular JS inside methods is not subject to template compilation):
+```js
+// in proto
+innerPackingText(d) {
+  const ip = d && d.inner_packing;
+  if (!ip || ip === "裸果") return "";
+  return " · 内包装 " + ip;
+}
+```
+```html
+<!-- in template -->
+<div>{{$host.innerPackingText($data)}}</div>
+```
+
+**Debugging mnemonic**: o-fill block not rendering + console shows `SyntaxError: Unexpected token '&'` → grep that o-fill for `&&` inside `{{` expressions and convert them all to method calls. (Whether `&&` is safe in the property-binding channel is unverified — when in doubt, methodize rather than gamble.)
 
 ---
 

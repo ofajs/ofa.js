@@ -606,6 +606,15 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 
 **排查口诀**：`on:click` 等事件表达式报 `Error evaluating element expression` → 先看元素是否在 o-fill 内；不在 o-fill 内就去掉 `$host.` 直接写方法名（o-fill 内的数字页码按钮等才保留 `$host`）。属性绑定（`:disabled="page <= 1"`）根级直接用 data 字段名，无需 `$host`。
 
+**补充（属性绑定通道同样命中）：顶层（非 o-fill 内）的 `o-if :value` 与 `attr:` 属性绑定引用 `$host.xxx` 会静默失效**——不报错、不求值异常，而是内容/属性**永不渲染**（o-if 恒不显示、attr 不设置）。例如：
+```html
+<!-- ❌ 顶层 o-if 内容永不渲染（条件为真也不显示） -->
+<o-if :value="!$host.warehouseId">请先选择仓库</o-if>
+<!-- ❌ 顶层 attr: 永不设置（输入框始终可用） -->
+<input attr:disabled="!$host.canInput" />
+```
+✅ **正确写法**：属性绑定里直接用 data 字段名（`o-if :value="warehouseId === ''"` / `attr:disabled="!warehouseId || !selectedChannel"`）；`attr:` 也**不要绑定 proto getter**（`!$host.canInput` 不渲染），把条件展开成响应式 data 字段的表达式。**排查口诀**：顶层 o-if 内容不出现 / attr 属性不生效、console 无报错 → 检查绑定表达式是否引用了 `$host`（顶层没有 `$host`，只有 o-fill 的 item 作用域才注入）。
+
 ### 详细示例：o-fill 文本插值表达式不要写 `&&`（整块不渲染，重要）
 
 **症状**：给 o-fill 内某条文本插值加 `&&` 表达式（如 `{{ $data.x && $data.x !== '裸果' ? ' · 内包装 ' + $data.x : '' }}`）后，**整个 o-fill 区块不渲染**（列表项全消失），页面其它区域（标题/工具条/分页）正常，无整页报错，仅 console 有一条 `SyntaxError: Unexpected token '&'`（`new Function` 编译时抛错）。

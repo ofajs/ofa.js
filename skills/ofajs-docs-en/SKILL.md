@@ -606,6 +606,15 @@ ofa.js has an **in-memory module cache** for already-loaded page modules (reusin
 
 **Debugging mnemonic**: an event expression like `on:click` reports `Error evaluating element expression` → first check whether the element is inside an o-fill. If it isn't, drop the `$host.` and write the method name directly (keep `$host` only for things like numeric page buttons inside an o-fill). For property bindings (`:disabled="page <= 1"`) at root level, use the data field name directly — no `$host` needed.
 
+**Addition (the property-binding channel hits the same trap): `$host.xxx` references in root-level (outside o-fill) `o-if :value` and `attr:` bindings silently fail** — no error, no exception; the content / attribute is simply **never rendered** (the o-if never shows, the attr is never set). For example:
+```html
+<!-- ❌ Root-level o-if content never renders (even when the condition is true) -->
+<o-if :value="!$host.warehouseId">Please select a warehouse</o-if>
+<!-- ❌ Root-level attr: is never set (input always enabled) -->
+<input attr:disabled="!$host.canInput" />
+```
+✅ **Correct way**: in property bindings use data field names directly (`o-if :value="warehouseId === ''"` / `attr:disabled="!warehouseId || !selectedChannel"`); also **don't bind `attr:` to a proto getter** (`!$host.canInput` doesn't render) — expand the condition into an expression over reactive data fields. **Debugging mnemonic**: root-level o-if content missing / attr not applied with no console error → check whether the binding expression references `$host` (root level has no `$host`; it is only injected into o-fill's item scope).
+
 ### Detailed example: don't write `&&` in an o-fill text interpolation (block stops rendering, important)
 
 **Symptom**: after adding a `&&` expression to a text interpolation inside an o-fill (e.g. `{{ $data.x && $data.x !== '裸果' ? ' · 内包装 ' + $data.x : '' }}`), the **entire o-fill block stops rendering** (all list items disappear), while other parts of the page (titles / toolbars / pagination) still work. There is no page-level error — only a console `SyntaxError: Unexpected token '&'` thrown when compiling with `new Function`.

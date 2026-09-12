@@ -1,0 +1,25 @@
+<template component>
+  <div id="import-comment-result">loading</div>
+  <script>
+    // A leading comment before any import
+    import { ok1 } from "../import-comment/ok1.mjs";
+    /* block comment between imports */
+    import { ok2 } from "../../cases/import-comment/ok2.mjs"; // trailing comment
+    import * as ns3 from "../import-comment/ok3.mjs";
+    import ok4 from "../import-comment/ok4.mjs";
+    import "../import-comment/ok5.mjs";
+
+    // strings and regex that look like imports must not be rewritten
+    const fake = "import { x } from './not-real.mjs';";
+    const template = `import y from "../not-real.mjs"`;
+    const reg = /['";]/;
+
+    export default {
+      attached() {
+        if (fake || template || reg) {
+          this.shadow.$("#import-comment-result").text = `${ok1()}-${ok2()}-${ns3.ok3()}-${ok4()}-${window.ok5SideEffect}`;
+        }
+      },
+    };
+  </script>
+</template>

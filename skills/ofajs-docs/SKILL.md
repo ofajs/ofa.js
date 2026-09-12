@@ -1,6 +1,7 @@
 ---
 name: ofajs-docs
 description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使用方法、组件开发、页面模块、路由配置、状态管理，或想要构建无需 Node.js/Webpack 的 Web 应用时使用。
+version: 4.7.4.1
 ---
 
 # ofa.js 文档知识库
@@ -645,6 +646,10 @@ innerPackingText(d) {
 **排查口诀**：o-fill 整块不渲染 + console 有 `SyntaxError: Unexpected token '&'` → 在该 o-fill 内 grep `&&` 的 `{{` 表达式，全部改方法调用。（`&&` 在属性绑定通道是否安全未验证，遇到同场景优先方法化，不赌。）
 
 ---
+
+### 历史：v4.7.x 曾存在「import 被注释破坏」的编译缺陷（已修复）
+
+> 定性：ofa.js 模块编译实现缺陷（`drawUrl` 按 `;` 切分 `<script>` 后重写 import），已在新版修复。import 之间放注释（`//`、`/* */`、行尾注释）是标准 ESM 合法写法，现在可正常使用，无需规避。若在旧版本（≈v4.7.2 及之前）遇到 `Failed to resolve module specifier "../.."` 且报错随 import「顺移」，升级框架即可；临时规避是把注释挪到 import 块之后。
 
 ## 核心语法要点
 

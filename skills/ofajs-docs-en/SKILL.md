@@ -1,7 +1,7 @@
 ---
 name: ofajs-docs
 description: Complete documentation knowledge base for ofa.js framework. Use when users ask about ofa.js usage, component development, page modules, routing configuration, state management, or want to build Web applications without Node.js/Webpack.
-version: 4.7.4.1
+version: 4.7.5.0
 ---
 
 # ofa.js Documentation Knowledge Base

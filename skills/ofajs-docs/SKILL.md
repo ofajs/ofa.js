@@ -1,7 +1,7 @@
 ---
 name: ofajs-docs
 description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使用方法、组件开发、页面模块、路由配置、状态管理，或想要构建无需 Node.js/Webpack 的 Web 应用时使用。
-version: 4.7.4.1
+version: 4.7.5.0
 ---
 
 # ofa.js 文档知识库

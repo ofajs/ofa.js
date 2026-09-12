@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.4 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.5 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -5145,6 +5145,207 @@ const addStyleSourcemap = async (temp, originContent, filePath) => {
 
 const cacheLink = new Map();
 
+const isIdChar = (char) => /[A-Za-z0-9_$]/.test(char);
+
+/**
+ * Locate the end of a quoted string starting at `start` (index of the quote char).
+ * Returns the index right after the closing quote.
+ */
+const skipString = (code, start) => {
+  const quote = code[start];
+  let i = start + 1;
+  while (i < code.length) {
+    if (code[i] === "\\") {
+      i += 2;
+      continue;
+    }
+    if (code[i] === quote) {
+      return i + 1;
+    }
+    i++;
+  }
+  return i;
+};
+
+// Skip a template literal (`` ` ``) including ${ } interpolations.
+const skipTemplate = (code, start) => {
+  let i = start + 1;
+  let depth = 0;
+  while (i < code.length) {
+    if (code[i] === "\\") {
+      i += 2;
+      continue;
+    }
+    if (depth === 0) {
+      if (code[i] === "`") {
+        return i + 1;
+      }
+      if (code[i] === "$" && code[i + 1] === "{") {
+        depth = 1;
+        i += 2;
+        continue;
+      }
+    } else {
+      if (code[i] === "{") {
+        depth++;
+      } else if (code[i] === "}") {
+        depth--;
+      }
+    }
+    i++;
+  }
+  return i;
+};
+
+// Skip a regex literal starting at `start` (index of `/`). Returns end index.
+const skipRegExp = (code, start) => {
+  let i = start + 1;
+  let inClass = false;
+  while (i < code.length) {
+    if (code[i] === "\\") {
+      i += 2;
+      continue;
+    }
+    if (code[i] === "\n") {
+      break;
+    }
+    if (inClass) {
+      if (code[i] === "]") {
+        inClass = false;
+      }
+    } else if (code[i] === "[") {
+      inClass = true;
+    } else if (code[i] === "/") {
+      return i + 1;
+    }
+    i++;
+  }
+  return i;
+};
+
+/**
+ * Scan script code and rewrite the module specifier of every top-level
+ * `import` declaration with resolvePath. Comments, strings, template
+ * literals and regex literals are passed through untouched, so imports
+ * surrounded or suffixed by comments are rewritten correctly.
+ */
+const rewriteImportPaths = (code, url) => {
+  let output = "";
+  let i = 0;
+  let prev = ""; // last significant code char, for regex vs division detection
+
+  while (i < code.length) {
+    const char = code[i];
+
+    // line comment
+    if (char === "/" && code[i + 1] === "/") {
+      let end = code.indexOf("\n", i);
+      if (end === -1) {
+        end = code.length;
+      }
+      output += code.slice(i, end);
+      i = end;
+      continue;
+    }
+
+    // block comment
+    if (char === "/" && code[i + 1] === "*") {
+      let end = code.indexOf("*/", i + 2);
+      end = end === -1 ? code.length : end + 2;
+      output += code.slice(i, end);
+      i = end;
+      continue;
+    }
+
+    // string
+    if (char === '"' || char === "'") {
+      const end = skipString(code, i);
+      output += code.slice(i, end);
+      i = end;
+      prev = char;
+      continue;
+    }
+
+    // template literal
+    if (char === "`") {
+      const end = skipTemplate(code, i);
+      output += code.slice(i, end);
+      i = end;
+      prev = char;
+      continue;
+    }
+
+    // regex literal (a `/` that can't be division)
+    if (char === "/" && !isIdChar(prev) && !")]}".includes(prev) && prev !== '"' && prev !== "'" && prev !== "`") {
+      const end = skipRegExp(code, i);
+      output += code.slice(i, end);
+      i = end;
+      prev = char;
+      continue;
+    }
+
+    // top-level import keyword
+    if (
+      char === "i" &&
+      !isIdChar(prev) &&
+      code.startsWith("import", i) &&
+      !isIdChar(code[i + 6])
+    ) {
+      // find the module specifier: the first string token after the keyword,
+      // skipping whitespace and comments. `import(` and `import.` are not
+      // static import declarations, leave them alone.
+      let j = i + 6;
+      let specifierStart = -1;
+      let specifierEnd = -1;
+      let quote = "";
+      while (j < code.length) {
+        const cj = code[j];
+        if (/\s/.test(cj)) {
+          j++;
+          continue;
+        }
+        if (cj === "/" && code[j + 1] === "/") {
+          const end = code.indexOf("\n", j);
+          j = end === -1 ? code.length : end;
+          continue;
+        }
+        if (cj === "/" && code[j + 1] === "*") {
+          const end = code.indexOf("*/", j + 2);
+          j = end === -1 ? code.length : end + 2;
+          continue;
+        }
+        if (cj === "(" || cj === ".") {
+          // dynamic import or import.meta, not a static declaration
+          break;
+        }
+        if (cj === '"' || cj === "'") {
+          specifierStart = j + 1;
+          specifierEnd = skipString(code, j) - 1;
+          quote = cj;
+          break;
+        }
+        j++;
+      }
+
+      if (specifierStart !== -1) {
+        const pathStr = code.slice(specifierStart, specifierEnd);
+        output += code.slice(i, specifierStart - 1);
+        output += `${quote}${resolvePath(pathStr, url)}${quote}`;
+        i = specifierEnd + 1;
+        continue;
+      }
+    }
+
+    if (!/\s/.test(char)) {
+      prev = char;
+    }
+    output += char;
+    i++;
+  }
+
+  return output;
+};
+
 async function drawUrl(content, url, isPage = true) {
   let targetUrl = cacheLink.get(url);
   if (targetUrl) {
@@ -5193,20 +5394,7 @@ async function drawUrl(content, url, isPage = true) {
 
   let scriptContent = "";
   if (scriptEl) {
-    scriptContent = scriptEl.html
-      .split(/;/g)
-      .map((content) => {
-        const t_content = content.trim();
-        // Confirm it is an import reference and correct the address
-        if (/^import[ \{'"]/.test(t_content)) {
-          // Update address string directly
-          return content.replace(/['"]([\s\S]+)['"]/, (arg0, pathStr) => {
-            return `"${resolvePath(pathStr, url)}"`;
-          });
-        }
-        return content;
-      })
-      .join(";");
+    scriptContent = rewriteImportPaths(scriptEl.html, url);
   }
 
   const fileContent = `${beforeContent};
@@ -7336,7 +7524,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.7.4";
+const version = "ofa.js@4.7.5";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

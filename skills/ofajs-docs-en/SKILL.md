@@ -1,6 +1,7 @@
 ---
 name: ofajs-docs
 description: Complete documentation knowledge base for ofa.js framework. Use when users ask about ofa.js usage, component development, page modules, routing configuration, state management, or want to build Web applications without Node.js/Webpack.
+version: 4.7.5.0
 ---
 
 # ofa.js Documentation Knowledge Base
@@ -645,6 +646,10 @@ innerPackingText(d) {
 **Debugging mnemonic**: o-fill block not rendering + console shows `SyntaxError: Unexpected token '&'` → grep that o-fill for `&&` inside `{{` expressions and convert them all to method calls. (Whether `&&` is safe in the property-binding channel is unverified — when in doubt, methodize rather than gamble.)
 
 ---
+
+### Historical: v4.7.x had a compilation defect where comments broke imports (fixed)
+
+> Status: an ofa.js module-compilation implementation defect (`drawUrl` split `<script>` on `;` before rewriting imports); fixed in newer versions. Placing comments (`//`, `/* */`, trailing comments) between import declarations is standard, legal ESM and now works without any workaround. If you hit `Failed to resolve module specifier "../.."` on old versions (≈v4.7.2 and earlier) with the error "moving" from one import to the next, upgrade the framework; the temporary workaround was to keep comments after the import block.
 
 ## Core Syntax Points
 

@@ -1,7 +1,7 @@
 ---
 name: ofajs-docs
 description: ofa.js 框架完整文档知识库。当用户询问 ofa.js 的使用方法、组件开发、页面模块、路由配置、状态管理，或想要构建无需 Node.js/Webpack 的 Web 应用时使用。
-version: 4.7.5.0
+version: 4.7.5.1
 ---
 
 # ofa.js 文档知识库
@@ -567,6 +567,21 @@ SyntaxError: Unexpected token 'in'
 ```
 
 **排查口诀**：`SyntaxError: Unexpected token '<xxx>'`（`in`/`for`/`if` 等词）→ 必是指令属性值里写了裸标识符。优先把需要"标识类型"的场景改成方法名分发（如 `on:click="$host.stockIn($event)"`），把字符串字面量放进 `attr:` 值时要加引号（`attr:data-type="'in'"`）。
+
+**补充：静态值不要用 `attr:`；裸静态文案会抛错（单个词/中文是 ReferenceError，多个词是 SyntaxError）且会中断组件 render**——上面那条只覆盖「保留字」这类**语法**错误。更常见、更阴的是**把静态文案直接塞进 `attr:`**（中文尤其容易中招）：它不是保留字，于是被当成**标识符**去求值——**单个词或中文短语（是一整个合法标识符）报 ReferenceError，含空格的多段英文则先报 SyntaxError: Unexpected identifier**：
+
+```html
+❌ <button attr:title="abc">                        <!-- 单个裸标识符 → ReferenceError: abc is not defined -->
+❌ <button attr:title="点这里选择要看的订单状态">      <!-- 中文短语通常是一整个合法标识符 → ReferenceError（现实中最常见的踩法） -->
+❌ <button attr:title="Choose a status">            <!-- 多段裸词 → SyntaxError: Unexpected identifier -->
+✅ <button title="点这里选择要看的订单状态">          <!-- 静态值 → 写普通属性（ofa 不处理无指令前缀的属性） -->
+✅ <button attr:title="'点这里选择要看的订单状态'">    <!-- 非要用 attr: 就包成字符串表达式 -->
+✅ <button attr:title="locked ? '已锁定' : ''">      <!-- attr: 留给真正的动态表达式 -->
+```
+
+⚠️ **真正的坑是它的连锁症状**：这个异常会**中断整个组件/页面的 render**，而模板 HTML 已经先写进 shadowRoot 了——于是表象变成「组件看起来正常（DOM 都在）、但 `ready()` 不执行、后面的 `o-fill` / `o-if` 一律不展开、数据恒为空」，**极易误诊为「属性绑定不生效 / 接口没返回 / 组件没升级」**（实测踩坑：筛选组件里把 `attr:title="点这里选择…"` 写错后，弹窗里只剩静态那一项；改回 `title="点这里选择…"` 后 `ready()` 立刻执行、列表全部渲染出来）。
+
+**排查口诀**：`attr:xxx="静态文案"` → `ReferenceError: xxx is not defined`；**症状是「模板在、但 `ready()` 没跑、`o-fill` 不展开」时，先全仓 grep `attr:` 的值里有没有既不是表达式、又不是 `data`/`$data` 字段名的裸文案**（含中文字符是最明显的信号）。确认 `ready()` 是否真的执行，可在 `ready()` 里往 `window` 挂个标记再读（项目里若有 log-show 之类拦截 console 的组件，`console.log` 是看不到的）。
 
 ### 详细示例：页面模块缓存导致改代码不生效（调试/测试时最容易误判）
 

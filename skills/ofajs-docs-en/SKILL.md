@@ -1,7 +1,7 @@
 ---
 name: ofajs-docs
 description: Complete documentation knowledge base for ofa.js framework. Use when users ask about ofa.js usage, component development, page modules, routing configuration, state management, or want to build Web applications without Node.js/Webpack.
-version: 4.7.5.0
+version: 4.7.5.1
 ---
 
 # ofa.js Documentation Knowledge Base
@@ -567,6 +567,21 @@ SyntaxError: Unexpected token 'in'
 ```
 
 **Debugging mnemonic**: `SyntaxError: Unexpected token '<xxx>'` (words like `in`/`for`/`if`) → a bare identifier was written in a directive attribute value. Prefer refactoring "type-identifying" scenarios into method dispatch (e.g. `on:click="$host.stockIn($event)"`), and quote string literals when placing them in `attr:` values (`attr:data-type="'in'"`).
+
+**Addendum: never use `attr:` for static values — a bare static string throws (ReferenceError or SyntaxError) and aborts the component render** — the rule above only covers *reserved words* (a **syntax** error). The more common and far more insidious case is **putting a plain static string straight into `attr:`**: the value is not a reserved word, so it is evaluated as an **identifier** and throws at runtime:
+
+```html
+❌ <button attr:title="pending">          <!-- one bare identifier → ReferenceError: pending is not defined -->
+❌ <button attr:title="点这里选择订单状态">  <!-- localized text is usually ONE valid identifier → ReferenceError (the classic real-world trap) -->
+❌ <button attr:title="Choose a status">  <!-- several bare words → SyntaxError: Unexpected identifier -->
+✅ <button title="点这里选择订单状态">       <!-- static value → plain attribute (ofa ignores attributes without a directive prefix) -->
+✅ <button attr:title="'点这里选择订单状态'"> <!-- if you must use attr:, wrap it as a string expression -->
+✅ <button attr:title="locked ? 'Locked' : ''"> <!-- keep attr: for real dynamic expressions -->
+```
+
+⚠️ **The real trap is the knock-on symptom**: that exception **aborts the whole component/page render**, while the template HTML has already been written into the shadowRoot. What you observe is therefore "the component looks alive (its DOM is there), but `ready()` never runs, every later `o-fill` / `o-if` stays unexpanded, and the data looks empty" — which is **extremely easy to misdiagnose as "the property binding doesn't work / the API returned nothing / the component was never upgraded"**. (Real case: a filter component with a mistyped `attr:title="…"` showed only the one static item in its dialog; changing it back to a plain `title="…"` made `ready()` run immediately and the whole list render.)
+
+**Debugging mnemonic**: `attr:xxx="static text"` → `ReferenceError: xxx is not defined` (single word / localized text) or `SyntaxError: Unexpected identifier` (several words); **when the symptom is "template present, but `ready()` never ran and `o-fill` is not expanded", first grep every `attr:` value for bare text that is neither an expression nor a `data`/`$data` field name** (non-ASCII characters are the clearest signal). To confirm whether `ready()` actually ran, set a marker on `window` inside it and read it back (if the project has a component that intercepts `console` — e.g. a log-show overlay — `console.log` output will be invisible).
 
 ### Detailed Example: Page Module Cache Makes Code Changes Not Take Effect (Easiest to Misdiagnose When Debugging/Testing)
 

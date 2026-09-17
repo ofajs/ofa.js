@@ -199,6 +199,17 @@
 </template>
 ```
 
+> ⚠️ **`attr:` 的值是 JavaScript 表达式，不是字符串字面量**——**纯静态的属性值不要用 `attr:`，直接写普通属性**（中文文案最容易踩）：
+>
+> ```html
+> ❌ <button attr:title="点这里选择要看的订单状态">   <!-- 被当标识符求值 → ReferenceError，且中断整个组件 render -->
+> ✅ <button title="点这里选择要看的订单状态">         <!-- 静态值 → 普通属性（ofa 不处理无指令前缀的属性） -->
+> ✅ <button attr:title="'点这里选择要看的订单状态'">   <!-- 非要用 attr: 就包成字符串表达式 -->
+> ✅ <button attr:title="locked ? '已锁定' : ''">     <!-- attr: 留给真正的动态表达式 -->
+> ```
+>
+> 静态文案误写进 `attr:` 时，异常会**中断组件 render**：模板 HTML 已挂进 shadowRoot，但 `ready()` 不执行、后面的 `o-fill` / `o-if` 不展开、数据恒为空——表象像「绑定不生效 / 接口没返回」，极易误诊。详见 [SKILL.md](../SKILL.md) 的「模板指令的值是 JS 表达式」一节。
+
 ### 布尔属性处理
 
 对于布尔类型的属性（如 `disabled`, `hidden`），ofa.js 会根据绑定值的真假性来决定是否添加该属性。

@@ -199,6 +199,18 @@ Besides class and style binding, you can also dynamically bind other HTML attrib
 </template>
 ```
 
+> ⚠️ **The value of `attr:` is a JavaScript expression, not a string literal** — **never use `attr:` for a purely static value; write a plain attribute instead** (localized text is the classic trap):
+>
+> ```html
+> ❌ <button attr:title="pending">          <!-- one bare identifier → ReferenceError, and the whole component render aborts -->
+> ❌ <button attr:title="点这里选择订单状态">  <!-- localized text is usually ONE valid identifier → ReferenceError -->
+> ✅ <button title="点这里选择订单状态">       <!-- static value → plain attribute (ofa ignores attributes without a directive prefix) -->
+> ✅ <button attr:title="'点这里选择订单状态'"> <!-- if you must use attr:, wrap it as a string expression -->
+> ✅ <button attr:title="locked ? 'Locked' : ''"> <!-- keep attr: for real dynamic expressions -->
+> ```
+>
+> When static text is mistakenly put into `attr:`, the exception **aborts the component render**: the template HTML is already in the shadowRoot, but `ready()` never runs, later `o-fill` / `o-if` blocks stay unexpanded and the data looks empty — it reads like "the binding doesn't work / the API returned nothing" and is very easy to misdiagnose. See the "Directive Values Are JS Expressions" section in [SKILL.md](../SKILL.md).
+
 ### Boolean Attribute Handling
 
 For boolean type attributes (like `disabled`, `hidden`), ofa.js will decide whether to add the attribute based on the truthiness of the bound value.

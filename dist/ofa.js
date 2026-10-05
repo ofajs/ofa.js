@@ -3241,7 +3241,8 @@ try{
       },
     },
     created() {
-      this.__originHTML = this.$("template[condition]").html;
+      const conditionTemp = this.$("template[condition]");
+      this.__originHTML = conditionTemp ? conditionTemp.html : this.html;
       this.html = "";
     },
     ready() {
@@ -7233,8 +7234,11 @@ ${scriptContent}`;
   };
 
   const createdFunc = function (_this) {
-    if (_this[0].is("template[inner-code]")) {
-      _this.__originHTML = _this[0].html.trim();
+    // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
+    // 此时首个子元素不存在，需要回退到自身内容
+    const firstEle = _this[0];
+    if (firstEle && firstEle.is("template[inner-code]")) {
+      _this.__originHTML = firstEle.html.trim();
     } else {
       _this.__originHTML = _this.html.trim();
     }
@@ -7455,8 +7459,9 @@ ${scriptContent}`;
     created() {
       let originHTML = "";
 
-      if (this[0].is("template[inner-code]")) {
-        originHTML = this[0].html.trim();
+      const firstEle = this[0];
+      if (firstEle && firstEle.is("template[inner-code]")) {
+        originHTML = firstEle.html.trim();
       } else {
         originHTML = this.html.trim();
       }

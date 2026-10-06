@@ -151,7 +151,8 @@ const regOptions = {
     },
   },
   created() {
-    this.__originHTML = this.$("template[condition]").html;
+    const conditionTemp = this.$("template[condition]");
+    this.__originHTML = conditionTemp ? conditionTemp.html : this.html;
     this.html = "";
   },
   ready() {

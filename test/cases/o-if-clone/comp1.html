@@ -1,0 +1,28 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
+  <div id="status">count:{{count}}</div>
+  <o-if :value="count >= 1">
+    <div id="big" style="color: red">I am {{count}} red</div>
+  </o-if>
+  <o-else>
+    <div id="small" style="color: green">I am {{count}} green</div>
+  </o-else>
+  <o-fill :value="arr">
+    <div data-testid="item" style="border: #aaa solid 1px; margin: 4px">
+      {{$data.val}}
+    </div>
+  </o-fill>
+  <script>
+    export default {
+      tag: "comp-one",
+      data: {
+        count: 2,
+        arr: [{ val: "1111" }, { val: "222" }],
+      },
+    };
+  </script>
+</template>

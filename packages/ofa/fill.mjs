@@ -177,8 +177,9 @@ $.register({
   created() {
     let originHTML = "";
 
-    if (this[0].is("template[inner-code]")) {
-      originHTML = this[0].html.trim();
+    const firstEle = this[0];
+    if (firstEle && firstEle.is("template[inner-code]")) {
+      originHTML = firstEle.html.trim();
     } else {
       originHTML = this.html.trim();
     }

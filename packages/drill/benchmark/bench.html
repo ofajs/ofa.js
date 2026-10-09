@@ -71,10 +71,12 @@
 
       // ---- 计时工具 ----
 
-      /** 吞吐类：预热 1 轮 JIT，再跑 5 轮取中位数换算 ops/s */
+      /** 吞吐类：预热完整一轮触发 JIT 分层编译，再跑 5 轮取中位数换算 ops/s */
       const benchOps = async (id, label, iterations, fn) => {
         addRow(id, label);
-        fn(0); // 预热，触发 JIT
+        for (let i = 0; i < Math.min(iterations, 2000); i++) {
+          fn(i); // 预热
+        }
 
         const times = [];
         for (let round = 0; round < 5; round++) {

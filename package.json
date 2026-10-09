@@ -9,7 +9,9 @@
   ],
   "scripts": {
     "test": "playwright test",
-    "bench": "node packages/drill/benchmark/run.mjs",
+    "bench": "npm run bench:drill && npm run bench:stanz",
+    "bench:drill": "node packages/drill/benchmark/run.mjs",
+    "bench:stanz": "node packages/stanz/benchmark/run.mjs",
     "server": "node scripts/static-server.mjs"
   },
   "devDependencies": {

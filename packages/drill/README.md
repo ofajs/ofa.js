@@ -104,8 +104,10 @@ loads (serial/parallel, cold/warm), fetch cache, `l-m` element batches,
 size. Run it from the repository root:
 
 ```sh
-npm run bench
+npm run bench:drill
 ```
+
+`npm run bench` runs every package benchmark in sequence.
 
 It drives `benchmark/bench.html?v=old|new` (openable by hand as well) with
 playwright, alternates both versions for several rounds and reports medians

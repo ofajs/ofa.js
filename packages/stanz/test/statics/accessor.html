@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stanz · 访问与归属 accessor</title>
+  </head>
+  <body>
+    <script type="module">
+      import stanz from "../../src/base.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      test("初始数据中的访问器原样保留 / accessors in initial data are preserved", () => {
+        const d = stanz({
+          get a() {
+            return (this._a || 0) + 1;
+          },
+          set a(val) {
+            this._a = val;
+          },
+        });
+
+        assertEqual(d.a, 1);
+        d.a = 100;
+        assertEqual(d.a, 101);
+      });
+
+      test("_ 前缀属性绕过观察且不可枚举 / underscore props bypass observation and stay non-enumerable", () => {
+        const d = stanz({ a: 222, _b: 111 });
+
+        assertEqual(d.a, 222);
+        assertEqual(d._b, 111);
+
+        const keys = Object.keys(d);
+        assert(keys.includes("a"), "a 应可枚举 / a should be enumerable");
+        assert(!keys.includes("_b"), "_b 不应可枚举 / _b should not be enumerable");
+
+        // _ 前缀赋值不产生更新事件
+        let fired = 0;
+        d.watch(() => fired++);
+        d._b = 222;
+        d._c = 1;
+        assertEqual(fired, 0, "_ 前缀赋值不应触发监听 / underscore set should not emit");
+      });
+
+      test("普通对象赋值自动包裹并登记 owner / plain objects are wrapped and owner is registered", () => {
+        const d = stanz({ o1: { val: "I am o1" } });
+        d.o2 = { val: "I am o2" };
+
+        assert(stanz.is(d.o1), "o1 应为 stanz / o1 should be stanz");
+        assert(stanz.is(d.o2), "o2 应为 stanz / o2 should be stanz");
+        assert(d.o1.owner.has(d), "o1 的 owner 应含 d / o1 owner should contain d");
+        assert(d.o2.owner.has(d), "o2 的 owner 应含 d / o2 owner should contain d");
+      });
+
+      test("已有 stanz 赋值共享实例 / assigning an existing stanz shares the instance", () => {
+        const d = stanz({});
+        const o3 = stanz({ val: "I am o3" });
+        const a1 = stanz([100, 200, 300]);
+
+        d.o3 = o3;
+        d.a1 = a1;
+
+        assertEqual(d.o3, o3, "应共享同一实例 / should share the same instance");
+        assertEqual(d.a1, a1, "应共享同一实例 / should share the same instance");
+        assert(o3.owner.has(d), "owner 应登记 / owner should be registered");
+        assert(a1.owner.has(d), "owner 应登记 / owner should be registered");
+      });
+
+      test("覆盖赋值解除旧值的 owner / overwriting clears the old child's owner", () => {
+        const d = stanz({ a1: { val: "I am a1" } });
+        const { a1 } = d;
+
+        assert(a1.owner.has(d), "owner 应登记 / owner should be registered");
+
+        d.a1 = "cover it";
+        assertEqual(a1.owner.size, 0, "旧值 owner 应被清除 / old child's owner should be cleared");
+      });
+
+      test("delete 清除 owner / delete clears owner", () => {
+        const d = stanz({ o1: { val: "I am o1" } });
+        const { o1 } = d;
+
+        delete d.o1;
+        assertEqual(o1.owner.size, 0, "delete 后 owner 应清空 / owner should be cleared after delete");
+      });
+
+      test("相同值赋值不触发更新 / setting the same value emits nothing", () => {
+        const d = stanz({ val: "I am d" });
+
+        let fired = 0;
+        d.watch(() => fired++);
+        d.val = "I am d";
+
+        assertEqual(fired, 0, "相同值不应触发监听 / same value should not emit");
+      });
+
+      test("相同 stanz 重复赋值不重复登记 owner / re-assigning the same stanz keeps owner unique", () => {
+        const d1 = stanz({ val: "I am d1" });
+        const d2 = stanz({ val: "I am d2", d1 });
+
+        assertEqual(d1.owner.size, 1);
+
+        d2.d1 = d1;
+        assertEqual(d1.owner.size, 1, "重复赋值不应新增 owner / re-assign should not add owner");
+
+        d2.d1 = null;
+        assertEqual(d1.owner.size, 0, "置空应解除 owner / null-out should clear owner");
+      });
+
+      test("经访问器存储的值保持原始形态 / values stored via setters stay raw", () => {
+        const d = stanz({
+          a: "I am a",
+          get data() {
+            return this._data;
+          },
+          set data(data) {
+            this._data = data;
+          },
+        });
+
+        d.data = { val: "I am data" };
+        assertEqual(stanz.is(d.data), false, "访问器内存的值不应包裹 / values behind setters should not be wrapped");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

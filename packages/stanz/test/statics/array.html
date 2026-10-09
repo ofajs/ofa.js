@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stanz · 数组 array</title>
+  </head>
+  <body>
+    <script type="module">
+      import stanz from "../../src/base.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      test("push 包裹新增对象并登记 owner / push wraps new items and registers owner", () => {
+        const d = stanz([100, 200, 300]);
+
+        d.push({ val: "I am 3" });
+
+        assert(stanz.is(d[3]), "新增项应被包裹 / new item should be wrapped");
+        assert(d[3].owner.has(d), "owner 应登记 / owner should be registered");
+        assertEqual(d.length, 4);
+      });
+
+      test("pop/shift 移除项并清理 owner / pop and shift remove items and clear owner", () => {
+        const d = stanz([{ val: "V1" }, { val: "V2" }]);
+        const v1 = d[0];
+        const v2 = d[1];
+
+        const popped = d.pop();
+        assertEqual(popped, v2, "pop 应返回末项 / pop should return the last item");
+        assertEqual(v2.owner.size, 0, "移除后 owner 清空 / owner cleared after removal");
+
+        const shifted = d.shift();
+        assertEqual(shifted, v1, "shift 应返回首项 / shift should return the first item");
+        assertEqual(v1.owner.size, 0, "移除后 owner 清空 / owner cleared after removal");
+      });
+
+      test("splice 替换同时清理与登记 / splice swaps owners correctly", () => {
+        const d = stanz([{ val: "V1" }, { val: "V2" }]);
+        const o1 = d[0];
+        const o2 = stanz({ val: "I am new" });
+
+        d.splice(0, 1, o2);
+
+        assertEqual(o1.owner.has(d), false, "被移除项应解除 / removed item should be unlinked");
+        assertEqual(o2.owner.has(d), true, "新增项应登记 / inserted item should be linked");
+      });
+
+      test("重复引用的独立登记与解除 / repeated references register independently", () => {
+        const d = stanz([{ val: "V2" }]);
+        const v2 = d[0];
+
+        assertEqual(v2._owner.length, 1);
+
+        d.push(v2);
+        assertEqual(v2._owner.length, 2, "重复 push 追加登记 / duplicated push adds owner");
+
+        d.h = v2;
+        assertEqual(v2._owner.length, 3, "属性挂载追加登记 / property mount adds owner");
+
+        delete d.h;
+        assertEqual(v2._owner.length, 2, "delete 解除一处 / delete removes one");
+
+        d.pop();
+        assertEqual(v2._owner.length, 1, "pop 解除一处 / pop removes one");
+
+        d.shift();
+        assertEqual(v2._owner.length, 0, "shift 解除最后一处 / shift removes the last one");
+      });
+
+      test("数组事件与返回值 / array events and return values", () => {
+        const d = stanz([3, 1, 2]);
+
+        const events = [];
+        d.watch((e) => events.push({ name: e.name, args: e.args }));
+
+        const sortRet = d.sort();
+        assertEqual(sortRet, d, "sort 应返回代理自身保持链式 / sort should return the proxy itself");
+        assertEqual(Array.from(d), [1, 2, 3]);
+        assertEqual(events[0].name, "sort");
+
+        const pushRet = d.push(9);
+        assertEqual(pushRet, 4, "push 应返回新长度 / push returns the new length");
+        assertEqual(events[1].args, [9]);
+
+        const mapped = d.map((item) => item * 2);
+        assertEqual(Array.isArray(mapped), true, "map 应返回纯数组 / map should return a plain array");
+        assertEqual(mapped, [2, 4, 6, 18]);
+
+        const filtered = d.filter((item) => item > 2);
+        assertEqual(filtered, [3, 9]);
+
+        const sliced = d.slice(0, 2);
+        assertEqual(sliced, [1, 2]);
+      });
+
+      test("toJSON 还原各类形状 / toJSON restores all shapes", () => {
+        const arrData = stanz([100]);
+        assertEqual(arrData.toJSON(), [100], "纯数组还原数组 / pure array restores as array");
+
+        const objData = stanz({ val: "I am val" });
+        assertEqual(objData.toJSON(), { val: "I am val" });
+
+        // 混合形态：对象上挂数字键，不按数组还原
+        const mixed = stanz({ val: "I am val" });
+        mixed.push(100);
+        assertEqual(mixed.toJSON(), { 0: 100, val: "I am val" });
+
+        const withXid = stanz({ val: "I am val" });
+        assertEqual(withXid.toJSON().xid, withXid.xid, "结果保留 xid / result keeps xid");
+
+        const nested = stanz({ obj: { o1: {}, o2: [] } });
+        assertEqual(nested.obj.o1.toJSON(), {});
+        assertEqual(nested.obj.o2.toJSON(), []);
+
+        const parent = stanz({ a: [] });
+        assertEqual(parent.toJSON(), { a: [] });
+        assertEqual(parent.toJSON().a.length, 0);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

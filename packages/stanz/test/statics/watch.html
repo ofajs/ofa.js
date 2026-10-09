@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stanz · 监听 watch</title>
+  </head>
+  <body>
+    <script type="module">
+      import stanz from "../../src/base.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      test("watch 捕获本层 set / watch catches local set", () => {
+        const d = stanz({ val: "I am d" });
+
+        let event;
+        d.watch((e) => (event = e));
+        d.val = "changed";
+
+        assertEqual(event.type, "set");
+        assertEqual(event.name, "val");
+        assertEqual(event.value, "changed");
+        assertEqual(event.oldValue, "I am d");
+        assertEqual(event.path.length, 0, "本层变更 path 为空 / local change has empty path");
+      });
+
+      test("子对象变更沿 owner 链冒泡 / child changes bubble through owners", () => {
+        const d = stanz({
+          val: "I am d",
+          obj: { val: "I am obj", sub: { val: "I am sub" } },
+        });
+
+        const obj = d.obj;
+        d.push(obj); // 重复 push 同一子项
+        const sub = d.obj.sub;
+
+        const paths = [];
+        d.watch((e) => paths.push({ target: e.target, path: e.path.length }));
+
+        d.val = "change d";
+        obj.val = "change obj";
+        sub.val = "change sub";
+
+        assertEqual(paths.length, 3, "重复 push 的子项事件不应重复派发 / duplicated child should not double-emit");
+        assertEqual(paths[0].target, d);
+        assertEqual(paths[0].path, 0);
+        assertEqual(paths[1].target, obj);
+        assertEqual(paths[1].path, 1);
+        assertEqual(paths[2].target, sub);
+        assertEqual(paths[2].path, 2);
+      });
+
+      test("多个父级都能收到冒泡事件 / multiple owners each receive the event", () => {
+        const d = stanz({ inner: { val: "I am inner" } });
+        const d2 = stanz({});
+
+        // 经由中间节点挂到 d2 上，验证跨层冒泡
+        d2.container = {};
+        d2.container.inner = d.inner;
+
+        const hits = [];
+        d.watch((e) => hits.push(["d", e.path.length]));
+        d2.watch((e) => hits.push(["d2", e.path.length]));
+
+        d.inner.val = "changed";
+
+        assertEqual(hits.length, 2, "两个父级各收到一次 / both owners get one event");
+        assertEqual(hits[0], ["d", 1], "直接父级 path 长度为 1 / direct owner has path length 1");
+        assertEqual(hits[1], ["d2", 2], "跨层父级 path 长度为 2 / hop-through owner has path length 2");
+      });
+
+      test("delete 事件冒泡 / delete events bubble", () => {
+        const d = stanz({
+          test: "test delete this",
+          obj: { test2: "test delete this 2" },
+        });
+
+        const paths = [];
+        d.watch((e) => {
+          assertEqual(e.type, "delete");
+          paths.push(e.path.length);
+        });
+
+        delete d.test;
+        delete d.obj.test2;
+
+        assertEqual(paths, [0, 1]);
+      });
+
+      test("_update=false 阻断子树冒泡 / _update=false cuts bubbling", () => {
+        const d = stanz({ obj: { val: "I am obj" }, val: "I am d" });
+
+        let fired = 0;
+        d.watch(() => fired++);
+
+        d.obj._update = false;
+        d.obj.val = "change obj val";
+
+        assertEqual(fired, 0, "被阻断的子树不应冒泡 / cut subtree should not emit");
+
+        d.val = "change d val";
+        assertEqual(fired, 1, "本层仍正常派发 / local set still emits");
+      });
+
+      test("unwatch 停止监听 / unwatch stops watching", () => {
+        const d = stanz({ obj: { val: "I am obj" } });
+
+        let fired = 0;
+        const wid = d.watch(() => fired++);
+
+        d.obj.val = "change 1";
+        assertEqual(fired, 1);
+
+        d.unwatch(wid);
+        d.obj.val = "change 2";
+        assertEqual(fired, 1, "unwatch 后不应再触发 / no emit after unwatch");
+      });
+
+      test("watchTick 合并同一时钟内的变更 / watchTick batches same-tick changes", async () => {
+        const d = stanz({
+          test: "test delete this",
+          obj: { test2: "test delete this 2" },
+        });
+
+        const batches = [];
+        d.watchTick((e) => batches.push(e.length));
+
+        delete d.test;
+        delete d.obj.test2;
+
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        assertEqual(batches, [2], "同钟两次变更应合并为一批 / two same-tick changes should batch into one");
+      });
+
+      test("watchTick 支持自定义等待间隔 / watchTick supports a custom wait", async () => {
+        const d = stanz({ val: 0 });
+
+        const batches = [];
+        d.watchTick((e) => batches.push(e.length), 30);
+
+        d.val = 1;
+        d.val = 2;
+        d.val = 3;
+
+        await new Promise((resolve) => setTimeout(resolve, 80));
+
+        assertEqual(batches, [3], "30ms 内的变更应合并 / changes within 30ms should batch");
+      });
+
+      test("watcher.hasModified 判定变更链 / watcher.hasModified matches the change chain", () => {
+        const d = stanz({
+          obj: { val: "I am obj", sub: { val: "I am sub" } },
+          arr: [7, 3, 6],
+        });
+
+        const results = [];
+        d.watch((e) => results.push([e.name, e.hasModified("obj.sub"), e.hasModified("arr")]));
+
+        d.obj.sub.val = "change sub";
+        d.arr.push(11);
+
+        assertEqual(results[0], ["val", true, false], "子链变更应命中 / change in the sub-chain should match");
+        assertEqual(results[1], ["push", false, true], "数组变更应命中 / array change should match");
+      });
+
+      test("refresh 手动派发事件 / refresh emits a manual event", () => {
+        const d = stanz({ val: "I am d" });
+
+        let event;
+        d.watch((e) => (event = e));
+        d.refresh({ name: "custom" });
+
+        assertEqual(event.type, "refresh");
+        assertEqual(event.name, "custom");
+      });
+
+      test("环状引用安全终止冒泡 / circular reference stops bubbling safely", () => {
+        const d = stanz({ val: 1 });
+        d.self = d;
+
+        let fired = 0;
+        d.watch(() => fired++);
+
+        d.self.val = 2;
+        assertEqual(fired, 1, "环状引用只应派发一次且不卡死 / circular ref should emit once, no hang");
+        assertEqual(d.val, 2);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

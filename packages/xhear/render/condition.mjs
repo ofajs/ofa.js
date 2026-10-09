@@ -151,6 +151,8 @@ const regOptions = {
     },
   },
   created() {
+    // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
+    // 此时 template[condition] 不存在，需要回退到自身内容
     const conditionTemp = this.$("template[condition]");
     this.__originHTML = conditionTemp ? conditionTemp.html : this.html;
     this.html = "";

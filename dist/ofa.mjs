@@ -1,4 +1,4 @@
-//! ofa.js - v4.7.6 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
+//! ofa.js - v4.7.7 https://github.com/ofajs/ofa.js  (c) 2018-2026 YAO
 // const error_origin = "http://127.0.0.1:5793/errors";
 const error_origin = "https://ofajs.github.io/ofa-errors/errors";
 
@@ -1508,6 +1508,10 @@ function render({
   renderExtends.render({ step: "init", target });
 }
 
+// XML reserved namespace prefixes; attributes like xmlns:xlink, xlink:href
+// and xml:space are namespace declarations, not template directives
+const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
+
 const convertEl = (el) => {
   const { tagName } = el;
 
@@ -1527,6 +1531,10 @@ const convertEl = (el) => {
       }
 
       let [, actionName, param0] = matchData;
+
+      if (nsAttrPrefixes.has(actionName)) {
+        return;
+      }
 
       if (!actionName) {
         actionName = "prop";
@@ -3234,6 +3242,8 @@ const regOptions = {
     },
   },
   created() {
+    // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
+    // 此时 template[condition] 不存在，需要回退到自身内容
     const conditionTemp = this.$("template[condition]");
     this.__originHTML = conditionTemp ? conditionTemp.html : this.html;
     this.html = "";
@@ -7529,7 +7539,7 @@ const wrapTemp = (template) => {
   });
 };
 
-const version = "ofa.js@4.7.6";
+const version = "ofa.js@4.7.7";
 $.version = version.replace("ofa.js@", "");
 
 let isDebug = false;

@@ -334,6 +334,10 @@ export function render({
   renderExtends.render({ step: "init", target });
 }
 
+// XML reserved namespace prefixes; attributes like xmlns:xlink, xlink:href
+// and xml:space are namespace declarations, not template directives
+const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
+
 const convertEl = (el) => {
   const { tagName } = el;
 
@@ -353,6 +357,10 @@ const convertEl = (el) => {
       }
 
       let [, actionName, param0] = matchData;
+
+      if (nsAttrPrefixes.has(actionName)) {
+        return;
+      }
 
       if (!actionName) {
         actionName = "prop";

@@ -1,66 +1,29 @@
 {
-  "name": "ofa.js",
-  "version": "4.7.7",
-  "description": "pure web front-end componentized framework that does not require the use of nodejs",
+  "name": "ofajs-monorepo",
+  "private": true,
+  "version": "6.0.0",
+  "description": "ofa.js framework monorepo",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "reset-full-coverage": "node skills-helper/scripts/reset-full-coverage.js",
-    "bump": "node scripts/bump-version.js && npm i && npm run build",
-    "update": "node scripts/update",
-    "build": "rollup -c",
-    "static": "node scripts/static-server",
-    "start": "node scripts/start.mjs",
-    "test": "node scripts/ci-test",
-    "build-skill": "node scripts/build-skill.js",
-    "playwright": "npx playwright test",
-    "ncu": "ncu -u xhear drill.js && npm i",
-    "router-server": "node ./scripts/router-server"
+    "test": "playwright test",
+    "bench": "node packages/drill/benchmark/run.mjs",
+    "server": "node scripts/static-server.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
   },
   "author": {
     "name": "YAO",
     "email": "kirayao@hotmail.com"
   },
-  "exports": {
-    "require": "./dist/ofa.min.js",
-    "import": "./dist/ofa.min.mjs"
-  },
   "license": "MIT",
-  "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "@rollup/plugin-terser": "^1.0.0",
-    "jasmine-core": "^6.2.0",
-    "koa": "^3.2.1",
-    "koa-static": "^5.0.0",
-    "open": "^11.0.0",
-    "rollup": "^4.60.4",
-    "shelljs": "^0.10.0"
-  },
-  "main": "dist/ofa.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {
-    "drill.js": "^5.3.12",
-    "xhear": "^7.6.0"
-  },
+  "startyear": "2018",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ofajs/ofa.js.git"
   },
-  "bugs": {
-    "url": "https://github.com/ofajs/ofa.js/issues"
-  },
-  "homepage": "https://github.com/ofajs/ofa.js",
-  "startyear": "2018",
-  "keywords": [
-    "ofa.js",
-    "ofajs",
-    "Web Components",
-    "Frontend Development",
-    "Micro Frontends",
-    "Data Sharing",
-    "Static Client Rendering",
-    "Application Development",
-    "Frontend Framework",
-    "JavaScript"
-  ]
+  "homepage": "https://github.com/ofajs/ofa.js"
 }

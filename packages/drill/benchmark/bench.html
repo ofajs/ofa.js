@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill benchmark</title>
+    <style>
+      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 32px auto; max-width: 760px; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 20px; }
+      .version { display: inline-block; font-size: 13px; font-weight: 600; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+      .version.old { background: #fddddd; color: #c62828; }
+      .version.new { background: #d8f0dd; color: #1a7f37; }
+      #status { color: #6e6e73; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8e8ed; }
+      th { font-size: 13px; color: #6e6e73; font-weight: 500; }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      tr.pending td.num { color: #a1a1a6; }
+    </style>
+  </head>
+  <body>
+    <span id="versionBadge" class="version"></span>
+    <h1>drill benchmark</h1>
+    <p id="status">准备中… / preparing</p>
+    <table>
+      <thead>
+        <tr><th>场景 / scenario</th><th style="text-align:right">结果 / result</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script type="module">
+      // 同一页面通过 ?v=old|new 分别驱动旧版与新版 drill，
+      // 场景代码完全一致，只替换被测实现，保证公平。
+      const version = new URLSearchParams(location.search).get("v") === "old" ? "old" : "new";
+      const OLD = version === "old";
+
+      document.getElementById("versionBadge").textContent = OLD
+        ? "旧版 legacy drill.js 5.3.x"
+        : "新版 new drill.js 6.0";
+      document.title = `drill benchmark · ${OLD ? "legacy 5.3.x" : "new 6.0"}`;
+
+      const status = document.getElementById("status");
+      const rowsEl = document.getElementById("rows");
+      const results = (window.__benchResults = []);
+
+      const rowEls = new Map();
+      let total = 0;
+
+      const addRow = (id, label) => {
+        total++;
+        const tr = document.createElement("tr");
+        tr.className = "pending";
+        tr.innerHTML = `<td>${label}</td><td class="num">…</td>`;
+        rowsEl.appendChild(tr);
+        rowEls.set(id, tr);
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const render = (id, text) => {
+        const tr = rowEls.get(id);
+        tr.className = "";
+        tr.querySelector(".num").textContent = text;
+      };
+
+      const push = (id, label, value, unit) => {
+        results.push({ id, label, value, unit });
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const median = (arr) => [...arr].sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+
+      // ---- 计时工具 ----
+
+      /** 吞吐类：预热 1 轮 JIT，再跑 5 轮取中位数换算 ops/s */
+      const benchOps = async (id, label, iterations, fn) => {
+        addRow(id, label);
+        fn(0); // 预热，触发 JIT
+
+        const times = [];
+        for (let round = 0; round < 5; round++) {
+          const t0 = performance.now();
+          for (let i = 0; i < iterations; i++) {
+            fn(i);
+          }
+          times.push(performance.now() - t0);
+        }
+
+        const ops = Math.round(iterations / (median(times) / 1000));
+        render(id, `${ops.toLocaleString("en-US")} ops/s`);
+        push(id, label, ops, "ops/s");
+      };
+
+      /**
+       * 耗时类：cold 仅 1 轮（首过效应）；warm 跑 rounds 轮取中位数，
+       * 每轮执行 warmBatch 次以摊薄亚毫秒级样本的噪声，结果按次折算。
+       */
+      const benchTime = async (id, label, fn, rounds = 3, warmBatch = 1) => {
+        addRow(id, label);
+
+        const t0 = performance.now();
+        await fn();
+        const cold = performance.now() - t0;
+
+        const times = [];
+        for (let round = 0; round < rounds; round++) {
+          const s = performance.now();
+          for (let batch = 0; batch < warmBatch; batch++) {
+            await fn();
+          }
+          times.push((performance.now() - s) / warmBatch);
+        }
+        const warm = median(times);
+
+        render(id, `${cold.toFixed(1)} ms 冷 · ${warm.toFixed(1)} ms 热`);
+        push(`${id}-cold`, label, +cold.toFixed(1), "ms 冷/cold");
+        push(`${id}-warm`, label, +warm.toFixed(1), "ms 热/warm");
+      };
+
+      // ---- 加载被测实现 ----
+
+      // 等窗口就绪：旧版的 load-module 元素在 window load 时才注册
+      await (document.readyState === "complete"
+        ? Promise.resolve()
+        : new Promise((resolve) => window.addEventListener("load", resolve)));
+
+      const { default: lm } = await import(OLD ? "./vendor/legacy/src/base.mjs" : "../src/main.mjs");
+      const { path } = await import(OLD ? "./vendor/legacy/src/config.mjs" : "../src/path.mjs");
+      const { processor, use } = await import(OLD ? "./vendor/legacy/src/use.mjs" : "../src/processors.mjs");
+
+      // ---- 场景 ----
+
+      const modSet = (prefix) =>
+        Array.from({ length: 50 }, (_, i) => `./fixtures/${prefix}${String(i).padStart(2, "0")}.mjs`);
+      const SERIAL_SET = modSet("modA"); // 串行 + 元素场景用
+      const PARALLEL_SET = modSet("modB"); // 并发专用，避免污染串行场景的冷启动
+      const load = lm(import.meta);
+      const base = location.href;
+
+      // 场景顺序有讲究：模块加载类先跑（抢冷启动），微基准与缓存类随后
+      const SCENARIOS = [
+        () =>
+          benchTime("serial", "串行加载 50 个模块 / load 50 modules serially", async () => {
+            for (const url of SERIAL_SET) {
+              await load(url);
+            }
+          }, 3, 10),
+
+        () =>
+          benchTime("parallel", "并发加载 50 个模块 / load 50 modules in parallel", () =>
+            Promise.all(PARALLEL_SET.map((url) => load(url)))
+          , 3, 10),
+
+        () =>
+          benchOps("path", "path() 路径解析 ×20k / path resolution ×20k", 20000, (i) =>
+            path(`./bench/f${i % 64}.mjs`, base)
+          ),
+
+        () => {
+          // 三层空中间件，衡量洋葱链本身的调度开销
+          const noop = (ctx, next) => next();
+          use("bench", noop);
+          use("bench", noop);
+          use("bench", noop);
+          const oni = processor.bench;
+
+          return benchOps("chain", "中间件链 3 层 ×5k / middleware chain (3 layers) ×5k", 5000, () =>
+            oni.run({})
+          );
+        },
+
+        () =>
+          benchTime("json-cached", "缓存 json 加载 ×500 / cached json loads ×500", async () => {
+            for (let i = 0; i < 500; i++) {
+              await load("../test/statics/data.json");
+            }
+          }, 2),
+
+        () =>
+          benchTime("elements", "100 个 l-m 元素批量加载 / load 100 l-m elements", async () => {
+            // 复用 50 个模块地址拼出 100 个元素，import 去重后聚焦元素升级本身
+            const els = [...SERIAL_SET, ...SERIAL_SET].map((url) => {
+              const el = document.createElement("l-m");
+              el.setAttribute("src", url);
+              return el;
+            });
+
+            const done = Promise.all(
+              els.map((el) => new Promise((resolve) => el.addEventListener("load", resolve)))
+            );
+
+            els.forEach((el) => document.body.appendChild(el));
+            await done;
+          }, 3, 3),
+      ];
+
+      for (const scenario of SCENARIOS) {
+        await scenario();
+      }
+
+      status.textContent = "完成 / done";
+      window.__benchDone = true;
+    </script>
+  </body>
+</html>

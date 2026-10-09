@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill · 加载器 loader</title>
+  </head>
+  <body>
+    <script type="module">
+      import lm from "../../src/main.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      const load = lm(import.meta);
+
+      test("加载 ES 模块并返回命名空间 / loads an ES module and returns its namespace", async () => {
+        assertEqual(await load("./esm/answer.mjs"), { answer: 42 });
+      });
+
+      test(".type 参数覆盖文件扩展名 / the .type param overrides the file extension", async () => {
+        assertEqual(
+          await load("./esm/answer.mjs .txt"),
+          "export const answer = 42;\n"
+        );
+      });
+
+      test("加载 json 并解析为对象 / loads json as a parsed object", async () => {
+        assertEqual(await load("./data.json"), { name: "drill", major: 6 });
+      });
+
+      test("加载 txt 为原始文本 / loads txt as raw text", async () => {
+        assertEqual(await load("./note.txt"), "hello drill text");
+      });
+
+      test("加载并实例化 wasm 模块 / loads and instantiates a wasm module", async () => {
+        assertEqual(await load("./empty.wasm"), {});
+      });
+
+      test("不同 query 拼接共享同一次模块求值 / different query spellings share one module evaluation", async () => {
+        // 查询串会在 import 前剥掉，两种拼写命中同一模块实例
+        const m1 = await load("./esm/counter.mjs?v=1");
+        const m2 = await load("./esm/counter.mjs?v=2");
+
+        assertEqual([m1.evalCount, m2.evalCount], [1, 1]);
+      });
+
+      test("blob URL 通过 Content-Type 嗅探加载 / a blob URL is loaded by sniffing its Content-Type", async () => {
+        // blob 地址没有扩展名，走 fetch 兜底后按响应头反查处理器
+        const blob = new Blob(["<p>from blob</p>"], { type: "text/html" });
+
+        assertEqual(
+          await load(URL.createObjectURL(blob)),
+          "<p>from blob</p>"
+        );
+      });
+
+      test("未命中的类型以原始 Response 返回 / an unmatched type resolves with the raw Response", async () => {
+        const resp = await load("./raw/binary");
+
+        assert(resp instanceof Response, "应返回 Response 实例 / expected a Response instance");
+        assertEqual(resp.status, 200);
+      });
+
+      test("404 的 json 加载抛出 load_fail_status / a 404 json load rejects with load_fail_status", async () => {
+        try {
+          await load("./missing.json");
+          assert(false, "预期加载应失败 / expected the load to reject");
+        } catch (error) {
+          assertEqual(error.code, "load_fail_status");
+          assert(
+            error.message.includes("missing.json"),
+            `错误信息应包含地址 / the error message should mention the url, got: ${error.message}`
+          );
+        }
+      });
+
+      run();
+    </script>
+  </body>
+</html>

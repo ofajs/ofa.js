@@ -6,3 +6,5 @@
 tutorial/website
 prompt.md
 .playwright-mcp
+# benchmark 夹具由 run.mjs 动态生成，不进仓库
+packages/drill/benchmark/fixtures/

@@ -1,0 +1,33 @@
+{
+  "name": "drill.js",
+  "version": "6.0.0",
+  "description": "A declarative module loader that runs on the browser",
+  "type": "module",
+  "main": "src/main.mjs",
+  "exports": {
+    ".": "./src/main.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/drill"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "drill.js",
+    "drill",
+    "module loader",
+    "es modules"
+  ]
+}

@@ -8,8 +8,8 @@
 
 ```html
 ...
-<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@4.7.6/dist/ofa.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@4.7.6/libs/global-link/dist/global-link.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@4.7.7/dist/ofa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@4.7.7/libs/global-link/dist/global-link.min.js"></script>
 ...
 
 <body>

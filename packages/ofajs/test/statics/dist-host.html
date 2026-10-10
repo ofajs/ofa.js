@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>dist 构建产物冒烟 / dist bundle smoke</title>
+    <!-- 经典 script 引入 UMD 包（与旧版 dist 用法一致；产物由 npm run build 生成） -->
+    <script src="../../../../dist/ofa.js"></script>
+  </head>
+  <body>
+    <!-- 包内 drill 走完整组件加载管线 -->
+    <l-m src="./fixtures/comp-card.html"></l-m>
+    <dist-btn></dist-btn>
+    <comp-card></comp-card>
+
+    <script>
+      // 经典脚本环境：window.$ 由 UMD 包暴露，直接注册组件（无模块系统参与）
+      $.register({
+        tag: "dist-btn",
+        temp: `<button id="db">count:{{count}}</button>`,
+        data: {
+          count: 1,
+        },
+        proto: {
+          inc() {
+            this.count++;
+          },
+        },
+      });
+    </script>
+
+    <script type="module">
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      test("UMD 包暴露全局 $ 与 ofa / UMD bundle exposes global $ and ofa", async () => {
+        assert(typeof window.$ === "function", "window.$ 应存在 / window.$ should exist");
+        assert(globalThis.ofa === window.$, "globalThis.ofa 应可用 / globalThis.ofa should exist");
+        assertEqual(window.$.version, "5.0.0", "版本号应正确 / version should match");
+      });
+
+      test("经典脚本注册的组件可渲染 / component registered via classic script renders", async () => {
+        const $btn = window.$("dist-btn");
+        await waitFor(() => $btn.shadow && $btn.shadow.$("#db").text === "count:1");
+        $btn.inc();
+        await waitFor(() => $btn.shadow.$("#db").text === "count:2");
+      });
+
+      test("包内 drill 可加载组件文件 / bundled drill loads component files", async () => {
+        // l-m 经包内 drill 完成文件加载、转译与注册
+        await waitFor(() => !!customElements.get("comp-card"));
+
+        const $card = window.$("comp-card");
+        await waitFor(() => $card.shadow && $card.shadow.$(".card"));
+        assertEqual($card.shadow.$(".card").text, "card:card");
+        assert(
+          $card.PATH.endsWith("fixtures/comp-card.html"),
+          "PATH 应解析到组件文件 / PATH should resolve to the component file",
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

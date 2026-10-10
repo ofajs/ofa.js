@@ -98,6 +98,13 @@ packages/ofajs/
 - 手动预览：根 `npm run server` → `http://localhost:3348/packages/ofajs/test/statics/<页面>.html`；
 - 测试 fixtures：`test/statics/fixtures/`（组件/页面/应用配置样例，
   script 必须在 template 内部）；
+- **构建**：仓库根 `npm run build`（rollup，配置在根 `rollup.config.mjs`，
+  用户 2026-10-10 确认的唯一打包例外）→ 根 `dist/` 四产物：
+  `ofa.mjs`（ES）/ `ofa.js`（UMD，name "$"）/ `ofa.min.mjs` / `ofa.min.js`
+  （min 版带 terser sourcemap）。产物暴露 `window.$`、`globalThis.ofa`、
+  `exports.Stanz`，与旧版 dist 契约一致；**产物不手改，只由 build 生成**。
+  冒烟页 `test/statics/dist-host.html` 以经典 script 引 `dist/ofa.js`，
+  断言全局暴露、经典脚本注册组件渲染、包内 drill 完整加载 fixtures 组件。
 - benchmark：`npm run bench:ofajs`（端口 3352，自动起停）。新旧分页
   A/B（两版都设 window.\$/globalThis.ofa 且注册 o-* 元素，同页必冲突），
   场景：o-fill 初建/对账、o-if 切换、drawUrl 转译、fixRelate 修正、
@@ -114,6 +121,7 @@ packages/ofajs/
 | app.html | 配置加载 + home 自动挂载（appIsReady）、goto、back、router-change 事件、olink 点击路由、forward（allowForward）、页面继承（parent 包裹）；**old cases 移植**：watchUntil 等 appIsReady、.mjs 页面模块（PAGE 类型 + 外置 temp）、页面相对 img 改写（直写/条件/命名模板三处）、动态 attr:href 的 olink 读实时地址（fix-link）、离场旧页尺寸锁定（resetOldPage） |
 | context.html | provider 数据广播（attributes → 数据）、更新广播、dispatch 定向事件、作用域隔离、root provider 应用级提供 |
 | misc.html | inject-host 收编（光 DOM 生效 + head 去重）、match-var 样式收集；**old cases 移植**：style 内 data() 响应式（含 @media 同式多处替换）、条件注入样式的 data() |
+| dist-host.html | dist 构建产物冒烟：经典 script 引 UMD 包、全局 \$/ofa 暴露与版本号、经典脚本注册组件渲染、包内 drill 完整加载组件（l-m → drawUrl → 注册） |
 
 old/test/cases 27 个疑难案例的归口（2026-10 移植）：
 render-src → app.html（olink 相对地址由既有 olink 用例覆盖）；

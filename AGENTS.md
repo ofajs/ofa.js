@@ -120,7 +120,10 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
 - 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352，`npm run bench` 依次跑全部）
-- 唯一 devDependency 是 `@playwright/test`；浏览器二进制缺失时报
+- 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
+  `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
+- devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`
+  （仅构建 ofajs dist）；浏览器二进制缺失时报
   "Executable doesn't exist"，用 `npx playwright install <browser>` 安装
 
 ## 九、技术选型禁令
@@ -130,10 +133,14 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - **任何运行时依赖**：drill 与 stanz 目前零依赖（drill 连 ofa-error 都已移除），
   错误处理用各包内部的轻量 Error 类
 - **打包器 / 构建步骤**：各包是 source-only ESM，`src/*.mjs` 即发布产物；
-  浏览器直接加载源码，"看到的文件 = 运行的文件"
+  浏览器直接加载源码，"看到的文件 = 运行的文件"。
+  **唯一例外（用户 2026-10-10 确认）**：ofajs 主包经 rollup 打包到根 `dist/`
+  （ES + UMD + min，供 `<script src>` 经典用法与 CDN），配置在根
+  `rollup.config.mjs`；其余包不得引入打包，dist 产物不手改、只由 build 生成
 - **测试基建新依赖**：静态服务器保持零依赖 `node:http`；不引入 vitest/jest
   等第二测试运行器
 - **浏览器全局副作用**：新增代码不得依赖或写入 window 全局做模块间通信
+  （UMD 包对 window.$ / globalThis.ofa 的约定暴露除外，属框架公开契约）
 
 理由：每多一层黑盒（转换、隐式行为、全局耦合），定位问题的能力就弱一分。
 stanz 正是靠"零全局副作用"才实现了新旧两版同页 A/B 对比的基准能力。

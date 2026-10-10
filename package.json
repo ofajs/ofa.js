@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "test": "playwright test",
+    "build": "rollup -c",
     "bench": "npm run bench:drill && npm run bench:stanz && npm run bench:xhear && npm run bench:ofajs",
     "bench:drill": "node packages/drill/benchmark/run.mjs",
     "bench:stanz": "node packages/stanz/benchmark/run.mjs",
@@ -17,7 +18,9 @@
     "bench:ofajs": "node packages/ofajs/benchmark/run.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.64.5"
   },
   "author": {
     "name": "YAO",

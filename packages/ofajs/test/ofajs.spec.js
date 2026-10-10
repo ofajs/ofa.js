@@ -10,6 +10,7 @@ const PAGES = [
   { path: "/packages/ofajs/test/statics/app.html", total: 12 },
   { path: "/packages/ofajs/test/statics/context.html", total: 5 },
   { path: "/packages/ofajs/test/statics/misc.html", total: 5 },
+  { path: "/packages/ofajs/test/statics/dist-host.html", total: 3 },
 ];
 
 for (const { path, total } of PAGES) {

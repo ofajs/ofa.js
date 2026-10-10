@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>事件绑定 / Event binding</title>
+  </head>
+  <body>
+    <event-demo></event-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "event-demo",
+        temp: `
+        <button id="btn-method" on:click="addCount">method</button>
+        <button id="btn-inline" on:click="count = count + 10">inline</button>
+        <button id="btn-one" one:click="oneHit = true">one</button>
+        <button id="btn-args" on:click="lastEvent = $event.type">args</button>
+        <div id="count">count:{{count}}</div>
+        <div id="one-state">one:{{oneHit}}</div>
+        <div id="event-state">event:{{lastEvent}}</div>
+        <div id="custom" on:my-event="onCustom">custom listener</div>
+        `,
+        data: {
+          count: 0,
+          oneHit: false,
+          lastEvent: "",
+          customData: "",
+        },
+        proto: {
+          addCount() {
+            this.count++;
+          },
+          onCustom(e) {
+            this.customData = e.data;
+          },
+        },
+      });
+
+      const $demo = $("event-demo");
+
+      const textOf = (id) => $demo.shadow.$(id).text;
+
+      test("on: 方法名绑定 / on: with method name", async () => {
+        $demo.shadow.$("#btn-method").ele.click();
+        await waitFor(() => textOf("#count") === "count:1");
+      });
+
+      test("on: 内联表达式 / on: with inline expression", async () => {
+        $demo.shadow.$("#btn-inline").ele.click();
+        await waitFor(() => textOf("#count") === "count:11");
+      });
+
+      test("one: 只触发一次 / one: fires once", async () => {
+        const btn = $demo.shadow.$("#btn-one").ele;
+        btn.click();
+        btn.click();
+        btn.click();
+        await waitFor(() => textOf("#one-state") === "one:true");
+      });
+
+      test("$event 事件对象 / $event object access", async () => {
+        $demo.shadow.$("#btn-args").ele.click();
+        await waitFor(() => textOf("#event-state") === "event:click");
+      });
+
+      test("emit 传递 data / emit with data payload", async () => {
+        // emit 的 data 会挂到 event.data 上
+        $demo.shadow.$("#custom").emit("my-event", {
+          data: "payload-1",
+        });
+        await waitFor(() => $demo.customData === "payload-1");
+      });
+
+      test("off 解绑事件 / off removes listener", async () => {
+        let fired = 0;
+        const handler = () => fired++;
+        $demo.shadow.$("#btn-method").on("off-test", handler);
+        $demo.shadow.$("#btn-method").emit("off-test");
+        $demo.shadow.$("#btn-method").off("off-test", handler);
+        $demo.shadow.$("#btn-method").emit("off-test");
+        await new Promise((r) => setTimeout(r, 50));
+        assertEqual(fired, 1, "解绑后不应再触发 / should not fire after off");
+      });
+
+      test("事件冒泡到组件 / event bubbles to host", async () => {
+        let bubbled = 0;
+        $demo.on("btn-bubble", () => bubbled++);
+        // 模板内元素派发的事件需 composed 才能穿过 shadow 边界到达组件
+        const btn = $demo.shadow.$("#btn-method");
+        btn.emit("btn-bubble", { composed: true });
+        await waitFor(() => bubbled === 1);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

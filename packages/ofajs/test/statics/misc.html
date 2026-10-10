@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>杂项组件 / inject-host and match-var</title>
+  </head>
+  <body>
+    <style-host></style-host>
+    <!-- inject-host 提升的样式作用于光 DOM -->
+    <div class="hosted-color" id="light-target">hosted text</div>
+    <match-demo></match-demo>
+    <style-data-demo></style-data-demo>
+
+    <script type="module">
+      import "../../src/main.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      const { register } = ofa;
+
+      // ---- inject-host：shadow 内样式收编到宿主根（光 DOM 生效）----
+      register({
+        tag: "style-host",
+        temp: `
+        <inject-host>
+          <style>
+            .hosted-color { color: rgb(0, 128, 0); }
+          </style>
+        </inject-host>`,
+        data: {},
+      });
+
+      test("inject-host 收编样式并作用于光 DOM / inject-host hoists styles", async () => {
+        const target = document.querySelector("#light-target");
+
+        // 样式被收编到 head 后作用于光 DOM 元素
+        await waitFor(
+          () => getComputedStyle(target).color === "rgb(0, 128, 0)",
+        );
+      });
+
+      test("inject-host 样式提升至 head 且按内容去重 / hoisted to head deduped", async () => {
+        const hoisted = document.head.querySelectorAll("style[inject-host]");
+        assert(hoisted.length >= 1, "head 中应有收编样式 / hoisted style should exist");
+
+        // 相同样式内容只保留一份（hash 去重）
+        const contents = new Set();
+        hoisted.forEach((s) => contents.add(s.textContent.trim()));
+        assertEqual(hoisted.length, contents.size);
+      });
+
+      // ---- match-var：属性条件样式 ----
+      register({
+        tag: "match-demo",
+        temp: `
+        <match-var id="mv" mode="on">
+          <style>
+            .flag { color: rgb(255, 0, 0); }
+          </style>
+        </match-var>
+        <div class="flag" id="flag-el">flag text</div>
+        <button id="unmatch" on:click="unset()">unset</button>`,
+        data: {},
+        proto: {
+          unset() {
+            this.$("#mv").removeAttribute("mode");
+          },
+        },
+      });
+
+      test("match-var 收集样式并按环境生效 / match-var collects styles", async () => {
+        const mv = ofa("match-demo").shadow.$("#mv");
+        // match-var 摘走了自身内容作为样式源
+        await waitFor(() => !!mv);
+        assertEqual(mv.ele.childNodes.length, 0, "样式内容应被收集 / style content should be collected");
+
+        // 支持 container style query 的环境生成 @container 规则；
+        // 不支持的环境降级为原样式直插——两条路径都在 shadow 内留下 .flag 规则
+        const shadow = ofa("match-demo").ele.shadowRoot;
+        const hasRule = [...shadow.querySelectorAll("style")].some((style) =>
+          style.textContent.includes(".flag"),
+        );
+        assert(hasRule, ".flag 规则应存在 / .flag rule should exist");
+      });
+
+      // ---- 历史疑难案例（old/test/cases 移植）：style 内 data() 响应式 ----
+
+      const { register: registerStyle } = ofa;
+
+      registerStyle({
+        tag: "style-data-demo",
+        temp: `
+        <style>
+          #sd-box { color: data(sdColor); }
+          @media screen and (min-width: data(sdWidth + "px")) {
+            #sd-box { width: data(sdWidth + "px"); }
+          }
+        </style>
+        <o-if :value="sdWeight > 800">
+          <style>#sd-box { font-weight: data(sdWeight); }</style>
+        </o-if>
+        <div id="sd-box">style data box</div>`,
+        data: {
+          sdColor: "rgb(255, 0, 0)",
+          sdWidth: 600,
+          sdWeight: 900,
+        },
+      });
+
+      test("style 内 data() 随数据刷新（含 @media）/ style data() reacts to data changes", async () => {
+        const $demo = ofa("style-data-demo");
+        const box = $demo.shadow.$("#sd-box");
+
+        await waitFor(() => getComputedStyle(box.ele).color === "rgb(255, 0, 0)");
+
+        // data() 变更 → style 文本重写 → 规则生效
+        $demo.sdColor = "rgb(0, 0, 255)";
+        await waitFor(() => getComputedStyle(box.ele).color === "rgb(0, 0, 255)");
+
+        // @media 条件里的 data()：视口 1280 宽，600px 断言命中、5000px 失配
+        assertEqual(getComputedStyle(box.ele).width, "600px");
+        $demo.sdWidth = 5000;
+        // 失配后 width 规则撤销，回落容器宽度（computed 恒为像素值，非 auto）
+        await waitFor(() => getComputedStyle(box.ele).width !== "5000px");
+      });
+
+      test("条件注入的样式也可用 data() / data() works in conditionally injected style", async () => {
+        const $demo = ofa("style-data-demo");
+        const box = $demo.shadow.$("#sd-box");
+
+        // sdWeight=900 > 800：条件样式注入，font-weight 900
+        await waitFor(() => getComputedStyle(box.ele).fontWeight === "900");
+
+        // 降到 800 以下：o-if 撤销样式，回落默认值
+        $demo.sdWeight = 600;
+        await waitFor(() => getComputedStyle(box.ele).fontWeight === "400");
+
+        // 850 > 800：条件样式重新注入并取新值
+        $demo.sdWeight = 850;
+        await waitFor(() => getComputedStyle(box.ele).fontWeight === "850");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

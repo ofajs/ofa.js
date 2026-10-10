@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 
 const PAGES = [
   { path: "/packages/stanz/test/statics/accessor.html", total: 9 },
-  { path: "/packages/stanz/test/statics/watch.html", total: 11 },
+  { path: "/packages/stanz/test/statics/watch.html", total: 14 },
   { path: "/packages/stanz/test/statics/array.html", total: 6 },
   { path: "/packages/stanz/test/statics/methods.html", total: 5 },
 ];

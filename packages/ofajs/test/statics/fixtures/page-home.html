@@ -1,0 +1,24 @@
+<template page>
+  <title>Home</title>
+  <div class="page-root">
+    <h3 id="page-title">home:{{title}}</h3>
+    <button id="go-two" on:click="goto('page-two.html')">go two</button>
+    <a id="olink-two" olink href="page-two.html">olink go two</a>
+    <!-- 动态 href 的 olink（旧 fix-link 案例）：点击时应读取当前 href -->
+    <a id="olink-dyn" olink attr:href="dynHref">olink dyn</a>
+    <span id="route-log">router:{{routeCount}}</span>
+  </div>
+<script>
+  export default {
+    data: {
+      title: "home",
+      routeCount: 0,
+      dynHref: "./page-two.html",
+    },
+    // app 路由变化时触发（嵌套路由中父页的 routerChange）
+    routerChange({ type }) {
+      this.routeCount++;
+    },
+  };
+</script>
+</template>

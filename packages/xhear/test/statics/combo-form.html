@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>表单与注册组合回归 / Form and registration regressions</title>
+  </head>
+  <body>
+    <fill-opt-demo></fill-opt-demo>
+    <formdata-demo></formdata-demo>
+    <before-init-demo id="before-init-target"></before-init-demo>
+    <loop-attr-demo></loop-attr-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      // formData 为可选插件，按需引入
+      import { formData } from "../../src/formdata.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      /* ===== 用例来源 230904/fill-option：select 内 replace-temp + fill + if ===== */
+      $.register({
+        tag: "fill-opt-demo",
+        temp: `
+        select: <span id="comp-val">{{val}}</span>
+        <br />
+        <select sync:value="val">
+          <template is="replace-temp">
+            <option value="a">AA</option>
+            <x-fill :value="arr">
+              <option attr:value="$data.value">{{$data.name}}</option>
+            </x-fill>
+            <x-if :value="val !== 'a'">
+              <option value="b">BB</option>
+            </x-if>
+          </template>
+        </select>
+        `,
+        data: {
+          val: "t-cn",
+          arr: [
+            { name: "简体中文", value: "cn" },
+            { name: "繁体中文", value: "t-cn" },
+          ],
+        },
+      });
+
+      test("select 内 replace-temp 与条件选项 / replace-temp in select with condition", async () => {
+        const $demo = $("fill-opt-demo");
+        const $shadow = $demo.shadow;
+
+        const select = $shadow.$("select");
+        const optionCount = () => select.ele.querySelectorAll("option").length;
+
+        // 初始 val=t-cn（非 a）→ 条件选项 b 存在，共 4 个 option
+        await waitFor(() => optionCount() === 4);
+        assertEqual($shadow.$("#comp-val").text, "t-cn");
+
+        // 选中 a → 条件选项 b 移除，剩 3 个
+        select.ele.value = "a";
+        select.ele.dispatchEvent(new Event("change"));
+        await waitFor(() => $shadow.$("#comp-val").text === "a");
+        await waitFor(() => optionCount() === 3);
+
+        // 换回 cn 条件选项恢复
+        select.ele.value = "cn";
+        select.ele.dispatchEvent(new Event("change"));
+        await waitFor(() => $shadow.$("#comp-val").text === "cn");
+        await waitFor(() => optionCount() === 4);
+      });
+
+      /* ===== 用例来源 formdata-in-if：x-if 显隐与 x-fill 项参与 formData ===== */
+      $.register({
+        tag: "formdata-demo",
+        temp: `
+        <button on:click="count++">Count++</button>
+        <div>
+          <input type="text" name="a" value="I am A" />
+        </div>
+        <x-if :value="count % 2">
+          <div>
+            <input type="text" name="b" value="I am B" />
+          </div>
+        </x-if>
+        <div id="fill-inputs">
+          <x-fill :value="arr">
+            <div>
+              <input type="text" attr:name="$data.name" sync:value="$data.val" />
+            </div>
+          </x-fill>
+        </div>
+        <div id="target">{{fdata}}</div>
+        `,
+        data: {
+          fdata: {},
+          count: 0,
+          arr: [
+            { name: "K1", val: 1 },
+            { name: "K2", val: "2" },
+          ],
+        },
+        proto: {
+          addItem() {
+            this.addItemCount = (this.addItemCount || 2) + 1;
+            this.arr.push({
+              name: `K${this.addItemCount}`,
+              val: this.addItemCount,
+            });
+          },
+        },
+        attached() {
+          this.fdata = formData(this.shadow);
+        },
+        detached() {
+          this.fdata = {};
+        },
+      });
+
+      test("formData 随条件显隐增减键 / formData tracks condition visibility", async () => {
+        const $demo = $("formdata-demo");
+        const $shadow = $demo.shadow;
+        const target = () => $shadow.$("#target").text.trim();
+
+        await waitFor(() => target() === `{"a":"I am A","K1":"1","K2":"2"}`);
+
+        // 显示条件块 → b 键出现
+        $demo.count++;
+        await waitFor(() =>
+          target().startsWith(`{"a":"I am A","K1":"1","K2":"2","b"`),
+        );
+
+        // 隐藏条件块 → b 键消失
+        $demo.count++;
+        await waitFor(() => target() === `{"a":"I am A","K1":"1","K2":"2"}`);
+      });
+
+      test("formData 跟随 fill 项增删 / formData tracks fill items", async () => {
+        const $demo = $("formdata-demo");
+        const $shadow = $demo.shadow;
+        const target = () => $shadow.$("#target").text.trim();
+
+        $demo.addItem();
+        await waitFor(() =>
+          target().includes(`"K3":"3"`),
+        );
+        $demo.addItem();
+        await waitFor(() => target().includes(`"K4":"4"`));
+      });
+
+      test("formData 编辑回写 / formData edit flows back", async () => {
+        const $demo = $("formdata-demo");
+        const $shadow = $demo.shadow;
+        const target = () => $shadow.$("#target").text.trim();
+
+        const input = $shadow.$('input[name="a"]');
+        input.ele.value = "I am A2";
+        input.ele.dispatchEvent(new Event("input"));
+        await waitFor(() => target().startsWith(`{"a":"I am A2"`));
+      });
+
+      /* ===== 用例来源 set-data-before-init：注册前设置数据 ===== */
+      // 页面加载即先赋值，组件在下方才注册
+      $("#before-init-target").count = 100;
+      $("#before-init-target").num = 100;
+
+      $.register({
+        tag: "before-init-demo",
+        temp: `
+        <div id="c">count:{{count}}</div>
+        <div id="n">num:{{num}}</div>
+        `,
+        attrs: {
+          num: 1,
+        },
+        data: {
+          count: 0,
+        },
+      });
+
+      test("注册前设置的数据保留 / data set before register is kept", async () => {
+        const $demo = $("before-init-demo");
+        const $shadow = $demo.shadow;
+
+        await waitFor(() => $shadow.$("#c").text === "count:100");
+        // num 是 attrs 成员：注册前赋值会反射到属性上
+        assertEqual($demo.ele.getAttribute("num"), "100");
+        assertEqual($shadow.$("#n").text, "num:100");
+      });
+
+      /* ===== 用例来源 loop-set-attr-bug：attrs 反射与模板赋值不成死循环 ===== */
+      $.register({
+        tag: "loop-attr-child",
+        attrs: {
+          activeItem: null,
+        },
+        temp: `<div class="tab-label">tab - {{activeItem}}</div>`,
+      });
+
+      $.register({
+        tag: "loop-attr-demo",
+        temp: `
+        <div id="tabs">
+          <x-fill :value="arr">
+            <loop-attr-child :active-item="$data.active"></loop-attr-child>
+          </x-fill>
+        </div>
+        `,
+        data: {
+          arr: [{ active: "hahaha" }],
+        },
+      });
+
+      test("attrs 数据变化不引发循环 / attrs change stays stable", async () => {
+        const $demo = $("loop-attr-demo");
+        const $shadow = $demo.shadow;
+
+        // 子组件渲染在自身 shadow 内，取值需穿透一级
+        const label = () =>
+          $shadow.$("loop-attr-child").shadow.$(".tab-label");
+
+        await waitFor(() => label() && label().text === "tab - hahaha");
+
+        // 修改数据项 → 反射链条走完一轮后必须稳定
+        $demo.arr[0].active = 1;
+        await waitFor(() => label() && label().text === "tab - 1");
+        await new Promise((r) => setTimeout(r, 200));
+        assertEqual(label().text, "tab - 1");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

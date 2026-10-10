@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM 数组操作 / DOM array operations</title>
+    <style>
+      dom-array-demo .sub { padding: 2px 8px; border: #ccc solid 1px; margin: 2px; display: inline-block; }
+    </style>
+  </head>
+  <body>
+    <dom-array-demo></dom-array-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      let detachedCount = 0;
+
+      $.register({
+        tag: "da-item",
+        temp: `<span class="sub"><slot></slot></span>`,
+        detached() {
+          detachedCount++;
+        },
+      });
+
+      $.register({
+        tag: "dom-array-demo",
+        temp: `
+        <div id="target">
+          <da-item>1</da-item>
+          <da-item>2</da-item>
+          <da-item>3</da-item>
+          <da-item>4</da-item>
+          <da-item>5</da-item>
+        </div>
+        `,
+        data: {},
+      });
+
+      const $demo = $("dom-array-demo");
+      const $target = $demo.shadow.$("#target");
+      const subTexts = () =>
+        $target.all("da-item").map((e) => e.text.trim()).join(",");
+
+      test("push / unshift 追加子元素 / push and unshift", async () => {
+        assertEqual($target.length, 5);
+        $target.push($("<da-item>6</da-item>"));
+        $target.unshift($("<da-item>0</da-item>"));
+        assertEqual($target.length, 7);
+        assertEqual(subTexts(), "0,1,2,3,4,5,6");
+      });
+
+      test("pop / shift 移除首尾 / pop and shift", async () => {
+        const last = $target.pop();
+        assertEqual(last.text, "6");
+        const first = $target.shift();
+        assertEqual(first.text, "0");
+        assertEqual(subTexts(), "1,2,3,4,5");
+      });
+
+      test("splice 中段操作 / splice in the middle", async () => {
+        const removed = $target.splice(1, 2, $("<da-item>9</da-item>"));
+        assertEqual(removed.length, 2);
+        assertEqual(subTexts(), "1,9,4,5");
+      });
+
+      test("非可变方法 filter / map / non-mutating methods", async () => {
+        const texts = $target
+          .filter((e) => e.text !== "9")
+          .map((e) => e.text.trim());
+        assertEqual(texts, ["1", "4", "5"]);
+      });
+
+      test("reverse / sort 重排 / reverse and sort", async () => {
+        $target.reverse();
+        assertEqual(subTexts(), "5,4,9,1");
+        $target.sort((a, b) => Number(a.text) - Number(b.text));
+        assertEqual(subTexts(), "1,4,5,9");
+      });
+
+      test("内部搬动不触发 detached / internal moves skip detached", async () => {
+        detachedCount = 0;
+        $target.reverse();
+        await new Promise((r) => setTimeout(r, 100));
+        assertEqual(
+          detachedCount,
+          0,
+          "reverse 属内部搬动不应触发 detached / reverse should not trigger detached",
+        );
+      });
+
+      test("移除元素触发 detached / removal triggers detached", async () => {
+        // 上一个用例做过 reverse，当前顺序为 [9,5,4,1]
+        detachedCount = 0;
+        const removed = $target.pop();
+        assertEqual(removed.text, "1");
+        await new Promise((r) => setTimeout(r, 100));
+        assertEqual(detachedCount, 1, "真实移除应触发 detached / real removal should trigger detached");
+        assertEqual(subTexts(), "9,5,4");
+      });
+
+      test("导航属性 next / prev / index / navigation getters", async () => {
+        // 当前顺序 [9,5,4]
+        const second = $target.all("da-item")[1];
+        assertEqual(second.text, "5");
+        assertEqual(second.next.text, "4");
+        assertEqual(second.prev.text, "9");
+        assertEqual(second.index, 1);
+        assertEqual(second.parent.tag, "div");
+        assert(second.parent.ele.id === "target");
+      });
+
+      test("remove 走 splice 语义 / remove uses splice semantics", async () => {
+        const victim = $target.all("da-item")[0];
+        victim.remove();
+        await new Promise((r) => setTimeout(r, 50));
+        assertEqual(subTexts(), "5,4");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

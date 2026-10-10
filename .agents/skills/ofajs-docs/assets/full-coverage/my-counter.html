@@ -1,0 +1,63 @@
+<template component>
+  <style>
+    :host {
+      display: inline-block;
+      padding: 10px;
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      background: #f1f8e9;
+    }
+    .counter-display {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0 10px;
+    }
+    .btn {
+      padding: 5px 15px;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+  </style>
+
+  <div>
+    <slot></slot>
+    <span class="counter-display">{{currentValue}}</span>
+    <button class="btn" on:click="increment">+</button>
+    <button class="btn" on:click="decrement">-</button>
+  </div>
+
+  <script>
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initialValue: 0,
+      },
+      data: {
+        currentValue: 0,
+      },
+      watch: {
+        initialValue(val) {
+          this.currentValue = val;
+        },
+      },
+      proto: {
+        increment() {
+          this.currentValue++;
+          this.emitChange();
+        },
+        decrement() {
+          this.currentValue--;
+          this.emitChange();
+        },
+        emitChange() {
+          this.emit("change", {
+            data: { value: this.currentValue },
+          });
+        },
+      },
+      ready() {
+        this.currentValue = this.initialValue;
+      },
+    };
+  </script>
+</template>

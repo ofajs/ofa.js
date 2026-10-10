@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-if 与 o-fill / Conditional and list rendering</title>
+  </head>
+  <body>
+    <demo-host></demo-host>
+    <demo-nest></demo-nest>
+
+    <script type="module">
+      import "../../src/main.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      const { register } = ofa;
+
+      register({
+        tag: "demo-host",
+        temp: `
+        <button id="mode-0" on:click="mode = 0">0</button>
+        <button id="mode-1" on:click="mode = 1">1</button>
+        <button id="mode-2" on:click="mode = 2">2</button>
+
+        <div id="chain">
+          <o-if :value="mode === 1">
+            <span class="one">one-{{mode}}</span>
+          </o-if>
+          <o-else-if :value="mode === 2">
+            <span class="two">two</span>
+          </o-else-if>
+          <o-else>
+            <span class="zero">zero</span>
+          </o-else>
+        </div>
+
+        <div id="items">
+          <o-fill :value="arr" fill-key="id">
+            <div class="row" attr:data-rid="$data.id">
+              <span class="rv">{{$index}}:{{$data.name}}</span>
+              <span class="rh">{{$host.hostName}}</span>
+              <o-if :value="$data.id % 2">
+                <em class="odd">odd</em>
+              </o-if>
+            </div>
+          </o-fill>
+        </div>
+        `,
+        data: {
+          mode: 0,
+          hostName: "H",
+          arr: [
+            { id: 1, name: "a" },
+            { id: 2, name: "b" },
+            { id: 3, name: "c" },
+          ],
+        },
+      });
+
+      const $demo = ofa("demo-host");
+      const $shadow = $demo.shadow;
+
+      const rows = () => $shadow.all(".row");
+      // 只读数据位（行内的 o-if 会渲染 odd 标记，不能整行取文本）
+      const rowVals = () =>
+        rows()
+          .map((e) => (e.$(".rv").text + " " + e.$(".rh").text).trim())
+          .join(",");
+
+      test("o-if/o-else 初始渲染 / o-if else branch initial", async () => {
+        await waitFor(() => !!$shadow.$(".zero"));
+        assertEqual($shadow.$(".zero").text, "zero");
+      });
+
+      test("o-if 链切换 / condition chain switching", async () => {
+        $demo.mode = 1;
+        await waitFor(() => !!$shadow.$(".one"));
+        assertEqual($shadow.$(".one").text, "one-1");
+        await waitFor(() => !$shadow.$(".zero"));
+
+        $demo.mode = 2;
+        await waitFor(() => !!$shadow.$(".two"));
+        $demo.mode = 0;
+        await waitFor(() => !!$shadow.$(".zero"));
+      });
+
+      test("o-fill 初始列表与 $data/$index/$host / o-fill initial list", async () => {
+        await waitFor(() => rows().length === 3);
+        await waitFor(() =>
+          rowVals().includes("0:a H") && rowVals().includes("2:c H"),
+        );
+      });
+
+      test("o-fill 项内 o-if / o-if inside fill items", async () => {
+        // id 为奇数的项带 odd 标记
+        await waitFor(() => $shadow.all(".odd").length === 2);
+      });
+
+      test("o-fill push/splice 增删 / o-fill push and splice", async () => {
+        $demo.arr.push({ id: 4, name: "d" });
+        await waitFor(() => rows().length === 4);
+        await waitFor(() => rowVals().includes("3:d H"));
+
+        $demo.arr.splice(1, 1);
+        await waitFor(() => rows().length === 3);
+        // $index 对账后重新对齐
+        await waitFor(() => rowVals() === "0:a H,1:c H,2:d H");
+      });
+
+      test("o-fill key 复用 DOM / o-fill reuses DOM by key", async () => {
+        // 在元素上打标记：复用时标记保留，重建则丢失
+        rows().forEach((e, i) => (e.ele.__kept = i));
+
+        const arr2 = $demo.arr.slice();
+        arr2[1] = { id: 3, name: "c2" };
+        $demo.arr = arr2;
+
+        await waitFor(() => rowVals() === "0:a H,1:c2 H,2:d H");
+        assertEqual(
+          rows().filter((e) => e.ele.__kept !== undefined).length,
+          3,
+          "全部元素应复用 / all rows should be reused",
+        );
+      });
+
+      test("o-fill 值清空 / o-fill clears on empty", async () => {
+        $demo.arr = [];
+        await waitFor(() => rows().length === 0);
+      });
+
+      // ---- 历史疑难案例（old/test/cases 移植）：嵌套与克隆 ----
+
+      const { register: registerNest } = ofa;
+
+      registerNest({
+        tag: "demo-nest",
+        temp: `
+        <!-- o-if 嵌套：else 分支里再放一条 if 链 -->
+        <div id="ifinif">
+          <o-if :value="obj.count < 2">
+            <o-if :value="obj.count < 0"><span class="iig">green-{{obj.count}}</span></o-if>
+            <o-else-if :value="obj.count === 1"><span class="iir">red-{{obj.count}}</span></o-else-if>
+            <o-else><span class="iip">pink-{{obj.count}}</span></o-else>
+          </o-if>
+          <o-else>
+            <o-if :value="obj.count > 2"><span class="oib">blue-{{obj.count}}</span></o-if>
+            <o-else><span class="oiy">yellow-{{obj.count}}</span></o-else>
+          </o-else>
+        </div>
+
+        <!-- o-fill 在 o-if 内：条件切换 + 列表增项 -->
+        <div id="fillinif">
+          <o-if :value="obj.showList">
+            <o-fill :value="obj.items" class="inner-fill">
+              <span class="fi">{{$data}}</span>
+            </o-fill>
+          </o-if>
+          <o-else><span class="hidden-list">List is hidden</span></o-else>
+        </div>
+
+        <!-- o-fill 嵌套 o-fill：内外层 $data 各自独立 -->
+        <div id="fillinfill">
+          <o-fill :value="outerArr" fill-key="id">
+            <div class="outer-row">
+              <span class="oid">{{$data.id}}</span>
+              <o-fill :value="$data.innerArr">
+                <em class="iid">{{$data}}</em>
+              </o-fill>
+            </div>
+          </o-fill>
+        </div>
+
+        <!-- _$parent：嵌套 fill 内引用父级项数据；$host 引用宿主组件 -->
+        <div id="parentfill">
+          <o-fill :value="items" fill-key="name">
+            <div class="p-row">
+              <span class="pname">{{$data.name}}</span>
+              <span class="phost">{{$host.balance}}</span>
+              <o-fill :value="$data.nestedArr" :_$parent="$data">
+                <i class="pnest">{{$parent.name}}:{{$data.n}}</i>
+              </o-fill>
+            </div>
+          </o-fill>
+        </div>
+
+        <!-- 递归命名模板：模板内引用同名模板自身 -->
+        <div id="recfill">
+          <o-fill :value="tree" name="rec-node"></o-fill>
+          <template name="rec-node">
+            <div class="rec-node">
+              <span class="recname">{{$data.name}}</span>
+              <o-if :value="$data.children && $data.children.length">
+                <o-fill :value="$data.children" name="rec-node"></o-fill>
+              </o-if>
+            </div>
+          </template>
+        </div>
+
+        <!-- 空对象/空数组的文本渲染 -->
+        <div id="emptyvals">a:{{emptyObj}} b:{{list}}</div>
+        `,
+        data: {
+          emptyObj: {},
+          obj: { count: -1, showList: true, items: ["A", "B"] },
+          outerArr: [
+            { id: 1, innerArr: ["A", "B"] },
+            { id: 2, innerArr: ["C"] },
+          ],
+          balance: 1000,
+          items: [
+            { name: "it1", nestedArr: [{ n: "n1" }, { n: "n2" }] },
+            { name: "it2", nestedArr: [] },
+          ],
+          tree: [
+            {
+              name: "one",
+              children: [
+                { name: "one-1", children: [] },
+                {
+                  name: "one-2",
+                  children: [{ name: "one-2-1", children: [] }],
+                },
+              ],
+            },
+            { name: "two", children: [] },
+          ],
+          list: [],
+        },
+      });
+
+      const $nest = ofa("demo-nest");
+      const $nshadow = $nest.shadow;
+
+      test("o-if/o-fill 空构造与深克隆不报错 / create & clone o-if/o-fill without children", async () => {
+        // 回归（#258）：第三方库（如 snapdom）克隆 DOM 时，自定义元素
+        // upgrade 发生在子节点就位之后，构造函数不能抛错
+        const pageErrors = [];
+        const onError = (e) => pageErrors.push(String(e));
+        window.addEventListener("error", onError);
+
+        const createResults = {};
+        ["o-if", "o-else-if", "o-else", "o-fill"].forEach((tag) => {
+          try {
+            document.body.appendChild(document.createElement(tag));
+            createResults[tag] = "ok";
+          } catch (err) {
+            createResults[tag] = err.message;
+          }
+        });
+        assertEqual(createResults, {
+          "o-if": "ok",
+          "o-else-if": "ok",
+          "o-else": "ok",
+          "o-fill": "ok",
+        });
+
+        // 已渲染元素的 cloneNode(true)：克隆体惰性（内容被构造器收纳进
+        // __originHTML、光子节点清空，与旧框架行为一致），关键是零崩溃
+        const $liveIf = $nshadow.$("#ifinif o-if");
+        const $liveElse = $nshadow.$("#ifinif o-else");
+        const $liveFill = $nshadow.$("#fillinif .inner-fill");
+        assert(!!$liveIf && !!$liveFill, "应存在已渲染的 o-if/o-fill / live o-if & o-fill should exist");
+
+        [[$liveIf, "o-if"], [$liveElse, "o-else"], [$liveFill, "o-fill"]]
+          .filter(([$el]) => !!$el)
+          .forEach(([$el, tag]) => {
+            let cloned;
+            try {
+              cloned = $el.ele.cloneNode(true);
+            } catch (err) {
+              assert(false, `${tag} 克隆抛错 / ${tag} clone threw: ${err.message}`);
+            }
+            assert(!!cloned, `${tag} 克隆应返回节点 / ${tag} clone should return a node`);
+          });
+
+        window.removeEventListener("error", onError);
+        assertEqual(pageErrors, [], "不应有全局错误 / no global errors expected");
+      });
+
+      test("o-if 嵌套（else 包裹 if 链）随数据逐级切换 / nested if chains switch by data", async () => {
+        const cls = () => {
+          const el = $nshadow.$("#ifinif span");
+          // className 是原生属性，需经 .ele 读取（代理不透传原生属性）
+          return el ? el.ele.className : null;
+        };
+
+        await waitFor(() => cls() === "iig"); // count -1 → green
+
+        $nest.obj.count = 0;
+        await waitFor(() => cls() === "iip"); // pink
+        $nest.obj.count = 1;
+        await waitFor(() => cls() === "iir"); // red
+        $nest.obj.count = 2;
+        await waitFor(() => cls() === "oiy"); // else 包裹的 else → yellow
+        $nest.obj.count = 3;
+        await waitFor(() => cls() === "oib"); // else 包裹的 if → blue
+      });
+
+      test("o-fill 在 o-if 内（条件切换 + 列表增项）/ o-fill inside o-if", async () => {
+        await waitFor(() => $nshadow.all("#fillinif .fi").length === 2);
+
+        // 条件切走再切回，列表重建
+        $nest.obj.showList = false;
+        await waitFor(() => !!$nshadow.$("#fillinif .hidden-list"));
+        await waitFor(() => $nshadow.all("#fillinif .fi").length === 0);
+
+        $nest.obj.showList = true;
+        $nest.obj.items.push("C");
+        await waitFor(() => {
+          const texts = $nshadow.all("#fillinif .fi").map((e) => e.text);
+          return texts.join(",") === "A,B,C";
+        });
+      });
+
+      test("o-fill 嵌套 o-fill 内外层数据独立 / nested o-fill keeps scopes apart", async () => {
+        const outerText = () =>
+          $nshadow
+            .all("#fillinfill .outer-row")
+            .map(
+              (row) =>
+                row.$(".oid").text +
+                "[" +
+                row.all(".iid").map((e) => e.text).join(",") +
+                "]",
+            )
+            .join(",");
+
+        await waitFor(() => outerText() === "1[A,B],2[C]");
+
+        // 外层追加：内层按各自数据渲染
+        $nest.outerArr.push({ id: 3, innerArr: ["X", "Y"] });
+        await waitFor(() => outerText() === "1[A,B],2[C],3[X,Y]");
+
+        // 内层追加：只动第一行的内层
+        $nest.outerArr[0].innerArr.push("Z");
+        await waitFor(() => outerText() === "1[A,B,Z],2[C],3[X,Y]");
+      });
+
+      test("_$parent 传递父级项 + $host 访问宿主 / _$parent passes parent item, $host reaches host", async () => {
+        const rowText = (row) =>
+          row.$(".pname").text +
+          "|" +
+          row.$(".phost").text +
+          "|" +
+          row.all(".pnest").map((e) => e.text).join(",");
+
+        const rows = () => $nshadow.all("#parentfill .p-row");
+        await waitFor(() => rows().length === 2);
+        await waitFor(
+          () => rowText(rows()[0]) === "it1|1000|it1:n1,it1:n2",
+        );
+        assertEqual(rowText(rows()[1]), "it2|1000|", "空嵌套列表不渲染项 / empty nested list renders nothing");
+
+        // 数据替换后 $parent 仍指向新项
+        $nest.items = [
+          { name: "new1", nestedArr: [{ n: "m1" }] },
+        ];
+        await waitFor(() => rows().length === 1);
+        await waitFor(() => rowText(rows()[0]) === "new1|1000|new1:m1");
+      });
+
+      test("递归命名模板渲染树 / recursive named template renders tree", async () => {
+        const recText = () =>
+          $nshadow.all("#recfill .rec-node").map((e) => e.$(".recname").text).join(",");
+
+        // 深层嵌套节点（one-2-1）也要被递归渲染
+        await waitFor(() => recText() === "one,one-1,one-2,one-2-1,two");
+      });
+
+      test("空对象/空数组文本渲染为 {} 与 [] / empty object & array render as {} and []", async () => {
+        // 回归（sub-empty-data-type）：stanz 的 toString 走 JSON 形状
+        await waitFor(() => $nshadow.$("#emptyvals").text === "a:{} b:[]");
+
+        // 变更后按新形状重渲染
+        $nest.list.push(1);
+        $nest.emptyObj = { count: 0 };
+        await waitFor(() => $nshadow.$("#emptyvals").text === 'a:{"count":0} b:[1]');
+      });
+
+      run();
+    </script>
+  </body>
+</html>

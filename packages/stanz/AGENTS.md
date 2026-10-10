@@ -46,9 +46,21 @@
 
 xhear 的 XData 依赖这些导出，语义变更都是 breaking change：
 `constructor(data, handler)`（自定义 handler 的构造入口）、`__OriginStanz`
-（指定包裹类）、`_onrevokes`（revoke 钩子）、`setData`/`clearOwner`/
-`emitUpdate`/`extend`/`getType`/`nextTick`/`dataRevoked`/`getRandomId`、
-全部 Symbol（SELF/PROXY/WATCHS/ISXDATA）。
+（指定包裹类）、`_onrevokes`（revoke 钩子）、`_bubbleOwners`（冒泡钩子，
+见下节）、`setData`/`clearOwner`/`emitUpdate`/`extend`/`getType`/`nextTick`/
+`dataRevoked`/`getRandomId`、全部 Symbol（SELF/PROXY/WATCHS/ISXDATA）。
+
+### 4.1 `_bubbleOwners` 冒泡钩子
+
+`emitUpdate` 默认只沿数据 `_owner` 链冒泡；节点若挂了 `_bubbleOwners()`
+（返回可迭代的 owner 集合），冒泡改走它的返回值。xhear 用它把 DOM
+parentNode 并入传播路径（shadow 级订阅依赖）。本包不感知 DOM——钩子
+内容完全由衍生库定义，默认路径（单 owner 快路径/Set 去重）不受影响。
+
+> **事故案例**：stanz 重构把冒泡从 owner getter 改为内部 `_owner` 数组，
+> 丢掉"xhear owner getter 含 parentNode"的隐式语义，shadow 级事件收集
+> 全部静默失灵。教训：改事件路径前先列旧实现的隐式语义清单逐条确认；
+> 需要扩展点时提供显式钩子而不是让衍生库猜。
 
 ### 5. 保持零全局副作用
 

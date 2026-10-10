@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow DOM 操作示例 - ofa.js</title>
+    <script
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.min.mjs"
+      type="module"
+    ></script>
+  </head>
+  <body>
+    <l-m src="./shadow-demo.html"></l-m>
+    <shadow-demo id="myComponent"></shadow-demo>
+
+    <div style="margin: 20px">
+      <h2>Shadow DOM 操作示例</h2>
+      <div
+        style="
+          background: #f5f5f5;
+          padding: 15px;
+          margin: 10px 0;
+          border-left: 4px solid #007acc;
+        "
+      >
+        <p><strong>功能说明：</strong></p>
+        <ul>
+          <li>
+            组件内部按钮：点击后通过
+            <code>this.shadow.$("#shadow-text").text</code> 修改影子节点内的文本
+          </li>
+          <li>
+            外部调用：通过
+            <code>$("shadow-demo").changeShadowText()</code>
+            直接调用组件上的方法
+          </li>
+        </ul>
+      </div>
+      <div style="margin-top: 15px">
+        <button
+          onclick="
+            $('shadow-demo').changeShadowText('外面调用方法修改新文本', 'blue')
+          "
+          style="
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+          "
+        >
+          外部调用组件方法
+        </button>
+        <button
+          onclick="
+            alert(
+              '影子节点内的文本：' +
+                $('shadow-demo').shadow.$('#shadow-text').text,
+            )
+          "
+          style="
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+          "
+        >
+          获取影子节点文本
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

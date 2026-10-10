@@ -1,0 +1,34 @@
+{
+  "name": "ofa.js",
+  "version": "5.0.0",
+  "description": "ofa.js framework: components, pages and app routing on top of xhear",
+  "type": "module",
+  "main": "src/main.mjs",
+  "exports": {
+    ".": "./src/main.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/ofajs"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com",
+    "url": "https://kirakiray.com/"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "web-components",
+    "framework",
+    "routing"
+  ]
+}

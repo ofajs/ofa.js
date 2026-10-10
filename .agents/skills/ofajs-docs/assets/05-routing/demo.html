@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js Router Demo</title>
+    <script
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs"
+      type="module"
+    ></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      o-app {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <l-m
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/libs/router/dist/router.min.mjs"
+    ></l-m>
+    <o-router>
+      <o-app src="./app-config.js"></o-app>
+    </o-router>
+  </body>
+</html>

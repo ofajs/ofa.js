@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>组合渲染历史回归 / Combined rendering regressions</title>
+  </head>
+  <body>
+    <!-- 各用例独立组件，互不干扰 -->
+    <if-fill-demo></if-fill-demo>
+    <fill-if-host></fill-if-host>
+    <if-in-if-demo></if-in-if-demo>
+    <first-render-demo></first-render-demo>
+    <sibling-chain-demo></sibling-chain-demo>
+    <fill-table-demo></fill-table-demo>
+    <fill-custom-demo></fill-custom-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      /* ===== 用例来源 230816/fill-in-if：x-fill 嵌在 x-if 里，项内还有 x-if ===== */
+      $.register({
+        tag: "if-fill-demo",
+        temp: `
+        <div id="container">
+          <button on:click="sw">switch</button>
+          <x-if :value="showContent">
+            <x-fill :value="arr">
+              <div attr:data-testid="'item-' + $index">
+                {{$data.val}}
+                <x-if :value="$host.count >= 2 || $index >= 1">
+                  <span class="item-mark">{{$host.count}}</span>
+                </x-if>
+              </div>
+            </x-fill>
+          </x-if>
+          <x-if :value="showContent">
+            <div class="other-block">other</div>
+          </x-if>
+        </div>
+        `,
+        data: {
+          showContent: true,
+          count: 0,
+          arr: [{ val: "A" }, { val: "B" }],
+        },
+        proto: {
+          sw() {
+            this.count++;
+            this.showContent = !this.showContent;
+          },
+        },
+      });
+
+      test("if-in-fill：显隐切换与项内条件 / fill inside if with per-item condition", async () => {
+        const $demo = $("if-fill-demo");
+        const $shadow = $demo.shadow;
+
+        // 初始 count=0：仅 index>=1 的项显示标记
+        await waitFor(() => $shadow.all(".item-mark").length === 1);
+
+        // 隐藏：两块 x-if 内容全部清空
+        $demo.sw();
+        await waitFor(() => $shadow.all("[data-testid]").length === 0);
+        await waitFor(() => !$shadow.$(".other-block"));
+
+        // 再显示：内容重建，count=2 两项都满足标记条件
+        $demo.sw();
+        await waitFor(() => $shadow.all("[data-testid]").length === 2);
+        await waitFor(() => $shadow.all(".item-mark").length === 2);
+      });
+
+      /* ===== 用例来源 230816/if-in-fill：项内 x-if + 递归命名模板 ===== */
+      $.register({
+        tag: "fill-if-host",
+        temp: `
+        <button on:click="addItem">Add Item</button>
+        <x-fill name="item" :value="navs"></x-fill>
+
+        <template name="item">
+          <div class="nav-item">
+            <x-if :value="$data.href">
+              <a class="nav-link" attr:href="$data.href">{{$data.name}}</a>
+            </x-if>
+            <x-else>
+              <span class="nav-label">{{$data.name}}</span>
+              <x-fill :value="$data.childs" name="item"></x-fill>
+            </x-else>
+          </div>
+        </template>
+        `,
+        data: {
+          navs: [
+            { name: "介绍", href: "./docs/introduce.html" },
+            {
+              name: "使用",
+              childs: [
+                { name: "如何使用", href: "./docs/get-started.html" },
+                { name: "第一个案例", href: "./docs/hello-world.html" },
+              ],
+            },
+          ],
+        },
+        proto: {
+          addItem() {
+            this.navs.push({
+              name: "新增",
+              href: "./docs/new.html",
+            });
+          },
+        },
+      });
+
+      test("fill-in-if：项内条件与递归模板 / item condition with recursive template", async () => {
+        const $demo = $("fill-if-host");
+        const $shadow = $demo.shadow;
+
+        await waitFor(() => $shadow.all(".nav-item").length === 4);
+        // 有 href 的 3 项渲染链接，无 href 的容器项渲染标签
+        assertEqual($shadow.all(".nav-link").length, 3);
+        assertEqual($shadow.all(".nav-label").length, 1);
+
+        $demo.addItem();
+        await waitFor(() => $shadow.all(".nav-item").length === 5);
+        await waitFor(() => $shadow.all(".nav-link").length === 4);
+      });
+
+      /* ===== 用例来源 230816/if-in-if：条件链多层嵌套 ===== */
+      $.register({
+        tag: "if-in-if-demo",
+        temp: `
+        <button on:click="addItem">addItem</button>
+        <div class="target">
+          <x-if :value="arr.length">
+            <x-if :value="arr.length > 1">
+              <span class="txt">length ok - {{arr.length}}</span>
+            </x-if>
+            <x-else>
+              <span class="txt">length not ok - {{arr.length}}</span>
+            </x-else>
+          </x-if>
+          <x-else>
+            <span class="txt">length not ok - zero</span>
+          </x-else>
+        </div>
+        `,
+        data: {
+          arr: [{ val: "A" }],
+        },
+        proto: {
+          addItem() {
+            this.arr.push({ val: "more" });
+          },
+        },
+      });
+
+      test("if-in-if：双层条件链 / nested if chains", async () => {
+        const $demo = $("if-in-if-demo");
+        const $shadow = $demo.shadow;
+
+        const txt = () => ($shadow.$(".txt") ? $shadow.$(".txt").text.trim() : "");
+
+        await waitFor(() => txt() === "length not ok - 1");
+        $demo.addItem();
+        await waitFor(() => txt() === "length ok - 2");
+        $demo.addItem();
+        await waitFor(() => txt() === "length ok - 3");
+      });
+
+      /* ===== 用例来源 230810/x-if-bug：首次渲染不重复输出 ===== */
+      $.register({
+        tag: "first-render-demo",
+        temp: `
+        <div id="condition-container">
+          <x-if :value="showContent">
+            <div class="only-child">rendered once</div>
+          </x-if>
+        </div>
+        `,
+        data: {
+          showContent: true,
+        },
+      });
+
+      test("x-if 首次渲染只输出一份 / x-if renders content once", async () => {
+        const $demo = $("first-render-demo");
+        const container = $demo.shadow.$("#condition-container");
+        await waitFor(() => container.length === 1);
+        assertEqual(container.ele.children.length, 1);
+        assert(
+          container.ele.children[0].classList.contains("only-child"),
+          "唯一子元素应为渲染内容 / the only child should be the rendered content",
+        );
+      });
+
+      /* ===== 用例来源 241030：前置条件不吞掉兄弟元素里的新条件链 ===== */
+      $.register({
+        tag: "sibling-chain-demo",
+        temp: `
+        <div id="condition-container">
+          <x-if :value="show0">
+            <div>s000</div>
+          </x-if>
+          <div id="ha">
+            <x-if :value="show1">
+              <div class="mark">1111</div>
+            </x-if>
+            <x-else>
+              <div class="mark">2222</div>
+            </x-else>
+          </div>
+        </div>
+        `,
+        data: {
+          show0: 0,
+          show1: true,
+        },
+      });
+
+      test("兄弟元素间的独立条件链 / sibling element between chains", async () => {
+        const $demo = $("sibling-chain-demo");
+        const $shadow = $demo.shadow;
+        await waitFor(() => $shadow.$("#ha"));
+        // show0 为假不渲染，但 #ha 内的 if/else 链独立工作
+        await waitFor(() => {
+          const mark = $shadow.$("#ha .mark");
+          return mark && mark.text.trim() === "1111";
+        });
+      });
+
+      /* ===== 用例来源 241009/fill-table：tbody 内嵌套 fill + 命名模板 ===== */
+      $.register({
+        tag: "fill-table-demo",
+        temp: `
+        <div>
+          <x-fill :value="list">
+            <div class="table-block">
+              <h1>{{$data.DbTableName}}</h1>
+              <table class="table">
+                <thead>
+                  <tr><th>列名称</th><th>列说明</th></tr>
+                </thead>
+                <tbody>
+                  <template is="replace-temp">
+                    <x-fill :value="$data.Columns" name="tableDetail"></x-fill>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </x-fill>
+        </div>
+
+        <template name="tableDetail">
+          <tr class="col-row">
+            <td>{{$data.DbColumnName}}</td>
+            <td>{{$data.ColumnDescription}}</td>
+          </tr>
+        </template>
+        `,
+        data: {
+          list: [
+            {
+              DbTableName: "表1",
+              Columns: [
+                { DbColumnName: "列1", ColumnDescription: "说明1" },
+                { DbColumnName: "列2", ColumnDescription: "说明2" },
+              ],
+            },
+            {
+              DbTableName: "表2",
+              Columns: [{ DbColumnName: "列A", ColumnDescription: "说明A" }],
+            },
+          ],
+        },
+      });
+
+      test("fill-table：tbody 内嵌套列表 / nested fill inside tbody", async () => {
+        const $demo = $("fill-table-demo");
+        const $shadow = $demo.shadow;
+
+        await waitFor(() => $shadow.all(".table-block").length === 2);
+        // replace-temp 把 fill 内容正确替换回 tbody（不受 HTML 解析限制）
+        const tbodys = $shadow.all("tbody");
+        assertEqual(tbodys.length, 2);
+        assertEqual(tbodys[0].length, 2, "表1 应有 2 行 / table 1 should have 2 rows");
+        assertEqual(tbodys[1].length, 1, "表2 应有 1 行 / table 2 should have 1 row");
+        assertEqual($shadow.all(".col-row").length, 3);
+      });
+
+      /* ===== 用例来源 240819/fill-custom：fill 项含自定义组件与 :html 不死循环 ===== */
+      $.register({
+        tag: "fill-c-item",
+        temp: `<span class="c-item"><slot></slot></span>`,
+      });
+
+      $.register({
+        tag: "fill-custom-demo",
+        temp: `
+        <div id="list">
+          <x-fill :value="pages">
+            <li :html="$data.val"></li>
+          </x-fill>
+        </div>
+        `,
+        data: {
+          pages: Array.from({ length: 50 }, (_, i) => ({
+            val: `<fill-c-item>item-${i}</fill-c-item>`,
+          })),
+        },
+      });
+
+      test("fill :html 渲染自定义组件不循环 / fill with :html stays stable", async () => {
+        const $demo = $("fill-custom-demo");
+        const $shadow = $demo.shadow;
+
+        await waitFor(() => $shadow.all("li").length === 50);
+        // 自定义元素在组件 shadow 内，外部查询只能看到宿主标签本身
+        await waitFor(() => $shadow.all("fill-c-item").length === 50);
+        // 已升级的自定义元素带 shadowRoot
+        assert(!!$shadow.$("fill-c-item").ele.shadowRoot, "fill-c-item 应已升级 / fill-c-item should be upgraded");
+        // 等待一拍确认没有无限重渲染导致的数量膨胀
+        await new Promise((r) => setTimeout(r, 300));
+        assertEqual($shadow.all("li").length, 50);
+        assertEqual($shadow.all("fill-c-item").length, 50);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

@@ -13,7 +13,8 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 
 - `packages/drill/CONTEXT.md` —— 浏览器端模块加载器
 - `packages/stanz/CONTEXT.md` —— Proxy 驱动的响应式数据
-- `packages/xhear/`、`packages/ofajs/` —— 待迁移骨架（暂空）
+- `packages/xhear/CONTEXT.md` —— Web Components 底座与模板渲染语法
+- `packages/ofajs/CONTEXT.md` —— ofa.js 框架本体（组件/页面/路由/上下文）
 
 **目录约定**：
 
@@ -99,9 +100,7 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 | 技能 | 触发场景 |
 |------|---------|
 | `benchmark-methodology` | 新建/修改 benchmark、解读 benchmark 结果、怀疑性能回退时 |
-
-> `ofajs-docs`（框架文档技能，源码在 `old/skills/`）暂未放入 `.agents/skills/`；
-> 迁移 xhear/ofajs 时再恢复并在本表登记。
+| `ofajs-docs` | 写/改 ofa.js 页面、组件、路由、状态管理时（`packages/ofajs` 已是正源；该技能为使用方文档，两者行为不一致时以 `packages/ofajs` 为准并同步修订） |
 
 **同步维护**：新增或删除 `.agents/skills/` 下的技能时，必须同步更新上表。
 
@@ -120,7 +119,7 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 
 - 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
-- 基准：`npm run bench:stanz` / `npm run bench:drill`（runner 自管 3349/3350）
+- 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352，`npm run bench` 依次跑全部）
 - 唯一 devDependency 是 `@playwright/test`；浏览器二进制缺失时报
   "Executable doesn't exist"，用 `npx playwright install <browser>` 安装
 

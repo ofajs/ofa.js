@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>fill-key 对账复用 / fill-key reconciliation</title>
+    <style>
+      fill-key-host t-key-child {
+        display: inline-block;
+        padding: 4px 8px;
+        border: #ccc solid 1px;
+        margin: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <fill-key-host></fill-key-host>
+    <button id="reset-first">重置首项 / Reset First</button>
+    <button id="change-first">修改首项 / Change First</button>
+    <button id="bump-reverse">加值并反转 / Bump and Reverse</button>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "t-key-child",
+        temp: `<span class="kv">{{val}}</span>`,
+        data: {
+          val: "",
+        },
+      });
+
+      $.register({
+        tag: "fill-key-host",
+        temp: `
+        <div id="list">
+          <x-fill :value="arr" fill-key="id">
+            <t-key-child attr:data-kid="$data.id" :val="$data.val"></t-key-child>
+          </x-fill>
+        </div>
+        `,
+        data: {
+          arr: Array.from({ length: 10 }, (_, i) => ({
+            id: i + 1,
+            val: (i + 1) * 10,
+          })),
+        },
+      });
+
+      const $host = $("fill-key-host");
+
+      const items = () => $host.shadow.all("t-key-child");
+      // 子组件渲染在自身 shadow 内，取值需穿透一级
+      const vals = () => items().map((e) => e.shadow.$(".kv").text.trim()).join(",");
+      const kids = () =>
+        items().map((e) => e.ele.getAttribute("data-kid")).join(",");
+
+      // 在元素上打标记：对账复用时标记保留，重建则丢失
+      const markAll = () => {
+        items().forEach((e, i) => (e.ele.__kept = `m${i}`));
+      };
+      const keptCount = () => items().filter((e) => e.ele.__kept).length;
+
+      test("初始列表 / initial list", async () => {
+        await waitFor(() => items().length === 10);
+        assertEqual(kids(), "1,2,3,4,5,6,7,8,9,10");
+      });
+
+      test("同 key 替换对象：复用 DOM / same-key replace reuses DOM", async () => {
+        markAll();
+        // 替换整个首项对象（id 不变，val 变化）→ 不应重建元素
+        const arr2 = $host.arr.slice();
+        arr2[0] = { id: 1, val: "reset" };
+        $host.arr = arr2;
+
+        await waitFor(() => vals().startsWith("reset,"));
+        assertEqual(keptCount(), 10, "全部元素应复用 / all items should be reused");
+        assertEqual(kids(), "1,2,3,4,5,6,7,8,9,10");
+      });
+
+      test("数据项内部修改：不走对账仍正确更新 / in-place mutation updates without re-creating", async () => {
+        markAll();
+        $host.arr[0].val = "changed";
+        await waitFor(() => vals().startsWith("changed,"));
+        assertEqual(keptCount(), 10);
+      });
+
+      test("全体改值并反转：移动而非重建 / bump and reverse moves instead of re-creating", async () => {
+        markAll();
+        const arr2 = $host.arr.map((e) => ({ id: e.id, val: e.val + 3 }));
+        arr2.reverse();
+        $host.arr = arr2;
+
+        await waitFor(() => kids() === "10,9,8,7,6,5,4,3,2,1");
+        assertEqual(keptCount(), 10, "全部元素应移动复用 / all items should be moved");
+        // 值也随新对象更新
+        await waitFor(() => vals().startsWith("103,93,"));
+      });
+
+      run();
+    </script>
+  </body>
+</html>

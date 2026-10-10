@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>组件注册 / Component registration</title>
+  </head>
+  <body>
+    <reg-full-demo id="reg-full"></reg-full-demo>
+    <reg-attrs-demo id="reg-attrs" num="7"></reg-attrs-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      const lifecycle = [];
+
+      $.register({
+        tag: "reg-full-demo",
+        temp: `
+        <div id="count-view">count:{{count}}</div>
+        <button on:click="count++">add</button>
+        <div id="watch-view">n1:{{n1}} n2:{{n2}} c12:{{c12}} c32:{{c32}}</div>
+        `,
+        data: {
+          count: 0,
+          n1: 1,
+          n2: 2,
+          n3: 3,
+          c12: 0,
+          c32: 0,
+        },
+        proto: {
+          touch() {
+            lifecycle.push("proto-ok");
+          },
+        },
+        watch: {
+          // 单键与多键监听（历史用例 watch-multi）
+          n1(val) {
+            lifecycle.push("n1:" + val);
+          },
+          ["n1,n2"]([n1, n2]) {
+            this.c12++;
+          },
+          ["n3,n2"]([n3, n2]) {
+            this.c32++;
+          },
+        },
+        created() {
+          lifecycle.push("created");
+        },
+        ready() {
+          lifecycle.push("ready");
+          // ready 时数据已可操作
+          this.readyCount = (this.readyCount || 0) + 1;
+        },
+        attached() {
+          lifecycle.push("attached");
+        },
+        detached() {
+          lifecycle.push("detached");
+        },
+      });
+
+      const $full = $("reg-full-demo");
+
+      test("生命周期时序 created → ready → attached / lifecycle order", async () => {
+        await waitFor(() => lifecycle.includes("attached"));
+        const ci = lifecycle.indexOf("created");
+        const ri = lifecycle.indexOf("ready");
+        const ai = lifecycle.indexOf("attached");
+        assert(ci < ri && ri < ai, `应为 created→ready→attached，实际 ${lifecycle.join(",")}`);
+      });
+
+      test("watch 单键初始化即触发 / single-key watch fires on init", async () => {
+        await waitFor(() => lifecycle.some((e) => String(e).startsWith("n1:")));
+        assert(
+          lifecycle.some((e) => e === "n1:1"),
+          "初始化应以当前值触发一次 n1 watch / n1 watch should fire with initial value",
+        );
+      });
+
+      test("watch 多键任一命中即触发 / multi-key watch fires on any key", async () => {
+        // 初始 n1/n2/n3 以当前值各触发一次：c12=1、c32=1
+        await waitFor(() => $full.c12 === 1 && $full.c32 === 1);
+
+        // n1、n2 同拍变更 → 合并为一次回调
+        $full.n1 = 10;
+        $full.n2 = 20;
+        await waitFor(() => $full.c12 === 2);
+
+        // 仅 n1 再变 → 多键再次命中
+        $full.n1 = 100;
+        await waitFor(() => $full.c12 === 3);
+        // n2 变过一次，n3,n2 组合随 n2 命中：初始 1 次 + n2 变更 1 次
+        assertEqual($full.c32, 2, "n3,n2 应随 n2 变更命中 / n3,n2 should fire with n2");
+      });
+
+      test("数据默认值与 proto 方法 / data defaults and proto methods", async () => {
+        assertEqual($full.count, 0);
+        $full.touch();
+        assert(lifecycle.includes("proto-ok"), "proto 方法应可用 / proto method should work");
+      });
+
+      test("模板数据更新 / template reflects data", async () => {
+        $full.count = 5;
+        await waitFor(() => $full.shadow.$("#count-view").text === "count:5");
+      });
+
+      /* ===== attrs 反射 ===== */
+      $.register({
+        tag: "reg-attrs-demo",
+        temp: `<div id="num-view">{{num}}</div>`,
+        attrs: {
+          num: 1,
+          label: "init",
+          flag: null,
+          conf: null,
+        },
+        data: {},
+      });
+
+      const $attrs = $("reg-attrs-demo");
+
+      test("解析器属性作为初始值 / parser attributes as initial values", async () => {
+        // 元素上 num="7" 优先于默认值 1
+        await waitFor(() => $attrs.shadow.$("#num-view").text === "7");
+      });
+
+      test("数据变化反射到属性 / data reflects to attributes", async () => {
+        $attrs.num = 100;
+        await waitFor(() => $attrs.ele.getAttribute("num") === "100");
+        $attrs.label = "changed";
+        await waitFor(() => $attrs.ele.getAttribute("label") === "changed");
+      });
+
+      test("属性写入回填数据 / attribute writes flow to data", async () => {
+        // 外部（解析器升级后）设置属性 → attributeChangedCallback → 数据
+        $attrs.ele.setAttribute("label", "from-attr");
+        await waitFor(() => $attrs.label === "from-attr");
+        // 纯数字串自动转数值
+        $attrs.ele.setAttribute("num", "88");
+        await waitFor(() => $attrs.num === 88);
+      });
+
+      test("布尔数据的属性反射语义 / boolean data attr reflection", async () => {
+        // attrs 反射按字符串写值：true → "true"，false → "false"，
+        // null/undefined 才移除属性（attr: 模板动作才有 true→"" 语义）
+        $attrs.flag = true;
+        await waitFor(() => $attrs.ele.getAttribute("flag") === "true");
+        $attrs.flag = false;
+        await waitFor(() => $attrs.ele.getAttribute("flag") === "false");
+        $attrs.flag = null;
+        await waitFor(() => !$attrs.ele.hasAttribute("flag"));
+      });
+
+      /* ===== 注册校验 ===== */
+      test("data 键与原型冲突报错 / data key conflict throws", async () => {
+        let err = null;
+        try {
+          $.register({
+            tag: "conflict-demo",
+            temp: "<div></div>",
+            data: { text: 1 },
+          });
+        } catch (e) {
+          err = e;
+        }
+        assert(err, "应抛出冲突错误 / should throw");
+        assertEqual(err.code, "invalid_key");
+      });
+
+      test("非法组件名报错 / invalid tag names throw", async () => {
+        for (const bad of ["noline", "-bad", "bad-", "dou--ble"]) {
+          let err = null;
+          try {
+            $.register({ tag: bad, temp: "<div></div>" });
+          } catch (e) {
+            err = e;
+          }
+          assert(err, `${bad} 应报错 / ${bad} should throw`);
+        }
+      });
+
+      test("data 含 Set/Map/函数报错 / data rejects Set, Map and function", async () => {
+        let setErr = null;
+        try {
+          $.register({ tag: "set-data-demo", temp: "<div></div>", data: { s: new Set() } });
+        } catch (e) {
+          setErr = e;
+        }
+        assert(setErr, "Set 应报错 / Set should throw");
+
+        let fnErr = null;
+        try {
+          $.register({ tag: "fn-data-demo", temp: "<div></div>", data: { fn: () => {} } });
+        } catch (e) {
+          fnErr = e;
+        }
+        assert(fnErr, "函数应报错 / function should throw");
+      });
+
+      test("formData 已拆为插件不在默认 API / formData is a plugin now", async () => {
+        assertEqual(typeof $full.formData, "undefined", "默认原型不应含 formData / prototype should not include formData");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

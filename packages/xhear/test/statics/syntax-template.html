@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>模板机制 / Template mechanics</title>
+  </head>
+  <body>
+    <temp-mech-demo></temp-mech-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "temp-mech-demo",
+        temp: `
+        <div id="named">
+          <x-fill name="item" :value="arr">
+          </x-fill>
+        </div>
+
+        <template name="item">
+          <span class="named-item" :val="$data.val">{{$data.val}}</span>
+        </template>
+
+        <div id="anon">
+          <x-fill :value="arr">
+            <b class="anon-item">{{$data.val}}</b>
+          </x-fill>
+        </div>
+
+        <div id="multi-child">
+          <x-fill name="multi" :value="arr"></x-fill>
+        </div>
+
+        <template name="multi">
+          <i class="multi-a">A{{$data.val}}</i>
+          <i class="multi-b">B{{$data.val}}</i>
+        </template>
+
+        <div id="code-in-if">
+          <x-if :value="showCode">
+            <code id="protected-code">&lt;div&gt;{{val}}&lt;/div&gt;</code>
+          </x-if>
+        </div>
+        `,
+        data: {
+          arr: [{ val: 1 }, { val: 2 }],
+          showCode: true,
+          val: "inner",
+        },
+      });
+
+      const $demo = $("temp-mech-demo");
+      const $shadow = $demo.shadow;
+
+      test("命名模板被 x-fill 引用 / named template referenced by x-fill", async () => {
+        await waitFor(() => $shadow.all(".named-item").length === 2);
+        // 命名模板从文档树摘除，不应直接出现在渲染结果里
+        assertEqual(
+          $shadow.all("template").length,
+          0,
+          "命名模板不应渲染 / named template should not render",
+        );
+      });
+
+      test("匿名 x-fill 自动包装模板 / anonymous x-fill auto-wraps", async () => {
+        await waitFor(() => $shadow.all(".anon-item").length === 2);
+        assertEqual($shadow.all(".anon-item").map((e) => e.text).join(","), "1,2");
+      });
+
+      test("多子元素模板包一层容器 / multi-child template wrapped", async () => {
+        await waitFor(() => $shadow.all(".multi-a").length === 2);
+        assertEqual($shadow.all(".multi-b").length, 2);
+      });
+
+      test("条件内容里的 code 受保护 / code inside condition is protected", async () => {
+        // code 在 x-if 内容中：内容既不被编译，也不因嵌套编译丢失
+        await waitFor(() => !!$shadow.$("#protected-code"));
+        assertEqual(
+          $shadow.$("#protected-code").text.replace(/\s+/g, "").trim(),
+          "<div>{{val}}</div>",
+        );
+      });
+
+      test("模板重名注册报错 / duplicate template name throws", async () => {
+        let err = null;
+        try {
+          $.register({
+            tag: "dup-temp-demo",
+            temp: `
+            <template name="same"></template>
+            <template name="same"></template>
+            `,
+          });
+        } catch (e) {
+          err = e;
+        }
+        assert(err, "应抛出重名错误 / should throw duplicate error");
+        assertEqual(err.code, "xhear_register_err");
+      });
+
+      test("重复注册组件报错 / duplicate tag registration throws", async () => {
+        let err = null;
+        try {
+          $.register({ tag: "temp-mech-demo", temp: `<div></div>` });
+        } catch (e) {
+          err = e;
+        }
+        assert(err, "应抛出重复注册错误 / should throw duplicate error");
+        assertEqual(err.code, "xhear_register_err");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

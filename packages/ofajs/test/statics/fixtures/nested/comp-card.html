@@ -1,0 +1,21 @@
+<template component>
+  <style>:host{display:block;padding:4px;border:1px solid #ccc;}</style>
+  <div class="card">card:{{name}}</div>
+  <script>
+    // 组件默认配置：data/proto/loaded
+    export default {
+      data: {
+        name: "card",
+      },
+      proto: {
+        hello() {
+          return "hi-" + this.name;
+        },
+      },
+      loaded() {
+        // 通过全局事件告知测试：组件 loaded 钩子已触发
+        document.dispatchEvent(new CustomEvent("comp-card-loaded"));
+      },
+    };
+  </script>
+</template>

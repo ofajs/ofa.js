@@ -9,10 +9,12 @@
   ],
   "scripts": {
     "test": "playwright test",
-    "bench": "npm run bench:drill && npm run bench:stanz",
+    "bench": "npm run bench:drill && npm run bench:stanz && npm run bench:xhear && npm run bench:ofajs",
     "bench:drill": "node packages/drill/benchmark/run.mjs",
     "bench:stanz": "node packages/stanz/benchmark/run.mjs",
-    "server": "node scripts/static-server.mjs"
+    "bench:xhear": "node packages/xhear/benchmark/run.mjs",
+    "server": "node scripts/static-server.mjs",
+    "bench:ofajs": "node packages/ofajs/benchmark/run.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"

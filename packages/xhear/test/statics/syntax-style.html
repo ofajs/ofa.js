@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>样式内数据表达式 / data() in style</title>
+  </head>
+  <body>
+    <style-demo></style-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "style-demo",
+        temp: `
+        <style id="dynamic-style">
+          #container {
+            color: data(tColor);
+            width: data(tWidth + "px");
+          }
+
+          @media screen and (min-width: 400px) {
+            #container {
+              font-size: data(tSize + "px");
+            }
+          }
+        </style>
+        <div id="container">content</div>
+        `,
+        data: {
+          tColor: "rgb(255, 0, 0)",
+          tWidth: 120,
+          tSize: 20,
+        },
+      });
+
+      const $demo = $("style-demo");
+      const styleText = () => $demo.shadow.$("#dynamic-style").text;
+
+      test("data() 初始求值 / data() evaluated on init", async () => {
+        await waitFor(() => styleText().includes("rgb(255, 0, 0)"));
+        assert(styleText().includes("width: 120px"), "宽度表达式应已求值 / width expr should be evaluated");
+      });
+
+      test("@media 内的表达式 / expression inside @media", async () => {
+        assert(
+          styleText().includes("font-size: 20px"),
+          "@media 内表达式应已求值 / expr in @media should be evaluated",
+        );
+      });
+
+      test("数据更新重写样式 / data change rewrites style", async () => {
+        $demo.tColor = "rgb(0, 128, 0)";
+        $demo.tSize = 24;
+        await waitFor(() => styleText().includes("rgb(0, 128, 0)"));
+        await waitFor(() => styleText().includes("font-size: 24px"));
+        assert(
+          styleText().includes("width: 120px"),
+          "未变更的表达式应保持 / unchanged expr should stay",
+        );
+      });
+
+      test("渲染后的计算样式生效 / computed style takes effect", async () => {
+        const color = $demo.shadow.$("#container").css.color;
+        assertEqual(color, "rgb(0, 128, 0)");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

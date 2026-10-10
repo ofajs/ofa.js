@@ -20,7 +20,7 @@ packages/stanz/
 ├── src/
 │   ├── main.mjs       Stanz 类（继承 Array）、Symbol 契约、constructor 构造核心
 │   ├── accessor.mjs   代理 set/delete 陷阱、setData、clearOwner、handler 导出
-│   ├── watch.mjs      emitUpdate 冒泡、Watcher/Watchers、watch/unwatch/watchTick/refresh
+│   ├── watch.mjs      emitUpdate 冒泡、Watcher/Watchers、watch/unwatch/watchTick/watchUntil/refresh
 │   ├── array.mjs      数组方法增强（解析型/重排型/写入型三分类）
 │   ├── public.mjs     getRandomId/getType/isObject/nextTick/debounce/extend/dataRevoked
 │   └── base.mjs       stanz(data) 工厂 + stanz.is
@@ -37,7 +37,8 @@ packages/stanz/
 |---|---|
 | `stanz(data)` / `stanz.is(v)` | 工厂与实例判定 |
 | `watch(cb)` / `unwatch(wid)` | 监听；事件字段 `type/name/value/oldValue/target/currentTarget/path/args` |
-| `watchTick(cb, wait?)` | 同钟合并批量回调，收到 `Watchers`（数组子类，含 `hasModified("a.b")`） |
+| `watchTick(cb, wait?)` | 同钟合并批量回调，收到 `Watchers`（数组子类，含 `hasModified("a.b")`；无自定义构造器，兼容 map/filter 等 species 构造） |
+| `watchUntil(fn, outTime?)` | 监听直到 `fn()` 为真后自动撤销并以数据代理自身兑现；仅在数据变更时判定（不做注册即查）；超时（默认 30s）撤销并拒绝 |
 | `refresh(opts?)` | 手动派发 `refresh` 事件 |
 | `revoke()` | 注销：清监听、解双向引用、撤销代理 |
 | `toJSON()` / `toString()` | 还原纯数据，保留 `xid` |
@@ -52,7 +53,8 @@ packages/stanz/
   同值/同实例重复赋值不重复登记；覆盖与 delete 解除 owner
 - 访问器属性（get/set）原样保留，setter 内存的对象不包裹
 - 冒泡：沿 `_owner` 逐层向上，`path` 记录中间链；**多 owner 必须 Set 去重**；
-  环状引用经 `path.includes` 安全切断
+  环状引用经 `path.includes` 安全切断；节点挂 `_bubbleOwners()` 时冒泡改走
+  其返回值（xhear 借此把 DOM parentNode 并入传播路径）
 - `_update = false` 阻断子树冒泡；`__unupdate` 抑制内部包裹事件
 - 数组三分类：解析型（push/pop/shift/unshift/splice，按参数与返回值定位变更）、
   重排型（reverse/sort，仅需事件）、写入型（fill/copyWithin，差分）；

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>文本插值 / Text interpolation</title>
+  </head>
+  <body>
+    <text-demo></text-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "text-demo",
+        temp: `
+        <div id="basic">num:{{num}}</div>
+        <div id="expr">calc:{{ num * 2 + 1 }}</div>
+        <div id="concat">{{ name + " - " + value }}</div>
+        <div id="multiline">
+          {{ flag ?
+              value :
+              'default' }}
+        </div>
+        <div id="missing">empty:{{nothing}}</div>
+        <div id="fncall">call:{{ Double(num) }}</div>
+        <div id="html">{{ rawHtml }}</div>
+        <div id="amp">{{ flag && value }}</div>
+        <div id="amp-off">{{ !flag && value }}</div>
+        <code id="protected">
+          &lt;div class:code="asdasd"&gt;{{num}}&lt;/div&gt;
+        </code>
+        `,
+        data: {
+          num: 10,
+          name: "xhear",
+          value: "hello",
+          flag: true,
+          nothing: null,
+          rawHtml: "<b>not bold</b>",
+        },
+        proto: {
+          Double(n) {
+            return n * 2;
+          },
+        },
+      });
+
+      const $demo = $("text-demo");
+
+      const textOf = (id) =>
+        $demo.shadow.$(id).text.replace(/\s+/g, " ").trim();
+
+      test("基本插值 / basic interpolation", async () => {
+        assertEqual(textOf("#basic"), "num:10");
+      });
+
+      test("表达式计算 / expression evaluation", async () => {
+        assertEqual(textOf("#expr"), "calc:21");
+        assertEqual(textOf("#concat"), "xhear - hello");
+      });
+
+      test("跨行表达式 / multiline expression", async () => {
+        assertEqual(textOf("#multiline"), "hello");
+      });
+
+      test("含引号的表达式 / expression with quotes", async () => {
+        // 引号已被 concat 检查覆盖；此处验证切值后随数据更新
+        $demo.flag = false;
+        await waitFor(() => textOf("#multiline") === "default");
+        assertEqual(textOf("#multiline"), "default");
+        $demo.flag = true;
+        await waitFor(() => textOf("#multiline") === "hello");
+      });
+
+      test("空值与方法调用 / null value and method call", async () => {
+        // null 经文本渲染为空串
+        assertEqual(textOf("#missing"), "empty:");
+        assertEqual(textOf("#fncall"), "call:20");
+      });
+
+      test("数据更新驱动重渲染 / data change re-renders text", async () => {
+        $demo.num = 100;
+        await waitFor(() => textOf("#basic") === "num:100");
+        // 同一数据的其他绑定表达式也一并更新
+        assertEqual(textOf("#expr"), "calc:201");
+        assertEqual(textOf("#fncall"), "call:200");
+      });
+
+      test("插值按纯文本处理 / interpolation renders as plain text", async () => {
+        // 文本插值走 textContent，HTML 不会被解析成元素
+        assertEqual(textOf("#html"), "<b>not bold</b>");
+        assert(!$demo.shadow.$("#html").$("b"), "不应产生 b 元素 / <b> should not be created");
+      });
+
+      test("code 标签内容不被编译 / code tag content is protected", async () => {
+        // code 内的 {{}} 与指令示例应原样保留
+        assertEqual(
+          textOf("#protected"),
+          '<div class:code="asdasd">{{num}}</div>'
+        );
+      });
+
+      test("表达式含 && 正常编译 / expressions with && compile", async () => {
+        // 回归：{{}} 经 innerHTML 序列化后 & 变 &amp;，曾导致编译必炸
+        await waitFor(() => textOf("#amp") === "hello");
+        assertEqual(textOf("#amp-off"), "false");
+      });
+
+      test("更新复用文本节点 / updates reuse the text node", async () => {
+        // 历史用例 repeat-render-text：更新时应改写原文本节点而非重建，
+        // 用户在节点上打的标记必须保留
+        await waitFor(() => textOf("#basic") === "num:100");
+        const textNode = $demo.shadow.$("#basic").ele.childNodes[0];
+        textNode.__keepMark = "on";
+        $demo.num = 200;
+        await waitFor(() => textOf("#basic") === "num:200");
+        assertEqual(
+          $demo.shadow.$("#basic").ele.childNodes[0].__keepMark,
+          "on",
+          "文本节点应被复用 / the text node should be reused",
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

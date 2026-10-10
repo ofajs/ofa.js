@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>上下文通信 / Context provider and consumer</title>
+  </head>
+  <body>
+    <demo-host></demo-host>
+
+    <script type="module">
+      import "../../src/main.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      const { register } = ofa;
+
+      register({
+        tag: "demo-host",
+        temp: `
+        <o-provider id="prov" name="theme" color="dark" data-from="provider">
+          <o-consumer id="cons" name="theme">
+            <span id="c-color">{{color}}</span>
+            <span id="c-from">{{dataFrom}}</span>
+          </o-consumer>
+        </o-provider>
+        <button id="set-color" on:click="setLight()">set light</button>`,
+        data: {},
+        proto: {
+          setLight() {
+            this.$("#prov").color = "light";
+          },
+        },
+      });
+
+      const $demo = ofa("demo-host");
+      const $shadow = $demo.shadow;
+      const $provider = $shadow.$("#prov");
+      const $consumer = $shadow.$("#cons");
+
+      test("consumer 同步 provider 数据 / consumer mirrors provider data", async () => {
+        // provider 的 attributes 会成为广播数据（dash 转驼峰），
+        // consumer 把它们镜像为自身数据
+        await waitFor(() => ofa($consumer).color === "dark");
+        assertEqual(ofa($consumer).dataFrom, "provider");
+      });
+
+      test("provider 数据更新广播 / provider updates broadcast", async () => {
+        $provider.color = "light";
+        await waitFor(() => ofa($consumer).color === "light");
+      });
+
+      test("provider.dispatch 派发事件 / provider dispatches events", async () => {
+        let received = null;
+        $consumer.on("app-event", (e) => {
+          received = e.data;
+        });
+
+        // dispatch 只对捕获到该 provider 的 consumer 生效
+        $provider.dispatch("app-event", { data: "payload" });
+        await waitFor(() => received === "payload");
+      });
+
+      test("provider 外的 consumer 不受广播影响 / consumers outside scope unaffected", async () => {
+        // 作用域外的同名 consumer 不在 provider 的 consumer 池中，不收数据
+        const outside = document.createElement("o-consumer");
+        outside.setAttribute("name", "theme");
+        document.body.appendChild(outside);
+
+        await waitFor(() => ofa(outside).name === "theme");
+
+        $provider.color = "blue";
+        await waitFor(() => ofa($consumer).color === "blue");
+        assertEqual(ofa(outside).color, undefined, "作用域外不应收到数据 / outside should not receive data");
+
+        outside.remove();
+      });
+
+      test("o-root-provider 应用级提供 / root provider", async () => {
+        const root = document.createElement("o-root-provider");
+        root.setAttribute("name", "app-name");
+        root.setAttribute("app-title", "ofa-demo");
+        document.body.appendChild(root);
+
+        const consumer = document.createElement("o-consumer");
+        consumer.setAttribute("name", "app-name");
+        document.body.appendChild(consumer);
+
+        await waitFor(() => ofa(consumer).appTitle === "ofa-demo");
+        assertEqual(ofa(consumer).provider.tag, "o-root-provider");
+        assertEqual(ofa(consumer).appTitle, "ofa-demo");
+
+        root.remove();
+        await waitFor(() => ofa(consumer)["app-title"] === undefined);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

@@ -186,6 +186,53 @@
         assertEqual(d.val, 2);
       });
 
+      test("watchTick 列表继承数组方法 / Watchers supports inherited array methods", async () => {
+        // 回归：Watchers 曾带自定义构造器破坏 Array species 契约，
+        // 对实例调用 map/filter 会以长度参数构造结果而直接 TypeError
+        const d = stanz({ val: 1 });
+
+        let mapped;
+        d.watchTick((e) => {
+          mapped = e.map((w) => w.name);
+        });
+
+        d.val = 2;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        assertEqual(mapped, ["val"], "watchTick 列表应可 map / Watchers should be mappable");
+      });
+
+      test("watchUntil 条件满足后兑现 / watchUntil resolves when condition met", async () => {
+        const d = stanz({ ready: false });
+
+        const pms = d.watchUntil(() => d.ready);
+
+        setTimeout(() => (d.ready = true), 30);
+
+        const resolved = await pms;
+        assertEqual(resolved, d, "应以数据代理自身兑现 / should resolve with the proxy");
+
+        // 监听已自动撤销，后续变更不再触发
+        let fired = 0;
+        d.watch(() => fired++);
+        d.ready = false;
+        assertEqual(fired, 1);
+      });
+
+      test("watchUntil 超时拒绝 / watchUntil rejects on timeout", async () => {
+        const d = stanz({ val: 0 });
+
+        let err = null;
+        try {
+          await d.watchUntil(() => d.val === 1, 50);
+        } catch (e) {
+          err = e;
+        }
+
+        assert(err, "超时应拒绝 / timeout should reject");
+        assert(err.message.includes("timed out"), "应为超时错误 / should be a timeout error");
+      });
+
       run();
     </script>
   </body>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ofa.js benchmark</title>
+    <style>
+      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 32px auto; max-width: 760px; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 20px; }
+      .version { display: inline-block; font-size: 13px; font-weight: 600; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+      .version.old { background: #fddddd; color: #c62828; }
+      .version.new { background: #d8f0dd; color: #1a7f37; }
+      #status { color: #6e6e73; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8e8ed; }
+      th { font-size: 13px; color: #6e6e73; font-weight: 500; }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      tr.pending td.num { color: #a1a1a6; }
+    </style>
+  </head>
+  <body>
+    <span id="versionBadge" class="version"></span>
+    <h1>ofa.js benchmark</h1>
+    <p id="status">准备中… / preparing</p>
+    <table>
+      <thead>
+        <tr><th>场景 / scenario</th><th style="text-align:right">结果 / result</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script type="module">
+      // ofa.js 新旧两版都设置 window.$/globalThis.ofa 且注册 o-* 元素，
+      // 同页必冲突，按 ?v=old|new 分页驱动；跑器对每个场景单独开页，
+      // 新旧紧挨着采集，消除机器热漂移的先后偏差。
+      const params = new URLSearchParams(location.search);
+      const version = params.get("v") === "old" ? "old" : "new";
+      const only = params.get("only");
+      const OLD = version === "old";
+
+      document.getElementById("versionBadge").textContent = OLD
+        ? "旧版 legacy ofa.js 4.7.x"
+        : "新版 new ofa.js 5.0";
+      document.title = `ofa.js benchmark · ${OLD ? "legacy 4.7.x" : "new 5.0"}`;
+
+      const status = document.getElementById("status");
+      const rowsEl = document.getElementById("rows");
+      const results = (window.__benchResults = []);
+
+      const rowEls = new Map();
+      let total = 0;
+
+      const addRow = (id, label) => {
+        total++;
+        const tr = document.createElement("tr");
+        tr.className = "pending";
+        tr.innerHTML = `<td>${label}</td><td class="num">…</td>`;
+        rowsEl.appendChild(tr);
+        rowEls.set(id, tr);
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const push = (id, label, value, unit) => {
+        rowEls.get(id).className = "";
+        rowEls.get(id).querySelector(".num").textContent =
+          `${Number(value).toLocaleString("en-US")} ${unit}`;
+        results.push({ id, label, value, unit });
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const median = (arr) =>
+        [...arr].sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+
+      // 刷新等待：新旧版数据更新都经 watchTick 防抖，跨宏任务保证 DOM 落定
+      const settle = () => new Promise((r) => setTimeout(r, 0));
+
+      const ofa = (await import(
+        version === "old"
+          ? "./vendor/legacy/packages/ofa/main.mjs"
+          : "../src/main.mjs"
+      )).default;
+
+      const makeItems = (n) =>
+        Array.from({ length: n }, (_, i) => ({ id: i + 1, name: "item-" + i }));
+
+      // ---- 计时工具 ----
+
+      /** 耗时类：repeats 次独立采样取中位数（含预预热一轮） */
+      const benchTime = async (id, label, repeats, prepare, fn) => {
+        addRow(id, label);
+        await fn(await prepare(), true); // 预热一轮触发 JIT 分层
+        const samples = [];
+        for (let s = 0; s < repeats; s++) {
+          const state = await prepare();
+          const t0 = performance.now();
+          await fn(state, false);
+          samples.push(performance.now() - t0);
+        }
+        push(id, label, median(samples).toFixed(1), "ms");
+      };
+
+      /** 吞吐类：预热后跑 samples 轮取中位数换算 ops/s */
+      const benchOps = async (id, label, iterations, preheat, fn) => {
+        addRow(id, label);
+        for (let i = 0; i < preheat; i++) {
+          await fn(i, true);
+        }
+        const samples = [];
+        for (let s = 0; s < 3; s++) {
+          const t0 = performance.now();
+          for (let i = 0; i < iterations; i++) {
+            await fn(i, false);
+          }
+          samples.push((iterations * 1000) / (performance.now() - t0));
+        }
+        push(id, label, Math.round(median(samples)), "ops/s");
+      };
+
+      // ---- 场景 ----
+
+      const SCENARIOS = [
+        {
+          id: "ofill-build",
+          label: "500 项 o-fill 初建 ×20 / build 500-item o-fill ×20",
+          run: async () => {
+            ofa.register({
+              tag: `bench-ofill-${version}`,
+              temp: `<o-fill :value="items"><div class="it"><span>{{$index}}:{{$data.name}}</span></div></o-fill>`,
+              data: { items: null },
+            });
+
+            addRow("ofill-build", SCENARIOS[0].label);
+
+            const buildRound = async () => {
+              const t0 = performance.now();
+              for (let i = 0; i < 20; i++) {
+                // 必须经 ofa() 包装：裸元素赋值绕过代理，数据不会进入渲染
+                const host = ofa(document.createElement(`bench-ofill-${version}`));
+                document.body.appendChild(host.ele);
+                host.items = makeItems(500);
+              }
+              await settle();
+              const cost = performance.now() - t0;
+              // 清理在计时外（revokeAll 级联不混入本场景）
+              document
+                .querySelectorAll(`bench-ofill-${version}`)
+                .forEach((e) => e.remove());
+              await settle();
+              return cost;
+            };
+
+            await buildRound(); // 预热
+            const samples = [];
+            for (let s = 0; s < 3; s++) {
+              samples.push(await buildRound());
+            }
+            push("ofill-build", SCENARIOS[0].label, median(samples).toFixed(1), "ms");
+          },
+        },
+        {
+          id: "ofill-update",
+          label: "300 项 o-fill 批量追加 50（单次对账）/ append 50 of 300, one diff",
+          run: async () => {
+            ofa.register({
+              tag: `bench-ofill-u-${version}`,
+              temp: `<o-fill :value="items"><div class="it" attr:data-iid="$data.id">{{$data.name}}</div></o-fill>`,
+              data: { items: null },
+            });
+            const host = ofa(document.createElement(`bench-ofill-u-${version}`));
+            document.body.appendChild(host.ele);
+
+            await benchTime(
+              "ofill-update",
+              SCENARIOS[1].label,
+              5,
+              async () => {
+                host.items = makeItems(300);
+                await settle();
+                return null;
+              },
+              async () => {
+                // 一次 tick 内批量 push，单次 watchTick 刷新走一遍对账
+                for (let j = 0; j < 50; j++) {
+                  host.items.push({ id: 1000 + j, name: "n" + j });
+                }
+                await settle();
+              },
+            );
+            host.ele.remove();
+          },
+        },
+        {
+          id: "oif-toggle",
+          label: "o-if 条件切换循环 ×40 / o-if toggle cycles ×40",
+          run: async () => {
+            ofa.register({
+              tag: `bench-oif-${version}`,
+              temp: `
+              <o-if :value="flag"><span class="on">on {{n}}</span></o-if>
+              <o-else><span class="off">off {{n}}</span></o-else>`,
+              data: { flag: false, n: 0 },
+            });
+            const host = ofa(document.createElement(`bench-oif-${version}`));
+            document.body.appendChild(host.ele);
+
+            const cycle = async () => {
+              host.flag = true;
+              await settle();
+              host.flag = false;
+              await settle();
+            };
+
+            await benchOps("oif-toggle", SCENARIOS[2].label, 40, 3, cycle);
+            host.ele.remove();
+          },
+        },
+        {
+          id: "drawurl",
+          label: "组件 HTML 转译 ×30 / component HTML transpile ×30",
+          run: async () => {
+            const { drawUrl } = await import(
+              version === "old"
+                ? "./vendor/legacy/packages/ofa/draw-template.mjs"
+                : "../src/draw-template.mjs"
+            );
+
+            const content = `<template component>
+  <style>:host{display:block;padding:8px;}</style>
+  <div class="bench-card">
+    <h3>{{title}}</h3>
+    <ul>${Array.from(
+      { length: 10 },
+      (_, i) => `<li><a href="./item-${i}.html">item ${i}</a></li>`,
+    ).join("")}</ul>
+    <img src="./cover.png" alt="cover">
+  </div>
+</template>
+<script>
+  import { helper } from "./helper.mjs";
+  export default {
+    data: { title: "bench" },
+    proto: {
+      init() {
+        return helper(this.title);
+      },
+    },
+  };
+<\/script>
+`;
+
+            // 单调计数：循环下标会跨采样重复，命中转译缓存后测的就不是纯转译了
+            let drawSeq = 0;
+            await benchOps("drawurl", SCENARIOS[3].label, 30, 5, async () => {
+              await drawUrl(content, `bench-draw-${version}-${drawSeq++}.html`, false);
+            });
+          },
+        },
+        {
+          id: "fixrelate",
+          label: "HTML 相对资源修正 ×200 / fixRelatePathContent ×200",
+          run: async () => {
+            const { fixRelatePathContent } = await import(
+              version === "old"
+                ? "./vendor/legacy/packages/ofa/public.mjs"
+                : "../src/public.mjs"
+            );
+
+            const content = `<div>${Array.from(
+              { length: 40 },
+              (_, i) =>
+                `<div class="row-${i}"><a href="./page-${i}.html">p${i}</a><img src="./img-${i}.png"><template><a href="./deep-${i}.html">d</a></template></div>`,
+            ).join("")}</div>`;
+
+            await benchOps("fixrelate", SCENARIOS[4].label, 200, 20, async () => {
+              fixRelatePathContent(content, "http://localhost:3348/bench/base/");
+            });
+          },
+        },
+        {
+          id: "context",
+          label: "provider 广播 30 consumer ×20 / broadcast to 30 consumers ×20",
+          run: async () => {
+            ofa.register({
+              tag: `bench-ctx-${version}`,
+              temp: `
+              <o-provider id="prov" name="bench" count="0">
+                ${Array.from(
+                  { length: 30 },
+                  (_, i) =>
+                    `<o-consumer name="bench"><span class="c${i}">{{count}}</span></o-consumer>`,
+                ).join("")}
+              </o-provider>`,
+              data: {},
+            });
+            const host = ofa(document.createElement(`bench-ctx-${version}`));
+            document.body.appendChild(host.ele);
+            const provider = host.shadow.$("#prov");
+
+            const broadcast = async () => {
+              provider.count = Math.random();
+              await settle();
+            };
+
+            await benchOps("context", SCENARIOS[5].label, 20, 5, broadcast);
+            host.ele.remove();
+          },
+        },
+      ];
+
+      // ---- 执行 ----
+
+      const targets = only ? SCENARIOS.filter((s) => s.id === only) : SCENARIOS;
+
+      for (const scenario of targets) {
+        await scenario.run();
+      }
+
+      status.textContent = `完成 ${results.length}/${targets.length} / done`;
+      window.__benchDone = true;
+    </script>
+  </body>
+</html>

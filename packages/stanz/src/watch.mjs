@@ -68,14 +68,22 @@ const getModifieds = (_this, keys) => {
 
 /** watchTick 回调收到的批量变更列表 */
 class Watchers extends Array {
-  constructor(arr) {
-    super(...arr);
-  }
-
+  /** 批量判断：任一变更命中 key 即为真 */
   hasModified(key) {
     return this.some((e) => e.hasModified(key));
   }
 }
+
+/**
+ * 构造 Watchers：不能在类上写自定义构造器并以 super(...arr) 展开——
+ * map/filter 等继承方法会按 Array species 契约以"长度数字"为参数构造
+ * 结果实例（new Watchers(3)），展开数字会直接 TypeError。
+ */
+const createWatchers = (arr) => {
+  const ws = new Watchers();
+  ws.push(...arr);
+  return ws;
+};
 
 /**
  * 派发一次变更事件：先通知当前节点的监听者，再沿 _owner 祖先链
@@ -120,10 +128,26 @@ export const emitUpdate = ({
   }
 
   const { _owner } = currentTarget;
-  if (currentTarget._update && _owner.length) {
+  if (currentTarget._update && (_owner.length || currentTarget._bubbleOwners)) {
     const nextPath = [currentTarget, ...path];
 
-    if (_owner.length === 1) {
+    // 衍生库（xhear）可挂 _bubbleOwners() 把宿主链（DOM parentNode）并入
+    // 冒泡路径——旧版 owner getter 即含 parentNode，是 shadow 级订阅
+    // （如 formData）赖以工作的隐式语义；默认仅沿数据 owner 链
+    if (currentTarget._bubbleOwners) {
+      for (const parent of currentTarget._bubbleOwners()) {
+        emitUpdate({
+          type,
+          target,
+          name,
+          value,
+          oldValue,
+          args,
+          currentTarget: parent,
+          path: nextPath,
+        });
+      }
+    } else if (_owner.length === 1) {
       // 单 owner 快路径，避免分配
       emitUpdate({
         type,
@@ -135,7 +159,7 @@ export const emitUpdate = ({
         currentTarget: _owner[0],
         path: nextPath,
       });
-    } else {
+    } else if (_owner.length) {
       // 同一父级可能被登记多次（如重复 push），需按 Set 去重
       for (const parent of new Set(_owner)) {
         emitUpdate({
@@ -198,7 +222,7 @@ export default {
           return true;
         });
 
-        callback(new Watchers(arr));
+        callback(createWatchers(arr));
       }, wait || 0)
     );
   },
@@ -210,6 +234,37 @@ export default {
       type: "refresh",
       target: this,
       currentTarget: this,
+    });
+  },
+
+  /**
+   * 监听直到 func() 返回真值，随后自动撤销监听并以自身（代理）兑现。
+   * 与旧版一致，仅在数据变更时判定，不做注册即查——需要"已满足则立即
+   * 通过"的场景由调用方先自行判断。超时（默认 30 秒）自动撤销并拒绝。
+   *
+   * @param {() => boolean} func 判定函数
+   * @param {number} [outTime] 超时毫秒数，默认 30000
+   */
+  watchUntil(func, outTime = 30000) {
+    if (!(func instanceof Function)) {
+      throw new TypeError("watchUntil requires a function as its parameter");
+    }
+
+    return new Promise((resolve, reject) => {
+      let timer;
+
+      const tid = this.watch(() => {
+        if (func()) {
+          clearTimeout(timer);
+          this.unwatch(tid);
+          resolve(this);
+        }
+      });
+
+      timer = setTimeout(() => {
+        this.unwatch(tid);
+        reject(new Error("watchUntil timed out"));
+      }, outTime);
     });
   },
 };

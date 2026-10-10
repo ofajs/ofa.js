@@ -69,6 +69,12 @@ packages/drill/
    新代码禁止 window 全局通信（见本包 AGENTS.md）。
 2. **json/wasm 曾经不检查 HTTP 状态**：404 会变成难懂的解析错误。重构后统一
    走 `read()` 的 2xx 检查；新增文本类处理器必须复用 `read()`。
+3. **@ 别名体系是用户明确决策删除的，不要加回来**：旧 drill 的
+   `lm.config({alias})` / `aliasMap` / `path()` 的 `@name` 展开，迁移时
+   （2026-10-09）按用户要求删除，移植 old/test/cases 时曾恢复过一次，
+   用户再次明确"不要加回来，对应案例也删去"（2026-10-10）。旧案例
+   alias / alias-page 因此不移植。再遇到依赖别名的场景，用完整相对/
+   绝对路径替代。
 3. **升级重放即初始化**：删掉 `attributeChangedCallback` 的 `oldValue === null`
    分支会导致解析器创建的元素不再自动加载（动态 `createElement` 不受影响，
    极难第一时间发现）。

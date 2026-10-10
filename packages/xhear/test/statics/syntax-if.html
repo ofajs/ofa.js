@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>条件渲染 / Conditional rendering</title>
+  </head>
+  <body>
+    <if-demo></if-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "if-demo",
+        temp: `
+        <button id="mode-0" on:click="mode = 0">mode 0</button>
+        <button id="mode-1" on:click="mode = 1">mode 1</button>
+        <button id="mode-2" on:click="mode = 2">mode 2</button>
+
+        <div id="chain">
+          <x-if :value="mode === 1" on:rendered="renderedCount++" on:clear="clearedCount++">
+            <div id="branch-1">branch one</div>
+          </x-if>
+          <x-else-if :value="mode === 2" on:rendered="renderedCount++" on:clear="clearedCount++">
+            <div id="branch-2">branch two</div>
+          </x-else-if>
+          <x-else on:rendered="renderedCount++" on:clear="clearedCount++">
+            <div id="branch-else">branch else</div>
+          </x-else>
+        </div>
+
+        <div id="counts">r:{{renderedCount}} c:{{clearedCount}}</div>
+
+        <div id="attr-in-if">
+          <x-if :value="mode > 0">
+            <div id="inner-attr" attr:data-mode="mode">inner {{mode}}</div>
+          </x-if>
+        </div>
+
+        <div id="outer">
+          <x-if :value="mode > 0">
+            <div>
+              <x-if :value="mode === 1" id="inner-if-mark">
+                <div id="inner-nested">nested one</div>
+              </x-if>
+              <x-else>
+                <div id="inner-nested-else">nested else</div>
+              </x-else>
+            </div>
+          </x-if>
+        </div>
+        `,
+        data: {
+          mode: 0,
+          renderedCount: 0,
+          clearedCount: 0,
+        },
+      });
+
+      const $demo = $("if-demo");
+      const $shadow = $demo.shadow;
+
+      const has = (id) => !!$shadow.$(id);
+      const textOf = (id) => ($shadow.$(id) ? $shadow.$(id).text.trim() : "");
+
+      // 条件链重判是异步的，等 DOM 稳定的辅助函数
+      const waitBranch = async (visibleId, hiddenIds) => {
+        await waitFor(() => has(visibleId));
+        for (const id of hiddenIds) {
+          await waitFor(() => !has(id));
+        }
+      };
+
+      test("初始渲染 else 分支 / else branch renders initially", async () => {
+        await waitBranch("#branch-else", ["#branch-1", "#branch-2"]);
+        assertEqual(textOf("#branch-else"), "branch else");
+      });
+
+      test("x-if 命中与切换 / x-if hit and switch", async () => {
+        $demo.mode = 1;
+        await waitBranch("#branch-1", ["#branch-else", "#branch-2"]);
+        $demo.mode = 2;
+        await waitBranch("#branch-2", ["#branch-1", "#branch-else"]);
+        assertEqual(textOf("#branch-2"), "branch two");
+      });
+
+      test("rendered / clear 事件计数 / rendered and clear events", async () => {
+        // 初始 else rendered(r:1) → mode=1: else clear(c:1) + if1 render(r:2)
+        // → mode=2: if1 clear(c:2) + if2 render(r:3)
+        await waitFor(() => /^r:3 c:2$/.test(textOf("#counts")));
+      });
+
+      test("条件内容里的属性绑定生效 / attr binding inside condition", async () => {
+        $demo.mode = 2;
+        await waitFor(() => has("#inner-attr"));
+        await waitFor(
+          () => $shadow.$("#inner-attr").ele.getAttribute("data-mode") === "2",
+        );
+        assertEqual(textOf("#inner-attr"), "inner 2");
+      });
+
+      test("嵌套条件 / nested conditions", async () => {
+        $demo.mode = 1;
+        await waitFor(() => has("#inner-nested"));
+        assertEqual(textOf("#inner-nested"), "nested one");
+        $demo.mode = 2;
+        await waitFor(() => has("#inner-nested-else"));
+        assertEqual(textOf("#inner-nested-else"), "nested else");
+        $demo.mode = 0;
+        await waitFor(() => !has("#inner-nested-else") && !has("#inner-nested"));
+      });
+
+      test("空内容条件元素的安全构造 / empty condition element constructs safely", async () => {
+        // 历史用例 condition-clone：createElement/cloneNode 出的条件元素
+        // 没有子内容，created 应回退到空内容而不是抛 null 崩溃
+        const sandbox = document.createElement("div");
+        const cloned = document.createElement("x-if");
+        document.body.appendChild(sandbox);
+        sandbox.appendChild(cloned);
+        // 升级完成（created 走了空内容回退）即证明没有崩溃
+        await waitFor(() => !!cloned.__xhear__);
+        sandbox.remove();
+      });
+
+      run();
+    </script>
+  </body>
+</html>

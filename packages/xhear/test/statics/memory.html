@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>数据释放 / Memory recovery</title>
+    <style>
+      memory-demo mem-child { display: inline-block; padding: 6px; margin: 4px; border: #aaa solid 1px; }
+    </style>
+  </head>
+  <body>
+    <memory-host></memory-host>
+    <memory-fill></memory-fill>
+    <memory-sync></memory-sync>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      /* ===== 用例来源 memory-recovery/demo1、demo2：宿主销毁级联释放 ===== */
+      window.__sharedData = $.stanz({
+        value: "I am outer",
+        sub: { value: "I am sub" },
+      });
+
+      $.register({
+        tag: "mem-child",
+        temp: `<span class="cv">{{outer && outer.value}}</span>`,
+        data: { outer: {} },
+      });
+
+      $.register({
+        tag: "memory-host",
+        temp: `
+        <div id="cells">
+          <mem-child :outer="outer"></mem-child>
+          <mem-child :outer="outer"></mem-child>
+          <mem-child :outer="outer.sub"></mem-child>
+        </div>
+        `,
+        data: { outer: {} },
+        attached() {
+          this.outer = window.__sharedData;
+        },
+        detached() {
+          this.outer = null;
+        },
+      });
+
+      const $host = $("memory-host");
+      const sharedOwners = () => window.__sharedData.owner.size;
+
+      test("挂载后建立引用 / mounting registers owners", async () => {
+        // 宿主 + 两个 mem-child 引用 outer
+        await waitFor(() => sharedOwners() === 3);
+      });
+
+      test("宿主 detached 置空级联释放全部引用 / host detach cascades release", async () => {
+        $host.remove();
+        // detached 置空 outer → 两个子项的 :outer 绑定同步置空 → 引用清零
+        await waitFor(() => sharedOwners() === 0);
+      });
+
+      /* ===== 用例来源 memory-recovery/demo3：fill 项移除释放数据引用 ===== */
+      const fillShared = $.stanz({ arr: [{ val: "A" }, { val: "B" }] });
+
+      $.register({
+        tag: "memory-fill",
+        temp: `
+        <div id="cells">
+          <x-fill :value="items">
+            <mem-child :outer="$data"></mem-child>
+          </x-fill>
+        </div>
+        `,
+        data: { items: null },
+        attached() {
+          this.items = fillShared.arr;
+        },
+        detached() {
+          this.items = null;
+        },
+      });
+
+      const $fillHost = $("memory-fill");
+      const itemA = fillShared.arr[0];
+
+      test("fill 移除项释放该项引用 / removing a fill item releases it", async () => {
+        // 引用方：arr、fill 项的 itemData、项内 mem-child 的 outer
+        await waitFor(() => itemA.owner.size === 3);
+
+        fillShared.arr.splice(0, 1);
+        // stanz splice 解除 arr 对 A 的持有，fill 对账撤销 itemData 与
+        // 项内绑定——引用应完全清零
+        await waitFor(() => itemA.owner.size === 0);
+      });
+
+      test("清空 fill 释放全部项引用 / clearing fill releases all", async () => {
+        const itemB = fillShared.arr[0];
+        await waitFor(() => itemB.owner.size === 3);
+
+        $fillHost.items = [];
+        await waitFor(() => itemB.owner.size === 1);
+      });
+
+      /* ===== 用例来源 memory-recovery/demo6：反复编辑不累积引用 ===== */
+      $.register({
+        tag: "memory-sync",
+        temp: `
+        <input id="sync-input" sync:value="outer.value" />
+        `,
+        data: { outer: { value: "sync-me" } },
+      });
+
+      test("sync 反复编辑不累积 owner / repeated sync edits do not leak", async () => {
+        const $sync = $("memory-sync");
+        const outerData = $sync.outer;
+        const input = $sync.shadow.$("#sync-input");
+
+        const sizes = new Set();
+        for (let i = 0; i < 3; i++) {
+          input.ele.value = "v" + i;
+          input.ele.dispatchEvent(new Event("input"));
+          await new Promise((r) => setTimeout(r, 120));
+          sizes.add(outerData.owner.size);
+        }
+
+        // 引用集合保持稳定（组件自身），无逐步累积
+        assertEqual([...sizes], [1]);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

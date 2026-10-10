@@ -1,0 +1,12 @@
+<template component>
+  <div id="side-effect-flag">pending</div>
+  <script>
+    import "./effect.mjs";
+
+    export default {
+      attached() {
+        this.shadow.$("#side-effect-flag").text = window.__ofaTestEffect || "missing";
+      },
+    };
+  </script>
+</template>

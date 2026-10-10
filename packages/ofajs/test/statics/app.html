@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-app 路由 / App routing</title>
+  </head>
+  <body>
+    <o-app id="app" src="./fixtures/app-config.mjs"></o-app>
+
+    <script type="module">
+      import "../../src/main.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      const $app = ofa("#app");
+
+      // app 初始化前就注册 watchUntil（旧 app-is-ready 案例：
+      // appIsReady 置位是一次性事件，之后注册会错过）
+      const appReadyPms = $app.watchUntil(() => $app.appIsReady);
+
+      // 路由事件计数（goto/back/forward 都会派发）
+      let routerEvents = 0;
+      $app.on("router-change", () => routerEvents++);
+
+      const pageTitle = () => {
+        const page = $app.current;
+        const el = page && page.shadow && page.shadow.$("#page-title");
+        return el ? el.text.trim() : null;
+      };
+
+      test("o-app 加载配置并自动挂载 home / app loads config and mounts home", async () => {
+        await waitFor(() => $app.appIsReady);
+        await waitFor(() => pageTitle() === "home:home");
+        assertEqual($app.current.tag, "o-page");
+      });
+
+      test("goto 路由 / goto navigates", async () => {
+        $app.goto(location.href.replace(/[^/]+$/, "") + "fixtures/page-two.html");
+        await waitFor(() => pageTitle() === "two:two");
+        // 旧页移除
+        await waitFor(() => $app.all("o-page").length === 1);
+      });
+
+      test("back 回退 / back returns", async () => {
+        $app.back();
+        await waitFor(() => pageTitle() === "home:home");
+      });
+
+      test("路由事件派发 / router-change events", async () => {
+        // goto 与 back 各派发一次 router-change
+        await waitFor(() => routerEvents >= 2);
+      });
+
+      test("forward 前进（allowForward）/ forward works", async () => {
+        $app.forward();
+        await waitFor(() => pageTitle() === "home:home");
+      });
+
+      test("olink 点击路由 / olink click navigates", async () => {
+        const link = $app.current.shadow.$("#olink-two");
+        link.ele.click();
+        await waitFor(() => pageTitle() === "two:two");
+      });
+
+      test("o-page 页面继承（嵌套路由）/ page inheritance", async () => {
+        const sub = document.createElement("div");
+        sub.innerHTML = `<o-page src="${location.href.replace(
+          /[^/]+$/,
+          "",
+        )}fixtures/page-sub.html"></o-page>`;
+        document.body.appendChild(sub);
+
+        const $sub = ofa(sub.children[0]);
+        await waitFor(() => $sub.pageIsReady);
+
+        // 父页包裹子页：home 在外层，sub 在内层
+        await waitFor(() => {
+          const subEl = $sub.ele;
+          const parentPage = subEl.parentElement;
+          return (
+            parentPage &&
+            parentPage.tagName === "O-PAGE" &&
+            !!parentPage.shadowRoot &&
+            parentPage.shadowRoot.textContent.includes("home:")
+          );
+        });
+        assertEqual($sub.shadow.$("#sub-title").text, "sub:content");
+
+        sub.remove();
+      });
+
+      // ---- 历史疑难案例（old/test/cases 移植）----
+
+      // test 6（olink）会把 app 停在 two 页；后续用例先回 home
+      const ensureHome = async () => {
+        if (pageTitle() !== "home:home") {
+          $app.back();
+          await waitFor(() => pageTitle() === "home:home");
+        }
+      };
+
+      test("watchUntil 等待 appIsReady / watchUntil waits for appIsReady", async () => {
+        // 顶部已注册：app 就绪的一次性置位不应被错过
+        await appReadyPms;
+      });
+
+      test(".mjs 页面模块（PAGE 类型 + 外置 temp）可加载 / .mjs page module with PAGE type and temp", async () => {
+        const holder = document.createElement("div");
+        holder.innerHTML = `<o-page src="${location.href.replace(
+          /[^/]+$/,
+          "",
+        )}fixtures/my-page.mjs"></o-page>`;
+        document.body.appendChild(holder);
+
+        const $pg = ofa(holder.children[0]);
+        await waitFor(() => $pg.pageIsReady);
+
+        // 外置模板内容 + 页面模块 data 渲染
+        await waitFor(() => $pg.shadow.$("#my-page-title").text === "My Page");
+        assert(
+          $pg.shadow.$("#my-page-title").text === "My Page",
+          "temp 与 data 应结合渲染 / temp and data should render together",
+        );
+        holder.remove();
+      });
+
+      test("页面内相对图片地址按页面地址改写 / relative img srcs rewrite to page base", async () => {
+        // 旧 relate-img 案例：直写模板、条件内容、命名模板三处的相对 src
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-app style="display:block;height:60px">
+            <o-page src="${location.href.replace(
+              /[^/]+$/,
+              "",
+            )}fixtures/page-imgs.html"></o-page>
+          </o-app>`;
+        document.body.appendChild(holder);
+
+        const $imgsApp = ofa(holder.children[0]);
+        const expectedEnd = "/fixtures/logo-relate.png";
+
+        // 直写模板内的 img（页面加载是异步的，防御式取 shadow）
+        await waitFor(() => {
+          const page = $imgsApp.current;
+          const img = page && page.shadow && page.shadow.$(".img1");
+          return img && img.ele.src.endsWith(expectedEnd);
+        });
+
+        // ready 里延迟点亮 val：条件内容与命名模板内容后渲染
+        await waitFor(() => {
+          const page = $imgsApp.current;
+          const shadow = page && page.shadow;
+          if (!shadow) {
+            return false;
+          }
+          const img2 = shadow.$(".img2");
+          const img3 = shadow.$(".img3");
+          return (
+            !!img2 &&
+            !!img3 &&
+            img2.ele.src.endsWith(expectedEnd) &&
+            img3.ele.src.endsWith(expectedEnd)
+          );
+        });
+
+        holder.remove();
+      });
+
+      test("动态 attr:href 的 olink 点击读取实时地址 / dynamic attr:href olink reads live href", async () => {
+        // 旧 fix-link 案例：锚点 href 由数据驱动，切换后点击应跳新地址
+        await ensureHome();
+
+        let home = $app.current;
+
+        // 初始 dynHref 指向 page-two：点击后路由到 two
+        await waitFor(() => !!home.shadow.$("#olink-dyn"));
+        home.shadow.$("#olink-dyn").ele.click();
+        await waitFor(() => pageTitle() === "two:two");
+
+        await ensureHome();
+
+        // href 切到 page-three 后，同一锚点应跳新地址（读实时 href）
+        home = $app.current;
+        home.dynHref = "./page-three.html";
+        await waitFor(
+          () => home.shadow.$("#olink-dyn").ele.getAttribute("href").endsWith("page-three.html"),
+        );
+        home.shadow.$("#olink-dyn").ele.click();
+        await waitFor(() => pageTitle() === "three:three");
+
+        await ensureHome();
+      });
+
+      test("离场旧页保持尺寸（resetOldPage）/ leaving page keeps its size", async () => {
+        // 旧 old-page-size 案例：旧页转 absolute 瞬间若不锁定宽高会塌缩。
+        // willRemoved 写在 dataset 上（非 stanz 数据），用 rAF 轮询采集；
+        // 离场动画约 300ms，采样窗口充足。
+        await ensureHome();
+
+        const oldPage = $app.current;
+        const before = oldPage.ele.getBoundingClientRect();
+        assert(before.width > 0, "旧页应有尺寸 / old page should have size");
+
+        const sizeAtRemove = new Promise((resolve) => {
+          const tick = () => {
+            if (!oldPage.ele.isConnected) {
+              return; // 已被移除仍未捕获则放弃（断言会因 pending 超时失败）
+            }
+            if (oldPage.data.willRemoved) {
+              resolve(oldPage.ele.getBoundingClientRect());
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+
+        $app.goto(location.href.replace(/[^/]+$/, "") + "fixtures/page-two.html");
+        await waitFor(() => pageTitle() === "two:two");
+
+        const rect = await sizeAtRemove;
+        assert(
+          oldPage.ele.isConnected,
+          "采样时旧页应尚未移除 / old page should still be connected at sample time",
+        );
+        assert(
+          Math.abs(rect.width - before.width) < 1 &&
+            Math.abs(rect.height - before.height) < 1,
+          `离场瞬间尺寸应保持 before=${before.width}x${before.height}，actual=${rect.width}x${rect.height}`,
+        );
+
+        // 回到 home，避免影响其他用例的前置状态
+        $app.back();
+        await waitFor(() => pageTitle() === "home:home");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

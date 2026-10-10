@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR Home</title>
+    <link rel="stylesheet" href="./public.css" />
+    <script
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs"
+      type="module"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/libs/scsr/dist/scsr.min.mjs"
+      type="module"
+    ></script>
+  </head>
+  <body>
+    <o-app src="./app-config.js">
+      <!-- 服务端填充：替换整个 <template page> 内容 -->
+      <template page>
+        <style>
+          :host {
+            display: block;
+            padding: 20px;
+          }
+          nav a {
+            margin-right: 15px;
+            color: #007bff;
+          }
+        </style>
+        <h1>首页</h1>
+        <nav>
+          <a href="./home.html" olink>首页</a>
+          <a href="./about.html" olink>关于</a>
+        </nav>
+        <p>服务端渲染的首页内容（SEO 友好）。</p>
+        <button on:click="goto('./about.html')">跳转到关于</button>
+        <script>
+          export default function () {
+            return {
+              data: {},
+            };
+          }
+        </script>
+      </template>
+    </o-app>
+  </body>
+</html>

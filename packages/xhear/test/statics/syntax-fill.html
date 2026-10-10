@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>列表渲染 / List rendering (x-fill)</title>
+  </head>
+  <body>
+    <fill-demo></fill-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "fill-demo",
+        temp: `
+        <button id="push" on:click="arr.push({ val: 'new' + arr.length })">push</button>
+        <button id="remove-first" on:click="arr.splice(0, 1)">remove first</button>
+        <button id="reverse" on:click="arr.reverse()">reverse</button>
+        <button id="clear" on:click="arr = []">clear</button>
+
+        <div id="items">
+          <x-fill :value="arr">
+            <div class="item" attr:data-tid="'i' + $index">
+              <span class="val">{{$index}}:{{$data.val}}</span>
+              <span class="host-num">{{$host.num}}</span>
+              <button class="del" on:click="$host.removeItem($index)">del</button>
+            </div>
+          </x-fill>
+        </div>
+
+        <ul id="str-items">
+          <x-fill :value="strArr">
+            <li class="str-item">{{$data}}</li>
+          </x-fill>
+        </ul>
+        `,
+        data: {
+          num: 100,
+          arr: [{ val: "A" }, { val: "B" }, { val: "C" }],
+          strArr: ["en/index.html"],
+        },
+        proto: {
+          removeItem(index) {
+            this.arr.splice(index, 1);
+          },
+        },
+      });
+
+      const $demo = $("fill-demo");
+      const $shadow = $demo.shadow;
+
+      const itemVals = () =>
+        $shadow.all(".item .val").map((e) => e.text.trim()).join(",");
+      const itemTids = () =>
+        $shadow.all(".item").map((e) => e.ele.getAttribute("data-tid")).join(",");
+      const hostNums = () =>
+        $shadow.all(".item .host-num").map((e) => e.text.trim()).join(",");
+      const strVals = () =>
+        $shadow.all(".str-item").map((e) => e.text.trim()).join(",");
+
+      test("初始列表与 $data/$index / initial list with $data and $index", async () => {
+        await waitFor(() => $shadow.all(".item").length === 3);
+        assertEqual(itemVals(), "0:A,1:B,2:C");
+      });
+
+      test("$host 引用宿主 / $host references host component", async () => {
+        assertEqual(hostNums(), "100,100,100");
+      });
+
+      test("push 增加列表项 / push appends item", async () => {
+        $demo.arr.push({ val: "D" });
+        await waitFor(() => $shadow.all(".item").length === 4);
+        assertEqual(itemVals(), "0:A,1:B,2:C,3:D");
+      });
+
+      test("splice 删除后 $index 自动修正 / $index fixed after splice", async () => {
+        // 删除首项后，剩余项的 $index 应重新对齐
+        $demo.arr.splice(0, 1);
+        await waitFor(() => $shadow.all(".item").length === 3);
+        assertEqual(itemVals(), "0:B,1:C,2:D");
+        assertEqual(itemTids(), "i0,i1,i2");
+      });
+
+      test("字符串项渲染 / string items", async () => {
+        assertEqual(strVals(), "en/index.html");
+        $demo.strArr = ["cn/index.html"];
+        await waitFor(() => strVals() === "cn/index.html");
+      });
+
+      test("reverse 重排 / reverse order", async () => {
+        $demo.arr.reverse();
+        await waitFor(() => itemVals() === "0:D,1:C,2:B");
+      });
+
+      test("清空列表 / clear list", async () => {
+        $demo.arr = [];
+        await waitFor(() => $shadow.all(".item").length === 0);
+      });
+
+      test("非数组值告警且清空 / non-array value warns and clears", async () => {
+        $demo.arr = "not-array";
+        await waitFor(() => $shadow.all(".item").length === 0);
+        $demo.arr = [{ val: "back" }];
+        await waitFor(() => itemVals() === "0:back");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>xhear benchmark</title>
+    <style>
+      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 32px auto; max-width: 760px; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 20px; }
+      .version { display: inline-block; font-size: 13px; font-weight: 600; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+      .version.old { background: #fddddd; color: #c62828; }
+      .version.new { background: #d8f0dd; color: #1a7f37; }
+      #status { color: #6e6e73; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8e8ed; }
+      th { font-size: 13px; color: #6e6e73; font-weight: 500; }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      tr.pending td.num { color: #a1a1a6; }
+    </style>
+  </head>
+  <body>
+    <span id="versionBadge" class="version"></span>
+    <h1>xhear benchmark</h1>
+    <p id="status">准备中… / preparing</p>
+    <table>
+      <thead>
+        <tr><th>场景 / scenario</th><th style="text-align:right">结果 / result</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script type="module">
+      // xhear 两版都注册 x-if/x-fill 等自定义元素，同页必冲突，
+      // 与 drill 一样按 ?v=old|new 分页驱动；跑器对每个场景单独开页
+      // （?only=），并让新旧紧挨着采集，消除机器热漂移的先后偏差。
+      const params = new URLSearchParams(location.search);
+      const version = params.get("v") === "old" ? "old" : "new";
+      const only = params.get("only");
+      const OLD = version === "old";
+
+      document.getElementById("versionBadge").textContent = OLD
+        ? "旧版 legacy xhear 7.6.x"
+        : "新版 new xhear 8.0";
+      document.title = `xhear benchmark · ${OLD ? "legacy 7.6.x" : "new 8.0"}`;
+
+      const status = document.getElementById("status");
+      const rowsEl = document.getElementById("rows");
+      const results = (window.__benchResults = []);
+
+      const rowEls = new Map();
+      let total = 0;
+
+      const addRow = (id, label) => {
+        total++;
+        const tr = document.createElement("tr");
+        tr.className = "pending";
+        tr.innerHTML = `<td>${label}</td><td class="num">…</td>`;
+        rowsEl.appendChild(tr);
+        rowEls.set(id, tr);
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const push = (id, label, value, unit) => {
+        rowEls.get(id).className = "";
+        rowEls.get(id).querySelector(".num").textContent =
+          `${Number(value).toLocaleString("en-US")} ${unit}`;
+        results.push({ id, label, value, unit });
+        status.textContent = `运行中 ${results.length}/${total}… / running`;
+      };
+
+      const median = (arr) =>
+        [...arr].sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+
+      // 刷新等待：两版 watchTick 都是防抖异步，跨宏任务保证 DOM 已落定
+      const settle = () => new Promise((r) => setTimeout(r, 0));
+
+      const $ = (await import(
+        version === "old"
+          ? "./vendor/legacy/packages/xhear/base.mjs"
+          : "../src/base.mjs"
+      )).default;
+
+      // ---- 计时工具 ----
+
+      /** 吞吐类：先预热完整一轮触发 JIT 分层编译，再跑 repeats 轮取中位数换算 ops/s */
+      const benchOps = async (id, label, iterations, preheat, fn) => {
+        addRow(id, label);
+        for (let i = 0; i < preheat; i++) {
+          await fn(i, true);
+        }
+        const samples = [];
+        for (let s = 0; s < 3; s++) {
+          const t0 = performance.now();
+          for (let i = 0; i < iterations; i++) {
+            await fn(i, false);
+          }
+          samples.push((iterations * 1000) / (performance.now() - t0));
+        }
+        push(id, label, Math.round(median(samples)), "ops/s");
+      };
+
+      /** 耗时类：repeats 次独立采样取中位数，直接报告毫秒 */
+      const benchTime = async (id, label, repeats, prepare, fn) => {
+        addRow(id, label);
+        await fn(await prepare(), true); // 预热一轮
+        const samples = [];
+        for (let s = 0; s < repeats; s++) {
+          const state = await prepare();
+          const t0 = performance.now();
+          await fn(state, false);
+          samples.push(performance.now() - t0);
+        }
+        push(id, label, median(samples).toFixed(1), "ms");
+      };
+
+      // ---- 场景 ----
+
+      const makeItems = (n) =>
+        Array.from({ length: n }, (_, i) => ({ id: i + 1, val: "item-" + i }));
+
+      const SCENARIOS = [
+        {
+          id: "register",
+          label: "组件注册（编译+define）×60 / register ×60",
+          run: () => {
+            let seq = 0; // 全程唯一 tag，避免重复注册报错
+            return benchOps(
+              "register",
+              SCENARIOS[0].label,
+              60,
+              5,
+              async () => {
+                $.register({
+                  tag: `bench-reg-${version}-${seq++}`,
+                  temp: `<div id="v">{{val}}</div><div attr:data-x="val"></div>`,
+                  data: { val: seq },
+                });
+              },
+            );
+          },
+        },
+        {
+          id: "create",
+          label: "实例创建+渲染 ×1500 / create & render ×1500",
+          run: async () => {
+            $.register({
+              tag: `bench-create-${version}`,
+              temp: `<span class="a">{{val}}</span><span class="b" attr:data-x="val"></span>`,
+              data: { val: 1 },
+            });
+            await benchOps("create", SCENARIOS[1].label, 1500, 300, async () => {
+              document.createElement(`bench-create-${version}`);
+            });
+          },
+        },
+        {
+          id: "text-update",
+          label: "20 文本绑定批量刷新 ×100 / 20 text bindings ×100 flushes",
+          run: async () => {
+            const temp = Array.from(
+              { length: 20 },
+              (_, i) => `<span id="s${i}">{{v${i}}}</span>`,
+            ).join("");
+            $.register({
+              tag: `bench-text-${version}`,
+              temp,
+              data: Object.fromEntries(
+                Array.from({ length: 20 }, (_, i) => ["v" + i, i]),
+              ),
+            });
+            // 必须经 $() 包装：裸元素赋值不经过代理，渲染系统感知不到
+            const host = $(document.createElement(`bench-text-${version}`));
+            document.body.appendChild(host.ele);
+            const data = host;
+
+            const flushOnce = async () => {
+              for (let i = 0; i < 20; i++) {
+                data["v" + i] = Math.random();
+              }
+              await settle();
+            };
+
+            await benchOps("text-update", SCENARIOS[2].label, 100, 50, flushOnce);
+            host.remove();
+          },
+        },
+        {
+          id: "fill-build",
+          label: "500 项 x-fill 初建 ×20 / build 500-item fill ×20",
+          run: async () => {
+            $.register({
+              tag: `bench-fill-${version}`,
+              temp: `<x-fill :value="items"><div class="it">{{$index}}:{{$data.val}}</div></x-fill>`,
+              data: { items: null },
+            });
+
+            addRow("fill-build", SCENARIOS[3].label);
+
+            const buildRound = async () => {
+              const t0 = performance.now();
+              for (let i = 0; i < 20; i++) {
+                const host = $(document.createElement(`bench-fill-${version}`));
+                document.body.appendChild(host.ele);
+                host.items = makeItems(500);
+              }
+              await settle();
+              const cost = performance.now() - t0;
+              // 清理在计时外（revokeAll 级联是另一条路径，不混入本场景）
+              document
+                .querySelectorAll(`bench-fill-${version}`)
+                .forEach((e) => e.remove());
+              await settle();
+              return cost;
+            };
+
+            await buildRound(); // 预热一轮触发 JIT 分层
+            const samples = [];
+            for (let s = 0; s < 3; s++) {
+              samples.push(await buildRound());
+            }
+            push("fill-build", SCENARIOS[3].label, median(samples).toFixed(1), "ms");
+          },
+        },
+        {
+          id: "fill-remove",
+          label: "千项 fill 批删 100 项（单次对账）/ remove 100 of 1k, one diff",
+          run: async () => {
+            $.register({
+              tag: `bench-fill-rm-${version}`,
+              temp: `<x-fill :value="items"><div class="it" attr:data-kid="$data.id">{{$index}}:{{$data.val}}</div></x-fill>`,
+              data: { items: null },
+            });
+            const host = $(document.createElement(`bench-fill-rm-${version}`));
+            document.body.appendChild(host.ele);
+
+            await benchTime(
+              "fill-remove",
+              SCENARIOS[4].label,
+              5,
+              async () => {
+                host.items = makeItems(1000);
+                await settle();
+                return null;
+              },
+              async () => {
+                // 一次 tick 内批量 splice，单次 watchTick 刷新走一遍对账
+                for (let j = 0; j < 100; j++) {
+                  host.items.splice(400, 1);
+                }
+                await settle();
+              },
+            );
+            host.remove();
+          },
+        },
+        {
+          id: "fill-reverse",
+          label: "千项 fill-key 反转重排（单次对账）/ reverse 1k keyed items",
+          run: async () => {
+            $.register({
+              tag: `bench-fill-rev-${version}`,
+              temp: `<x-fill :value="items" fill-key="id"><div class="it" attr:data-kid="$data.id">{{$data.val}}</div></x-fill>`,
+              data: { items: null },
+            });
+            const host = $(document.createElement(`bench-fill-rev-${version}`));
+            document.body.appendChild(host.ele);
+
+            await benchTime(
+              "fill-reverse",
+              SCENARIOS[5].label,
+              5,
+              async () => {
+                host.items = makeItems(1000);
+                await settle();
+                return null;
+              },
+              async () => {
+                host.items.reverse();
+                await settle();
+              },
+            );
+            host.remove();
+          },
+        },
+        {
+          id: "if-toggle",
+          label: "条件分支切换循环 ×30 / condition toggle cycles ×30",
+          run: async () => {
+            $.register({
+              tag: `bench-if-${version}`,
+              temp: `
+              <x-if :value="show"><div class="on">on {{n}}</div></x-if>
+              <x-else><div class="off">off {{n}}</div></x-else>`,
+              data: { show: false, n: 0 },
+            });
+            const host = $(document.createElement(`bench-if-${version}`));
+            document.body.appendChild(host.ele);
+
+            const cycle = async () => {
+              host.show = true;
+              await settle();
+              host.show = false;
+              await settle();
+            };
+
+            await benchOps("if-toggle", SCENARIOS[6].label, 30, 3, cycle);
+            host.remove();
+          },
+        },
+      ];
+
+      // ---- 执行 ----
+
+      const targets = only ? SCENARIOS.filter((s) => s.id === only) : SCENARIOS;
+
+      for (const scenario of targets) {
+        await scenario.run();
+      }
+
+      status.textContent = `完成 ${results.length}/${targets.length} / done`;
+      window.__benchDone = true;
+    </script>
+  </body>
+</html>

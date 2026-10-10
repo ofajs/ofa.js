@@ -1,0 +1,34 @@
+{
+  "name": "xhear",
+  "version": "8.0.0",
+  "description": "web components library with reactive template rendering, driven by stanz",
+  "type": "module",
+  "main": "src/base.mjs",
+  "exports": {
+    ".": "./src/base.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/xhear"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com",
+    "url": "https://kirakiray.com/"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "xhear",
+    "web-components",
+    "template",
+    "reactive"
+  ]
+}

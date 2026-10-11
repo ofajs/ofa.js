@@ -1,7 +1,7 @@
 {
   "name": "ofajs-monorepo",
   "private": true,
-  "version": "6.0.0",
+  "version": "5.0.0",
   "description": "ofa.js framework monorepo",
   "type": "module",
   "workspaces": [

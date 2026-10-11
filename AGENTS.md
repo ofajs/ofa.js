@@ -120,6 +120,10 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
 - 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352，`npm run bench` 依次跑全部）
+- CI：`.github/workflows/ci.yml`，五条并行任务——drill、stanz（各三浏览器）+ ofa.js 按
+  chromium/firefox/webkit 拆三条（ofajs 覆盖 xhear，不单列）。本地等价命令
+  `npm run test:drill` / `test:stanz` / `test:ofajs`；CI 下 config 自动启用
+  forbidOnly/retries=2/workers=1，ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
 - 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
   `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
 - devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`

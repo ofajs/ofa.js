@@ -1,0 +1,91 @@
+# CI：五条并行流水线
+# - drill / stanz：各自包的 playwright 全量（三浏览器）
+# - ofa.js：按浏览器拆三条（chromium / firefox / webkit；ofajs 覆盖 xhear，故不单列 xhear）
+# 各任务互不依赖，天然并行；playwright.config.mjs 在 CI 下自动启用
+# forbidOnly / retries=2 / workers=1，并在测试前自动起停 3348 静态服务器。
+name: CI
+
+on:
+  push:
+    branches: [main, rebuild]
+  pull_request:
+    branches: [main, rebuild]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-drill:
+    name: drill（三浏览器）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test packages/drill --reporter=line
+
+  test-stanz:
+    name: stanz（三浏览器）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test packages/stanz --reporter=line
+
+  test-ofajs-chromium:
+    name: ofa.js（chromium）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # dist-host 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=chromium --reporter=line
+
+  test-ofajs-firefox:
+    name: ofa.js（firefox）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps firefox
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=firefox --reporter=line
+
+  test-ofajs-webkit:
+    name: ofa.js（webkit）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=webkit --reporter=line

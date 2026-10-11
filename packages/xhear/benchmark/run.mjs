@@ -2,7 +2,7 @@
  * 新旧 xhear 性能对比跑器。
  *
  * 用法：仓库根目录执行 `npm run bench:xhear`。
- * 方法学：新旧两版都注册 x-if/x-fill 等自定义元素，同页必冲突，
+ * 方法学：新旧两版都注册 o-if/o-fill 等自定义元素，同页必冲突，
  * 因此与 drill 一样按 ?v=old|new 分页；同时吸收 stanz 的教训——
  * 每个场景单独开页（?only=），页内完整预热一轮再计时，
  * 新旧紧挨着采集，机器热漂移对相邻 A/B 对称生效。
@@ -119,7 +119,7 @@ const SCENARIOS = [
   ["register", "组件注册（编译+define）×60 / register ×60", "ops"],
   ["create", "实例创建+渲染 ×1500 / create & render ×1500", "ops"],
   ["text-update", "20 文本绑定批量刷新 ×100 / 20 text bindings ×100 flushes", "ms"],
-  ["fill-build", "500 项 x-fill 初建 ×20 / build 500-item fill ×20", "ms"],
+  ["fill-build", "500 项 o-fill 初建 ×20 / build 500-item fill ×20", "ms"],
   ["fill-remove", "千项 fill 批删 100 项（单次对账）/ remove 100 of 1k, one diff", "ms"],
   ["fill-reverse", "千项 fill-key 反转重排（单次对账）/ reverse 1k keyed items", "ms"],
   ["if-toggle", "条件分支切换循环 ×30 / condition toggle cycles ×30", "ms"],

@@ -24,25 +24,25 @@
         run,
       } from "./harness.mjs";
 
-      /* ===== 用例来源 230816/fill-in-if：x-fill 嵌在 x-if 里，项内还有 x-if ===== */
+      /* ===== 用例来源 230816/fill-in-if：o-fill 嵌在 o-if 里，项内还有 o-if ===== */
       $.register({
         tag: "if-fill-demo",
         temp: `
         <div id="container">
           <button on:click="sw">switch</button>
-          <x-if :value="showContent">
-            <x-fill :value="arr">
+          <o-if :value="showContent">
+            <o-fill :value="arr">
               <div attr:data-testid="'item-' + $index">
                 {{$data.val}}
-                <x-if :value="$host.count >= 2 || $index >= 1">
+                <o-if :value="$host.count >= 2 || $index >= 1">
                   <span class="item-mark">{{$host.count}}</span>
-                </x-if>
+                </o-if>
               </div>
-            </x-fill>
-          </x-if>
-          <x-if :value="showContent">
+            </o-fill>
+          </o-if>
+          <o-if :value="showContent">
             <div class="other-block">other</div>
-          </x-if>
+          </o-if>
         </div>
         `,
         data: {
@@ -65,7 +65,7 @@
         // 初始 count=0：仅 index>=1 的项显示标记
         await waitFor(() => $shadow.all(".item-mark").length === 1);
 
-        // 隐藏：两块 x-if 内容全部清空
+        // 隐藏：两块 o-if 内容全部清空
         $demo.sw();
         await waitFor(() => $shadow.all("[data-testid]").length === 0);
         await waitFor(() => !$shadow.$(".other-block"));
@@ -76,22 +76,22 @@
         await waitFor(() => $shadow.all(".item-mark").length === 2);
       });
 
-      /* ===== 用例来源 230816/if-in-fill：项内 x-if + 递归命名模板 ===== */
+      /* ===== 用例来源 230816/if-in-fill：项内 o-if + 递归命名模板 ===== */
       $.register({
         tag: "fill-if-host",
         temp: `
         <button on:click="addItem">Add Item</button>
-        <x-fill name="item" :value="navs"></x-fill>
+        <o-fill name="item" :value="navs"></o-fill>
 
         <template name="item">
           <div class="nav-item">
-            <x-if :value="$data.href">
+            <o-if :value="$data.href">
               <a class="nav-link" attr:href="$data.href">{{$data.name}}</a>
-            </x-if>
-            <x-else>
+            </o-if>
+            <o-else>
               <span class="nav-label">{{$data.name}}</span>
-              <x-fill :value="$data.childs" name="item"></x-fill>
-            </x-else>
+              <o-fill :value="$data.childs" name="item"></o-fill>
+            </o-else>
           </div>
         </template>
         `,
@@ -137,17 +137,17 @@
         temp: `
         <button on:click="addItem">addItem</button>
         <div class="target">
-          <x-if :value="arr.length">
-            <x-if :value="arr.length > 1">
+          <o-if :value="arr.length">
+            <o-if :value="arr.length > 1">
               <span class="txt">length ok - {{arr.length}}</span>
-            </x-if>
-            <x-else>
+            </o-if>
+            <o-else>
               <span class="txt">length not ok - {{arr.length}}</span>
-            </x-else>
-          </x-if>
-          <x-else>
+            </o-else>
+          </o-if>
+          <o-else>
             <span class="txt">length not ok - zero</span>
-          </x-else>
+          </o-else>
         </div>
         `,
         data: {
@@ -173,14 +173,14 @@
         await waitFor(() => txt() === "length ok - 3");
       });
 
-      /* ===== 用例来源 230810/x-if-bug：首次渲染不重复输出 ===== */
+      /* ===== 用例来源 230810/o-if-bug：首次渲染不重复输出 ===== */
       $.register({
         tag: "first-render-demo",
         temp: `
         <div id="condition-container">
-          <x-if :value="showContent">
+          <o-if :value="showContent">
             <div class="only-child">rendered once</div>
-          </x-if>
+          </o-if>
         </div>
         `,
         data: {
@@ -188,14 +188,20 @@
         },
       });
 
-      test("x-if 首次渲染只输出一份 / x-if renders content once", async () => {
+      test("o-if 首次渲染只输出一份 / o-if renders content once", async () => {
         const $demo = $("first-render-demo");
         const container = $demo.shadow.$("#condition-container");
         await waitFor(() => container.length === 1);
-        assertEqual(container.ele.children.length, 1);
-        assert(
-          container.ele.children[0].classList.contains("only-child"),
-          "唯一子元素应为渲染内容 / the only child should be the rendered content",
+        // o-if 元素驻留（display:contents，区别于旧 x-if 的自移除），
+        // 渲染内容在元素内部且只有一份
+        assertEqual(container.ele.children.length, 1, "容器内应只有 o-if 元素 / container should hold only the o-if element");
+        assertEqual(
+          container.ele.children[0].tagName, "O-IF",
+          "唯一子元素应为 o-if / the only child should be the o-if element",
+        );
+        assertEqual(
+          container.ele.querySelectorAll(".only-child").length, 1,
+          "渲染内容只应有一份 / rendered content should appear exactly once",
         );
       });
 
@@ -204,16 +210,16 @@
         tag: "sibling-chain-demo",
         temp: `
         <div id="condition-container">
-          <x-if :value="show0">
+          <o-if :value="show0">
             <div>s000</div>
-          </x-if>
+          </o-if>
           <div id="ha">
-            <x-if :value="show1">
+            <o-if :value="show1">
               <div class="mark">1111</div>
-            </x-if>
-            <x-else>
+            </o-if>
+            <o-else>
               <div class="mark">2222</div>
-            </x-else>
+            </o-else>
           </div>
         </div>
         `,
@@ -239,7 +245,7 @@
         tag: "fill-table-demo",
         temp: `
         <div>
-          <x-fill :value="list">
+          <o-fill :value="list">
             <div class="table-block">
               <h1>{{$data.DbTableName}}</h1>
               <table class="table">
@@ -248,12 +254,12 @@
                 </thead>
                 <tbody>
                   <template is="replace-temp">
-                    <x-fill :value="$data.Columns" name="tableDetail"></x-fill>
+                    <o-fill :value="$data.Columns" name="tableDetail"></o-fill>
                   </template>
                 </tbody>
               </table>
             </div>
-          </x-fill>
+          </o-fill>
         </div>
 
         <template name="tableDetail">
@@ -285,11 +291,12 @@
         const $shadow = $demo.shadow;
 
         await waitFor(() => $shadow.all(".table-block").length === 2);
-        // replace-temp 把 fill 内容正确替换回 tbody（不受 HTML 解析限制）
+        // replace-temp 把 fill 内容正确替换回 tbody（不受 HTML 解析限制）；
+        // o-fill 元素驻留，行不再计入 tbody.rows，按内容行数断言
         const tbodys = $shadow.all("tbody");
         assertEqual(tbodys.length, 2);
-        assertEqual(tbodys[0].length, 2, "表1 应有 2 行 / table 1 should have 2 rows");
-        assertEqual(tbodys[1].length, 1, "表2 应有 1 行 / table 2 should have 1 row");
+        assertEqual(tbodys[0].ele.querySelectorAll(".col-row").length, 2, "表1 应有 2 行 / table 1 should have 2 rows");
+        assertEqual(tbodys[1].ele.querySelectorAll(".col-row").length, 1, "表2 应有 1 行 / table 2 should have 1 row");
         assertEqual($shadow.all(".col-row").length, 3);
       });
 
@@ -303,9 +310,9 @@
         tag: "fill-custom-demo",
         temp: `
         <div id="list">
-          <x-fill :value="pages">
+          <o-fill :value="pages">
             <li :html="$data.val"></li>
-          </x-fill>
+          </o-fill>
         </div>
         `,
         data: {

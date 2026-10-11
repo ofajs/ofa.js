@@ -1,298 +1,250 @@
 /**
- * 列表渲染：x-fill。
+ * 列表渲染：o-fill（light DOM 版，唯一实现，列表项直接作为子元素渲染）。
  *
- * 首次渲染按模板整建列表项；之后 value 变化走基于 key 的对账：
- * 1. 计算新数组的 key 集合（fill-key 指定键名，默认 xid；基础类型项以
- *    自身为 key），预先删除已不存在的项；
- * 2. 从 FakeNode 区间头（_start 注释）向后走，逐位比对新旧序列：
- *    key 已存在 → 移位复用已有 DOM 并更新 $data/$index；
- *    key 不存在 → 现场创建插入；
- * 3. 收尾清理多余项，刷新宿主并派发 rendered 事件。
+ * 支持两种模板来源：`name` 属性引用宿主的命名模板；未声明 name 时使用
+ * 元素自身内容（编译期被 wrapTemp 包进 template[inner-code] 保护，首次
+ * 渲染时按需编译并全局缓存）。列表项数据上下文为 $data/$index/$host/
+ * $parent，与命名模板引用一致。
  *
- * 数据项内部变化（如 item.name 改了）不触发对账 —— 变更路径深度 > 1
- * 时由项内绑定自行修正（watchers 短路）；只有数组本身的增删或整体
- * 替换（路径深度 ≤ 1）才走对账。
+ * 更新采用基于 key 的对账（fill-key 或 xid 或引用）：存在则复用 DOM
+ * 并更新 $data/$index，缺失则删除，新增则插入。
  */
 import { register } from "../register.mjs";
 import { render } from "./render.mjs";
-import { FakeNode } from "./fake-node.mjs";
-import Stanz from "../../../stanz/src/main.mjs";
-import { createXEle, eleX, revokeAll } from "../util.mjs";
-import { removeArrayValue } from "../public.mjs";
 import { getRenderData } from "./condition.mjs";
+import { getCompiledContent } from "./inner-code.mjs";
+import { createXEle, eleX, revokeAll } from "../util.mjs";
+import Stanz from "../../../stanz/src/main.mjs";
+import { removeArrayValue } from "../public.mjs";
 import { getErr } from "../error.mjs";
 import { getType } from "../../../stanz/src/public.mjs";
 
 register({
-  tag: "x-fill",
+  tag: "o-fill",
+  temp: `<style>:host{display:contents;}</style><slot></slot>`,
   data: {
     value: null,
   },
-  watch: {
-    value(value, t) {
-      this.refreshValue(t?.watchers);
-    },
-  },
   proto: {
-    refreshValue(watchers) {
-      const arrayData = this.value;
+    refreshView() {
+      const arr = this.value;
+      const tempName = this.attr("name");
 
-      if (!this._bindend) {
+      if (
+        !arr ||
+        !arr.length ||
+        (this.__oldTempName && this.__oldTempName !== tempName)
+      ) {
+        // 没有值或模板来源已切换，清空内容
+        Array.from(this.ele.childNodes).forEach((e) => {
+          revokeAll(e);
+          e.remove();
+        });
         return;
       }
 
-      const childs = this._fake.children;
+      if (!(arr instanceof Array)) {
+        // 非数组值：告警并清空（如字符串恰好带 length，不能当列表用）
+        console.warn(getErr("fill_type", { type: getType(arr) }));
 
-      if (!arrayData) {
-        childs.forEach((e) => revokeAll(e));
-        this._fake.innerHTML = "";
+        Array.from(this.ele.childNodes).forEach((e) => {
+          revokeAll(e);
+          e.remove();
+        });
         return;
       }
 
-      if (!(arrayData instanceof Array)) {
-        console.warn(
-          getErr("fill_type", {
-            type: getType(arrayData),
-          }),
-        );
-
-        childs &&
-          childs.forEach((el) => {
-            revokeAll(el);
-            el.remove();
-          });
-        return;
-      }
-
-      const regData = getRenderData(this._fake);
-
-      if (!regData) {
-        return;
-      }
-
-      const { data, temps } = regData;
-
-      const targetTemp = temps[this._name];
-
+      const { data, target, temps = {} } = getRenderData(this.ele);
 
       const keyName = this.attr("fill-key") || "xid";
 
-      if (!childs.length) {
-        // 首建：按模板逐项创建后一次性挂载
+      let targetTemp = temps[tempName];
+
+      if (!targetTemp) {
+        // 未声明 name 或找不到命名模板时，使用自身内容（编译缓存）
+        if (this.__originHTML) {
+          targetTemp = getCompiledContent(this.__originHTML);
+        } else {
+          throw new Error("o-fill - Template not found: " + tempName);
+        }
+      }
+
+      this.__oldTempName = tempName;
+
+      if (!this.length) {
+        // 首建：逐项创建后一次性挂载
         const frag = document.createDocumentFragment();
 
-        arrayData.forEach((e, i) => {
+        for (let i = 0, len = arr.length; i < len; i++) {
+          const item = arr[i];
+
           const $ele = createItem(
-            e,
+            item,
             temps,
             targetTemp,
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
+
           frag.appendChild($ele.ele);
-        });
-
-        this._fake.appendChild(frag);
-      } else {
-        if (watchers) {
-          const isReplaced = watchers.some((e) => e.path.length <= 1);
-
-          if (!isReplaced) {
-            // 数据项内部的变化，由项内绑定自行修正，不走对账
-            return;
-          }
         }
 
-        const vals = arrayData.slice();
-        const valsKeys = new Set(
-          vals.map((e) => {
-            if (!e) {
-              return;
-            }
-
-            const val = e[keyName];
-            return val === undefined ? e : val;
-          }),
-        );
-
-        const { parentNode } = this._fake;
-
-        if (keyName !== "xid" && vals.length !== valsKeys.size) {
-          // 默认 xid 模式不校验（对象可能没有 xid，以对象自身为 key）
-          const err = getErr("fill_key_duplicates");
-          console.error(err);
-          console.warn(err, {
-            parentNode,
-            host: eleX(parentNode)?.host?.ele,
-          });
-        }
-
-        // 预删除已不存在的项（先删能让后续移位计算更简单）
-        const positionKeys = [];
-        for (let i = 0, len = childs.length; i < len; i++) {
-          const e = childs[i];
-          const key = e._data_xid || e;
-
-          if (!valsKeys.has(key)) {
-            revokeAll(e);
-            e.remove();
-            childs.splice(i, 1);
-            len--;
-            i--;
-          } else {
-            positionKeys.push(key);
-          }
-        }
-
-        // 从区间头开始逐位对账
-        let target = this._fake._start;
-
-        const needRemoves = [];
-
-        let count = 0;
-
-        while (target) {
-          if (target === this._fake) {
-            if (vals.length) {
-              // 已走到区间尾，剩余项全部追加到末尾
-              vals.forEach((item) => {
-                const $ele = createItem(
-                  item,
-                  temps,
-                  targetTemp,
-                  data.$host || data,
-                  count,
-                  keyName,
-                );
-
-                count++;
-
-                parentNode.insertBefore($ele.ele, target);
-              });
-            }
-            break;
-          }
-          if (!(target instanceof Element)) {
-            target = target.nextSibling;
-            continue;
-          }
-          const currentVal = vals.shift();
-          const isObj = currentVal instanceof Object;
-          const $tar = eleX(target);
-          const item = $tar.__item;
-
-          if (currentVal === undefined && !vals.length) {
-            // 新数组已耗尽，剩余旧项记录待删
-            needRemoves.push(target);
-            target = target.nextSibling;
-            continue;
-          }
-
-          const oldId = positionKeys.indexOf(
-            isObj ? currentVal[keyName] : currentVal,
-          );
-          if (oldId > -1) {
-            // key 已存在：把对应旧项移位过来并更新绑定数据
-            const oldItem = childs[oldId];
-            if (
-              isObj
-                ? currentVal[keyName] !== item.$data[keyName]
-                : currentVal !== item.$data
-            ) {
-              oldItem.__internal = 1;
-              parentNode.insertBefore(oldItem, target);
-              delete oldItem.__internal;
-              target = oldItem;
-            }
-
-            // 复用 DOM，仅换绑数据与索引
-            const $old = eleX(oldItem);
-            if ($old.__item.$data !== currentVal) {
-              $old.__item.$data = currentVal;
-            }
-            $old.__item.$index = count;
-          } else {
-            // 新项：现场创建插入
-            const $ele = createItem(
-              currentVal,
-              temps,
-              targetTemp,
-              data.$host || data,
-              count,
-              keyName,
-            );
-
-            parentNode.insertBefore($ele.ele, target);
-            target = $ele.ele;
-          }
-
-          count++;
-          target = target.nextSibling;
-        }
-
-        if (needRemoves.length) {
-          needRemoves.forEach((e) => {
-            revokeAll(e);
-            e.remove();
-          });
-        }
-      }
-
-      if (this._fake.parentNode) {
-        eleX(this._fake.parentNode).refresh();
-      }
-
-      this.emit("rendered", {
-        bubbles: false,
-      });
-    },
-    init() {
-      if (this._bindend) {
+        this.ele.appendChild(frag);
         return;
       }
 
-      this._bindend = true;
-      const fake = (this._fake = new FakeNode("x-fill"));
+      // 对账 key：fill-key → xid → "索引-引用" 兜底
+      const getKeyVal = (e, i) => {
+        const key = e[keyName];
 
-      // 组件本体的撤销登记移交给 FakeNode，内容释放走区间
-      fake.__revokes = this.ele.__revokes;
+        if (key === undefined || key === null) {
+          if (e.xid) {
+            return e.xid;
+          }
 
-      this.before(fake);
-      fake.init();
-      this.remove();
+          return `${i}-${e}`;
+        }
 
-      this.refreshValue();
+        return key;
+      };
+
+      const keyValsArr = arr.map(getKeyVal);
+
+      const tempChildren = Array.from(this.ele.children);
+
+      // 先删除已不存在的项
+      for (let i = 0; i < tempChildren.length; i++) {
+        const e = tempChildren[i];
+        const renderedItem = e.__render_data;
+
+        const currentKeyVal = getKeyVal(renderedItem.$data, i);
+
+        // 不存在的 id，需要删除
+        if (!keyValsArr.includes(currentKeyVal)) {
+          e.remove();
+          revokeAll(e);
+        }
+      }
+
+      const { children } = this.ele;
+
+      let keyVals = [];
+      const refreshKeyVals = () => {
+        keyVals = Array.from(children).map((e, i) =>
+          getKeyVal(e.__render_data.$data, i),
+        );
+      };
+      refreshKeyVals();
+
+      const selfEl = this.ele;
+
+      // 逐位对账：复用则移位并更新数据，缺失则新建插入
+      for (let i = 0, len = arr.length; i < len; i++) {
+        const item = arr[i];
+        const keyVal = getKeyVal(item, i);
+
+        const index = keyVals.indexOf(keyVal);
+
+        if (index > -1) {
+          const $ele = eleX(children[index]);
+
+          if (children[i] !== $ele.ele) {
+            selfEl.insertBefore($ele.ele, children[i]);
+            refreshKeyVals();
+          }
+
+          if ($ele.__item.$data !== item) {
+            $ele.__item.$data = item;
+          }
+          if ($ele.__item.$index !== i) {
+            $ele.__item.$index = i;
+          }
+        } else {
+          const $ele = createItem(
+            item,
+            temps,
+            targetTemp,
+            data.$host || data,
+            i,
+            keyName,
+            this._$parent,
+          );
+
+          selfEl.insertBefore($ele.ele, children[i]);
+          refreshKeyVals();
+        }
+      }
+
+      // 列表变更后唤醒父级监听（shadow 级订阅如 formData 依赖此约定）
+      const { parentNode } = selfEl;
+      if (parentNode) {
+        eleX(parentNode).refresh();
+      }
     },
   },
   ready() {
-    this._name = this.attr("name");
-
-    if (!this._name) {
-      const err = getErr("xhear_fill_tempname", { name: this._name });
-      console.warn(err, this.ele);
-      throw err;
+    this.watchTick((e) => {
+      if (e.hasModified("value")) {
+        this.refreshView();
+      }
+    });
+  },
+  attached() {
+    if (this.value) {
+      this.refreshView();
     }
+  },
+  created() {
+    let originHTML = "";
 
-    // 等待自身 :value 绑定生效后再初始化
-    if (this.ele._bindingRendered) {
-      this.init();
+    const firstEle = this[0];
+    if (firstEle && firstEle.is("template[inner-code]")) {
+      originHTML = firstEle.html.trim();
     } else {
-      this.one("binding-rendered", () => this.init());
+      originHTML = this.html.trim();
     }
+
+    // 多根检测：直接数 template.content 的根节点——template 内容不受解析器
+    // 位置限制，tr/option 等受限位置的内容原样保留。不能套 div 探测：解析器
+    // 会把 div 里的 tr 整体丢弃、只留下浮的注释标记，造成"多根"误判
+    const probeTemp = document.createElement("template");
+    probeTemp.innerHTML = originHTML;
+    const probeContent = probeTemp.content;
+
+    const rootCount = probeContent.children.length;
+    const hasStrayText = Array.from(probeContent.childNodes).some(
+      (node) => node.nodeType === 3 && node.textContent.trim(),
+    );
+
+    if (rootCount > 1 || (rootCount === 0 && hasStrayText)) {
+      // 多根时包一层 display:contents 的容器，保证列表项为单根
+      // （注意：多根的表格行内容无法用 div 包裹，需在模板里自行包一层）
+      const err = getErr("temp_multi_child");
+      console.warn(err, this.ele, {
+        content: this.html.trim(),
+      });
+
+      originHTML = `<div style="display: contents;">${originHTML}</div>`;
+    }
+
+    this.__originHTML = originHTML;
+
+    this.html = "";
   },
 });
 
 /**
- * 为 x-fill 渲染创建列表项元素。
+ * 为 o-fill 渲染创建列表项元素。
  *
  * @param {Object} $data - 列表项的数据对象
  * @param {Object} temps - 宿主可用的全部命名模板
  * @param {HTMLTemplateElement} targetTemp - 本列表项使用的模板
- * @param {Object} $host - 宿主数据（x-fill 所在组件实例），$host 供模板引用
+ * @param {Object} $host - 宿主数据（o-fill 所在组件实例），$host 供模板引用
  * @param {number} $index - 列表项索引
  * @param {string} keyName - 对账键名
- * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由 ofa 传入）
+ * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由外部传入）
  * @returns {Object} 列表项的 Xhear 实例（__item 上挂绑定数据）
  */
 export const createItem = (
@@ -304,7 +256,7 @@ export const createItem = (
   keyName,
   $parent,
 ) => {
-  // 编译过的模板走克隆 + 描述符绑定（旧版每项 innerHTML 解析已废）
+  // 编译过的模板走克隆 + 描述符绑定（每项 innerHTML 解析已废）
   const binders = targetTemp && targetTemp.__xt;
   let $ele;
   let bindRoot;
@@ -329,7 +281,7 @@ export const createItem = (
   });
 
   // $ele 若成为 item 的子属性，其内自定义组件的改动会反向冒泡，
-  // 导致 x-fill 内元素不停重渲染的死循环；故 $ele 只读且不入观察
+  // 导致列表内元素不停重渲染的死循环；故 $ele 只读且不入观察
   Object.defineProperties(itemData, {
     $ele: {
       get() {

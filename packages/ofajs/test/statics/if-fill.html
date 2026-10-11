@@ -7,6 +7,7 @@
   <body>
     <demo-host></demo-host>
     <demo-nest></demo-nest>
+    <demo-replace></demo-replace>
 
     <script type="module">
       import "../../src/main.mjs";
@@ -380,6 +381,79 @@
         $nest.list.push(1);
         $nest.emptyObj = { count: 0 };
         await waitFor(() => $nshadow.$("#emptyvals").text === 'a:{"count":0} b:[1]');
+      });
+
+      // ---- select/table 受限位置（replace-temp + 命名模板）----
+
+      const { register: registerRep } = ofa;
+
+      registerRep({
+        tag: "demo-replace",
+        temp: `
+        <!-- 表格行：tr 无法内联进任何包装元素（解析器按 body 规则丢弃），
+             必须声明在顶层命名模板里，o-fill 经 replace-temp 引用 -->
+        <table id="rb"><tbody>
+          <template is="replace-temp">
+            <o-fill :value="rows" name="row-item"></o-fill>
+          </template>
+        </tbody></table>
+        <template name="row-item">
+          <tr class="data-row"><td>{{$data.name}}</td><td><o-if :value="$data.hot"><em>hot</em></o-if></td></tr>
+        </template>
+
+        <!-- select：option 是 body 合法内容，replace-temp + 内联即可 -->
+        <select id="rs">
+          <template is="replace-temp">
+            <o-fill :value="opts">
+              <option attr:value="$data">{{$data}}</option>
+            </o-fill>
+          </template>
+        </select>
+
+        <!-- 条件行：tr 无法内联进 o-if，用 o-fill + 过滤值表达 -->
+        <table id="rc"><tbody>
+          <template is="replace-temp">
+            <o-fill :value="show ? [{}] : []" name="cond-row"></o-fill>
+          </template>
+        </tbody></table>
+        <template name="cond-row">
+          <tr class="cond"><td>conditional row</td></tr>
+        </template>
+        `,
+        data: {
+          rows: [
+            { name: "r1", hot: true },
+            { name: "r2", hot: false },
+          ],
+          opts: ["A", "B", "C"],
+          show: true,
+        },
+      });
+
+      const $rep = ofa("demo-replace");
+      const $rshadow = $rep.shadow;
+
+      test("table 行用 replace-temp + 命名模板，行内条件单元格 / table rows via replace-temp + named template", async () => {
+        await waitFor(() => $rshadow.all("#rb .data-row").length === 2);
+        await waitFor(() => $rshadow.$("#rb").text.includes("r1"));
+
+        // 行内 o-if（td 内）条件单元格正常且响应数据
+        await waitFor(() => $rshadow.all("#rb em").length === 1);
+        $rep.rows[1].hot = true;
+        await waitFor(() => $rshadow.all("#rb em").length === 2);
+      });
+
+      test("select 内 replace-temp + 内联 option / select via replace-temp with inline options", async () => {
+        await waitFor(() => $rshadow.$("#rs").ele.options.length === 3);
+        assertEqual($rshadow.$("#rs").ele.options[1].textContent, "B");
+      });
+
+      test("条件行用 o-fill + 过滤值表达 / conditional row via filtered fill value", async () => {
+        await waitFor(() => $rshadow.all("#rc .cond").length === 1);
+        $rep.show = false;
+        await waitFor(() => $rshadow.all("#rc .cond").length === 0);
+        $rep.show = true;
+        await waitFor(() => $rshadow.all("#rc .cond").length === 1);
       });
 
       run();

@@ -44,7 +44,7 @@
 | `<o-if :value="bool">` | 条件渲染 | `<o-if :value="show">内容</o-if>` |
 | `<o-else-if :value="bool">` | 否则如果 | `<o-else-if :value="type === 'A'">` |
 | `<o-else>` | 否则 | `<o-else>默认内容</o-else>` |
-| `<x-if>` | 非显式条件渲染 | 不渲染到 DOM 的条件组件 |
+| `<o-if>` | 非显式条件渲染 | 不渲染到 DOM 的条件组件 |
 
 ### 列表渲染
 
@@ -56,7 +56,7 @@
 | `$index` | 当前项索引 | `{{$index}}` |
 | `$data` | 当前项数据 | `{{$data.name}}` |
 | `$host` | 组件实例引用 | `on:click="$host.removeItem($index)"` |
-| `<x-fill>` | 非显式列表渲染 | 不渲染到 DOM 的列表组件 |
+| `<o-fill>` | 非显式列表渲染 | 不渲染到 DOM 的列表组件 |
 
 ---
 
@@ -254,9 +254,9 @@ detached() {
 ```html
 <select>
   <template is="replace-temp">
-    <x-fill :value="options">
+    <o-fill :value="options">
       <option>{{$data}}</option>
-    </x-fill>
+    </o-fill>
   </template>
 </select>
 ```
@@ -312,11 +312,11 @@ detached() {
 | 变量 | 用途 | 可用位置 |
 |------|------|---------|
 | `$event` | 事件对象 | 事件处理器中 |
-| `$index` | 列表项索引（从 0 开始） | o-fill / x-fill 内部 |
-| `$data` | 列表项数据对象 | o-fill / x-fill 内部 |
-| `$host` | 组件实例引用 | o-fill / x-fill 内部 |
+| `$index` | 列表项索引（从 0 开始） | o-fill / o-fill 内部 |
+| `$data` | 列表项数据对象 | o-fill / o-fill 内部 |
+| `$host` | 组件实例引用 | o-fill / o-fill 内部 |
 
-**⚠️ 重要提醒**：在 o-fill / x-fill 内部，**必须使用 `$data`、`$index`、`$host`** 这些特殊变量，**不能使用其他变量名**（如 item、element、row 等）。
+**⚠️ 重要提醒**：在 o-fill / o-fill 内部，**必须使用 `$data`、`$index`、`$host`** 这些特殊变量，**不能使用其他变量名**（如 item、element、row 等）。
 
 **错误示例**：
 ```html

@@ -12,7 +12,7 @@
  * - always 动作登记为任务，数据更新（watchTick 防抖）时批量重跑；
  * - 每个副作用登记撤销函数（__revokes 约定），节点树销毁时由
  *   revokeAll 统一执行；
- * - 绑定完成后派发 binding-rendered，x-if/x-fill 等组件据此初始化。
+ * - 绑定完成后派发 binding-rendered，o-if/o-fill 等组件据此初始化。
  *
  * 对外保留 renderExtends 四钩子（上层框架捕获重赋介入编译与渲染）与
  * 兼容回退路径（处理未经本版编译器处理的模板/DOM）。
@@ -341,11 +341,13 @@ export function render({
             revokes.push(clearRevs);
             addRevoke(el, clearRevs);
           } catch (error) {
+            // catch 与 try 不同作用域，key 在 try 内声明——此处只能取 item.key，
+            // 否则真错误会被这里的 ReferenceError 掩盖
             const err = getErr(
               "xhear_eval",
               {
                 name: action.name,
-                arg0: key,
+                arg0: item.key,
                 arg1: item.expr,
               },
               error,

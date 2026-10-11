@@ -25,36 +25,36 @@
         <button id="mode-2" on:click="mode = 2">mode 2</button>
 
         <div id="chain">
-          <x-if :value="mode === 1" on:rendered="renderedCount++" on:clear="clearedCount++">
+          <o-if :value="mode === 1" on:rendered="renderedCount++" on:clear="clearedCount++">
             <div id="branch-1">branch one</div>
-          </x-if>
-          <x-else-if :value="mode === 2" on:rendered="renderedCount++" on:clear="clearedCount++">
+          </o-if>
+          <o-else-if :value="mode === 2" on:rendered="renderedCount++" on:clear="clearedCount++">
             <div id="branch-2">branch two</div>
-          </x-else-if>
-          <x-else on:rendered="renderedCount++" on:clear="clearedCount++">
+          </o-else-if>
+          <o-else on:rendered="renderedCount++" on:clear="clearedCount++">
             <div id="branch-else">branch else</div>
-          </x-else>
+          </o-else>
         </div>
 
         <div id="counts">r:{{renderedCount}} c:{{clearedCount}}</div>
 
         <div id="attr-in-if">
-          <x-if :value="mode > 0">
+          <o-if :value="mode > 0">
             <div id="inner-attr" attr:data-mode="mode">inner {{mode}}</div>
-          </x-if>
+          </o-if>
         </div>
 
         <div id="outer">
-          <x-if :value="mode > 0">
+          <o-if :value="mode > 0">
             <div>
-              <x-if :value="mode === 1" id="inner-if-mark">
+              <o-if :value="mode === 1" id="inner-if-mark">
                 <div id="inner-nested">nested one</div>
-              </x-if>
-              <x-else>
+              </o-if>
+              <o-else>
                 <div id="inner-nested-else">nested else</div>
-              </x-else>
+              </o-else>
             </div>
-          </x-if>
+          </o-if>
         </div>
         `,
         data: {
@@ -83,7 +83,7 @@
         assertEqual(textOf("#branch-else"), "branch else");
       });
 
-      test("x-if 命中与切换 / x-if hit and switch", async () => {
+      test("o-if 命中与切换 / o-if hit and switch", async () => {
         $demo.mode = 1;
         await waitBranch("#branch-1", ["#branch-else", "#branch-2"]);
         $demo.mode = 2;
@@ -121,7 +121,7 @@
         // 历史用例 condition-clone：createElement/cloneNode 出的条件元素
         // 没有子内容，created 应回退到空内容而不是抛 null 崩溃
         const sandbox = document.createElement("div");
-        const cloned = document.createElement("x-if");
+        const cloned = document.createElement("o-if");
         document.body.appendChild(sandbox);
         sandbox.appendChild(cloned);
         // 升级完成（created 走了空内容回退）即证明没有崩溃

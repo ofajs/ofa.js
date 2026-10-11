@@ -33,8 +33,7 @@ packages/ofajs/
 │   ├── inject-host.mjs    shadow 内 link/style 收编到宿主根（hash 去重、移除回收）
 │   ├── context.mjs        o-provider / o-consumer / o-root-provider + $.fn.getProvider
 │   ├── match-var.mjs      CSS 属性条件样式（container style query + 降级轮询）
-│   ├── if.mjs             o-if / o-else-if / o-else（light DOM 条件渲染，按需编译 + 缓存）
-│   └── fill.mjs           o-fill（light DOM 列表渲染，key 对账，wrapTemp 内容保护）
+│   └── （o-if/o-else-if/o-else/o-fill 已下沉 xhear v9，由 base.mjs 的 import 链供给）
 └── test/
     ├── statics/           5 个自检页 + harness + fixtures/（组件/页面样例文件）
     └── ofajs.spec.js      断言各页 N/N 通过
@@ -141,6 +140,42 @@ alias-page 两个案例不移植：@ 别名体系是用户明确决策删除的�
 
 ## 八、踩坑
 
+### tr/td 无法内联进任何包装元素（平台铁律，select/table 的正确姿势）
+
+**症状**：`<table><tbody><template is="replace-temp"><o-fill><tr>...</tr></o-fill>
+</template></tbody></table>` 渲染后行消失，只剩 `{{}}` 渲染出的裸文本。
+
+**根因**：HTML 解析器的 body 规则会在任何包装元素（o-fill/o-if/div/自定义元素）
+内直接丢弃 tr/td，只把文本提升到包装元素里——replace-temp 的 template.content
+也救不了（"in template" 模式只在 template 根层级放行表格系标签）。这是平台约束，
+React/Vue 同样绕不过。
+
+**正确姿势**：
+- **表格行**：tr 声明在顶层命名模板，o-fill 经 replace-temp 引用——
+  `<tbody><template is="replace-temp"><o-fill :value="rows" name="row"></o-fill>
+  </template></tbody>` + `<template name="row"><tr>...</tr></template>`（与旧版
+  fill-table 用例同构，x-fill → o-fill 即可）；
+- **select**：option 是 body 合法内容，`replace-temp + o-fill` 内联 option 即可
+  （实测 option 收集与中间包装元素兼容，chromium/webkit/firefox 均验证）；
+- **条件行**：tr 无法内联进 o-if，惯用法 `o-fill :value="show ? rows : []"`；
+  条件单元格（td 内 o-if）无限制。
+
+用例钉在 if-fill.html 的 demo-replace 组件（3 项检查）。
+
+### wrapTemp 禁止 innerHTML 往返（防御性约定）
+
+`wrapTemp` 曾用 `e.innerHTML = "<template inner-code>" + e.innerHTML` 包裹内容。
+innerHTML 的解析受上下文元素影响，凡未来出现"内容在原位置合法、在 o-if/o-fill
+上下文不合法"的标签都会被静默丢弃。已改为 moveChildren 纯 DOM 搬运（moveChildren
+已从 xhear compile.mjs 导出）；新增结构变换一律走纯 DOM，不做序列化往返。
+
+### render 的 catch 块不得引用 try 作用域变量
+
+快速路径绑定循环的 catch 曾引用 try 内声明的 `key`——若错误发生在声明之前，
+catch 自身的 ReferenceError 会掩盖真实错误（排查 replace-temp 问题时当场发生）。
+catch 内一律使用循环变量（`item.key`）或外层作用域变量。
+
+
 ### `<script>` 写在 template 外会被静默丢弃
 
 **症状**：组件/页面文件加载成功、temp 渲染了静态内容，但 data/proto/
@@ -153,16 +188,23 @@ null，生成的模块只有 temp/type 两个导出。
 **正确姿势**：script 放在 template 内部（官方文档形态）。测试 fixtures
 最容易踩——写完后核对生成的模块是否含 `export default`。
 
-### x-if 级联初始化早于绑定阶段的取件问题
+### 嵌套条件/列表内层指令静默失活（递归编译剥属性）
 
-**症状**：嵌套条件链的内层分支渲染了静态内容，但其中 {{}} 标记与指令
-不生效（xhear 渲染管线相关）。
+**症状**：o-if 内 o-fill、fill 项内再嵌 o-if 的场景，内层指令（`:value`
+等）失效、元素裸渲染。
 
-**根因**：外层 x-if 的 init 会同步收集并触发链上 x-else 的 init，此时
-渲染循环尚未处理到该元素的绑定；实例克隆不携带 `__xt` 这类 JS 属性。
+**根因**：o-if 的 origin 字符串天然包含 o-fill 的 `<template inner-code>`
+包装；getCompiledContent 再解析时，compile 的递归编译把字符串里自带的
+inner-code 模板也编译了，extractDirectives 把属性剥进无人消费的描述符。
 
-**正确姿势**：编译期为条件模板打 `xt-src` 标记并登记 `xtRegistry`
-（属性随克隆走），运行时按标记取回编译原件——与处理顺序无关。
+**正确姿势**：递归编译用 `template:not([inner-code])` 跳过内容保护层
+（xhear compile.mjs 已修，详见 xhear CONTEXT 踩坑）。
+
+### x- 系元素已移除（v5 起统一 o- 语法）
+
+x-if/x-else-if/x-else/x-fill 不再注册；模板中出现会在控制台报弃用错
+（编译期扫描 + stub 元素升级两条检测路径，见 xhear deprecated.mjs）。
+o-if/o-fill 的实现已下沉 xhear（xhear v9），ofajs 不再有 if.mjs/fill.mjs。
 
 ### o-consumer 的 light children 不参与编译
 

@@ -31,12 +31,12 @@
         <select sync:value="val">
           <template is="replace-temp">
             <option value="a">AA</option>
-            <x-fill :value="arr">
+            <o-fill :value="arr">
               <option attr:value="$data.value">{{$data.name}}</option>
-            </x-fill>
-            <x-if :value="val !== 'a'">
+            </o-fill>
+            <o-if :value="val !== 'a'">
               <option value="b">BB</option>
-            </x-if>
+            </o-if>
           </template>
         </select>
         `,
@@ -73,7 +73,7 @@
         await waitFor(() => optionCount() === 4);
       });
 
-      /* ===== 用例来源 formdata-in-if：x-if 显隐与 x-fill 项参与 formData ===== */
+      /* ===== 用例来源 formdata-in-if：o-if 显隐与 o-fill 项参与 formData ===== */
       $.register({
         tag: "formdata-demo",
         temp: `
@@ -81,17 +81,17 @@
         <div>
           <input type="text" name="a" value="I am A" />
         </div>
-        <x-if :value="count % 2">
+        <o-if :value="count % 2">
           <div>
             <input type="text" name="b" value="I am B" />
           </div>
-        </x-if>
+        </o-if>
         <div id="fill-inputs">
-          <x-fill :value="arr">
+          <o-fill :value="arr">
             <div>
               <input type="text" attr:name="$data.name" sync:value="$data.val" />
             </div>
-          </x-fill>
+          </o-fill>
         </div>
         <div id="target">{{fdata}}</div>
         `,
@@ -204,9 +204,9 @@
         tag: "loop-attr-demo",
         temp: `
         <div id="tabs">
-          <x-fill :value="arr">
+          <o-fill :value="arr">
             <loop-attr-child :active-item="$data.active"></loop-attr-child>
-          </x-fill>
+          </o-fill>
         </div>
         `,
         data: {

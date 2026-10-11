@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>列表渲染 / List rendering (x-fill)</title>
+    <title>列表渲染 / List rendering (o-fill)</title>
   </head>
   <body>
     <fill-demo></fill-demo>
@@ -26,19 +26,19 @@
         <button id="clear" on:click="arr = []">clear</button>
 
         <div id="items">
-          <x-fill :value="arr">
+          <o-fill :value="arr">
             <div class="item" attr:data-tid="'i' + $index">
               <span class="val">{{$index}}:{{$data.val}}</span>
               <span class="host-num">{{$host.num}}</span>
               <button class="del" on:click="$host.removeItem($index)">del</button>
             </div>
-          </x-fill>
+          </o-fill>
         </div>
 
         <ul id="str-items">
-          <x-fill :value="strArr">
+          <o-fill :value="strArr">
             <li class="str-item">{{$data}}</li>
-          </x-fill>
+          </o-fill>
         </ul>
         `,
         data: {

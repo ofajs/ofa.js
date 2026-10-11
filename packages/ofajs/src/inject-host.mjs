@@ -3,7 +3,7 @@
  *
  * 组件内放置 link[rel=stylesheet] 或 style，inject-host 会将它们提升到
  * 宿主根（document.head 或 shadowRoot），按内容 hash 去重共享，并在
- * 元素移除时自动回收；x-if/x-fill 等渲染型组件不参与处理。
+ * 元素移除时自动回收；o-if/o-fill 等渲染型组件不参与处理。
  */
 import { getErr } from "./error.mjs";
 import $ from "../../xhear/src/base.mjs";
@@ -34,10 +34,10 @@ $.register({
         case "style":
           this._initStyle(e);
           break;
-        case "x-if":
-        case "x-else-if":
-        case "x-else":
-        case "x-fill":
+        case "o-if":
+        case "o-else-if":
+        case "o-else":
+        case "o-fill":
           // Components of a rendered nature do not need to be alerted
           break;
         default:

@@ -25,6 +25,7 @@ import { getPath, setPath } from "./path.mjs";
 import { getErr } from "./error.mjs";
 import "./render/condition.mjs";
 import "./render/fill.mjs";
+import "./deprecated.mjs";
 
 const { defineProperties } = Object;
 

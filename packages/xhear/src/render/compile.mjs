@@ -18,16 +18,18 @@
  *     属性回查），其中的示例语法不被编译；
  *  2. {{expr}} 文本预分裂 —— 文本节点拆成 [文本, 空标记节点, 文本…]，
  *     标记节点就是渲染目标本身（路径即定位），不再需要占位元素换入换出；
- *  3. 自身带 name 属性 → 登记为命名模板并从树中摘除（供 x-fill 按名
+ *  3. 自身带 name 属性 → 登记为命名模板并从树中摘除（供 o-fill 按名
  *     引用）；多子元素时包一层 display:contents 的 div；
- *  4. 匿名 x-fill（无 name 且有内容）→ 生成随机名，把内容移进
- *     <template name=tid>，fill 元素自命名，运行时按名取模板；
- *  5. x-if / x-else-if / x-else → 内容移进 <template condition>；
- *  6. 递归编译：content 内所有 template 子孙逐个 convert()；命名模板
+ *  4. 递归编译：content 内所有 template 子孙逐个 convert()；命名模板
  *     在这一步收集进 temps 并从树中摘除，重名抛错；
- *  7. 绑定描述符 —— 遍历 content 子树（childNodes 索引定位），登记
+ *  5. afterConvert 钩子 —— o-if/o-fill 的内容保护层（inner-code）在
+ *     这一步包裹内容，必须先于描述符构建（路径依赖结构）；
+ *  6. 绑定描述符 —— 遍历 content 子树（childNodes 索引定位），登记
  *     文本标记 / 属性指令 / 样式 data() 三类 binder，表达式在此编译
  *     一次（旧版是每个实例每个绑定各编译一次）。
+ *
+ * 另：模板中出现 x-if / x-else-if / x-else / x-fill（v5 已弃用）会在
+ * 控制台报错提示改用 o- 系标签。
  *
  * binder 结构（render 消费的稳定契约）：
  *   { t:"text",  path, expr, fn }                          文本插值
@@ -36,21 +38,14 @@
  * path 以 content.childNodes 的索引为基准；实例克隆后结构不变，
  * 写入只发生在节点内容上，路径永远有效。
  */
-import { getRandomId } from "../../../stanz/src/public.mjs";
 import { getErr } from "../error.mjs";
 import { renderExtends } from "./render.mjs";
 import { compileExpr } from "./expr.mjs";
+import { warnXTag } from "../deprecated.mjs";
 
 // XML 保留命名空间前缀：xmlns:xlink、xlink:href、xml:space 这类属性
 // 是命名空间声明，不是模板指令（SVG 场景的修复）
 const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
-
-/**
- * 条件模板注册表：xt-src 标记 → 编译原件。
- * 实例克隆携带属性但不携带 JS 属性（__xt），运行时按标记取回原件，
- * 不依赖渲染循环的处理顺序（x-if 的 init 级联可能早于绑定阶段）。
- */
-export const xtRegistry = new Map();
 
 const DIRECTIVE_RE = /(.*):(.+)/;
 const STYLE_DATA_RE = /data\(.+?\)/g;
@@ -66,8 +61,9 @@ const searchTemp = (template, expr, func) => {
   return rearr;
 };
 
-/** 把一个元素的内容整体搬进另一个元素/片段（保持顺序，纯 DOM 移动） */
-const moveChildren = (from, to) => {
+/** 把一个元素的内容整体搬进另一个元素/片段（保持顺序，纯 DOM 移动）。
+ * 上层框架（ofa 的 wrapTemp）也依赖它绕开 innerHTML 的上下文解析限制 */
+export const moveChildren = (from, to) => {
   // 两端都要归一化：template 元素的内容在 content 片段里，
   // 光子层（firstChild/childNodes）不承载内容，append 也不写入 content
   const src = from.tagName === "TEMPLATE" ? from.content : from;
@@ -124,8 +120,8 @@ const splitInsertionTexts = (parent, markers) => {
             frag.append(document.createTextNode(parts[i]));
           }
         } else {
-          // 标记用注释节点：表达式原文编码后存入，序列化/重解析可存活
-          //（内容保护层的 innerHTML 包裹依赖这一点），渲染不产生输出
+          // 标记用注释节点：表达式原文编码后存入，序列化可存活
+          //（内容保护层经序列化读取内容，依赖这一点），渲染不产生输出
           const marker = document.createComment(
             "xt:" + encodeURIComponent(parts[i]),
           );
@@ -265,6 +261,11 @@ export const compileTemplate = (template, markers = new Map()) => {
   // 0. replace-temp 解包
   unwrapReplaceTemps(template);
 
+  // 0.5 弃用标签检测：x- 系元素在 v5 已移除，出现即报错提示迁移
+  searchTemp(template, "x-if,x-else-if,x-else,x-fill", (el) => {
+    warnXTag(el.tagName.toLowerCase());
+  });
+
   // 1. code 标签保护：内容摘走（引用留表，恢复时无需回查），
   //    跳过已被外层保护过的 code，防止嵌套模板递归编译时置空丢失
   searchTemp(template, "code:not([code-id])", (code) => {
@@ -308,41 +309,12 @@ export const compileTemplate = (template, markers = new Map()) => {
     template.remove();
   }
 
-  // 4. 匿名 x-fill：生成随机名自命名，内容移进同名模板
-  searchTemp(template, "x-fill:not([name])", (fillEl) => {
-    if (fillEl.querySelector("x-fill:not([name])")) {
-      throw getErr("xhear_dbfill_noname");
-    }
-
-    if (fillEl.textContent.trim() || fillEl.children.length) {
-      const tid = `t${getRandomId()}`;
-      fillEl.setAttribute("name", tid);
-
-      const temp = document.createElement("template");
-      temp.setAttribute("name", tid);
-      moveChildren(fillEl, temp);
-      fillEl.append(temp);
-    }
-  });
-
-  // 5. 条件组件：内容移进 template[condition]，并注册编译原件
-  searchTemp(template, "x-if,x-else-if,x-else", (condiEl) => {
-    const firstChild = condiEl.children[0];
-    if (!firstChild || firstChild.tagName !== "TEMPLATE") {
-      const condTemp = document.createElement("template");
-      condTemp.setAttribute("condition", "");
-      moveChildren(condiEl, condTemp);
-      condiEl.append(condTemp);
-    }
-
-    const condTemp = condiEl.children[0];
-    const srcId = getRandomId();
-    condTemp.setAttribute("xt-src", srcId);
-    xtRegistry.set(srcId, condTemp);
-  });
-
-  // 6. 递归编译全部后代模板（命名模板在此收集合并）
-  searchTemp(template, "template", (e) => {
+  // 4. 递归编译全部后代模板（命名模板在此收集合并）。
+  //    必须跳过 template[inner-code]：那是 o-if/o-fill 的内容保护层，
+  //    其中的指令要在分支/列表项渲染时才绑定渲染数据——若在此处编译，
+  //    extractDirectives 会把属性剥进一个无人消费的描述符，内容静默失活
+  //    （嵌套条件/列表场景，如 o-if 内 o-fill 项内再嵌 o-if）
+  searchTemp(template, "template:not([inner-code])", (e) => {
     const newTemps = compileTemplate(e, markers);
 
     Object.keys(newTemps).forEach((name) => {
@@ -356,13 +328,13 @@ export const compileTemplate = (template, markers = new Map()) => {
     temps = { ...temps, ...newTemps };
   });
 
-  // 6.5 afterConvert 钩子：结构变换必须先于描述符构建（路径依赖结构）
+  // 5. afterConvert 钩子：结构变换必须先于描述符构建（路径依赖结构）
   renderExtends.afterConvert({
     template,
     temps,
   });
 
-  // 7. 绑定描述符
+  // 6. 绑定描述符
   const binders = [];
   buildBinders(template.content, [], binders, markers);
   template.__xt = binders;

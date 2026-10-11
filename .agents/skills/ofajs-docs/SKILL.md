@@ -424,7 +424,7 @@ Caused by: ReferenceError: flag is not defined
 ❌ **错误写法**（模板用了 `noBg`，`data` 没声明）：
 
 ```html
-<x-if :value="noBg === 'off'">...</x-if>
+<o-if :value="noBg === 'off'">...</o-if>
 <p-switch sync:value="noBg">无底色</p-switch>
 
 <script>
@@ -600,7 +600,7 @@ ofa.js 对已加载的页面模块有**内存级模块缓存**（同 URL 复用�
 
 ### 详细示例：`$host` / `$data` 只在 o-fill 的 item 作用域可用，根级元素直接用方法名（重要）
 
-`$host` / `$data` 由 ofa.js 在 **x-fill（o-fill）渲染列表项时**注入到 item 作用域（`createItem` 创建 `{ $data, $host, $index }`）。**根级（页面模板顶层、非 o-fill 内）作用域没有 `$host` / `$data`**，`on:click="$host.xxx()"` 会抛 `Error evaluating element expression: 'on:click="$host.xxx()"'`，点击无反应且 console 报错。
+`$host` / `$data` 由 ofa.js 在 **o-fill 渲染列表项时**注入到 item 作用域（`createItem` 创建 `{ $data, $host, $index }`）。**根级（页面模板顶层、非 o-fill 内）作用域没有 `$host` / `$data`**，`on:click="$host.xxx()"` 会抛 `Error evaluating element expression: 'on:click="$host.xxx()"'`，点击无反应且 console 报错。
 
 ✅ **正确写法**：
 ```html
@@ -767,7 +767,7 @@ innerPackingText(d) {
 - **响应式数据**：使用 `$.stanz()` 创建
 - **列表渲染**：使用 `<o-fill>` 组件；`fill-key` 虽为选填，但只要列表项存在唯一标识字段（如 `id`），编写代码时应始终添加 `fill-key="字段名"`，以保证数组增删、排序时正确复用和更新列表项
 - **条件渲染**：使用 `<o-if>` / `<o-else-if>` / `<o-else>` 组件
-- **非显式组件**：`<x-if>` / `<x-fill>` 功能相同但不渲染到 DOM
+- **非显式组件**：v5 起为 `<o-if>` / `<o-fill>`（元素驻留 + display:contents）；旧 `x-if`/`x-fill` 已移除，出现即控制台报弃用错
 - **属性传递**：`:toKey="fromKey"` 单向，`sync:toKey="fromKey"` 双向
 - **侦听器**：`watch: { prop() {} }`
 - **生命周期**：`ready()` `attached()` `detached()`
@@ -916,7 +916,7 @@ innerPackingText(d) {
 | `:toProp="fromProp"` | [领悟属性绑定](./references/deep-property-binding.md) |
 | `{{obj.nested.prop}}` | [属性响应](./references/property-response.md) |
 | `<inject-host>` | [注入宿主样式](./references/inject-host-style.md) |
-| `<x-if>` `<x-fill>` | [非显式组件](./references/non-explicit-component.md) |
+| `<o-if>` `<o-fill>` | [非显式组件](./references/non-explicit-component.md) |
 | `<template is="replace-temp">` | [替换模板](./references/replace-template.md) |
 | `<match-var>` | [样式查询](./references/match-var.md) |
 

@@ -13,6 +13,7 @@ const PAGES = [
   { path: "/packages/xhear/test/statics/syntax-sync-watch.html", total: 5 },
   { path: "/packages/xhear/test/statics/syntax-style.html", total: 4 },
   { path: "/packages/xhear/test/statics/syntax-if.html", total: 6 },
+  { path: "/packages/xhear/test/statics/syntax-deprecated.html", total: 4 },
   { path: "/packages/xhear/test/statics/syntax-fill.html", total: 8 },
   { path: "/packages/xhear/test/statics/syntax-fill-key.html", total: 4 },
   { path: "/packages/xhear/test/statics/syntax-template.html", total: 6 },

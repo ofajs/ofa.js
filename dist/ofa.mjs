@@ -151,10 +151,6 @@ const searchEle = (el, expr) => {
   return Array.from(el.querySelectorAll(expr));
 };
 
-/** Safari 判定：replace-temp 自定义内置元素在 Safari 不支持，需走降级路径 */
-const isSafariBrowser = () =>
-  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
 /**
  * 渲染报错时的补充定位信息：标明 $host/$data 用法提示与来源模块路径。
  * PATH 由上层框架（ofa.js）按需注入，纯 xhear 环境下为空。
@@ -1079,23 +1075,10 @@ const errorDescs$1 = {
     "Error in registering component {tag}, custom data cannot have data of type 'Set' or 'Map'",
   xhear_regster_data_nofunc:
     "Registration component {tag} error, functions cannot appear in custom data, please put the function in 'proto'; or change '{key}' to '_{key}'",
-  xhear_fakenode_unclose:
-    "This is an unclosed FakeNode; use the wrong attribute name: {name}",
-  xhear_fill_tempname: "Fill component template '{name}' not found",
-  xhear_dbfill_noname:
-    "Only fill components with the 'name' attribute can be rendered in the fill component",
-  xhear_temp_exist: "Template '{name}' already exists",
   temp_multi_child:
-    "The template element can only contain one child element. If multiple child elements appear, the child elements will be repackaged in a <div> element",
-  temp_wrap_child:
-    "The template '{tempName}' contains {len} child elements, which have been wrapped in a div element with the attribute '{wrapName}'.",
+    "The template has multiple root elements; they have been wrapped in a display:contents container. It is recommended to wrap them manually",
   fill_type:
-    "'value' of 'x-fill' must be of type Array, the current value is of type {type}",
-  fill_key_duplicates: "The key in the fill component is repeated",
-  xhear_sync_no_options:
-    "Direct use of the 'sync' method is not allowed, it is only used for template rendering",
-  xhear_sync_object_value:
-    "Cannot use 'sync' to synchronize values of Object type, target {targetName}",
+    "'value' of 'o-fill' must be of type Array, the current value is of type {type}",
 };
 
 /** 按错误码 + 占位符生成描述文本（未知码原样提示去查表） */
@@ -1215,6 +1198,45 @@ try{
 };
 
 /**
+ * x-if / x-else-if / x-else / x-fill 弃用提示。
+ *
+ * v5 起条件与列表渲染统一为 o-if / o-else-if / o-else / o-fill，x- 系
+ * 元素不再注册。两条检测路径：
+ * 1. 编译期扫描：compileTemplate 发现模板里有 x- 系标签时调用 warnXTag；
+ * 2. stub 元素：未经编译的裸用（静态 HTML、第三方 cloneNode）在元素
+ *    升级接入文档时也会报错。
+ * 同名标签只报一次，避免刷屏。
+ */
+const warned = new Set();
+
+const warnXTag = (tag) => {
+  if (warned.has(tag)) {
+    return;
+  }
+  warned.add(tag);
+
+  console.error(
+    `[ofa.js] "${tag}" 已在新版弃用 / deprecated in v5+：` +
+      `条件与列表渲染请改用 o-if / o-else-if / o-else / o-fill` +
+      ` (use the "o-" tags instead)`,
+  );
+};
+
+// stub 元素保持惰性（无渲染逻辑），只负责在接入文档时报弃用提示
+if (typeof customElements !== "undefined") {
+  ["x-if", "x-else-if", "x-else", "x-fill"].forEach((tag) => {
+    customElements.define(
+      tag,
+      class extends HTMLElement {
+        connectedCallback() {
+          warnXTag(tag);
+        }
+      },
+    );
+  });
+}
+
+/**
  * 模板编译器：把模板 HTML 一次性编译成"绑定描述符"。
  *
  * 设计核心：**编译一次、实例化万次**。注册期对模板做一次纯 DOM 遍历，
@@ -1234,16 +1256,18 @@ try{
  *     属性回查），其中的示例语法不被编译；
  *  2. {{expr}} 文本预分裂 —— 文本节点拆成 [文本, 空标记节点, 文本…]，
  *     标记节点就是渲染目标本身（路径即定位），不再需要占位元素换入换出；
- *  3. 自身带 name 属性 → 登记为命名模板并从树中摘除（供 x-fill 按名
+ *  3. 自身带 name 属性 → 登记为命名模板并从树中摘除（供 o-fill 按名
  *     引用）；多子元素时包一层 display:contents 的 div；
- *  4. 匿名 x-fill（无 name 且有内容）→ 生成随机名，把内容移进
- *     <template name=tid>，fill 元素自命名，运行时按名取模板；
- *  5. x-if / x-else-if / x-else → 内容移进 <template condition>；
- *  6. 递归编译：content 内所有 template 子孙逐个 convert()；命名模板
+ *  4. 递归编译：content 内所有 template 子孙逐个 convert()；命名模板
  *     在这一步收集进 temps 并从树中摘除，重名抛错；
- *  7. 绑定描述符 —— 遍历 content 子树（childNodes 索引定位），登记
+ *  5. afterConvert 钩子 —— o-if/o-fill 的内容保护层（inner-code）在
+ *     这一步包裹内容，必须先于描述符构建（路径依赖结构）；
+ *  6. 绑定描述符 —— 遍历 content 子树（childNodes 索引定位），登记
  *     文本标记 / 属性指令 / 样式 data() 三类 binder，表达式在此编译
  *     一次（旧版是每个实例每个绑定各编译一次）。
+ *
+ * 另：模板中出现 x-if / x-else-if / x-else / x-fill（v5 已弃用）会在
+ * 控制台报错提示改用 o- 系标签。
  *
  * binder 结构（render 消费的稳定契约）：
  *   { t:"text",  path, expr, fn }                          文本插值
@@ -1256,13 +1280,6 @@ try{
 // XML 保留命名空间前缀：xmlns:xlink、xlink:href、xml:space 这类属性
 // 是命名空间声明，不是模板指令（SVG 场景的修复）
 const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
-
-/**
- * 条件模板注册表：xt-src 标记 → 编译原件。
- * 实例克隆携带属性但不携带 JS 属性（__xt），运行时按标记取回原件，
- * 不依赖渲染循环的处理顺序（x-if 的 init 级联可能早于绑定阶段）。
- */
-const xtRegistry = new Map();
 
 const DIRECTIVE_RE = /(.*):(.+)/;
 const STYLE_DATA_RE = /data\(.+?\)/g;
@@ -1278,7 +1295,8 @@ const searchTemp = (template, expr, func) => {
   return rearr;
 };
 
-/** 把一个元素的内容整体搬进另一个元素/片段（保持顺序，纯 DOM 移动） */
+/** 把一个元素的内容整体搬进另一个元素/片段（保持顺序，纯 DOM 移动）。
+ * 上层框架（ofa 的 wrapTemp）也依赖它绕开 innerHTML 的上下文解析限制 */
 const moveChildren = (from, to) => {
   // 两端都要归一化：template 元素的内容在 content 片段里，
   // 光子层（firstChild/childNodes）不承载内容，append 也不写入 content
@@ -1336,8 +1354,8 @@ const splitInsertionTexts = (parent, markers) => {
             frag.append(document.createTextNode(parts[i]));
           }
         } else {
-          // 标记用注释节点：表达式原文编码后存入，序列化/重解析可存活
-          //（内容保护层的 innerHTML 包裹依赖这一点），渲染不产生输出
+          // 标记用注释节点：表达式原文编码后存入，序列化可存活
+          //（内容保护层经序列化读取内容，依赖这一点），渲染不产生输出
           const marker = document.createComment(
             "xt:" + encodeURIComponent(parts[i]),
           );
@@ -1477,6 +1495,11 @@ const compileTemplate = (template, markers = new Map()) => {
   // 0. replace-temp 解包
   unwrapReplaceTemps(template);
 
+  // 0.5 弃用标签检测：x- 系元素在 v5 已移除，出现即报错提示迁移
+  searchTemp(template, "x-if,x-else-if,x-else,x-fill", (el) => {
+    warnXTag(el.tagName.toLowerCase());
+  });
+
   // 1. code 标签保护：内容摘走（引用留表，恢复时无需回查），
   //    跳过已被外层保护过的 code，防止嵌套模板递归编译时置空丢失
   searchTemp(template, "code:not([code-id])", (code) => {
@@ -1520,41 +1543,12 @@ const compileTemplate = (template, markers = new Map()) => {
     template.remove();
   }
 
-  // 4. 匿名 x-fill：生成随机名自命名，内容移进同名模板
-  searchTemp(template, "x-fill:not([name])", (fillEl) => {
-    if (fillEl.querySelector("x-fill:not([name])")) {
-      throw getErr$1("xhear_dbfill_noname");
-    }
-
-    if (fillEl.textContent.trim() || fillEl.children.length) {
-      const tid = `t${getRandomId()}`;
-      fillEl.setAttribute("name", tid);
-
-      const temp = document.createElement("template");
-      temp.setAttribute("name", tid);
-      moveChildren(fillEl, temp);
-      fillEl.append(temp);
-    }
-  });
-
-  // 5. 条件组件：内容移进 template[condition]，并注册编译原件
-  searchTemp(template, "x-if,x-else-if,x-else", (condiEl) => {
-    const firstChild = condiEl.children[0];
-    if (!firstChild || firstChild.tagName !== "TEMPLATE") {
-      const condTemp = document.createElement("template");
-      condTemp.setAttribute("condition", "");
-      moveChildren(condiEl, condTemp);
-      condiEl.append(condTemp);
-    }
-
-    const condTemp = condiEl.children[0];
-    const srcId = getRandomId();
-    condTemp.setAttribute("xt-src", srcId);
-    xtRegistry.set(srcId, condTemp);
-  });
-
-  // 6. 递归编译全部后代模板（命名模板在此收集合并）
-  searchTemp(template, "template", (e) => {
+  // 4. 递归编译全部后代模板（命名模板在此收集合并）。
+  //    必须跳过 template[inner-code]：那是 o-if/o-fill 的内容保护层，
+  //    其中的指令要在分支/列表项渲染时才绑定渲染数据——若在此处编译，
+  //    extractDirectives 会把属性剥进一个无人消费的描述符，内容静默失活
+  //    （嵌套条件/列表场景，如 o-if 内 o-fill 项内再嵌 o-if）
+  searchTemp(template, "template:not([inner-code])", (e) => {
     const newTemps = compileTemplate(e, markers);
 
     Object.keys(newTemps).forEach((name) => {
@@ -1568,13 +1562,13 @@ const compileTemplate = (template, markers = new Map()) => {
     temps = { ...temps, ...newTemps };
   });
 
-  // 6.5 afterConvert 钩子：结构变换必须先于描述符构建（路径依赖结构）
+  // 5. afterConvert 钩子：结构变换必须先于描述符构建（路径依赖结构）
   renderExtends.afterConvert({
     template,
     temps,
   });
 
-  // 7. 绑定描述符
+  // 6. 绑定描述符
   const binders = [];
   buildBinders(template.content, [], binders);
   template.__xt = binders;
@@ -1606,7 +1600,7 @@ const convert = compileTemplate;
  * - always 动作登记为任务，数据更新（watchTick 防抖）时批量重跑；
  * - 每个副作用登记撤销函数（__revokes 约定），节点树销毁时由
  *   revokeAll 统一执行；
- * - 绑定完成后派发 binding-rendered，x-if/x-fill 等组件据此初始化。
+ * - 绑定完成后派发 binding-rendered，o-if/o-fill 等组件据此初始化。
  *
  * 对外保留 renderExtends 四钩子（上层框架捕获重赋介入编译与渲染）与
  * 兼容回退路径（处理未经本版编译器处理的模板/DOM）。
@@ -1916,11 +1910,13 @@ function render({
             revokes.push(clearRevs);
             addRevoke(el, clearRevs);
           } catch (error) {
+            // catch 与 try 不同作用域，key 在 try 内声明——此处只能取 item.key，
+            // 否则真错误会被这里的 ReferenceError 掩盖
             const err = getErr$1(
               "xhear_eval",
               {
                 name: action.name,
-                arg0: key,
+                arg0: item.key,
                 arg1: item.expr,
               },
               error,
@@ -3361,492 +3357,292 @@ function deepCopyData(obj, tag = "", keyName) {
 }
 
 /**
- * FakeNode：用一对注释节点（--start / --end）在 DOM 中圈出一段"虚拟容器"。
+ * o-if / o-fill 的内容保护层。
  *
- * x-if / x-fill 渲染的内容都装在 FakeNode 区间里：组件本体从 DOM 摘除后，
- * 区间内容仍留在文档流中，且支持 children/childNodes/innerHTML 等容器
- * 操作。遍历从 end 注释向前走到 _start 注释为止。
- *
- * 本模块同时注册 replace-temp 内置元素：<template is="replace-temp"> 用于
- * table/select 等解析受限的位置——HTML 解析器不允许这些位置出现任意元素，
- * 模板先落位为 template，连接时再把内容替换回原位。
+ * 条件与列表组件的内容必须被宿主编译"隔离"——它们应在分支/列表项渲染
+ * 时才绑定各自的渲染数据（$data/$index/…），而不是被宿主编译提前消费。
+ * wrapTemp 把这类组件的内容搬进 template[inner-code]（纯 DOM 搬运，禁止
+ * innerHTML 往返：innerHTML 解析受上下文元素影响，表格/表单位置的
+ * tr/option 会被解析器丢弃）；宿主编译的最终遍历跳过 TEMPLATE 子树，
+ * inner-code 内的文本标记与指令得以幸存，分支渲染时按需编译并全局缓存
+ * （同一份内容跨实例只编译一次）。
  */
 
-class FakeNode extends Comment {
-  constructor(markname) {
-    const tagText = `Fake Node${markname ? ": " + markname : ""}`;
+/** 需要 inner-code 内容保护的组件 */
+const needWrapTags = ["o-fill", "o-if", "o-else-if", "o-else"];
 
-    super(` ${tagText} --end `);
+/** 内容编译缓存：内容原文 → 编译模板（o-if 与 o-fill 共享一张表） */
+const compiledContents = new Map();
 
-    this._mark = markname;
-    this._inited = false;
+/** 按内容原文取编译模板（跨实例共享，编译一次） */
+const getCompiledContent = (html) => {
+  let compiled = compiledContents.get(html);
 
-    // start 注释通过 __fake_end 反指 end，便于 nextElementSibling 跳转
-    const startCom = new Comment(` ${tagText} --start `);
-    startCom.__fake_end = this;
-
-    Object.defineProperty(this, "_start", {
-      value: startCom,
-    });
+  if (!compiled) {
+    compiled = document.createElement("template");
+    compiled.innerHTML = html;
+    compileTemplate(compiled);
+    compiledContents.set(html, compiled);
   }
 
-  /** 把 start 注释插入到自己前面，形成完整区间 */
-  init() {
-    if (this._inited) {
-      return;
-    }
+  return compiled;
+};
 
-    this.parentNode.insertBefore(this._start, this);
-    this._inited = true;
-  }
+/**
+ * 把 template 内所有 o-fill/条件组件的内容包进 template[inner-code]，
+ * 并解开既有 inner-code 的嵌套（避免重复包裹导致渲染失败）。
+ */
+const wrapTemp = (template) => {
+  const eles = Array.from(
+    template.content.querySelectorAll(needWrapTags.join(",")),
+  );
 
-  querySelector(expr) {
-    return this.__searchEl(expr, "find");
-  }
-
-  querySelectorAll(expr) {
-    return this.__searchEl(expr);
-  }
-
-  /** 在全文档查询结果中过滤出落在自身区间内的元素 */
-  __searchEl(expr, funcName = "filter") {
-    const startParent = this.parentNode;
-    if (!startParent) return [];
-
-    const childs = this.children;
-
-    return Array.from(startParent.querySelectorAll(expr))[funcName]((e) => {
-      let par = e;
-      while (true) {
-        if (childs.includes(par)) {
-          return true;
-        }
-
-        par = par.parentNode;
-
-        if (!par) {
-          break;
-        }
-      }
-    });
-  }
-
-  insertBefore(newEle, target) {
-    const { parentNode } = this;
-
-    if (Array.from(parentNode.children).includes(target)) {
-      parentNode.insertBefore(newEle, target);
-    } else {
-      parentNode.insertBefore(newEle, this);
-    }
-  }
-
-  appendChild(newEle) {
-    this.parentNode.insertBefore(newEle, this);
-  }
-
-  /** 区间内的元素子节点（从 end 注释向前遍历到 start 注释为止） */
-  get children() {
-    const childs = [];
-
-    let prev = this;
+  eles.forEach((e) => {
     while (true) {
-      prev = prev.previousSibling;
+      const innerCodeTempEl = e.querySelector("template[inner-code]");
 
-      if (prev) {
-        if (prev instanceof HTMLElement) {
-          childs.unshift(prev);
-        } else if (prev === this._start) {
-          break;
-        }
-      } else if (this.isConnected) {
-        // 走到文档顶仍未遇到 start，说明区间不完整
-        throw getErr$1("xhear_fakenode_unclose", { name: "children" });
-      } else {
+      if (!innerCodeTempEl) {
         break;
       }
+
+      // 解开已有的 inner-code 包裹
+      const childs = innerCodeTempEl.content.childNodes;
+
+      childs.forEach((child) => {
+        innerCodeTempEl.parentNode.insertBefore(
+          child.cloneNode(true),
+          innerCodeTempEl,
+        );
+      });
+
+      innerCodeTempEl.remove();
     }
 
-    return childs;
+    // 包裹必须走纯 DOM 搬运，禁止 innerHTML 往返：innerHTML 的解析受
+    // 上下文元素影响（o-if/o-fill 属 body 上下文），表格/表单位置的
+    // 内容会被解析器丢弃
+    const innerCode = document.createElement("template");
+    innerCode.setAttribute("inner-code", "");
+    moveChildren(e, innerCode);
+    e.append(innerCode);
+    wrapTemp(innerCode);
+  });
+};
+
+// afterConvert 钩子：结构变换必须先于宿主的描述符构建（路径依赖结构）
+const oldAfterConvert = renderExtends.afterConvert;
+renderExtends.afterConvert = (e) => {
+  oldAfterConvert(e);
+  const { template, temps } = e;
+  wrapTemp(template);
+  Object.values(temps).forEach((temp) => wrapTemp(temp));
+};
+
+/**
+ * 条件渲染：o-if / o-else-if / o-else（light DOM 版，唯一实现）。
+ *
+ * 内容以 light children 渲染在 o-if 元素内部（shadow 为
+ * display:contents + slot，视觉上无额外层级）；内容在编译期被
+ * wrapTemp 包进 template[inner-code] 保护（不参与宿主编译），首次
+ * 渲染时才按需编译并对当前渲染数据绑定，编译结果全局缓存。
+ *
+ * 条件链：以首个 o-if 为头，收集其后相邻的 o-else-if / o-else；
+ * value 变化重判异步执行（setTimeout 0 合并同拍变更），从头到尾取
+ * 第一个满足条件（value 为真或 o-else）的分支渲染，其余清空，保证
+ * 同链同时只有一个分支存活。
+ *
+ * 组件初始化依赖 render 的就绪握手：等 _bindingRendered（或
+ * binding-rendered 事件）后才刷新——此时自身 :value 绑定已生效。
+ */
+
+const refreshCondition = (conditionEl) => {
+  const conditionEls = [conditionEl];
+
+  // 收集同链的兄弟条件元素
+  if (conditionEl.tag === "o-if") {
+    conditionEls.push(...getNexts(conditionEl.next));
+  } else if (conditionEl.tag === "o-else-if") {
+    conditionEls.push(...getNexts(conditionEl.next));
+    conditionEls.unshift(...getPrevs(conditionEl.prev));
   }
 
-  /** 区间内的全部子节点（含文本、注释） */
-  get childNodes() {
-    const childs = [];
-
-    let prev = this;
-    while (true) {
-      prev = prev.previousSibling;
-
-      if (prev) {
-        if (prev === this._start) {
-          break;
+  // 一条链只在首个 o-if 上做合并刷新
+  const firstEl = conditionEls[0];
+  if (firstEl.tag === "o-if") {
+    clearTimeout(firstEl.__refreshTimer);
+    firstEl.__refreshTimer = setTimeout(() => {
+      // 按顺序找到第一个成立的条件；o-else 兜底
+      let targetCondition = null;
+      for (let i = 0; i < conditionEls.length; i++) {
+        const el = conditionEls[i];
+        if (el.tag === "o-if" || el.tag === "o-else-if") {
+          if (el.value) {
+            targetCondition = el;
+            break;
+          }
+        } else {
+          targetCondition = el;
         }
-        childs.unshift(prev);
-      } else {
-        if (!this.isConnected) {
-          break;
+      }
+
+      if (targetCondition) {
+        renderContent(targetCondition);
+        targetCondition.attr("actived", "");
+      }
+
+      // 其余分支清空内容
+      conditionEls.forEach((el) => {
+        if (el !== targetCondition) {
+          el.attr("actived", null);
+          clearContent(el);
         }
-        throw getErr$1("xhear_fakenode_unclose", { name: "childNodes" });
+      });
+
+      // 内容变更后唤醒父级监听（shadow 级订阅如 formData 依赖此约定）
+      const { parentNode } = firstEl.ele;
+      if (parentNode) {
+        eleX(parentNode).refresh();
       }
-    }
-
-    return childs;
-  }
-
-  /** 清空并重设区间内容 */
-  set innerHTML(val) {
-    this.childNodes.forEach((e) => {
-      e.remove();
-    });
-
-    const temp = document.createElement("template");
-    temp.innerHTML = val;
-
-    Array.from(temp.content.childNodes).forEach((e) => {
-      this.appendChild(e);
-    });
-  }
-
-  get innerHTML() {
-    const { children } = this;
-    let content = "";
-
-    children.forEach((e) => {
-      content += e.outerHTML + "\n";
-    });
-
-    return content;
-  }
-
-  get nextElementSibling() {
-    let next = this.nextSibling;
-
-    if (!next) {
-      return null;
-    }
-
-    // 遇到嵌套 FakeNode 的 start 注释，跳到对应的 end 注释之后
-    if (next.__fake_end) {
-      return next.__fake_end;
-    }
-
-    if (next && !(next instanceof Element)) {
-      next = next.nextElementSibling;
-    }
-
-    return next;
-  }
-
-  get previousElementSibling() {
-    const { _start } = this;
-    let prev = _start.previousSibling;
-
-    if (!prev) {
-      return null;
-    }
-
-    if (prev instanceof FakeNode) {
-      return prev;
-    }
-
-    return _start.previousElementSibling;
-  }
-}
-
-/** 把 replace-temp 模板的内容替换回文档原位，并补渲染未绑定元素 */
-const replaceTempInit = (_this) => {
-  const parent = _this.parentNode;
-  if (parent) {
-    const children = Array.from(_this.content.children);
-    children.forEach((e) => {
-      parent.insertBefore(e, _this);
-    });
-
-    _this.remove();
-
-    if (parent.querySelector("[x-bind-data]")) {
-      const regData = getRenderData(parent);
-
-      if (regData) {
-        // 替换出的元素还没绑定，重跑一次渲染流程
-        render({
-          data: regData.data,
-          target: regData.target,
-          temps: regData.temps,
-        });
-      }
-    }
+    }, 0);
+  } else {
+    console.error("o-if must be the first element", conditionEls);
   }
 };
 
-if (isSafariBrowser()) {
-  // Safari 不支持自定义内置元素，改由每次渲染前的钩子驱动替换
-  renderExtends.beforeRender = ({ target }) => {
-    let replaces = [];
-
-    while (true) {
-      replaces = Array.from(
-        target.querySelectorAll('template[is="replace-temp"]'),
-      );
-
-      if (!replaces.length) {
-        break;
-      }
-
-      replaces.forEach((temp) => {
-        replaceTempInit(temp);
-      });
-    }
-  };
-} else {
-  class ReplaceTemp extends HTMLTemplateElement {
-    constructor() {
-      super();
-      this.init();
-    }
-
-    init() {
-      replaceTempInit(this);
-    }
-
-    connectedCallback() {
-      this.init();
-    }
+// 渲染分支内容：按需编译 + 克隆绑定（渲染期零解析零编译）
+const renderContent = (conditionEl) => {
+  if (conditionEl.__rendered) {
+    return;
   }
 
-  customElements.define("replace-temp", ReplaceTemp, {
-    extends: "template",
+  const result = getRenderData(conditionEl.ele);
+
+  if (!result) {
+    return;
+  }
+
+  const { target, data, temps } = result;
+
+  try {
+    render({
+      target: conditionEl.ele,
+      data,
+      temps,
+      template: getCompiledContent(conditionEl.__originHTML),
+    });
+    console.debug("[rc]", conditionEl.tag, "render OK");
+  } catch (err) {
+    console.debug("[rc]", conditionEl.tag, "render THREW:", String(err).slice(0, 160));
+    throw err;
+  }
+
+  conditionEl.__rendered = true;
+
+  conditionEl.emit("rendered", {
+    bubbles: false,
   });
-}
+};
 
-/**
- * 条件渲染：x-if / x-else-if / x-else。
- *
- * x-if 先把相邻的条件组件整体替换为 FakeNode 区间并触发一次渲染；
- * 之后每次 value 变化重走渲染流程：
- * 1. 以首个 x-if 为头，收集其后相邻的 x-else-if / x-else（_others）；
- *    x-else-if 反向持有头节点（_xif），值变化时委托头节点统一重判；
- * 2. 重判异步执行（setTimeout 0 合并同拍的多次变更）：
- *    从头到尾找到第一个满足条件（value 为真或 x-else）的组件渲染其内容，
- *    其余组件清空内容，保证同链同时只有一个分支存活。
- *
- * 组件初始化依赖 render 的就绪握手：等 _bindingRendered（或
- * binding-rendered 事件）后才 init —— 此时自身 :value 绑定已生效。
- */
+// 清空分支内容
+const clearContent = (conditionEl) => {
+  if (!conditionEl.__rendered) {
+    return;
+  }
 
-const regOptions = {
+  conditionEl.ele.childNodes?.forEach((el) => revokeAll(el));
+
+  conditionEl.html = "";
+
+  conditionEl.__rendered = false;
+
+  conditionEl.emit("clear", {
+    bubbles: false,
+  });
+};
+
+// 获取后方兄弟条件元素（到 o-else 为止）
+const getNexts = (next) => {
+  const nexts = [];
+  while (next && (next.tag === "o-else-if" || next.tag === "o-else")) {
+    nexts.push(next);
+    if (next.tag === "o-else") {
+      break;
+    }
+    next = next.next;
+  }
+  return nexts;
+};
+
+// 获取前方兄弟条件元素（到 o-if 为止）
+const getPrevs = (prev) => {
+  const prevs = [];
+  while (prev && (prev.tag === "o-if" || prev.tag === "o-else-if")) {
+    prevs.unshift(prev);
+    if (prev.tag === "o-if") {
+      break;
+    }
+    prev = prev.prev;
+  }
+  return prevs;
+};
+
+const createdFunc = function () {
+  // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
+  // 此时首个子元素不存在，需要回退到自身内容
+  const firstEle = this[0];
+  if (firstEle && firstEle.is("template[inner-code]")) {
+    this.__originHTML = firstEle.html.trim();
+  } else {
+    this.__originHTML = this.html.trim();
+  }
+  this.html = "";
+};
+
+const temp$1 = `<style>:host{display:contents;}</style><slot></slot>`;
+
+const conditionOptions = {
+  temp: temp$1,
   data: {
     value: null,
+    // 分支渲染标记必须是注册数据：代理内部状态（__ 前缀直设）在
+    // 条件元素上不保证持久，用它记 __rendered 会丢、clear 事件全灭
     __rendered: false,
   },
   watch: {
     value() {
-      if (!this._bindend) {
-        return;
-      }
-
-      this.refreshValue();
-    },
-  },
-  proto: {
-    /** 重新裁决条件链：合并短时间内的连续变更，只做一次判断 */
-    refreshValue() {
-      clearTimeout(this._timer);
-      this._timer = setTimeout(() => {
-        const conditions = [this, ...this._others];
-
-        let isOK = false;
-
-        conditions.forEach((conditionEl) => {
-          if (isOK) {
-            // 前面已有命中的分支，后续分支一律清空
-            conditionEl._clearContent();
-            return;
-          }
-
-          if (conditionEl.value || conditionEl.tag === "x-else") {
-            isOK = true;
-            conditionEl._renderContent();
-          } else {
-            conditionEl._clearContent();
-          }
-        });
-        if (this._fake.parentNode) {
-          eleX(this._fake.parentNode).refresh();
-        }
-      }, 0);
-    },
-    _renderContent() {
-      if (this.__rendered) {
-        return;
-      }
-      this.__rendered = true;
-
-      const result = getRenderData(this._fake);
-
-      if (!result) {
-        return;
-      }
-
-      const { target, data, temps } = result;
-
-      if (dataRevoked(data)) {
-        return;
-      }
-
-      // 编译原件走克隆 + 描述符绑定（渲染期零解析零编译）
-      const conditionTemp = this.__conditionCompiled;
-      let binders;
-
-      if (conditionTemp) {
-        // FakeNode.appendChild 把片段 children 插入区间（append 方法不存在）
-        this._fake.appendChild(conditionTemp.content.cloneNode(true));
-        binders = conditionTemp.__xt;
-      } else {
-        this._fake.innerHTML = this.__originHTML;
-      }
-
-      render({
-        target,
-        data,
-        temps,
-        binders,
-        bindRoot: binders ? this._fake : undefined,
-      });
-
-      this.emit("rendered", {
-        bubbles: false,
-      });
-    },
-    _clearContent() {
-      if (!this.__rendered) {
-        return;
-      }
-
-      this.__rendered = false;
-
-      // 释放区间内全部副作用后清空
-      this._fake?.childNodes?.forEach((el) => revokeAll(el));
-      this._fake.innerHTML = "";
-
-      this.emit("clear", {
-        bubbles: false,
-      });
-    },
-    init() {
-      if (this._bindend) {
-        return;
-      }
-
-      this._bindend = true;
-      const fake = (this._fake = new FakeNode(this.tag));
-
-      // 组件本体的撤销登记移交给 FakeNode，内容释放走区间
-      fake.__revokes = this.ele.__revokes;
-      this.before(fake);
-      fake.init();
-      this.remove();
-
-      // x-if 负责向后收集 else-if / else，组成条件链
-      if (this.tag === "x-if") {
-        const others = (this._others = []);
-
-        let next = fake;
-        while (true) {
-          next = next.nextElementSibling;
-
-          if (!next || next.tagName == "X-IF") {
-            // 又遇到 x-if 说明本链结束（后一个 if 是新链的头）
-            break;
-          }
-
-          switch (next.tagName) {
-            case "X-ELSE": {
-              const $el = eleX(next);
-              if ($el.init) {
-                $el.init();
-              } else {
-                $el._if_ready = 1;
-              }
-
-              others.push($el);
-              return;
-            }
-            case "X-ELSE-IF": {
-              const $el = eleX(next);
-
-              // else-if 的值变化委托给链头统一裁决
-              $el._xif = this;
-
-              others.push($el);
-              break;
-            }
-          }
-        }
-      }
+      refreshCondition(this);
     },
   },
   created() {
-    // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
-    // 此时 template[condition] 不存在，需要回退到自身内容
-    const conditionTemp = this.$("template[condition]");
-    this.__conditionTemp = conditionTemp ? conditionTemp.ele : null;
-    // 编译原件按 xt-src 标记取回（克隆携带属性但不携带 __xt 这类 JS 属性）
-    this.__conditionCompiled =
-      this.__conditionTemp
-        ? xtRegistry.get(this.__conditionTemp.getAttribute("xt-src"))
-        : null;
-    this.__originHTML = conditionTemp ? conditionTemp.html : this.html;
-    this.html = "";
-  },
-  ready() {
-    // 等待自身 :value 绑定生效后再初始化
-    if (this.ele._bindingRendered) {
-      this.init();
-    } else {
-      this.one("binding-rendered", () => this.init());
-    }
+    createdFunc.call(this);
   },
 };
 
 register$1({
-  tag: "x-if",
-  ...regOptions,
+  tag: "o-if",
+  ...conditionOptions,
 });
 
 register$1({
-  tag: "x-else-if",
-  ...regOptions,
-  watch: {
-    value() {
-      if (!this._bindend) {
-        return;
-      }
+  tag: "o-else-if",
+  ...conditionOptions,
+});
 
-      // else-if 自身不裁决，委托链头
-      if (this._xif) {
-        this._xif.refreshValue();
-      }
-    },
+register$1({
+  tag: "o-else",
+  temp: temp$1,
+  data: {
+    value: null,
+    __rendered: false,
   },
-});
-
-register$1({
-  tag: "x-else",
-  ...regOptions,
-  watch: {},
-  ready() {
-    // 被链头收集时（_if_ready）才自行初始化
-    if (this._if_ready) {
-      this.init();
-    }
+  created() {
+    createdFunc.call(this);
   },
 });
 
 /**
  * 从目标节点向上找最近的渲染宿主（带 __render_data 的节点），
- * 返回 { target, data, temps }；x-if/x-fill 的内容渲染数据来源于此。
+ * 返回 { target, data, temps }；o-if/o-fill 的内容渲染数据来源于此。
  */
 const getRenderData = (target) => {
   while (target && !target.__render_data) {
@@ -3865,291 +3661,243 @@ const getRenderData = (target) => {
 };
 
 /**
- * 列表渲染：x-fill。
+ * 列表渲染：o-fill（light DOM 版，唯一实现，列表项直接作为子元素渲染）。
  *
- * 首次渲染按模板整建列表项；之后 value 变化走基于 key 的对账：
- * 1. 计算新数组的 key 集合（fill-key 指定键名，默认 xid；基础类型项以
- *    自身为 key），预先删除已不存在的项；
- * 2. 从 FakeNode 区间头（_start 注释）向后走，逐位比对新旧序列：
- *    key 已存在 → 移位复用已有 DOM 并更新 $data/$index；
- *    key 不存在 → 现场创建插入；
- * 3. 收尾清理多余项，刷新宿主并派发 rendered 事件。
+ * 支持两种模板来源：`name` 属性引用宿主的命名模板；未声明 name 时使用
+ * 元素自身内容（编译期被 wrapTemp 包进 template[inner-code] 保护，首次
+ * 渲染时按需编译并全局缓存）。列表项数据上下文为 $data/$index/$host/
+ * $parent，与命名模板引用一致。
  *
- * 数据项内部变化（如 item.name 改了）不触发对账 —— 变更路径深度 > 1
- * 时由项内绑定自行修正（watchers 短路）；只有数组本身的增删或整体
- * 替换（路径深度 ≤ 1）才走对账。
+ * 更新采用基于 key 的对账（fill-key 或 xid 或引用）：存在则复用 DOM
+ * 并更新 $data/$index，缺失则删除，新增则插入。
  */
 
 register$1({
-  tag: "x-fill",
+  tag: "o-fill",
+  temp: `<style>:host{display:contents;}</style><slot></slot>`,
   data: {
     value: null,
   },
-  watch: {
-    value(value, t) {
-      this.refreshValue(t?.watchers);
-    },
-  },
   proto: {
-    refreshValue(watchers) {
-      const arrayData = this.value;
+    refreshView() {
+      const arr = this.value;
+      const tempName = this.attr("name");
 
-      if (!this._bindend) {
+      if (
+        !arr ||
+        !arr.length ||
+        (this.__oldTempName && this.__oldTempName !== tempName)
+      ) {
+        // 没有值或模板来源已切换，清空内容
+        Array.from(this.ele.childNodes).forEach((e) => {
+          revokeAll(e);
+          e.remove();
+        });
         return;
       }
 
-      const childs = this._fake.children;
+      if (!(arr instanceof Array)) {
+        // 非数组值：告警并清空（如字符串恰好带 length，不能当列表用）
+        console.warn(getErr$1("fill_type", { type: getType(arr) }));
 
-      if (!arrayData) {
-        childs.forEach((e) => revokeAll(e));
-        this._fake.innerHTML = "";
+        Array.from(this.ele.childNodes).forEach((e) => {
+          revokeAll(e);
+          e.remove();
+        });
         return;
       }
 
-      if (!(arrayData instanceof Array)) {
-        console.warn(
-          getErr$1("fill_type", {
-            type: getType(arrayData),
-          }),
-        );
-
-        childs &&
-          childs.forEach((el) => {
-            revokeAll(el);
-            el.remove();
-          });
-        return;
-      }
-
-      const regData = getRenderData(this._fake);
-
-      if (!regData) {
-        return;
-      }
-
-      const { data, temps } = regData;
-
-      const targetTemp = temps[this._name];
-
+      const { data, target, temps = {} } = getRenderData(this.ele);
 
       const keyName = this.attr("fill-key") || "xid";
 
-      if (!childs.length) {
-        // 首建：按模板逐项创建后一次性挂载
+      let targetTemp = temps[tempName];
+
+      if (!targetTemp) {
+        // 未声明 name 或找不到命名模板时，使用自身内容（编译缓存）
+        if (this.__originHTML) {
+          targetTemp = getCompiledContent(this.__originHTML);
+        } else {
+          throw new Error("o-fill - Template not found: " + tempName);
+        }
+      }
+
+      this.__oldTempName = tempName;
+
+      if (!this.length) {
+        // 首建：逐项创建后一次性挂载
         const frag = document.createDocumentFragment();
 
-        arrayData.forEach((e, i) => {
+        for (let i = 0, len = arr.length; i < len; i++) {
+          const item = arr[i];
+
           const $ele = createItem(
-            e,
+            item,
             temps,
             targetTemp,
             data.$host || data,
             i,
             keyName,
+            this._$parent,
           );
+
           frag.appendChild($ele.ele);
-        });
-
-        this._fake.appendChild(frag);
-      } else {
-        if (watchers) {
-          const isReplaced = watchers.some((e) => e.path.length <= 1);
-
-          if (!isReplaced) {
-            // 数据项内部的变化，由项内绑定自行修正，不走对账
-            return;
-          }
         }
 
-        const vals = arrayData.slice();
-        const valsKeys = new Set(
-          vals.map((e) => {
-            if (!e) {
-              return;
-            }
-
-            const val = e[keyName];
-            return val === undefined ? e : val;
-          }),
-        );
-
-        const { parentNode } = this._fake;
-
-        if (keyName !== "xid" && vals.length !== valsKeys.size) {
-          // 默认 xid 模式不校验（对象可能没有 xid，以对象自身为 key）
-          const err = getErr$1("fill_key_duplicates");
-          console.error(err);
-          console.warn(err, {
-            parentNode,
-            host: eleX(parentNode)?.host?.ele,
-          });
-        }
-
-        // 预删除已不存在的项（先删能让后续移位计算更简单）
-        const positionKeys = [];
-        for (let i = 0, len = childs.length; i < len; i++) {
-          const e = childs[i];
-          const key = e._data_xid || e;
-
-          if (!valsKeys.has(key)) {
-            revokeAll(e);
-            e.remove();
-            childs.splice(i, 1);
-            len--;
-            i--;
-          } else {
-            positionKeys.push(key);
-          }
-        }
-
-        // 从区间头开始逐位对账
-        let target = this._fake._start;
-
-        const needRemoves = [];
-
-        let count = 0;
-
-        while (target) {
-          if (target === this._fake) {
-            if (vals.length) {
-              // 已走到区间尾，剩余项全部追加到末尾
-              vals.forEach((item) => {
-                const $ele = createItem(
-                  item,
-                  temps,
-                  targetTemp,
-                  data.$host || data,
-                  count,
-                  keyName,
-                );
-
-                count++;
-
-                parentNode.insertBefore($ele.ele, target);
-              });
-            }
-            break;
-          }
-          if (!(target instanceof Element)) {
-            target = target.nextSibling;
-            continue;
-          }
-          const currentVal = vals.shift();
-          const isObj = currentVal instanceof Object;
-          const $tar = eleX(target);
-          const item = $tar.__item;
-
-          if (currentVal === undefined && !vals.length) {
-            // 新数组已耗尽，剩余旧项记录待删
-            needRemoves.push(target);
-            target = target.nextSibling;
-            continue;
-          }
-
-          const oldId = positionKeys.indexOf(
-            isObj ? currentVal[keyName] : currentVal,
-          );
-          if (oldId > -1) {
-            // key 已存在：把对应旧项移位过来并更新绑定数据
-            const oldItem = childs[oldId];
-            if (
-              isObj
-                ? currentVal[keyName] !== item.$data[keyName]
-                : currentVal !== item.$data
-            ) {
-              oldItem.__internal = 1;
-              parentNode.insertBefore(oldItem, target);
-              delete oldItem.__internal;
-              target = oldItem;
-            }
-
-            // 复用 DOM，仅换绑数据与索引
-            const $old = eleX(oldItem);
-            if ($old.__item.$data !== currentVal) {
-              $old.__item.$data = currentVal;
-            }
-            $old.__item.$index = count;
-          } else {
-            // 新项：现场创建插入
-            const $ele = createItem(
-              currentVal,
-              temps,
-              targetTemp,
-              data.$host || data,
-              count,
-              keyName,
-            );
-
-            parentNode.insertBefore($ele.ele, target);
-            target = $ele.ele;
-          }
-
-          count++;
-          target = target.nextSibling;
-        }
-
-        if (needRemoves.length) {
-          needRemoves.forEach((e) => {
-            revokeAll(e);
-            e.remove();
-          });
-        }
-      }
-
-      if (this._fake.parentNode) {
-        eleX(this._fake.parentNode).refresh();
-      }
-
-      this.emit("rendered", {
-        bubbles: false,
-      });
-    },
-    init() {
-      if (this._bindend) {
+        this.ele.appendChild(frag);
         return;
       }
 
-      this._bindend = true;
-      const fake = (this._fake = new FakeNode("x-fill"));
+      // 对账 key：fill-key → xid → "索引-引用" 兜底
+      const getKeyVal = (e, i) => {
+        const key = e[keyName];
 
-      // 组件本体的撤销登记移交给 FakeNode，内容释放走区间
-      fake.__revokes = this.ele.__revokes;
+        if (key === undefined || key === null) {
+          if (e.xid) {
+            return e.xid;
+          }
 
-      this.before(fake);
-      fake.init();
-      this.remove();
+          return `${i}-${e}`;
+        }
 
-      this.refreshValue();
+        return key;
+      };
+
+      const keyValsArr = arr.map(getKeyVal);
+
+      const tempChildren = Array.from(this.ele.children);
+
+      // 先删除已不存在的项
+      for (let i = 0; i < tempChildren.length; i++) {
+        const e = tempChildren[i];
+        const renderedItem = e.__render_data;
+
+        const currentKeyVal = getKeyVal(renderedItem.$data, i);
+
+        // 不存在的 id，需要删除
+        if (!keyValsArr.includes(currentKeyVal)) {
+          e.remove();
+          revokeAll(e);
+        }
+      }
+
+      const { children } = this.ele;
+
+      let keyVals = [];
+      const refreshKeyVals = () => {
+        keyVals = Array.from(children).map((e, i) =>
+          getKeyVal(e.__render_data.$data, i),
+        );
+      };
+      refreshKeyVals();
+
+      const selfEl = this.ele;
+
+      // 逐位对账：复用则移位并更新数据，缺失则新建插入
+      for (let i = 0, len = arr.length; i < len; i++) {
+        const item = arr[i];
+        const keyVal = getKeyVal(item, i);
+
+        const index = keyVals.indexOf(keyVal);
+
+        if (index > -1) {
+          const $ele = eleX(children[index]);
+
+          if (children[i] !== $ele.ele) {
+            selfEl.insertBefore($ele.ele, children[i]);
+            refreshKeyVals();
+          }
+
+          if ($ele.__item.$data !== item) {
+            $ele.__item.$data = item;
+          }
+          if ($ele.__item.$index !== i) {
+            $ele.__item.$index = i;
+          }
+        } else {
+          const $ele = createItem(
+            item,
+            temps,
+            targetTemp,
+            data.$host || data,
+            i,
+            keyName,
+            this._$parent,
+          );
+
+          selfEl.insertBefore($ele.ele, children[i]);
+          refreshKeyVals();
+        }
+      }
+
+      // 列表变更后唤醒父级监听（shadow 级订阅如 formData 依赖此约定）
+      const { parentNode } = selfEl;
+      if (parentNode) {
+        eleX(parentNode).refresh();
+      }
     },
   },
   ready() {
-    this._name = this.attr("name");
-
-    if (!this._name) {
-      const err = getErr$1("xhear_fill_tempname", { name: this._name });
-      console.warn(err, this.ele);
-      throw err;
+    this.watchTick((e) => {
+      if (e.hasModified("value")) {
+        this.refreshView();
+      }
+    });
+  },
+  attached() {
+    if (this.value) {
+      this.refreshView();
     }
+  },
+  created() {
+    let originHTML = "";
 
-    // 等待自身 :value 绑定生效后再初始化
-    if (this.ele._bindingRendered) {
-      this.init();
+    const firstEle = this[0];
+    if (firstEle && firstEle.is("template[inner-code]")) {
+      originHTML = firstEle.html.trim();
     } else {
-      this.one("binding-rendered", () => this.init());
+      originHTML = this.html.trim();
     }
+
+    // 多根检测：直接数 template.content 的根节点——template 内容不受解析器
+    // 位置限制，tr/option 等受限位置的内容原样保留。不能套 div 探测：解析器
+    // 会把 div 里的 tr 整体丢弃、只留下浮的注释标记，造成"多根"误判
+    const probeTemp = document.createElement("template");
+    probeTemp.innerHTML = originHTML;
+    const probeContent = probeTemp.content;
+
+    const rootCount = probeContent.children.length;
+    const hasStrayText = Array.from(probeContent.childNodes).some(
+      (node) => node.nodeType === 3 && node.textContent.trim(),
+    );
+
+    if (rootCount > 1 || (rootCount === 0 && hasStrayText)) {
+      // 多根时包一层 display:contents 的容器，保证列表项为单根
+      // （注意：多根的表格行内容无法用 div 包裹，需在模板里自行包一层）
+      const err = getErr$1("temp_multi_child");
+      console.warn(err, this.ele, {
+        content: this.html.trim(),
+      });
+
+      originHTML = `<div style="display: contents;">${originHTML}</div>`;
+    }
+
+    this.__originHTML = originHTML;
+
+    this.html = "";
   },
 });
 
 /**
- * 为 x-fill 渲染创建列表项元素。
+ * 为 o-fill 渲染创建列表项元素。
  *
  * @param {Object} $data - 列表项的数据对象
  * @param {Object} temps - 宿主可用的全部命名模板
  * @param {HTMLTemplateElement} targetTemp - 本列表项使用的模板
- * @param {Object} $host - 宿主数据（x-fill 所在组件实例），$host 供模板引用
+ * @param {Object} $host - 宿主数据（o-fill 所在组件实例），$host 供模板引用
  * @param {number} $index - 列表项索引
  * @param {string} keyName - 对账键名
- * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由 ofa 传入）
+ * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由外部传入）
  * @returns {Object} 列表项的 Xhear 实例（__item 上挂绑定数据）
  */
 const createItem = (
@@ -4161,7 +3909,7 @@ const createItem = (
   keyName,
   $parent,
 ) => {
-  // 编译过的模板走克隆 + 描述符绑定（旧版每项 innerHTML 解析已废）
+  // 编译过的模板走克隆 + 描述符绑定（每项 innerHTML 解析已废）
   const binders = targetTemp && targetTemp.__xt;
   let $ele;
   let bindRoot;
@@ -4186,7 +3934,7 @@ const createItem = (
   });
 
   // $ele 若成为 item 的子属性，其内自定义组件的改动会反向冒泡，
-  // 导致 x-fill 内元素不停重渲染的死循环；故 $ele 只读且不入观察
+  // 导致列表内元素不停重渲染的死循环；故 $ele 只读且不入观察
   Object.defineProperties(itemData, {
     $ele: {
       get() {
@@ -4660,8 +4408,8 @@ const createXEle = (expr) => {
  * 深度释放一个节点树上的全部渲染副作用（监听、数据绑定、watch 订阅）。
  *
  * 约定：render 过程把每个副作用的撤销函数登记在宿主节点的 __revokes
- * 数组上（FakeNode/组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
- * x-if 清空内容、x-fill 删项、组件销毁都依赖这个统一出口。
+ * 数组上（组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
+ * o-if 清空内容、o-fill 删项、组件销毁都依赖这个统一出口。
  */
 const revokeAll = (target) => {
   if (target.__revokes) {
@@ -4778,7 +4526,7 @@ const getErr = (key, options, cause) =>
  *
  * 组件内放置 link[rel=stylesheet] 或 style，inject-host 会将它们提升到
  * 宿主根（document.head 或 shadowRoot），按内容 hash 去重共享，并在
- * 元素移除时自动回收；x-if/x-fill 等渲染型组件不参与处理。
+ * 元素移除时自动回收；o-if/o-fill 等渲染型组件不参与处理。
  */
 
 $.register({
@@ -4806,10 +4554,10 @@ $.register({
         case "style":
           this._initStyle(e);
           break;
-        case "x-if":
-        case "x-else-if":
-        case "x-else":
-        case "x-fill":
+        case "o-if":
+        case "o-else-if":
+        case "o-else":
+        case "o-fill":
           // Components of a rendered nature do not need to be alerted
           break;
         default:
@@ -7413,7 +7161,7 @@ const consumers = {}; // 存储所有的consumer元素
 // 根provider
 const rootProviders = {};
 
-const temp$1 = `<style>:host{display:contents}</style><slot></slot>`;
+const temp = `<style>:host{display:contents}</style><slot></slot>`;
 
 Object.defineProperty($, "getRootProvider", {
   value(name) {
@@ -7587,7 +7335,7 @@ const removeConsumer = ($ele) => {
 
 $.register({
   tag: "o-provider",
-  temp: temp$1,
+  temp,
   attrs: {
     name: null,
   },
@@ -7608,7 +7356,7 @@ $.register({
 
 $.register({
   tag: "o-consumer",
-  temp: temp$1,
+  temp,
   attrs: {
     name: null,
   },
@@ -7925,474 +7673,11 @@ function supportsContainerStyleQueries() {
 }
 
 /**
- * o-if / o-else-if / o-else：条件渲染（light DOM 版，内容直接作为子元素
- * 渲染，配合 :host{display:contents} 与 slot 无额外层级）。
- *
- * 与 x-if 的差异：内容在编译期被 wrapTemp 包进 template[inner-code] 保护
- * （不参与宿主模板的编译），首次渲染时才按需编译并对当前渲染数据绑定，
- * 编译结果全局缓存——同一份内容跨实例只编译一次。
- */
-
-// 条件内容编译缓存：innerHTML 原文 → 编译模板
-const compiledContents$1 = new Map();
-
-/** 按内容原文取编译模板（跨实例共享，编译一次） */
-const getCompiledContent$1 = (html) => {
-  let compiled = compiledContents$1.get(html);
-
-  if (!compiled) {
-    compiled = document.createElement("template");
-    compiled.innerHTML = html;
-    compileTemplate(compiled);
-    compiledContents$1.set(html, compiled);
-  }
-
-  return compiled;
-};
-
-const refreshCondition = (conditionEl) => {
-  const conditionEls = [conditionEl];
-
-  // 收集同链的兄弟条件元素
-  if (conditionEl.tag === "o-if") {
-    conditionEls.push(...getNexts(conditionEl.next));
-  } else if (conditionEl.tag === "o-else-if") {
-    conditionEls.push(...getNexts(conditionEl.next));
-    conditionEls.unshift(...getPrevs(conditionEl.prev));
-  }
-
-  // 一条链只在首个 o-if 上做合并刷新
-  const firstEl = conditionEls[0];
-  if (firstEl.tag === "o-if") {
-    clearTimeout(firstEl.__refreshTimer);
-    firstEl.__refreshTimer = setTimeout(() => {
-      // 按顺序找到第一个成立的条件；o-else 兜底
-      let targetCondition = null;
-      for (let i = 0; i < conditionEls.length; i++) {
-        const el = conditionEls[i];
-        if (el.tag === "o-if" || el.tag === "o-else-if") {
-          if (el.value) {
-            targetCondition = el;
-            break;
-          }
-        } else {
-          targetCondition = el;
-        }
-      }
-
-      if (targetCondition) {
-        renderContent(targetCondition);
-        targetCondition.attr("actived", "");
-      }
-
-      // 其余分支清空内容
-      conditionEls.forEach((el) => {
-        if (el !== targetCondition) {
-          el.attr("actived", null);
-          clearContent(el);
-        }
-      });
-    }, 0);
-  } else {
-    console.error("o-if must be the first element", conditionEls);
-  }
-};
-
-// 渲染分支内容：按需编译 + 克隆绑定（渲染期零解析零编译）
-const renderContent = (conditionEl) => {
-  if (conditionEl.__rendered) {
-    return;
-  }
-
-  const result = getRenderData(conditionEl.ele);
-
-  if (!result) {
-    return;
-  }
-
-  const { target, data, temps } = result;
-
-  render({
-    target: conditionEl.ele,
-    data,
-    temps,
-    template: getCompiledContent$1(conditionEl.__originHTML),
-  });
-
-  conditionEl.__rendered = true;
-
-  conditionEl.emit("rendered", {
-    bubbles: false,
-  });
-};
-
-// 清空分支内容
-const clearContent = (conditionEl) => {
-  if (!conditionEl.__rendered) {
-    return;
-  }
-
-  conditionEl.ele.childNodes?.forEach((el) => revokeAll(el));
-
-  conditionEl.html = "";
-
-  conditionEl.__rendered = false;
-};
-
-// 获取后方兄弟条件元素（到 o-else 为止）
-const getNexts = (next) => {
-  const nexts = [];
-  while (next && (next.tag === "o-else-if" || next.tag === "o-else")) {
-    nexts.push(next);
-    if (next.tag === "o-else") {
-      break;
-    }
-    next = next.next;
-  }
-  return nexts;
-};
-
-// 获取前方兄弟条件元素（到 o-if 为止）
-const getPrevs = (prev) => {
-  const prevs = [];
-  while (prev && (prev.tag === "o-if" || prev.tag === "o-else-if")) {
-    prevs.unshift(prev);
-    if (prev.tag === "o-if") {
-      break;
-    }
-    prev = prev.prev;
-  }
-  return prevs;
-};
-
-const createdFunc = function () {
-  // 元素可能先于子内容构造（如 createElement 或第三方库 cloneNode），
-  // 此时首个子元素不存在，需要回退到自身内容
-  const firstEle = this[0];
-  if (firstEle && firstEle.is("template[inner-code]")) {
-    this.__originHTML = firstEle.html.trim();
-  } else {
-    this.__originHTML = this.html.trim();
-  }
-  this.html = "";
-};
-
-const temp = `<style>:host{display:contents;}</style><slot></slot>`;
-
-const conditionOptions = {
-  temp,
-  data: {
-    value: null,
-  },
-  watch: {
-    value() {
-      refreshCondition(this);
-    },
-  },
-  created() {
-    createdFunc.call(this);
-  },
-};
-
-$.register({
-  tag: "o-if",
-  ...conditionOptions,
-});
-
-$.register({
-  tag: "o-else-if",
-  ...conditionOptions,
-});
-
-$.register({
-  tag: "o-else",
-  temp,
-  created() {
-    createdFunc.call(this);
-  },
-});
-
-/**
- * o-fill：列表渲染（light DOM 版，列表项直接作为子元素渲染）。
- *
- * 支持两种模板来源：`name` 属性引用宿主的命名模板；未声明 name 时使用
- * 元素自身内容（编译期被 wrapTemp 包进 template[inner-code] 保护，首次
- * 渲染时按需编译并全局缓存）。列表项数据上下文为 $data/$index/$host/
- * $parent，与 x-fill 一致。
- *
- * 更新采用基于 key 的对账（fill-key 或 xid 或引用）：存在则复用 DOM
- * 并更新 $data/$index，缺失则删除，新增则插入。
- */
-
-// 内容编译缓存：innerHTML 原文 → 编译模板（与 o-if 共享策略）
-const compiledContents = new Map();
-
-/** 按内容原文取编译模板（多子元素时包一层 display:contents 的 div） */
-const getCompiledContent = (html) => {
-  let compiled = compiledContents.get(html);
-
-  if (!compiled) {
-    compiled = document.createElement("template");
-    compiled.innerHTML = html;
-    compileTemplate(compiled);
-    compiledContents.set(html, compiled);
-  }
-
-  return compiled;
-};
-
-$.register({
-  tag: "o-fill",
-  temp: `<style>:host{display:contents;}</style><slot></slot>`,
-  data: {
-    value: null,
-  },
-  proto: {
-    refreshView() {
-      const arr = this.value;
-      const tempName = this.attr("name");
-      console.debug("[xt-ofill]", "enter", "len=" + (arr ? arr.length : arr), "childs=" + this.ele.children.length);
-
-      if (
-        !arr ||
-        !arr.length ||
-        (this.__oldTempName && this.__oldTempName !== tempName)
-      ) {
-        // 没有值或模板来源已切换，清空内容
-        Array.from(this.ele.childNodes).forEach((e) => {
-          revokeAll(e);
-          e.remove();
-        });
-        return;
-      }
-
-      const { data, target, temps = {} } = getRenderData(this.ele);
-
-      const keyName = this.attr("fill-key") || "xid";
-
-      let targetTemp = temps[tempName];
-
-      if (!targetTemp) {
-        // 未声明 name 或找不到命名模板时，使用自身内容（编译缓存）
-        if (this.__originHTML) {
-          targetTemp = getCompiledContent(this.__originHTML);
-        } else {
-          throw new Error("o-fill - Template not found: " + tempName);
-        }
-      }
-
-      this.__oldTempName = tempName;
-
-      if (!this.length) {
-        // 首建：逐项创建后一次性挂载
-        const frag = document.createDocumentFragment();
-
-        for (let i = 0, len = arr.length; i < len; i++) {
-          const item = arr[i];
-
-          const $ele = createItem(
-            item,
-            temps,
-            targetTemp,
-            data.$host || data,
-            i,
-            keyName,
-            this._$parent,
-          );
-
-          frag.appendChild($ele.ele);
-        }
-
-        this.ele.appendChild(frag);
-        return;
-      }
-
-      // 对账 key：fill-key → xid → "索引-引用" 兜底
-      const getKeyVal = (e, i) => {
-        const key = e[keyName];
-
-        if (key === undefined || key === null) {
-          if (e.xid) {
-            return e.xid;
-          }
-
-          return `${i}-${e}`;
-        }
-
-        return key;
-      };
-
-      const keyValsArr = arr.map(getKeyVal);
-
-      const tempChildren = Array.from(this.ele.children);
-
-      // 先删除已不存在的项
-      for (let i = 0; i < tempChildren.length; i++) {
-        const e = tempChildren[i];
-        const renderedItem = e.__render_data;
-
-        const currentKeyVal = getKeyVal(renderedItem.$data, i);
-
-        if (!keyValsArr.includes(currentKeyVal)) {
-          e.remove();
-          revokeAll(e);
-        }
-      }
-
-      const { children } = this.ele;
-
-      let keyVals = [];
-      const refreshKeyVals = () => {
-        keyVals = Array.from(children).map((e, i) =>
-          getKeyVal(e.__render_data.$data, i),
-        );
-      };
-      refreshKeyVals();
-
-      const selfEl = this.ele;
-
-      // 逐位对账：复用则移位并更新数据，缺失则新建插入
-      try {
-      for (let i = 0, len = arr.length; i < len; i++) {
-        const item = arr[i];
-        const keyVal = getKeyVal(item, i);
-
-        const index = keyVals.indexOf(keyVal);
-
-        if (index > -1) {
-          const $ele = eleX(children[index]);
-
-          if (children[i] !== $ele.ele) {
-            selfEl.insertBefore($ele.ele, children[i]);
-            refreshKeyVals();
-          }
-
-          if ($ele.__item.$data !== item) {
-            $ele.__item.$data = item;
-          }
-          if ($ele.__item.$index !== i) {
-            $ele.__item.$index = i;
-          }
-        } else {
-          const $ele = createItem(
-            item,
-            temps,
-            targetTemp,
-            data.$host || data,
-            i,
-            keyName,
-            this._$parent,
-          );
-
-          selfEl.insertBefore($ele.ele, children[i]);
-          refreshKeyVals();
-        }
-      }
-      } catch (e) {
-        console.error("[xt-ofill-err]", String(e), e.stack.split("\n")[1]);
-      }
-    },
-  },
-  ready() {
-    this.watchTick((e) => {
-      if (e.hasModified("value")) {
-        this.refreshView();
-      }
-    });
-  },
-  attached() {
-    if (this.value) {
-      this.refreshView();
-    }
-  },
-  created() {
-    let originHTML = "";
-
-    const firstEle = this[0];
-    if (firstEle && firstEle.is("template[inner-code]")) {
-      originHTML = firstEle.html.trim();
-    } else {
-      originHTML = this.html.trim();
-    }
-
-    // 多子元素时包一层 display:contents 的容器，保证列表项为单根
-    const temp = $(`<template><div>${originHTML}</div></template>`);
-    const tempContent = temp.ele.content.children[0];
-
-    if (
-      tempContent.children.length > 1 ||
-      (tempContent.children.length === 0 && tempContent.innerHTML.trim())
-    ) {
-      const err = getErr("temp_multi_child");
-      console.warn(err, this.ele, {
-        content: this.html.trim(),
-      });
-
-      originHTML = `<div style="display: contents;">${originHTML}</div>`;
-    }
-
-    this.__originHTML = originHTML;
-
-    this.html = "";
-  },
-});
-
-// ---- 编译期内容保护 ----
-
-// 修正转换前的内容：给 o-fill / 条件组件的外部包一层 template[inner-code]
-const oldAfterConvert = renderExtends.afterConvert;
-renderExtends.afterConvert = (e) => {
-  oldAfterConvert(e);
-  const { template, temps } = e;
-  wrapTemp(template);
-  Object.values(temps).forEach((temp) => wrapTemp(temp));
-};
-
-const needWrapTags = ["o-fill", "o-if", "o-else-if", "o-else"];
-
-/**
- * 把 o-fill/条件组件的内容包进 template[inner-code]，防止宿主编译时
- * 提前消费其中的指令（它们应在分支渲染时才绑定渲染数据）；同时解开
- * 既有 inner-code 的嵌套，避免重复包裹导致渲染失败。
- */
-const wrapTemp = (template) => {
-  const eles = Array.from(
-    template.content.querySelectorAll(needWrapTags.join(",")),
-  );
-
-  eles.forEach((e) => {
-    while (true) {
-      const innerCodeTempEl = e.querySelector("template[inner-code]");
-
-      if (!innerCodeTempEl) {
-        break;
-      }
-
-      // 解开已有的 inner-code 包裹
-      const childs = innerCodeTempEl.content.childNodes;
-
-      childs.forEach((child) => {
-        innerCodeTempEl.parentNode.insertBefore(
-          child.cloneNode(true),
-          innerCodeTempEl,
-        );
-      });
-
-      innerCodeTempEl.remove();
-    }
-
-    const originCode = e.innerHTML;
-    e.innerHTML = `<template inner-code>${originCode}</template>`;
-    wrapTemp(e.children[0]);
-  });
-};
-
-/**
  * ofa.js 入口：在 xhear 之上补齐应用层能力。
  *
  * - 组件/页面模块系统（组件即 HTML 文件，浏览器直接运行，无构建）
  * - o-page / o-app 页面路由（嵌套路由、前进后退、页面动画）
- * - o-if / o-fill 模板语法（light DOM 条件与列表渲染）
+ * - o-if / o-fill 模板语法（实现已下沉 xhear）
  * - o-provider / o-consumer 上下文通信
  * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
  */

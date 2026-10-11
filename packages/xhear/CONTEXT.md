@@ -4,8 +4,10 @@
 
 Web Components 库：把任意 DOM 元素包装成"数据即元素"的代理实例（xhear =
 stanz 观察语义 + DOM 数组操作），并在此之上提供整套响应式模板渲染语法
-（`{{}}`、`:prop`、`attr:`、`class:`、`on:`、`sync:`、`watch:`、`x-if`、
-`x-fill`、`style` 内 `data()`），是 ofa.js 组件系统的底座。
+（`{{}}`、`:prop`、`attr:`、`class:`、`on:`、`sync:`、`watch:`、`o-if`、
+`o-fill`、`style` 内 `data()`），是 ofa.js 组件系统的底座。
+v9 起条件/列表渲染统一为 o- 系（o-if/o-else-if/o-else/o-fill，light DOM），
+x- 系元素移除、出现即控制台报弃用错（deprecated.mjs），实现由 ofajs 下沉合并。
 
 ## 二、技术栈
 
@@ -19,7 +21,7 @@ stanz 观察语义 + DOM 数组操作），并在此之上提供整套响应式�
 packages/xhear/
 ├── AGENTS.md              开发规则（扩展缝、渲染契约、事故案例）
 ├── CONTEXT.md             本文件
-├── package.json           name: xhear, version: 8.0.0, exports ./src/base.mjs
+├── package.json           name: xhear, version: 9.0.0, exports ./src/base.mjs
 ├── src/
 │   ├── base.mjs           入口：组装 $ 对象（stanz/register/render/fn/all/frag…）
 │   ├── dollar.mjs         $ 函数本体 + $.extensions 容器
@@ -35,14 +37,15 @@ packages/xhear/
 │   ├── error.mjs          XhearError + 本地错误码表（替代已废弃的 ofa-error）
 │   ├── util.mjs           eleX/createXEle/revokeAll
 │   ├── register.mjs       $.register 组件注册（attrs 反射/watch/生命周期）
+│   ├── deprecated.mjs     x-if/x-else-if/x-else/x-fill 弃用 stub + 报错（v9 移除）
 │   └── render/
 │       ├── expr.mjs       表达式编译（with(data) 注入作用域，$event 可用）
 │       ├── compile.mjs    模板编译（binder 描述符 + markers 共享映射，见文件头注释）
 │       ├── render.mjs     渲染编排 + renderExtends 钩子 + prop/attr/class/watch 动作
-│       ├── condition.mjs  x-if / x-else-if / x-else 条件链
-│       ├── fill.mjs       x-fill 列表渲染（fill-key 对账 + $data/$index/$host）
-│       ├── sync.mjs       sync: 双向同步动作
-│       └── fake-node.mjs  FakeNode 注释区间容器 + replace-temp 兼容层
+│       ├── condition.mjs  o-if / o-else-if / o-else 条件链（light DOM）
+│       ├── fill.mjs       o-fill 列表渲染（fill-key 对账 + $data/$index/$host）
+│       ├── inner-code.mjs o-if/o-fill 内容保护层（inner-code 包裹 + 编译缓存）
+│       └── sync.mjs       sync: 双向同步动作
 └── test/
     ├── statics/           15 个自检页（harness.mjs 零依赖渲染检查项）
     └── xhear.spec.js      断言每页 N/N 通过（含每页 total 契约）
@@ -76,9 +79,9 @@ packages/xhear/
 | `sync:prop="data.path"` | 元素属性 ↔ 渲染数据 双向同步（对象值禁止） |
 | `watch:prop="data.path"` | 元素自身 prop → 渲染数据路径 单向拷贝 |
 | `data(expr)`（style 内） | 样式值监视重渲染，`@media` 内可用；同一表达式可多处出现（如 min-width 与 width 同式），刷新逐处替换 |
-| `<x-if :value>` / `<x-else-if>` / `<x-else>` | 条件链；`rendered`/`clear` 事件 |
-| `<x-fill :value name fill-key>` | 列表渲染；项内 `$data`/`$index`/`$host`/`$parent`/`$ele` |
-| `<template name>` | 命名模板（编译期摘除，供 x-fill 引用） |
+| `<o-if :value>` / `<o-else-if>` / `<o-else>` | 条件链（light DOM，元素驻留 + display:contents）；`rendered`/`clear` 事件。**x-if/x-else-if/x-else 已在 v9 移除**，出现即控制台报错 |
+| `<o-fill :value name fill-key>` | 列表渲染；项内 `$data`/`$index`/`$host`/`$parent`/`$ele`。**x-fill 已在 v9 移除**，出现即控制台报错 |
+| `<template name>` | 命名模板（编译期摘除，供 o-fill 引用） |
 | `<template is="replace-temp">` | table/select 等解析受限位置的模板落位方案 |
 
 ### 渲染管线（编译一次、实例化万次）
@@ -89,7 +92,7 @@ register: temp 字符串 → compile 纯 DOM 编译一次
 实例期  ：content.cloneNode(true)（零解析）+ 按路径直取节点（零扫描）
           + 表达式经 call 注入实例上下文（零重编译）
         → always 动作登记为任务，watchTick 防抖批量重跑（增量更新）
-        → binding-rendered 握手 → x-if/x-fill init（条件模板经 xt-src
+        → binding-rendered 握手 → o-if/o-fill 初始化（内容经 inner-code 保护）
           注册表取回编译原件，实例克隆不携带 JS 属性）
 销毁  ：revokeAll 沿 __revokes 撤销全部副作用（watch/事件/任务/数据引用）
 ```
@@ -223,3 +226,27 @@ DOM 还没刷新。
 
 **正确姿势**：回写用 `replaceAll`（compile/render 两处 renderStyle 已改）；
 misc.html 的 style-data 用例覆盖此形状（@media 条件 + 同式 width）。
+
+### 递归编译必须跳过 template[inner-code]（嵌套条件/列表静默失活的元凶）
+
+**症状**：o-if 内 o-fill、项内再嵌 o-if 的场景，内层指令（`:value` 等）
+全部失效、元素裸渲染。
+
+**根因**：o-if 的 origin 字符串天然包含 o-fill 的 `<template inner-code>`
+包装；getCompiledContent 解析该字符串后，compileTemplate 第 4 步的递归
+编译把字符串里自带的 inner-code 模板也编译了——extractDirectives 把其中
+属性剥进一个无人消费的描述符，内容静默失活。宿主编译自己 wrap 出来的
+inner-code 没事（wrapTemp 在递归之后），只有"从 origin 字符串再解析出来"
+的才会踩中。
+
+**正确姿势**：递归编译用 `template:not([inner-code])` 选择器跳过；新增
+"从字符串重新解析"的路径时必须复查这一条。
+
+### 移植渲染组件时对照旧实现的"隐式副作用清单"
+
+o-if/o-fill 从 ofajs 下沉 xhear 时丢了三个旧 x-*/o-* 代码里的隐式契约，
+全部由测试抓出：① clearContent 忘了 emit("clear")（rendered/clear 事件
+计数用例）；② 内容变更后 `eleX(parentNode).refresh()` 唤醒 shadow 级
+监听（formData 随条件显隐用例）；③ o-fill 缺非数组值守卫（fill_type
+告警用例）。**教训：移植渲染管线时先列旧代码的隐式副作用清单，逐条
+确认新代码仍满足。**

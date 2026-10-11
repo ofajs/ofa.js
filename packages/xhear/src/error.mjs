@@ -43,23 +43,10 @@ const errorDescs = {
     "Error in registering component {tag}, custom data cannot have data of type 'Set' or 'Map'",
   xhear_regster_data_nofunc:
     "Registration component {tag} error, functions cannot appear in custom data, please put the function in 'proto'; or change '{key}' to '_{key}'",
-  xhear_fakenode_unclose:
-    "This is an unclosed FakeNode; use the wrong attribute name: {name}",
-  xhear_fill_tempname: "Fill component template '{name}' not found",
-  xhear_dbfill_noname:
-    "Only fill components with the 'name' attribute can be rendered in the fill component",
-  xhear_temp_exist: "Template '{name}' already exists",
   temp_multi_child:
-    "The template element can only contain one child element. If multiple child elements appear, the child elements will be repackaged in a <div> element",
-  temp_wrap_child:
-    "The template '{tempName}' contains {len} child elements, which have been wrapped in a div element with the attribute '{wrapName}'.",
+    "The template has multiple root elements; they have been wrapped in a display:contents container. It is recommended to wrap them manually",
   fill_type:
-    "'value' of 'x-fill' must be of type Array, the current value is of type {type}",
-  fill_key_duplicates: "The key in the fill component is repeated",
-  xhear_sync_no_options:
-    "Direct use of the 'sync' method is not allowed, it is only used for template rendering",
-  xhear_sync_object_value:
-    "Cannot use 'sync' to synchronize values of Object type, target {targetName}",
+    "'value' of 'o-fill' must be of type Array, the current value is of type {type}",
 };
 
 /** 按错误码 + 占位符生成描述文本（未知码原样提示去查表） */

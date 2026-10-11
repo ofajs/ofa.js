@@ -21,8 +21,8 @@
         tag: "temp-mech-demo",
         temp: `
         <div id="named">
-          <x-fill name="item" :value="arr">
-          </x-fill>
+          <o-fill name="item" :value="arr">
+          </o-fill>
         </div>
 
         <template name="item">
@@ -30,13 +30,13 @@
         </template>
 
         <div id="anon">
-          <x-fill :value="arr">
+          <o-fill :value="arr">
             <b class="anon-item">{{$data.val}}</b>
-          </x-fill>
+          </o-fill>
         </div>
 
         <div id="multi-child">
-          <x-fill name="multi" :value="arr"></x-fill>
+          <o-fill name="multi" :value="arr"></o-fill>
         </div>
 
         <template name="multi">
@@ -45,9 +45,9 @@
         </template>
 
         <div id="code-in-if">
-          <x-if :value="showCode">
+          <o-if :value="showCode">
             <code id="protected-code">&lt;div&gt;{{val}}&lt;/div&gt;</code>
-          </x-if>
+          </o-if>
         </div>
         `,
         data: {
@@ -60,7 +60,7 @@
       const $demo = $("temp-mech-demo");
       const $shadow = $demo.shadow;
 
-      test("命名模板被 x-fill 引用 / named template referenced by x-fill", async () => {
+      test("命名模板被 o-fill 引用 / named template referenced by o-fill", async () => {
         await waitFor(() => $shadow.all(".named-item").length === 2);
         // 命名模板从文档树摘除，不应直接出现在渲染结果里
         assertEqual(
@@ -70,7 +70,7 @@
         );
       });
 
-      test("匿名 x-fill 自动包装模板 / anonymous x-fill auto-wraps", async () => {
+      test("匿名 o-fill 自动包装模板 / anonymous o-fill auto-wraps", async () => {
         await waitFor(() => $shadow.all(".anon-item").length === 2);
         assertEqual($shadow.all(".anon-item").map((e) => e.text).join(","), "1,2");
       });
@@ -81,7 +81,7 @@
       });
 
       test("条件内容里的 code 受保护 / code inside condition is protected", async () => {
-        // code 在 x-if 内容中：内容既不被编译，也不因嵌套编译丢失
+        // code 在 o-if 内容中：内容既不被编译，也不因嵌套编译丢失
         await waitFor(() => !!$shadow.$("#protected-code"));
         assertEqual(
           $shadow.$("#protected-code").text.replace(/\s+/g, "").trim(),

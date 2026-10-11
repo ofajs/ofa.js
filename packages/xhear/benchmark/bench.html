@@ -29,7 +29,7 @@
     </table>
 
     <script type="module">
-      // xhear 两版都注册 x-if/x-fill 等自定义元素，同页必冲突，
+      // xhear 两版都注册 o-if/o-fill 等自定义元素，同页必冲突，
       // 与 drill 一样按 ?v=old|new 分页驱动；跑器对每个场景单独开页
       // （?only=），并让新旧紧挨着采集，消除机器热漂移的先后偏差。
       const params = new URLSearchParams(location.search);
@@ -185,11 +185,11 @@
         },
         {
           id: "fill-build",
-          label: "500 项 x-fill 初建 ×20 / build 500-item fill ×20",
+          label: "500 项 o-fill 初建 ×20 / build 500-item fill ×20",
           run: async () => {
             $.register({
               tag: `bench-fill-${version}`,
-              temp: `<x-fill :value="items"><div class="it">{{$index}}:{{$data.val}}</div></x-fill>`,
+              temp: `<o-fill :value="items"><div class="it">{{$index}}:{{$data.val}}</div></o-fill>`,
               data: { items: null },
             });
 
@@ -226,7 +226,7 @@
           run: async () => {
             $.register({
               tag: `bench-fill-rm-${version}`,
-              temp: `<x-fill :value="items"><div class="it" attr:data-kid="$data.id">{{$index}}:{{$data.val}}</div></x-fill>`,
+              temp: `<o-fill :value="items"><div class="it" attr:data-kid="$data.id">{{$index}}:{{$data.val}}</div></o-fill>`,
               data: { items: null },
             });
             const host = $(document.createElement(`bench-fill-rm-${version}`));
@@ -258,7 +258,7 @@
           run: async () => {
             $.register({
               tag: `bench-fill-rev-${version}`,
-              temp: `<x-fill :value="items" fill-key="id"><div class="it" attr:data-kid="$data.id">{{$data.val}}</div></x-fill>`,
+              temp: `<o-fill :value="items" fill-key="id"><div class="it" attr:data-kid="$data.id">{{$data.val}}</div></o-fill>`,
               data: { items: null },
             });
             const host = $(document.createElement(`bench-fill-rev-${version}`));
@@ -288,8 +288,8 @@
             $.register({
               tag: `bench-if-${version}`,
               temp: `
-              <x-if :value="show"><div class="on">on {{n}}</div></x-if>
-              <x-else><div class="off">off {{n}}</div></x-else>`,
+              <o-if :value="show"><div class="on">on {{n}}</div></o-if>
+              <o-else><div class="off">off {{n}}</div></o-else>`,
               data: { show: false, n: 0 },
             });
             const host = $(document.createElement(`bench-if-${version}`));

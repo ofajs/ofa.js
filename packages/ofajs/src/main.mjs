@@ -3,7 +3,7 @@
  *
  * - 组件/页面模块系统（组件即 HTML 文件，浏览器直接运行，无构建）
  * - o-page / o-app 页面路由（嵌套路由、前进后退、页面动画）
- * - o-if / o-fill 模板语法（light DOM 条件与列表渲染）
+ * - o-if / o-fill 模板语法（实现已下沉 xhear）
  * - o-provider / o-consumer 上下文通信
  * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
  */
@@ -16,8 +16,6 @@ import "./extend.mjs";
 import "./link.mjs";
 import "./context.mjs";
 import "./match-var.mjs";
-import "./if.mjs";
-import "./fill.mjs";
 import Stanz from "../../stanz/src/main.mjs";
 
 const version = "ofa.js@5.0.0";

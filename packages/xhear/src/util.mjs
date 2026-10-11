@@ -70,8 +70,8 @@ export const createXEle = (expr) => {
  * 深度释放一个节点树上的全部渲染副作用（监听、数据绑定、watch 订阅）。
  *
  * 约定：render 过程把每个副作用的撤销函数登记在宿主节点的 __revokes
- * 数组上（FakeNode/组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
- * x-if 清空内容、x-fill 删项、组件销毁都依赖这个统一出口。
+ * 数组上（组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
+ * o-if 清空内容、o-fill 删项、组件销毁都依赖这个统一出口。
  */
 export const revokeAll = (target) => {
   if (target.__revokes) {

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>x- 系元素弃用提示 / deprecated x- tags</title>
+    <script>
+      // 经典脚本先于模块执行：捕获弃用报错供检查项断言
+      // (classic script runs before modules: capture deprecation errors)
+      window.__depErrors = [];
+      const __origError = console.error;
+      console.error = (...args) => {
+        const msg = args
+          .map((a) => (a && a.message !== undefined ? a.message : String(a)))
+          .join(" ");
+        if (msg.includes("deprecated") || msg.includes("弃用")) {
+          window.__depErrors.push(msg);
+        }
+        __origError.apply(console, args);
+      };
+    </script>
+  </head>
+  <body>
+    <dep-warm></dep-warm>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      // 预热：确认 o- 系正常可用（弃用改造不影响 o- 语法）
+      $.register({
+        tag: "dep-warm",
+        temp: `<o-if :value="ok"><em class="ok-mark">o-if works</em></o-if>`,
+        data: { ok: true },
+      });
+
+      test("o-if / o-fill 正常工作 / o- tags keep working", async () => {
+        const $warm = $("dep-warm");
+        await waitFor(() => !!$warm.shadow.$(".ok-mark"));
+      });
+
+      test("模板里的 x-if / x-fill 触发弃用报错 / x-if & x-fill in templates log errors", async () => {
+        // 编译期扫描：模板中出现 x- 系标签即报错
+        $.register({
+          tag: "dep-comp",
+          temp: `
+          <x-if :value="ok"><div class="legacy-if">legacy if</div></x-if>
+          <x-fill :value="arr"><div class="legacy-fill">{{$data}}</div></x-fill>`,
+          data: { ok: true, arr: [1] },
+        });
+
+        const el = document.createElement("dep-comp");
+        document.body.appendChild(el);
+        await waitFor(() => {
+          const errs = window.__depErrors.join("|");
+          return errs.includes('"x-if"') && errs.includes('"x-fill"');
+        });
+
+        // 同名标签只报一次（去重）
+        const xifCount = window.__depErrors.filter((m) =>
+          m.includes('"x-if"'),
+        ).length;
+        assertEqual(xifCount, 1, "x-if 弃用报错应去重 / x-if error should be deduped");
+        el.remove();
+      });
+
+      test("裸用 x-else / x-else-if 升级时触发报错 / bare x-else tags error on upgrade", async () => {
+        // 未经编译直接写进页面的 x- 系元素：stub 元素升级即报错
+        const holder = document.createElement("div");
+        holder.innerHTML = `<x-else><span>x</span></x-else><x-else-if :value="1"><span>y</span></x-else-if>`;
+        document.body.appendChild(holder);
+
+        await waitFor(() => {
+          const errs = window.__depErrors.join("|");
+          return (
+            errs.includes('"x-else"') &&
+            errs.includes('"x-else-if"')
+          );
+        });
+        holder.remove();
+      });
+
+      test("弃用报错文案指向 o- 系 / error message points to o- tags", async () => {
+        const msg = window.__depErrors[0] || "";
+        assert(
+          msg.includes("o-if") || msg.includes("o-fill"),
+          "文案应提示改用 o- 系标签 / message should mention o- tags",
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

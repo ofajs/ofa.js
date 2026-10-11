@@ -1,9 +1,11 @@
 # 非显式组件
 
+> **v5 起只有 o- 系写法**：`x-if` / `x-else-if` / `x-else` / `x-fill` 已移除，模板中出现会在控制台报弃用错。旧文档中的 x- 示例一律按 o- 理解。
+
 ofa.js 内置包含两种非显式组件：
 
-* 条件渲染组件：`x-if`、`x-else-if`、`x-else`
-* 填充组件：`x-fill`
+* 条件渲染组件：`o-if`、`o-else-if`、`o-else`
+* 填充组件：`o-fill`
 
 这两种组件的功能分别与 `o-if` 和 `o-fill` 组件相同，但它们本身不会真实渲染到 DOM 中，而是将其内部元素直接渲染到对应的区域。
 
@@ -20,10 +22,10 @@ ofa.js 内置包含两种非显式组件：
         <!-- 样式不为红色，因为 o-if 组件本身存在于 DOM 中 -->
         <div class="item">1</div>
     </o-if>
-    <x-if :value="true">
-        <!-- 样式为红色，因为 x-if 组件不会渲染到 DOM 中 -->
+    <o-if :value="true">
+        <!-- 样式为红色，因为 o-if 组件不会渲染到 DOM 中 -->
         <div class="item">2</div>
-    </x-if>
+    </o-if>
 </div>
 ```
 
@@ -49,10 +51,10 @@ ofa.js 内置包含两种非显式组件：
             <!-- 样式不为红色，因为 o-if 组件本身存在于 DOM 中 -->
             <div class="item">不会显示为红色</div>
         </o-if>
-        <x-if :value="true">
-            <!-- 样式为红色，因为 x-if 组件不会渲染到 DOM 中 -->
+        <o-if :value="true">
+            <!-- 样式为红色，因为 o-if 组件不会渲染到 DOM 中 -->
             <div class="item">显示为红色</div>
-        </x-if>
+        </o-if>
     </div>
     <script>
     export default async () => {
@@ -64,43 +66,43 @@ ofa.js 内置包含两种非显式组件：
 </template>
 ```
 
-## x-if 条件渲染组件
+## o-if 条件渲染组件
 
-`x-if` 与 [o-if](./conditional-rendering.md) 的功能完全相同，用于根据条件表达式的真假值决定是否渲染内容。区别在于 `x-if` 本身不会作为 DOM 元素存在，其内部内容会直接渲染到父级容器中。
+`o-if` 与 [o-if](./conditional-rendering.md) 的功能完全相同，用于根据条件表达式的真假值决定是否渲染内容。区别在于 `o-if` 本身不会作为 DOM 元素存在，其内部内容会直接渲染到父级容器中。
 
 ```html
 <div class="container">
-    <x-if :value="isLoggedIn">
+    <o-if :value="isLoggedIn">
         <p>欢迎回来，用户！</p>
-    </x-if>
+    </o-if>
 </div>
 ```
 
-`x-if` 也可以配合 `x-else-if` 和 `x-else` 使用：
+`o-if` 也可以配合 `o-else-if` 和 `o-else` 使用：
 
 ```html
 <div class="container">
-    <x-if :value="role === 'admin'">
+    <o-if :value="role === 'admin'">
         <p>管理员面板</p>
-    </x-if>
-    <x-else-if :value="role === 'user'">
+    </o-if>
+    <o-else-if :value="role === 'user'">
         <p>用户中心</p>
-    </x-else-if>
-    <x-else>
+    </o-else-if>
+    <o-else>
         <p>请登录</p>
-    </x-else>
+    </o-else>
 </div>
 ```
 
-## x-fill 填充组件
+## o-fill 填充组件
 
-`x-fill` 与 [o-fill](./list-rendering.md) 的功能完全相同，用于将数组数据渲染为多个 DOM 元素。与 `x-if` 类似，`x-fill` 本身不会渲染到 DOM 中，其内部模板会直接渲染到父级容器。
+`o-fill` 与 [o-fill](./list-rendering.md) 的功能完全相同，用于将数组数据渲染为多个 DOM 元素。与 `o-if` 类似，`o-fill` 本身不会渲染到 DOM 中，其内部模板会直接渲染到父级容器。
 
 ```html
 <ul>
-    <x-fill :value="items">
+    <o-fill :value="items">
         <li>{{$data.name}}</li>
-    </x-fill>
+    </o-fill>
 </ul>
 ```
 
@@ -108,7 +110,7 @@ ofa.js 内置包含两种非显式组件：
 
 ```html
 <ul>
-    <x-fill name="li" :value="items"></x-fill>
+    <o-fill name="li" :value="items"></o-fill>
 </ul>
 
 <template name="li">

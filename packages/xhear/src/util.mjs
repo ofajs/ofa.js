@@ -72,19 +72,37 @@ export const createXEle = (expr) => {
  * 约定：render 过程把每个副作用的撤销函数登记在宿主节点的 __revokes
  * 数组上（组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
  * o-if 清空内容、o-fill 删项、组件销毁都依赖这个统一出口。
+ *
+ * 撤销闭包自带 __done 守卫（防重复执行）；这里只负责触发，整个列表
+ * 整批清空而不是逐个 indexOf+splice——大列表批量删除时这是热路径。
  */
 export const revokeAll = (target) => {
-  if (target.__revokes) {
-    Array.from(target.__revokes).forEach((f) => f && f());
-  }
-  target.childNodes &&
-    Array.from(target.childNodes).forEach((el) => {
-      revokeAll(el);
-    });
+  const revokes = target.__revokes;
 
-  const shadowRevokes = target?.shadowRoot?.__revokes;
+  if (revokes) {
+    for (let i = 0; i < revokes.length; i++) {
+      const f = revokes[i];
+      f && f();
+    }
+    revokes.length = 0;
+  }
+
+  let child = target.firstChild;
+
+  while (child) {
+    const next = child.nextSibling;
+    revokeAll(child);
+    child = next;
+  }
+
+  const shadow = target.shadowRoot;
+  const shadowRevokes = shadow && shadow.__revokes;
 
   if (shadowRevokes) {
-    [...shadowRevokes].forEach((f) => f());
+    for (let i = 0; i < shadowRevokes.length; i++) {
+      const f = shadowRevokes[i];
+      f && f();
+    }
+    shadowRevokes.length = 0;
   }
 };

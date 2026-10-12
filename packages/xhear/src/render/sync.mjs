@@ -23,6 +23,19 @@ const syncFn = {
 
     const { data } = options;
 
+    // 轻量行上下文（fill 行）：渲染数据是普通对象，数据侧订阅换到
+    // 本体上，路径剥掉 "$data." 前缀；读值仍走完整上下文
+    let watchData = data;
+    let watchPath = targetName;
+
+    if (data.__watchTargets) {
+      const seg = targetName.slice(0, targetName.indexOf("."));
+      if (seg === "$data" && data.__watchTargets[0]) {
+        watchData = data.__watchTargets[0];
+        watchPath = targetName.slice(6);
+      }
+    }
+
     const val = getPath(data, targetName);
 
     if (val instanceof Object) {
@@ -47,8 +60,8 @@ const syncFn = {
     });
 
     // 数据 → 本方
-    const wid2 = data.watch((e) => {
-      if (e.hasModified(targetName)) {
+    const wid2 = watchData.watch((e) => {
+      if (e.hasModified(watchPath)) {
         try {
           const value = getPath(data, targetName);
           setPath(this, propName, value);
@@ -60,8 +73,8 @@ const syncFn = {
 
     return () => {
       this.unwatch(wid1);
-      if (!dataRevoked(data)) {
-        data.unwatch(wid2);
+      if (!dataRevoked(watchData)) {
+        watchData.unwatch(wid2);
       }
     };
   },

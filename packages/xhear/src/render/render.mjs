@@ -183,8 +183,11 @@ export function render({
         };
         tasks.push(renderFunc);
 
+        // 撤销列表由 revokeAll 整批清空（done 标记防重复执行），
+        // 这里只负责停掉后续数据 tick 的重跑
         const textRevoke = () => {
-          remove(revokes, textRevoke);
+          if (textRevoke.__done) return;
+          textRevoke.__done = true;
           remove(tasks, renderFunc);
         };
         revokes.push(textRevoke);
@@ -237,7 +240,8 @@ export function render({
         tasks.push(renderStyle);
 
         const styleRevoke = () => {
-          remove(revokes, styleRevoke);
+          if (styleRevoke.__done) return;
+          styleRevoke.__done = true;
           remove(tasks, renderStyle);
         };
         revokes.push(styleRevoke);
@@ -312,6 +316,9 @@ export function render({
             };
 
             let clearRevs = () => {
+              if (clearRevs.__done) return;
+              clearRevs.__done = true;
+
               const { revoke: methodRevoke } = $el[action.name];
 
               if (methodRevoke) {
@@ -325,9 +332,7 @@ export function render({
                 });
               }
 
-              remove(revokes, clearRevs);
               remove(tasks, work);
-              clearRevs = null;
             };
 
             if (always) {
@@ -412,9 +417,9 @@ export function render({
         tasks.push(renderStyle);
 
         const styleRevoke = () => {
+          if (styleRevoke.__done) return;
+          styleRevoke.__done = true;
           remove(tasks, renderStyle);
-          remove(getRevokes(el), styleRevoke);
-          remove(revokes, styleRevoke);
         };
 
         addRevoke(el, styleRevoke);
@@ -467,9 +472,9 @@ export function render({
       tasks.push(renderFunc);
 
       const textRevoke = () => {
-        remove(revokes, textRevoke);
+        if (textRevoke.__done) return;
+        textRevoke.__done = true;
         remove(tasks, renderFunc);
-        remove(getRevokes(textEl), textRevoke);
       };
       revokes.push(textRevoke);
       addRevoke(textEl, textRevoke);
@@ -541,7 +546,10 @@ export function render({
             };
 
             let clearRevs = () => {
-              const { revoke: methodRevoke } = $el[actionName];
+              if (clearRevs.__done) return;
+              clearRevs.__done = true;
+
+              const { revoke: methodRevoke } = $el[action.name];
 
               if (methodRevoke) {
                 methodRevoke({
@@ -554,10 +562,7 @@ export function render({
                 });
               }
 
-              remove(revokes, clearRevs);
-              remove(getRevokes(el), clearRevs);
               remove(tasks, work);
-              clearRevs = null;
             };
 
             if (always) {
@@ -614,14 +619,43 @@ export function render({
   if (tasks.length) {
     tasks.forEach((f) => f());
 
-    // 数据更新后重跑全部渲染任务；任务清空（绑定全部释放）则退订
-    const wid = data.watchTick((e) => {
-      if (tasks.length) {
-        tasks.forEach((f) => f());
-      } else {
-        data.unwatch(wid);
+    // 数据更新后重跑全部渲染任务；任务清空（绑定全部释放）则退订。
+    // 轻量上下文（fill 行）经 __watchTargets 把订阅挂到数据本体上，
+    // 上下文对象本身不再是 Stanz（建表热路径省一个代理实例）。
+    // 数据本体不可订阅（原始值项）时跳过订阅，行更新由结构对账兜底
+    const watchTargets = data.__watchTargets;
+    const tickTargets = watchTargets || (data.watchTick ? [data] : null);
+
+    if (tickTargets) {
+      const rerun = () => {
+        if (tasks.length) {
+          tasks.forEach((f) => f());
+        } else {
+          untick();
+        }
+      };
+      const wids = tickTargets.map((t) => t.watchTick(rerun));
+      const untick = () => {
+        tickTargets.forEach((t, i) => t.unwatch(wids[i]));
+      };
+
+      if (watchTargets) {
+        // 轻量上下文的对接面：行销毁退订（__untick）、手动重跑
+        //（__rerun，$index 修正用）、对账换绑 $data（__retick）
+        data.__rerun = rerun;
+        data.__untick = untick;
+        data.__retick = (newTarget) => {
+          if (tickTargets[0] === newTarget) {
+            rerun();
+            return;
+          }
+          tickTargets[0].unwatch(wids[0]);
+          tickTargets[0] = newTarget;
+          wids[0] = newTarget.watchTick(rerun);
+          rerun();
+        };
       }
-    });
+    }
   }
 
   renderExtends.render({ step: "init", target });

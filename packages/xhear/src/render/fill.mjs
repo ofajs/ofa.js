@@ -9,16 +9,19 @@
  * 更新采用基于 key 的对账（fill-key 或 xid 或引用）+ LIS 最小移动：
  * 复用项只换绑 $data/$index，缺失则删除，新增则插入，乱序部分按最长
  * 递增子序列保证每个元素至多移动一次。触发面上只有 value 的结构变更
- * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更经
- * itemData 冒泡到行内绑定任务粒度消化，不为内容改动付出全量 diff。
+ * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更由行内
+ * 绑定任务直接订阅数据本体粒度消化，不为内容改动付出全量 diff。
+ *
+ * 行上下文是轻量对象（$data/$index/$host/$parent/$ele），不再是每行一个
+ * Stanz：变更订阅经 __watchTargets 挂到数据本体与 $host/$parent 上
+ * （见 render 的对接面 __rerun/__untick/__retick），$index 仅在模板
+ * 真正引用它时才回写（usesIndex 扫描）。
  */
 import { register } from "../register.mjs";
 import { render } from "./render.mjs";
 import { getRenderData } from "./condition.mjs";
 import { getCompiledContent } from "./inner-code.mjs";
 import { createXEle, eleX, revokeAll } from "../util.mjs";
-import Stanz from "../../../stanz/src/main.mjs";
-import { removeArrayValue } from "../public.mjs";
 import { getErr } from "../error.mjs";
 import { getType } from "../../../stanz/src/public.mjs";
 
@@ -78,6 +81,20 @@ const getSequence = (reused) => {
   return res;
 };
 
+/**
+ * 模板是否引用 $index（含文本标记里的编码形态 %24index）。
+ * 逐位对账后 $index 普遍变化，绝大多数行模板并不消费它——不消费就
+ * 跳过写入，避免触发行任务的无效重跑。命名模板也扫：行内嵌套模板
+ * 可能经命名模板引用外层 $index。
+ */
+const usesIndex = (targetTemp, temps) => {
+  let html = targetTemp.innerHTML;
+  for (const name in temps) {
+    html += temps[name].innerHTML;
+  }
+  return html.includes("$index") || html.includes("%24index");
+};
+
 register({
   tag: "o-fill",
   temp: `<style>:host{display:contents;}</style><slot></slot>`,
@@ -113,8 +130,16 @@ register({
         return;
       }
 
-      const { data, target, temps = {} } = getRenderData(this.ele);
+      // 无渲染宿主（如已渲染元素的 cloneNode 克隆体：升级了但没有
+      // 渲染上下文，却可能因复制到的数据引用收到结构事件）——无法解析
+      // 模板与 temps，直接跳过；真正接入渲染流时 attached 会重新触发
+      const rd = getRenderData(this.ele);
 
+      if (!rd) {
+        return;
+      }
+
+      const { data, target, temps = {} } = rd;
       const keyName = this.attr("fill-key") || "xid";
 
       let targetTemp = temps[tempName];
@@ -203,6 +228,8 @@ register({
       }
 
       // 复用项数据对齐：$data 换绑、$index 修正，由行内绑定任务粒度消化
+      const indexUsed = usesIndex(targetTemp, temps);
+
       for (let i = 0, len = arr.length; i < len; i++) {
         const found = reused[i];
 
@@ -212,12 +239,16 @@ register({
 
         const $ele = eleX(found.el);
         const item = arr[i];
+        const itemCtx = $ele.__item;
 
-        if ($ele.__item.$data !== item) {
-          $ele.__item.$data = item;
+        if (itemCtx.$data !== item) {
+          itemCtx.$data = item;
+          // 换绑订阅到新数据本体并立即重跑（轻量上下文）
+          itemCtx.__retick && itemCtx.__retick(item);
         }
-        if ($ele.__item.$index !== i) {
-          $ele.__item.$index = i;
+        if (indexUsed && itemCtx.$index !== i) {
+          itemCtx.$index = i;
+          itemCtx.__rerun && itemCtx.__rerun();
         }
       }
 
@@ -353,7 +384,7 @@ register({
  * @param {number} $index - 列表项索引
  * @param {string} keyName - 对账键名
  * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由外部传入）
- * @returns {Object} 列表项的 Xhear 实例（__item 上挂绑定数据）
+ * @returns {Object} 列表项的 Xhear 实例（__item 上挂轻量行上下文）
  */
 export const createItem = (
   $data,
@@ -382,25 +413,35 @@ export const createItem = (
     $ele = createXEle(targetTemp.innerHTML);
   }
 
-  const itemData = new Stanz({
+  // 轻量行上下文：不再每行建 Stanz（省代理与属性定义开销——建表是
+  // fill 的最大成本之一）。表达式作用域即普通对象；变更订阅经
+  // __watchTargets 直接挂在数据本体上，item 的 _owner 不再出现行
+  // 上下文：更新冒泡少一跳，行销毁零残留。$ele 非枚举不混入 with 作用域。
+  // 原始值项（字符串/数字）不可订阅：不挂 __watchTargets，行更新由
+  // 结构对账兜底。$host/$parent 也在订阅链上（旧 itemData 经所有权
+  // 冒泡宿主变更，这里显式订阅保持同一语义）
+  const itemData = {
     $data,
-    $host,
     $index,
-  });
+    $host,
+  };
 
-  // $ele 若成为 item 的子属性，其内自定义组件的改动会反向冒泡，
-  // 导致列表内元素不停重渲染的死循环；故 $ele 只读且不入观察
-  Object.defineProperties(itemData, {
-    $ele: {
-      get() {
-        return $ele;
-      },
-    },
-  });
-
+  if ($data && $data.watchTick) {
+    itemData.__watchTargets = [$data];
+  }
+  if ($host && $host.watchTick) {
+    (itemData.__watchTargets || (itemData.__watchTargets = [])).push($host);
+  }
   if ($parent) {
     itemData.$parent = $parent;
+    if ($parent.watchTick) {
+      (itemData.__watchTargets || (itemData.__watchTargets = [])).push($parent);
+    }
   }
+
+  Object.defineProperty(itemData, "$ele", {
+    value: $ele,
+  });
 
   render({
     target: $ele.ele,
@@ -412,12 +453,13 @@ export const createItem = (
     isRenderSelf: true,
   });
 
-  // 项销毁时连带撤销 itemData，断开对源数据的引用
+  // 项销毁时退订数据本体（轻量上下文无所有权边，无需 revoke 级联）
   const revokes = $ele.ele.__revokes;
 
   const revoke = () => {
-    removeArrayValue(revokes, revoke);
-    itemData.revoke();
+    if (revoke.__done) return;
+    revoke.__done = true;
+    itemData.__untick && itemData.__untick();
   };
 
   revokes.push(revoke);

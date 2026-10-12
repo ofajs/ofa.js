@@ -91,18 +91,19 @@
       const itemA = fillShared.arr[0];
 
       test("fill 移除项释放该项引用 / removing a fill item releases it", async () => {
-        // 引用方：arr、fill 项的 itemData、项内 mem-child 的 outer
-        await waitFor(() => itemA.owner.size === 3);
+        // 引用方：arr、项内 mem-child 的 outer（轻量行上下文不持有
+        // 所有权，行销毁只剩项内组件的引用需要释放）
+        await waitFor(() => itemA.owner.size === 2);
 
         fillShared.arr.splice(0, 1);
-        // stanz splice 解除 arr 对 A 的持有，fill 对账撤销 itemData 与
-        // 项内绑定——引用应完全清零
+        // stanz splice 解除 arr 对 A 的持有，fill 对账撤销项内绑定——
+        // 引用应完全清零
         await waitFor(() => itemA.owner.size === 0);
       });
 
       test("清空 fill 释放全部项引用 / clearing fill releases all", async () => {
         const itemB = fillShared.arr[0];
-        await waitFor(() => itemB.owner.size === 3);
+        await waitFor(() => itemB.owner.size === 2);
 
         $fillHost.items = [];
         await waitFor(() => itemB.owner.size === 1);

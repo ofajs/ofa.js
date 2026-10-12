@@ -1768,8 +1768,11 @@ function render({
         };
         tasks.push(renderFunc);
 
+        // 撤销列表由 revokeAll 整批清空（done 标记防重复执行），
+        // 这里只负责停掉后续数据 tick 的重跑
         const textRevoke = () => {
-          removeArrayValue(revokes, textRevoke);
+          if (textRevoke.__done) return;
+          textRevoke.__done = true;
           removeArrayValue(tasks, renderFunc);
         };
         revokes.push(textRevoke);
@@ -1822,7 +1825,8 @@ function render({
         tasks.push(renderStyle);
 
         const styleRevoke = () => {
-          removeArrayValue(revokes, styleRevoke);
+          if (styleRevoke.__done) return;
+          styleRevoke.__done = true;
           removeArrayValue(tasks, renderStyle);
         };
         revokes.push(styleRevoke);
@@ -1897,6 +1901,9 @@ function render({
             };
 
             let clearRevs = () => {
+              if (clearRevs.__done) return;
+              clearRevs.__done = true;
+
               const { revoke: methodRevoke } = $el[action.name];
 
               if (methodRevoke) {
@@ -1910,9 +1917,7 @@ function render({
                 });
               }
 
-              removeArrayValue(revokes, clearRevs);
               removeArrayValue(tasks, work);
-              clearRevs = null;
             };
 
             if (always) {
@@ -1997,9 +2002,9 @@ function render({
         tasks.push(renderStyle);
 
         const styleRevoke = () => {
+          if (styleRevoke.__done) return;
+          styleRevoke.__done = true;
           removeArrayValue(tasks, renderStyle);
-          removeArrayValue(getRevokes(el), styleRevoke);
-          removeArrayValue(revokes, styleRevoke);
         };
 
         addRevoke(el, styleRevoke);
@@ -2052,9 +2057,9 @@ function render({
       tasks.push(renderFunc);
 
       const textRevoke = () => {
-        removeArrayValue(revokes, textRevoke);
+        if (textRevoke.__done) return;
+        textRevoke.__done = true;
         removeArrayValue(tasks, renderFunc);
-        removeArrayValue(getRevokes(textEl), textRevoke);
       };
       revokes.push(textRevoke);
       addRevoke(textEl, textRevoke);
@@ -2126,7 +2131,10 @@ function render({
             };
 
             let clearRevs = () => {
-              const { revoke: methodRevoke } = $el[actionName];
+              if (clearRevs.__done) return;
+              clearRevs.__done = true;
+
+              const { revoke: methodRevoke } = $el[action.name];
 
               if (methodRevoke) {
                 methodRevoke({
@@ -2139,10 +2147,7 @@ function render({
                 });
               }
 
-              removeArrayValue(revokes, clearRevs);
-              removeArrayValue(getRevokes(el), clearRevs);
               removeArrayValue(tasks, work);
-              clearRevs = null;
             };
 
             if (always) {
@@ -2199,14 +2204,43 @@ function render({
   if (tasks.length) {
     tasks.forEach((f) => f());
 
-    // 数据更新后重跑全部渲染任务；任务清空（绑定全部释放）则退订
-    const wid = data.watchTick((e) => {
-      if (tasks.length) {
-        tasks.forEach((f) => f());
-      } else {
-        data.unwatch(wid);
+    // 数据更新后重跑全部渲染任务；任务清空（绑定全部释放）则退订。
+    // 轻量上下文（fill 行）经 __watchTargets 把订阅挂到数据本体上，
+    // 上下文对象本身不再是 Stanz（建表热路径省一个代理实例）。
+    // 数据本体不可订阅（原始值项）时跳过订阅，行更新由结构对账兜底
+    const watchTargets = data.__watchTargets;
+    const tickTargets = watchTargets || (data.watchTick ? [data] : null);
+
+    if (tickTargets) {
+      const rerun = () => {
+        if (tasks.length) {
+          tasks.forEach((f) => f());
+        } else {
+          untick();
+        }
+      };
+      const wids = tickTargets.map((t) => t.watchTick(rerun));
+      const untick = () => {
+        tickTargets.forEach((t, i) => t.unwatch(wids[i]));
+      };
+
+      if (watchTargets) {
+        // 轻量上下文的对接面：行销毁退订（__untick）、手动重跑
+        //（__rerun，$index 修正用）、对账换绑 $data（__retick）
+        data.__rerun = rerun;
+        data.__untick = untick;
+        data.__retick = (newTarget) => {
+          if (tickTargets[0] === newTarget) {
+            rerun();
+            return;
+          }
+          tickTargets[0].unwatch(wids[0]);
+          tickTargets[0] = newTarget;
+          wids[0] = newTarget.watchTick(rerun);
+          rerun();
+        };
       }
-    });
+    }
   }
 
   renderExtends.render({ step: "init", target });
@@ -2355,6 +2389,19 @@ const syncFn = {
 
     const { data } = options;
 
+    // 轻量行上下文（fill 行）：渲染数据是普通对象，数据侧订阅换到
+    // 本体上，路径剥掉 "$data." 前缀；读值仍走完整上下文
+    let watchData = data;
+    let watchPath = targetName;
+
+    if (data.__watchTargets) {
+      const seg = targetName.slice(0, targetName.indexOf("."));
+      if (seg === "$data" && data.__watchTargets[0]) {
+        watchData = data.__watchTargets[0];
+        watchPath = targetName.slice(6);
+      }
+    }
+
     const val = getPath(data, targetName);
 
     if (val instanceof Object) {
@@ -2379,8 +2426,8 @@ const syncFn = {
     });
 
     // 数据 → 本方
-    const wid2 = data.watch((e) => {
-      if (e.hasModified(targetName)) {
+    const wid2 = watchData.watch((e) => {
+      if (e.hasModified(watchPath)) {
         try {
           const value = getPath(data, targetName);
           setPath(this, propName, value);
@@ -2392,8 +2439,8 @@ const syncFn = {
 
     return () => {
       this.unwatch(wid1);
-      if (!dataRevoked(data)) {
-        data.unwatch(wid2);
+      if (!dataRevoked(watchData)) {
+        watchData.unwatch(wid2);
       }
     };
   },
@@ -3765,6 +3812,20 @@ const getSequence = (reused) => {
   return res;
 };
 
+/**
+ * 模板是否引用 $index（含文本标记里的编码形态 %24index）。
+ * 逐位对账后 $index 普遍变化，绝大多数行模板并不消费它——不消费就
+ * 跳过写入，避免触发行任务的无效重跑。命名模板也扫：行内嵌套模板
+ * 可能经命名模板引用外层 $index。
+ */
+const usesIndex = (targetTemp, temps) => {
+  let html = targetTemp.innerHTML;
+  for (const name in temps) {
+    html += temps[name].innerHTML;
+  }
+  return html.includes("$index") || html.includes("%24index");
+};
+
 register$1({
   tag: "o-fill",
   temp: `<style>:host{display:contents;}</style><slot></slot>`,
@@ -3800,8 +3861,16 @@ register$1({
         return;
       }
 
-      const { data, target, temps = {} } = getRenderData(this.ele);
+      // 无渲染宿主（如已渲染元素的 cloneNode 克隆体：升级了但没有
+      // 渲染上下文，却可能因复制到的数据引用收到结构事件）——无法解析
+      // 模板与 temps，直接跳过；真正接入渲染流时 attached 会重新触发
+      const rd = getRenderData(this.ele);
 
+      if (!rd) {
+        return;
+      }
+
+      const { data, target, temps = {} } = rd;
       const keyName = this.attr("fill-key") || "xid";
 
       let targetTemp = temps[tempName];
@@ -3890,6 +3959,8 @@ register$1({
       }
 
       // 复用项数据对齐：$data 换绑、$index 修正，由行内绑定任务粒度消化
+      const indexUsed = usesIndex(targetTemp, temps);
+
       for (let i = 0, len = arr.length; i < len; i++) {
         const found = reused[i];
 
@@ -3899,12 +3970,16 @@ register$1({
 
         const $ele = eleX(found.el);
         const item = arr[i];
+        const itemCtx = $ele.__item;
 
-        if ($ele.__item.$data !== item) {
-          $ele.__item.$data = item;
+        if (itemCtx.$data !== item) {
+          itemCtx.$data = item;
+          // 换绑订阅到新数据本体并立即重跑（轻量上下文）
+          itemCtx.__retick && itemCtx.__retick(item);
         }
-        if ($ele.__item.$index !== i) {
-          $ele.__item.$index = i;
+        if (indexUsed && itemCtx.$index !== i) {
+          itemCtx.$index = i;
+          itemCtx.__rerun && itemCtx.__rerun();
         }
       }
 
@@ -4040,7 +4115,7 @@ register$1({
  * @param {number} $index - 列表项索引
  * @param {string} keyName - 对账键名
  * @param {Object} $parent - 父级数据（上层 o-fill 嵌套时由外部传入）
- * @returns {Object} 列表项的 Xhear 实例（__item 上挂绑定数据）
+ * @returns {Object} 列表项的 Xhear 实例（__item 上挂轻量行上下文）
  */
 const createItem = (
   $data,
@@ -4069,25 +4144,35 @@ const createItem = (
     $ele = createXEle(targetTemp.innerHTML);
   }
 
-  const itemData = new Stanz({
+  // 轻量行上下文：不再每行建 Stanz（省代理与属性定义开销——建表是
+  // fill 的最大成本之一）。表达式作用域即普通对象；变更订阅经
+  // __watchTargets 直接挂在数据本体上，item 的 _owner 不再出现行
+  // 上下文：更新冒泡少一跳，行销毁零残留。$ele 非枚举不混入 with 作用域。
+  // 原始值项（字符串/数字）不可订阅：不挂 __watchTargets，行更新由
+  // 结构对账兜底。$host/$parent 也在订阅链上（旧 itemData 经所有权
+  // 冒泡宿主变更，这里显式订阅保持同一语义）
+  const itemData = {
     $data,
-    $host,
     $index,
-  });
+    $host,
+  };
 
-  // $ele 若成为 item 的子属性，其内自定义组件的改动会反向冒泡，
-  // 导致列表内元素不停重渲染的死循环；故 $ele 只读且不入观察
-  Object.defineProperties(itemData, {
-    $ele: {
-      get() {
-        return $ele;
-      },
-    },
-  });
-
+  if ($data && $data.watchTick) {
+    itemData.__watchTargets = [$data];
+  }
+  if ($host && $host.watchTick) {
+    (itemData.__watchTargets || (itemData.__watchTargets = [])).push($host);
+  }
   if ($parent) {
     itemData.$parent = $parent;
+    if ($parent.watchTick) {
+      (itemData.__watchTargets || (itemData.__watchTargets = [])).push($parent);
+    }
   }
+
+  Object.defineProperty(itemData, "$ele", {
+    value: $ele,
+  });
 
   render({
     target: $ele.ele,
@@ -4099,12 +4184,13 @@ const createItem = (
     isRenderSelf: true,
   });
 
-  // 项销毁时连带撤销 itemData，断开对源数据的引用
+  // 项销毁时退订数据本体（轻量上下文无所有权边，无需 revoke 级联）
   const revokes = $ele.ele.__revokes;
 
   const revoke = () => {
-    removeArrayValue(revokes, revoke);
-    itemData.revoke();
+    if (revoke.__done) return;
+    revoke.__done = true;
+    itemData.__untick && itemData.__untick();
   };
 
   revokes.push(revoke);
@@ -4552,20 +4638,38 @@ const createXEle = (expr) => {
  * 约定：render 过程把每个副作用的撤销函数登记在宿主节点的 __revokes
  * 数组上（组件根/shadowRoot 同样适用），revokeAll 沿树递归执行。
  * o-if 清空内容、o-fill 删项、组件销毁都依赖这个统一出口。
+ *
+ * 撤销闭包自带 __done 守卫（防重复执行）；这里只负责触发，整个列表
+ * 整批清空而不是逐个 indexOf+splice——大列表批量删除时这是热路径。
  */
 const revokeAll = (target) => {
-  if (target.__revokes) {
-    Array.from(target.__revokes).forEach((f) => f && f());
-  }
-  target.childNodes &&
-    Array.from(target.childNodes).forEach((el) => {
-      revokeAll(el);
-    });
+  const revokes = target.__revokes;
 
-  const shadowRevokes = target?.shadowRoot?.__revokes;
+  if (revokes) {
+    for (let i = 0; i < revokes.length; i++) {
+      const f = revokes[i];
+      f && f();
+    }
+    revokes.length = 0;
+  }
+
+  let child = target.firstChild;
+
+  while (child) {
+    const next = child.nextSibling;
+    revokeAll(child);
+    child = next;
+  }
+
+  const shadow = target.shadowRoot;
+  const shadowRevokes = shadow && shadow.__revokes;
 
   if (shadowRevokes) {
-    [...shadowRevokes].forEach((f) => f());
+    for (let i = 0; i < shadowRevokes.length; i++) {
+      const f = shadowRevokes[i];
+      f && f();
+    }
+    shadowRevokes.length = 0;
   }
 };
 

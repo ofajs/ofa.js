@@ -43,7 +43,7 @@ packages/xhear/
 │       ├── compile.mjs    模板编译（binder 描述符 + markers 共享映射，见文件头注释）
 │       ├── render.mjs     渲染编排 + renderExtends 钩子 + prop/attr/class/watch 动作
 │       ├── condition.mjs  o-if / o-else-if / o-else 条件链（light DOM）
-│       ├── fill.mjs       o-fill 列表渲染（结构变更才整表对账 + fill-key/LIS 最小移动 + $data/$index/$host）
+│       ├── fill.mjs       o-fill 列表渲染（结构变更才整表对账 + LIS 最小移动 + 轻量行上下文 + $index 条件写）
 │       ├── inner-code.mjs o-if/o-fill 内容保护层（inner-code 包裹 + 编译缓存；首编译支持元素搬运）
 │       └── sync.mjs       sync: 双向同步动作
 └── test/
@@ -259,6 +259,19 @@ template.innerHTML）裸解析 `<tbody><o-fill>` 都会被 foster parenting 提�
 `__originEl`），字符串解析只做兜底；新增"序列化→再解析"路径前先检查
 内容是否可能含表格位置的元素。另注意 `this[0]` 这类子项访问返回的是
 xhear 代理（tagName 为 undefined），传给 DOM 工具前用 `.ele` 归一化。
+
+### 撤销闭包的 done 守卫与 revokeAll 的触发职责要分开
+
+**症状**：批量删除行后组件引用不释放（owner 计数不清零），但行数正常减少。
+
+**根因**：revokeAll 逐项调用前先置 `f.__done = true` 再 `f()`，而撤销
+闭包自身第一行是 `if (this.__done) return`——预标记把方法体整个挡住，
+methodRevoke（如 prop 置空断开 owner）永远不执行。两处各自"正确"，
+组合起来互相抵消。
+
+**正确姿势**：done 守卫只属于闭包自身（防重复执行），revokeAll 只负责
+触发与整批清空列表，不碰标记。给撤销链路加任何一层"防重入"前，先确认
+另一层没有同样的语义。
 
 ### 移植渲染组件时对照旧实现的"隐式副作用清单"
 

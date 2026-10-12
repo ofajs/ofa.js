@@ -18,8 +18,9 @@
 > **事故案例**：重构时 `emitUpdate` 改为直接遍历 `_owner`，漏掉了旧版
 > `owner` getter 返回 Set 的天然去重——同一子项被 push 两次后，
 > 祖先监听对同一变更收到多次事件。
-> **正确姿势**：单 owner 走零分配快路径；`_owner.length > 1` 时必须按
-> `new Set(_owner)` 去重后再逐个冒泡（见 `src/watch.mjs`）。
+> **正确姿势**：单 owner 走零分配快路径；双 owner 用 O(1) 比较（`_owner[0]
+> !== _owner[1]`）去重；三个及以上按 `new Set(_owner)` 去重后再逐个冒泡
+> （见 `src/watch.mjs` 的分层实现）。
 
 ### 2. 数组新增变更方法的接入规则
 

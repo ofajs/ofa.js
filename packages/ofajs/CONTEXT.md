@@ -124,13 +124,13 @@ packages/ofajs/
   `hasModified("value")` → 整表 refreshView；② 逐位对账 indexOf + 每次
   移动后全量重算 keyVals，O(n²) 且单次交换级联 ~n/2 次 DOM 移动。
 
-  2026-10 优化后（fill.mjs 结构判定 + LIS，同机同法）：交换 3020→167ms
-  （反超 React 的 226）、追加 247→45ms、替换 128→60ms；建 1000 行
-  38ms、清空 34ms、首屏 74ms 持平原状。**部分更新（update10）421ms
-  无变化**——结构判定已生效（插桩验证 refreshView 零调用），剩余成本
-  在 stanz 事件机制（emitUpdate + Watcher 冻结构造约占粒度路径工作
-  时间一半，CPU profile 实测），下一步优化在 stanz 热路径（懒冻结、
-  双 owner 去 Set、path 数组复用），以 bench:stanz 验证。
+  2026-10 优化后（fill.mjs 结构判定 + LIS，同机同法）：交换 3020→146ms
+  （反超 React 的 247）、追加 247→45ms、替换 128→60ms、部分更新
+  ×10 421→330ms；建 1000 行 37ms、清空 33ms、首屏 74ms 持平原状。
+  部分更新的剩余差距在 stanz 事件发射机制与行任务重跑的粒度底价
+  （stanz 侧 2026-10 已做一轮热路径优化：位置参数递归 + 节点级共享
+  Watcher + 双 owner 去重，发射密集场景 +20~37%，见 stanz 包
+  CONTEXT.md；再往下要动订阅模型，收益递减）。
 
 ## 七、用例覆盖表（自检页 → 覆盖点）
 

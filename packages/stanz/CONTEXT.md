@@ -52,10 +52,16 @@ packages/stanz/
 - 普通对象/数组赋值自动包裹并登记 owner；已有 stanz 赋值共享实例；
   同值/同实例重复赋值不重复登记；覆盖与 delete 解除 owner
 - 访问器属性（get/set）原样保留，setter 内存的对象不包裹
-- 冒泡：沿 `_owner` 逐层向上，`path` 记录中间链；**多 owner 必须 Set 去重**；
+- 冒泡：沿 `_owner` 逐层向上，`path` 记录中间链；多 owner 必须去重——
+  单 owner 零分配、双 owner O(1) 比较去重、三个及以上按 `Set` 去重；
   环状引用经 `path.includes` 安全切断；节点挂 `_bubbleOwners()` 时冒泡改走
   其返回值（xhear 借此把 DOM parentNode 并入传播路径）
 - `_update = false` 阻断子树冒泡；`__unupdate` 抑制内部包裹事件
+- 事件发射热路径（2026-10 优化）：内部递归走位置参数 `_emit`（对外
+  `emitUpdate(opts)` 对象签名保留）；同一节点的多个监听共享一个 Watcher
+  快照；Watcher 构造用位置参数直赋（无 Object.assign），`path` 接管
+  调用方新建的数组引用不再复制。发射密集场景较优化前 +20~37%
+  （带监听赋值 370 万 ops/s、10 层深冒泡 78 万 ops/s）
 - 数组三分类：解析型（push/pop/shift/unshift/splice，按参数与返回值定位变更）、
   重排型（reverse/sort，仅需事件）、写入型（fill/copyWithin，差分）；
   全链无监听时跳过备份与事件构建（`hasWatchersUpwards`，含环防护）
@@ -73,7 +79,9 @@ packages/stanz/
 
 1. **多 owner 去重事故**：直遍 `_owner` 丢掉了旧版 Set 快照的去重语义，
    重复 push 的子项让祖先收到重复事件（node 冒烟当场抓出）。改冒泡逻辑前
-   先读 `watch.mjs` 的注释与单 owner 快路径设计。
+   先读 `watch.mjs` 的注释与快路径设计——现在的分层是：单 owner 零分配、
+   双 owner O(1) 比较、三个及以上 Set 去重，动这块必须保住"同一变更对
+   同一父级只冒泡一次"。
 2. **benchmark 顺序偏差**：先后采集会让后采集方承受机器热漂移，曾把新版
    冒泡误判为 -22%（实际 +103%）。方法论见技能 `benchmark-methodology`。
 3. **`delete this.__unupdate` 等值重赋值包裹技巧**：数组补包新增项用的是

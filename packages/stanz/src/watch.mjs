@@ -7,8 +7,24 @@ import { WATCHS } from "./main.mjs";
  * path 是两者之间的祖先链（不含 currentTarget）。
  */
 class Watcher {
-  constructor(opts) {
-    Object.assign(this, opts);
+  constructor(
+    type,
+    target,
+    name,
+    oldValue,
+    value,
+    args,
+    currentTarget,
+    path,
+  ) {
+    this.type = type;
+    this.target = target;
+    this.name = name;
+    this.oldValue = oldValue;
+    this.value = value;
+    this.args = args;
+    this.currentTarget = currentTarget;
+    this.path = path;
     // 冻结保证回调拿到的变更快照不可篡改
     Object.freeze(this);
   }
@@ -88,17 +104,34 @@ const createWatchers = (arr) => {
 /**
  * 派发一次变更事件：先通知当前节点的监听者，再沿 _owner 祖先链
  * 逐层向上冒泡；path 用于检测环状引用，防止死循环。
+ *
+ * 内部走位置参数的 _emit：热路径上每次冒泡省去 opts 对象分配与
+ * 8 变量解构；对外仍保留对象签名的 emitUpdate（xhear 的 form/array
+ * 与 refresh 在用）。
  */
-export const emitUpdate = ({
+export const emitUpdate = (opts) => {
+  _emit(
+    opts.type,
+    opts.target,
+    opts.name,
+    opts.value,
+    opts.oldValue,
+    opts.args,
+    opts.currentTarget,
+    opts.path || [],
+  );
+};
+
+const _emit = (
   type,
-  currentTarget,
   target,
   name,
   value,
   oldValue,
   args,
-  path = [],
-}) => {
+  currentTarget,
+  path,
+) => {
   if (path.includes(currentTarget)) {
     // 祖先链上已出现自身，说明存在环状引用，终止冒泡
     console.warn("stanz: circular data reference, update stopped", {
@@ -110,20 +143,19 @@ export const emitUpdate = ({
   }
 
   if (currentTarget._hasWatchs) {
+    // 同一节点上的全部监听共享同一份快照（Watcher 构造后即冻结）
+    const watcher = new Watcher(
+      type,
+      target,
+      name,
+      oldValue,
+      type === "array" ? undefined : value,
+      args,
+      currentTarget,
+      path,
+    );
     currentTarget[WATCHS].forEach((func) => {
-      func(
-        new Watcher({
-          type,
-          target,
-          name,
-          oldValue,
-          // 数组事件的变更载体是 args 而非 value
-          value: type === "array" ? undefined : value,
-          args,
-          currentTarget,
-          path: [...path],
-        })
-      );
+      func(watcher);
     });
   }
 
@@ -136,42 +168,26 @@ export const emitUpdate = ({
     // （如 formData）赖以工作的隐式语义；默认仅沿数据 owner 链
     if (currentTarget._bubbleOwners) {
       for (const parent of currentTarget._bubbleOwners()) {
-        emitUpdate({
-          type,
-          target,
-          name,
-          value,
-          oldValue,
-          args,
-          currentTarget: parent,
-          path: nextPath,
-        });
+        _emit(type, target, name, value, oldValue, args, parent, nextPath);
       }
     } else if (_owner.length === 1) {
       // 单 owner 快路径，避免分配
-      emitUpdate({
-        type,
-        target,
-        name,
-        value,
-        oldValue,
-        args,
-        currentTarget: _owner[0],
-        path: nextPath,
-      });
+      _emit(type, target, name, value, oldValue, args, _owner[0], nextPath);
+    } else if (_owner.length === 2) {
+      // 双 owner 是常态（数据同时挂在父数据和行渲染数据上）：
+      // O(1) 比较去重，省掉 Set 分配
+      const ownerA = _owner[0];
+      const ownerB = _owner[1];
+
+      _emit(type, target, name, value, oldValue, args, ownerA, nextPath);
+
+      if (ownerB !== ownerA) {
+        _emit(type, target, name, value, oldValue, args, ownerB, nextPath);
+      }
     } else if (_owner.length) {
       // 同一父级可能被登记多次（如重复 push），需按 Set 去重
       for (const parent of new Set(_owner)) {
-        emitUpdate({
-          type,
-          target,
-          name,
-          value,
-          oldValue,
-          args,
-          currentTarget: parent,
-          path: nextPath,
-        });
+        _emit(type, target, name, value, oldValue, args, parent, nextPath);
       }
     }
   }

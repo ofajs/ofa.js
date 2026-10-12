@@ -18,13 +18,31 @@ export const needWrapTags = ["o-fill", "o-if", "o-else-if", "o-else"];
 /** 内容编译缓存：内容原文 → 编译模板（o-if 与 o-fill 共享一张表） */
 const compiledContents = new Map();
 
-/** 按内容原文取编译模板（跨实例共享，编译一次） */
-export const getCompiledContent = (html) => {
+/**
+ * 按内容原文取编译模板（跨实例共享，编译一次）。
+ *
+ * @param {string} html 内容原文，同时作为缓存键
+ * @param {HTMLTemplateElement} [sourceEl] 内容所在的 template[inner-code]
+ *  元素引用。首编译优先从元素搬运内容：内容含表格位置的 o-if/o-fill 时
+ * （如 replace-temp 展开进 tbody 的行），字符串重解析会被解析器 foster
+ *  parenting 提出 table（自定义元素不在表格解析白名单），元素搬运则
+ *  原样保留。多实例共享缓存，仅首次编译用到该引用。
+ */
+export const getCompiledContent = (html, sourceEl) => {
   let compiled = compiledContents.get(html);
 
   if (!compiled) {
     compiled = document.createElement("template");
-    compiled.innerHTML = html;
+
+    // 调用方可能传入 xhear 代理（如元素子项访问器），归一化到原生元素
+    const rawEl = sourceEl && sourceEl.ele ? sourceEl.ele : sourceEl;
+
+    if (rawEl && rawEl.content) {
+      moveChildren(rawEl, compiled);
+    } else {
+      compiled.innerHTML = html;
+    }
+
     compileTemplate(compiled);
     compiledContents.set(html, compiled);
   }

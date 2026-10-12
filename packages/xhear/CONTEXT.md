@@ -43,8 +43,8 @@ packages/xhear/
 │       ├── compile.mjs    模板编译（binder 描述符 + markers 共享映射，见文件头注释）
 │       ├── render.mjs     渲染编排 + renderExtends 钩子 + prop/attr/class/watch 动作
 │       ├── condition.mjs  o-if / o-else-if / o-else 条件链（light DOM）
-│       ├── fill.mjs       o-fill 列表渲染（fill-key 对账 + $data/$index/$host）
-│       ├── inner-code.mjs o-if/o-fill 内容保护层（inner-code 包裹 + 编译缓存）
+│       ├── fill.mjs       o-fill 列表渲染（结构变更才整表对账 + fill-key/LIS 最小移动 + $data/$index/$host）
+│       ├── inner-code.mjs o-if/o-fill 内容保护层（inner-code 包裹 + 编译缓存；首编译支持元素搬运）
 │       └── sync.mjs       sync: 双向同步动作
 └── test/
     ├── statics/           15 个自检页（harness.mjs 零依赖渲染检查项）
@@ -241,6 +241,24 @@ inner-code 没事（wrapTemp 在递归之后），只有"从 origin 字符串再
 
 **正确姿势**：递归编译用 `template:not([inner-code])` 选择器跳过；新增
 "从字符串重新解析"的路径时必须复查这一条。
+
+### 表格位置的自定义元素不可字符串重解析（foster parenting）
+
+**症状**：replace-temp 展开进 tbody 的 o-fill（或表格位置的条件分支），
+宿主编译结构正确，实例渲染后该元素却被提到了 table 前面、tbody 空了。
+
+**根因**：HTML 解析器的表格插入模式白名单只有 caption/col/tbody/tr/td/
+template/style/script 等，**自定义元素不在其中**——任何上下文（含
+template.innerHTML）裸解析 `<tbody><o-fill>` 都会被 foster parenting 提出
+表格。宿主编译没事是因为解析时 o-fill 躺在 replace-temp 模板里（template
+在白名单内），之后 unwrap 是纯 DOM 移动；坏在 inner-code 缓存把内容序列化
+成 originHTML 字符串后**二次解析**。
+
+**正确姿势**：inner-code 编译缓存首编译优先从元素引用搬运（
+`getCompiledContent(html, sourceEl)`，fill/condition 的 created 留存
+`__originEl`），字符串解析只做兜底；新增"序列化→再解析"路径前先检查
+内容是否可能含表格位置的元素。另注意 `this[0]` 这类子项访问返回的是
+xhear 代理（tagName 为 undefined），传给 DOM 工具前用 `.ele` 归一化。
 
 ### 移植渲染组件时对照旧实现的"隐式副作用清单"
 

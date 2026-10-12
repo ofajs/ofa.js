@@ -105,11 +105,32 @@ packages/ofajs/
   冒烟页 `test/statics/dist-host.html` 以经典 script 引 `dist/ofa.js`，
   断言全局暴露、经典脚本注册组件渲染、包内 drill 完整加载 fixtures 组件。
 - benchmark：`npm run bench:ofajs`（端口 3352，自动起停）。新旧分页
-  A/B（两版都设 window.\$/globalThis.ofa 且注册 o-* 元素，同页必冲突），
+  A/B（两版都设 window.\$/globalThis.ofa 且注册 o-\* 元素，同页必冲突），
   场景：o-fill 初建/对账、o-if 切换、drawUrl 转译、fixRelate 修正、
   provider 广播。结论（chromium 156）：o-fill 批量对账 +63%、初建 +29%、
   转译 +6%，其余持平，零回退——对账/初建的领先主要继承自 xhear 新管线
   （createItem 描述符快路径），ofa 层自身的对账算法与旧版一致。
+- 跨框架基准：`npm run bench:cross`（端口 3353，自动起停；首次先
+  `node packages/ofajs/benchmark/fetch-cross-vendor.mjs` 下载框架文件到
+  `vendor/cross/`，该目录不进仓库）。ofa.js（dist/ofa.min.js）vs
+  Vue 3.5（vue.global.prod.js）vs React 18.3（UMD，19 起无 UMD），
+  页面 `cross-ofajs|vue|react.html` 的行 DOM 结构与场景逻辑逐字一致，
+  差异只在框架引导与数据操作惯用写法（o-fill fill-key / v-for :key /
+  key+useState 不可变更新）；分场景独立页，一轮内三框架紧挨着采集，
+  CDP 关 HTTP 缓存保证首屏冷加载，场景内行数断言自校验落定。
+  2026-10 优化前基线（chromium 156，3 轮中位数）：列表运行时操作全面
+  落后——交换 3020ms、追加 247ms、替换 128ms、部分更新 ×10 423ms
+  （Vue/React 个位数到几十）。根因：① 任何深层 item 变更冒泡命中
+  `hasModified("value")` → 整表 refreshView；② 逐位对账 indexOf + 每次
+  移动后全量重算 keyVals，O(n²) 且单次交换级联 ~n/2 次 DOM 移动。
+
+  2026-10 优化后（fill.mjs 结构判定 + LIS，同机同法）：交换 3020→167ms
+  （反超 React 的 226）、追加 247→45ms、替换 128→60ms；建 1000 行
+  38ms、清空 34ms、首屏 74ms 持平原状。**部分更新（update10）421ms
+  无变化**——结构判定已生效（插桩验证 refreshView 零调用），剩余成本
+  在 stanz 事件机制（emitUpdate + Watcher 冻结构造约占粒度路径工作
+  时间一半，CPU profile 实测），下一步优化在 stanz 热路径（懒冻结、
+  双 owner 去 Set、path 数组复用），以 bench:stanz 验证。
 
 ## 七、用例覆盖表（自检页 → 覆盖点）
 

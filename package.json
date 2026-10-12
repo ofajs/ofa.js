@@ -18,7 +18,8 @@
     "bench:stanz": "node packages/stanz/benchmark/run.mjs",
     "bench:xhear": "node packages/xhear/benchmark/run.mjs",
     "server": "node scripts/static-server.mjs",
-    "bench:ofajs": "node packages/ofajs/benchmark/run.mjs"
+    "bench:ofajs": "node packages/ofajs/benchmark/run.mjs",
+    "bench:cross": "node packages/ofajs/benchmark/run-cross.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

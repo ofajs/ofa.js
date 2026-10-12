@@ -68,7 +68,8 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   只有**用户明确要求**（"跑一下 benchmark""对比新旧性能"）时才运行并解读。
 - 涉及性能敏感路径的改动，完成后应**提醒用户**可以跑
   `npm run bench:drill` / `npm run bench:stanz` 验证。
-- 命令：`bench:drill` / `bench:stanz` 各测一包，`bench` 依次跑两个。
+- 命令：`bench:drill` / `bench:stanz` / `bench:xhear` / `bench:ofajs` 各测一包，
+  `bench:cross` 测 ofa.js vs Vue vs React 跨框架对比，`bench` 依次跑四个单包基准。
 - 方法学与坑较多，**做基准相关改动前先读技能 `benchmark-methodology`**。
 
 ## 五、踩坑知识沉淀规则
@@ -119,7 +120,7 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 
 - 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
-- 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352，`npm run bench` 依次跑全部）
+- 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352）；跨框架对比 `npm run bench:cross`（自管 3353，首次先跑 fetch-cross-vendor.mjs）
 - CI：`.github/workflows/ci.yml`，五条并行任务——drill、stanz（各三浏览器）+ ofa.js 按
   chromium/firefox/webkit 拆三条（ofajs 覆盖 xhear，不单列）。本地等价命令
   `npm run test:drill` / `test:stanz` / `test:ofajs`；CI 下 config 自动启用

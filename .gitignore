@@ -8,3 +8,5 @@ prompt.md
 .playwright-mcp
 # benchmark 夹具由 run.mjs 动态生成，不进仓库
 packages/drill/benchmark/fixtures/
+# 跨框架基准的第三方框架文件由 fetch-cross-vendor.mjs 下载，不进仓库
+packages/ofajs/benchmark/vendor/cross/

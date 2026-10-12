@@ -3381,13 +3381,31 @@ try{
   /** 内容编译缓存：内容原文 → 编译模板（o-if 与 o-fill 共享一张表） */
   const compiledContents = new Map();
 
-  /** 按内容原文取编译模板（跨实例共享，编译一次） */
-  const getCompiledContent = (html) => {
+  /**
+   * 按内容原文取编译模板（跨实例共享，编译一次）。
+   *
+   * @param {string} html 内容原文，同时作为缓存键
+   * @param {HTMLTemplateElement} [sourceEl] 内容所在的 template[inner-code]
+   *  元素引用。首编译优先从元素搬运内容：内容含表格位置的 o-if/o-fill 时
+   * （如 replace-temp 展开进 tbody 的行），字符串重解析会被解析器 foster
+   *  parenting 提出 table（自定义元素不在表格解析白名单），元素搬运则
+   *  原样保留。多实例共享缓存，仅首次编译用到该引用。
+   */
+  const getCompiledContent = (html, sourceEl) => {
     let compiled = compiledContents.get(html);
 
     if (!compiled) {
       compiled = document.createElement("template");
-      compiled.innerHTML = html;
+
+      // 调用方可能传入 xhear 代理（如元素子项访问器），归一化到原生元素
+      const rawEl = sourceEl && sourceEl.ele ? sourceEl.ele : sourceEl;
+
+      if (rawEl && rawEl.content) {
+        moveChildren(rawEl, compiled);
+      } else {
+        compiled.innerHTML = html;
+      }
+
       compileTemplate(compiled);
       compiledContents.set(html, compiled);
     }
@@ -3530,18 +3548,15 @@ try{
 
     const { target, data, temps } = result;
 
-    try {
-      render({
-        target: conditionEl.ele,
-        data,
-        temps,
-        template: getCompiledContent(conditionEl.__originHTML),
-      });
-      console.debug("[rc]", conditionEl.tag, "render OK");
-    } catch (err) {
-      console.debug("[rc]", conditionEl.tag, "render THREW:", String(err).slice(0, 160));
-      throw err;
-    }
+    render({
+      target: conditionEl.ele,
+      data,
+      temps,
+      template: getCompiledContent(
+        conditionEl.__originHTML,
+        conditionEl.__originEl,
+      ),
+    });
 
     conditionEl.__rendered = true;
 
@@ -3599,6 +3614,9 @@ try{
     const firstEle = this[0];
     if (firstEle && firstEle.is("template[inner-code]")) {
       this.__originHTML = firstEle.html.trim();
+      // 保留元素引用：首次编译优先从元素搬运（表格位置的内容不可字符串
+      // 重解析，见 getCompiledContent）
+      this.__originEl = firstEle;
     } else {
       this.__originHTML = this.html.trim();
     }
@@ -3675,9 +3693,68 @@ try{
    * 渲染时按需编译并全局缓存）。列表项数据上下文为 $data/$index/$host/
    * $parent，与命名模板引用一致。
    *
-   * 更新采用基于 key 的对账（fill-key 或 xid 或引用）：存在则复用 DOM
-   * 并更新 $data/$index，缺失则删除，新增则插入。
+   * 更新采用基于 key 的对账（fill-key 或 xid 或引用）+ LIS 最小移动：
+   * 复用项只换绑 $data/$index，缺失则删除，新增则插入，乱序部分按最长
+   * 递增子序列保证每个元素至多移动一次。触发面上只有 value 的结构变更
+   * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更经
+   * itemData 冒泡到行内绑定任务粒度消化，不为内容改动付出全量 diff。
    */
+
+  /**
+   * LIS（最长递增子序列）：入参为新序列到旧元素的映射（null = 新建项），
+   * 返回无需移动的新序列下标数组。patience 算法 + 前驱回溯，O(n log n)。
+   */
+  const getSequence = (reused) => {
+    const p = [];
+    const seq = [];
+
+    for (let i = 0; i < reused.length; i++) {
+      const found = reused[i];
+
+      if (!found) {
+        continue;
+      }
+
+      const val = found.index;
+      const last = seq[seq.length - 1];
+
+      if (last === undefined || reused[last].index < val) {
+        p[i] = last === undefined ? -1 : last;
+        seq.push(i);
+      } else {
+        // 二分找 seq 中最后一个 index < val 的槽位替换
+        let lo = 0;
+        let hi = seq.length - 1;
+
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1;
+          if (reused[seq[mid]].index < val) {
+            lo = mid + 1;
+          } else {
+            hi = mid;
+          }
+        }
+
+        if (reused[seq[lo]].index > val) {
+          p[i] = lo > 0 ? seq[lo - 1] : -1;
+          seq[lo] = i;
+        }
+      }
+    }
+
+    // 回溯还原下标链
+    const res = new Array(seq.length);
+    let cursor = seq.length - 1;
+    let idx = seq[cursor];
+
+    while (cursor >= 0) {
+      res[cursor] = idx;
+      cursor--;
+      idx = p[idx];
+    }
+
+    return res;
+  };
 
   register$1({
     tag: "o-fill",
@@ -3723,7 +3800,7 @@ try{
         if (!targetTemp) {
           // 未声明 name 或找不到命名模板时，使用自身内容（编译缓存）
           if (this.__originHTML) {
-            targetTemp = getCompiledContent(this.__originHTML);
+            targetTemp = getCompiledContent(this.__originHTML, this.__originEl);
           } else {
             throw new Error("o-fill - Template not found: " + tempName);
           }
@@ -3770,70 +3847,105 @@ try{
           return key;
         };
 
-        const keyValsArr = arr.map(getKeyVal);
+        const selfEl = this.ele;
 
-        const tempChildren = Array.from(this.ele.children);
+        // 旧子元素按 key 建索引（首现优先；重复 key 只复用一次，
+        // 第二个实例走新建，避免两个位置争抢同一元素）
+        const oldEls = Array.from(selfEl.children);
+        const oldByKey = new Map();
+        oldEls.forEach((e, i) => {
+          const key = getKeyVal(e.__render_data.$data, i);
+          if (!oldByKey.has(key)) {
+            oldByKey.set(key, { el: e, index: i });
+          }
+        });
 
-        // 先删除已不存在的项
-        for (let i = 0; i < tempChildren.length; i++) {
-          const e = tempChildren[i];
-          const renderedItem = e.__render_data;
+        // 新序列逐位取复用：取得到旧元素就复用，取不到就新建
+        const reused = [];
+        for (let i = 0, len = arr.length; i < len; i++) {
+          const key = getKeyVal(arr[i], i);
+          const found = oldByKey.get(key);
 
-          const currentKeyVal = getKeyVal(renderedItem.$data, i);
-
-          // 不存在的 id，需要删除
-          if (!keyValsArr.includes(currentKeyVal)) {
-            e.remove();
-            revokeAll(e);
+          if (found) {
+            oldByKey.delete(key);
+            reused.push(found);
+          } else {
+            reused.push(null);
           }
         }
 
-        const { children } = this.ele;
+        // 未被消费的旧元素 = 已删除项
+        for (const { el } of oldByKey.values()) {
+          el.remove();
+          revokeAll(el);
+        }
 
-        let keyVals = [];
-        const refreshKeyVals = () => {
-          keyVals = Array.from(children).map((e, i) =>
-            getKeyVal(e.__render_data.$data, i),
-          );
-        };
-        refreshKeyVals();
-
-        const selfEl = this.ele;
-
-        // 逐位对账：复用则移位并更新数据，缺失则新建插入
+        // 复用项数据对齐：$data 换绑、$index 修正，由行内绑定任务粒度消化
         for (let i = 0, len = arr.length; i < len; i++) {
+          const found = reused[i];
+
+          if (!found) {
+            continue;
+          }
+
+          const $ele = eleX(found.el);
           const item = arr[i];
-          const keyVal = getKeyVal(item, i);
 
-          const index = keyVals.indexOf(keyVal);
+          if ($ele.__item.$data !== item) {
+            $ele.__item.$data = item;
+          }
+          if ($ele.__item.$index !== i) {
+            $ele.__item.$index = i;
+          }
+        }
 
-          if (index > -1) {
-            const $ele = eleX(children[index]);
+        // 免移动快速通道：无新增且旧位置整体递增（如批量删除、原地过滤）
+        // 时连 LIS 都不必算
+        let needMoves = false;
+        let prevIndex = -1;
+        for (const found of reused) {
+          if (!found || found.index <= prevIndex) {
+            needMoves = true;
+            break;
+          }
+          prevIndex = found.index;
+        }
 
-            if (children[i] !== $ele.ele) {
-              selfEl.insertBefore($ele.ele, children[i]);
-              refreshKeyVals();
+        if (needMoves) {
+          // LIS 最小移动：旧位置的最长递增子序列原地不动，其余元素各移动
+          // 一次；从右往左以锚点落位（与 Vue 3 / inferno 同族算法），
+          // 取代逐位对账——后者一次交换会级联约 n/2 次 DOM 移动
+          const lis = new Set(getSequence(reused));
+
+          let anchor = null;
+          for (let i = arr.length - 1; i >= 0; i--) {
+            const found = reused[i];
+            let el;
+
+            if (found) {
+              if (lis.has(i)) {
+                anchor = found.el;
+                continue;
+              }
+              el = found.el;
+            } else {
+              el = createItem(
+                arr[i],
+                temps,
+                targetTemp,
+                data.$host || data,
+                i,
+                keyName,
+                this._$parent,
+              ).ele;
             }
 
-            if ($ele.__item.$data !== item) {
-              $ele.__item.$data = item;
+            // 免插入检查只对已挂载的复用元素成立；新建元素是 detached 的
+            // （nextSibling 恒为 null），必须无条件插入
+            if (!found || el.nextSibling !== anchor) {
+              selfEl.insertBefore(el, anchor);
             }
-            if ($ele.__item.$index !== i) {
-              $ele.__item.$index = i;
-            }
-          } else {
-            const $ele = createItem(
-              item,
-              temps,
-              targetTemp,
-              data.$host || data,
-              i,
-              keyName,
-              this._$parent,
-            );
-
-            selfEl.insertBefore($ele.ele, children[i]);
-            refreshKeyVals();
+            anchor = el;
           }
         }
 
@@ -3845,8 +3957,18 @@ try{
       },
     },
     ready() {
-      this.watchTick((e) => {
-        if (e.hasModified("value")) {
+      this.watchTick((watchers) => {
+        // 只有 value 的结构变更（整体替换、数组增删/重排/换元素）才整表
+        // 对账。结构判定依据 stanz 事件形态：数组方法与索引赋值的 target
+        // 就是 value 数组，整体替换的 target 是 o-fill 自身（name="value"）；
+        // item 内部变更的 target 是 item，跳过后由行内绑定任务粒度刷新。
+        const structural = watchers.some(
+          (w) =>
+            (w.target === w.currentTarget && w.name === "value") ||
+            w.target === w.currentTarget.value,
+        );
+
+        if (structural) {
           this.refreshView();
         }
       });
@@ -3862,6 +3984,10 @@ try{
       const firstEle = this[0];
       if (firstEle && firstEle.is("template[inner-code]")) {
         originHTML = firstEle.html.trim();
+        // 保留元素引用：首次编译优先从元素搬运内容（表格位置的内容不可
+        // 字符串重解析，见 getCompiledContent）；内容随后被清掉。
+        // this[0] 是 xhear 代理，存原生元素避免搬运时语义漂移
+        this.__originEl = firstEle.ele;
       } else {
         originHTML = this.html.trim();
       }

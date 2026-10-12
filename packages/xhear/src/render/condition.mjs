@@ -87,18 +87,15 @@ const renderContent = (conditionEl) => {
 
   const { target, data, temps } = result;
 
-  try {
-    render({
-      target: conditionEl.ele,
-      data,
-      temps,
-      template: getCompiledContent(conditionEl.__originHTML),
-    });
-    console.debug("[rc]", conditionEl.tag, "render OK");
-  } catch (err) {
-    console.debug("[rc]", conditionEl.tag, "render THREW:", String(err).slice(0, 160));
-    throw err;
-  }
+  render({
+    target: conditionEl.ele,
+    data,
+    temps,
+    template: getCompiledContent(
+      conditionEl.__originHTML,
+      conditionEl.__originEl,
+    ),
+  });
 
   conditionEl.__rendered = true;
 
@@ -156,6 +153,9 @@ const createdFunc = function () {
   const firstEle = this[0];
   if (firstEle && firstEle.is("template[inner-code]")) {
     this.__originHTML = firstEle.html.trim();
+    // 保留元素引用：首次编译优先从元素搬运（表格位置的内容不可字符串
+    // 重解析，见 getCompiledContent）
+    this.__originEl = firstEle;
   } else {
     this.__originHTML = this.html.trim();
   }

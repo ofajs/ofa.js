@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cross-framework benchmark · React</title>
+    <style>
+      body { font: 14px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 24px auto; max-width: 720px; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 18px; }
+      .framework { display: inline-block; font-size: 13px; font-weight: 600; padding: 2px 10px; border-radius: 12px; background: #e6f0f8; color: #0b6aa2; margin-bottom: 8px; }
+      #status { color: #6e6e73; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #e8e8ed; }
+      th { font-size: 13px; color: #6e6e73; font-weight: 500; }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      /* 行 DOM 结构与 ofajs/vue 页完全一致，是三框架对比的基准面 */
+      .row { display: flex; padding: 4px 8px; border-bottom: 1px solid #eee; align-items: center; }
+      .col-id { width: 72px; color: #888; }
+      .col-label { flex: 1; }
+      .col-label a { color: #2456c4; text-decoration: none; }
+      .col-remove { width: 28px; text-align: center; cursor: pointer; color: #c33; }
+    </style>
+  </head>
+  <body>
+    <span class="framework" id="fw-badge">…</span>
+    <h1>跨框架基准 / cross-framework benchmark</h1>
+    <p id="status">准备中… / preparing</p>
+    <table>
+      <thead>
+        <tr><th>场景 / scenario</th><th style="text-align:right">结果 / result</th></tr>
+      </thead>
+      <tbody id="rows-tb"></tbody>
+    </table>
+    <div id="app"></div>
+
+    <!-- React 18 生产版 UMD（19 起不再提供 UMD 构建）；加载求值计入首屏 -->
+    <script src="./vendor/cross/react.production.min.js"></script>
+    <script src="./vendor/cross/react-dom.production.min.js"></script>
+
+    <script type="module">
+      // 跨框架基准 · React 侧。场景与落定逻辑与 cross-ofajs.html /
+      // cross-vue.html 逐字一致，框架差异只体现在引导与 __api 实现。
+      // createElement 是 JSX 编译后的形态；无 memo/ useMemo 等人工优化，
+      // setState 不可变更新为 React 惯用写法。
+      const t0 = performance.now();
+
+      try {
+        const e = React.createElement;
+
+        document.getElementById("fw-badge").textContent =
+          `React ${React.version}`;
+
+        const results = (window.__benchResults = []);
+        const statusEl = document.getElementById("status");
+        const tb = document.getElementById("rows-tb");
+        const rowEls = new Map();
+
+        const addRow = (id, label) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${label}</td><td class="num">…</td>`;
+          tb.appendChild(tr);
+          rowEls.set(id, tr);
+          statusEl.textContent = `运行中 ${results.length}… / running`;
+        };
+
+        const push = (id, label, value) => {
+          rowEls.get(id).querySelector(".num").textContent =
+            `${Number(value).toLocaleString("en-US")} ms`;
+          results.push({ id, label, value, unit: "ms" });
+          statusEl.textContent = `运行中 ${results.length}… / running`;
+        };
+
+        const median = (arr) =>
+          [...arr].sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+        const raf = () => new Promise((r) => requestAnimationFrame(r));
+
+        // 统一落定：Vue 刷新在微任务、React 在 MessageChannel 宏任务、
+        // ofa watchTick 在定时器任务——都先于之后排队的 setTimeout(0) 执行
+        const settle = () => new Promise((r) => setTimeout(r, 0));
+
+        const makeItems = (offset, n) =>
+          Array.from({ length: n }, (_, i) => ({
+            id: offset + i,
+            label: "item #" + (offset + i),
+          }));
+
+        const allRows = () => [
+          ...document.querySelectorAll("#app .row"),
+        ];
+        const assertRows = (n, where) => {
+          const got = allRows().length;
+          if (got !== n) {
+            throw new Error(
+              `行数断言失败 / row count mismatch at ${where}: expect ${n}, got ${got}`,
+            );
+          }
+        };
+
+        // ---- React 引导与数据操作（惯用写法：useState 不可变更新 + key）----
+
+        function App() {
+          const [items, setItems] = React.useState([]);
+
+          const remove = (id) =>
+            setItems((prev) => {
+              const i = prev.findIndex((x) => x.id === id);
+              return i > -1
+                ? [...prev.slice(0, i), ...prev.slice(i + 1)]
+                : prev;
+            });
+
+          window.__api = {
+            setData: (v) => setItems(v),
+            append: (v) => setItems((prev) => [...prev, ...v]),
+            remove,
+            updateTenth: (suffix) =>
+              setItems((prev) =>
+                prev.map((it, i) =>
+                  i % 10 === 0
+                    ? { ...it, label: "item #" + it.id + suffix }
+                    : it,
+                ),
+              ),
+            swapEnds: () =>
+              setItems((prev) => {
+                const next = prev.slice();
+                const first = next[0];
+                next[0] = next[next.length - 1];
+                next[next.length - 1] = first;
+                return next;
+              }),
+          };
+
+          return items.map((item) =>
+            e(
+              "div",
+              { className: "row", key: item.id, "data-row-id": item.id },
+              e("div", { className: "col-id" }, item.id),
+              e(
+                "div",
+                { className: "col-label" },
+                e("a", { className: "lbl" }, item.label),
+              ),
+              e(
+                "div",
+                { className: "col-remove", onClick: () => remove(item.id) },
+                "×",
+              ),
+            ),
+          );
+        }
+
+        ReactDOM.createRoot(document.getElementById("app")).render(e(App));
+
+        // React 18 的 render 是异步调度，__api 在组件函数首次执行时才挂上
+        for (;;) {
+          if (window.__api) break;
+          await new Promise((r) => setTimeout(r, 0));
+        }
+        const api = window.__api;
+
+        // ---- 首屏：框架加载 + 挂载 + 渲染 1000 行 ----
+
+        addRow(
+          "load1k",
+          "首屏：加载 + 渲染 1000 行 / boot + render 1k rows",
+        );
+        api.setData(makeItems(0, 1000));
+        for (;;) {
+          if (allRows().length === 1000) break;
+          await new Promise((r) => setTimeout(r, 0));
+          await raf();
+        }
+        push("load1k", "boot", performance.now());
+
+        // ---- 场景（三页一致；fn 内含落定与行数断言）----
+
+        const benchScenario = async (id, label, prepare, fn) => {
+          addRow(id, label);
+          await prepare();
+          await fn(); // 预热一轮触发 JIT 分层
+          const samples = [];
+          for (let s = 0; s < 3; s++) {
+            await prepare();
+            const t = performance.now();
+            await fn();
+            samples.push(performance.now() - t);
+          }
+          push(id, label, median(samples).toFixed(1));
+        };
+
+        let updBit = false;
+        let rmIds = [];
+
+        const SCENARIOS = {
+          create1k: {
+            label: "初始化 1000 行 / create 1k rows",
+            prepare: async () => {
+              api.setData([]);
+              await settle();
+            },
+            fn: async () => {
+              api.setData(makeItems(0, 1000));
+              await settle();
+              assertRows(1000, "create1k");
+            },
+          },
+          replace1k: {
+            label: "整体替换 1000 行（全键对账）/ replace 1k rows",
+            prepare: async () => {
+              api.setData(makeItems(0, 1000));
+              await settle();
+            },
+            fn: async () => {
+              api.setData(makeItems(500000, 1000));
+              await settle();
+              assertRows(1000, "replace1k");
+            },
+          },
+          update10: {
+            label: "每 10 行改标签 ×10 轮 / update every 10th row ×10",
+            prepare: async () => {
+              updBit = false;
+              api.setData(makeItems(0, 1000));
+              await settle();
+            },
+            fn: async () => {
+              for (let i = 0; i < 10; i++) {
+                updBit = !updBit;
+                api.updateTenth(updBit ? "-x" : "");
+                await settle();
+              }
+              assertRows(1000, "update10");
+            },
+          },
+          swap20: {
+            label: "首尾行交换 ×20 / swap first & last ×20",
+            prepare: async () => {
+              api.setData(makeItems(0, 1000));
+              await settle();
+            },
+            fn: async () => {
+              for (let i = 0; i < 20; i++) {
+                api.swapEnds();
+                await settle();
+              }
+              assertRows(1000, "swap20");
+            },
+          },
+          remove100: {
+            label: "批量删除 100 行（单次落定）/ remove 100 rows (batched)",
+            prepare: async () => {
+              api.setData(makeItems(0, 1000));
+              await settle();
+              rmIds = [...allRows()]
+                .slice(500, 600)
+                .map((el) => Number(el.dataset.rowId));
+            },
+            fn: async () => {
+              for (const id of rmIds) {
+                api.remove(id);
+              }
+              await settle();
+              assertRows(900, "remove100");
+            },
+          },
+          append1k: {
+            label: "追加 1000 行（1000→2000）/ append 1k rows",
+            prepare: async () => {
+              api.setData(makeItems(0, 1000));
+              await settle();
+            },
+            fn: async () => {
+              api.append(makeItems(500000, 1000));
+              await settle();
+              assertRows(2000, "append1k");
+            },
+          },
+          clear: {
+            label: "清空 2000 行 / clear 2k rows",
+            prepare: async () => {
+              api.setData(makeItems(0, 2000));
+              await settle();
+            },
+            fn: async () => {
+              api.setData([]);
+              await settle();
+              assertRows(0, "clear");
+            },
+          },
+        };
+
+        const only = new URLSearchParams(location.search).get("only");
+        const scenario = SCENARIOS[only];
+
+        if (!scenario) {
+          throw new Error(`未知场景 / unknown scenario: ${only}`);
+        }
+
+        await benchScenario(only, scenario.label, scenario.prepare, scenario.fn);
+
+        statusEl.textContent = `完成 / done`;
+        window.__benchDone = true;
+      } catch (err) {
+        window.__benchError = (err && err.message) || String(err);
+        document.getElementById("status").textContent =
+          "失败 / failed: " + window.__benchError;
+        throw err;
+      }
+    </script>
+  </body>
+</html>

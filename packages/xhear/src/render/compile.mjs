@@ -50,6 +50,35 @@ const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
 const DIRECTIVE_RE = /(.*):(.+)/;
 const STYLE_DATA_RE = /data\(.+?\)/g;
 
+const DATA_KEY_RE = /\$data\.([A-Za-z_$][\w$]*)/g;
+
+/**
+ * 表达式依赖分析（编译期一次），供轻量行上下文的 tick 过滤使用：
+ * - itemKeys：$data.xxx 的键集合，item 上对应键的变更才重跑该绑定
+ * - dataAny：裸 $data / $data[...] 等无法定位键的整项读取
+ * - host/parent：订阅链上其他目标的依赖标记
+ * - $index 不入依赖：索引变更只发生在结构对账，由对账方主动重跑
+ * 分析是保守超集：字符串字面量里的 "$data.x" 会被多算，只会多跑不会漏跑。
+ */
+const analyzeDeps = (expr) => {
+  const itemKeys = new Set();
+  const re = new RegExp(DATA_KEY_RE.source, "g");
+  let m;
+
+  while ((m = re.exec(expr))) {
+    itemKeys.add(m[1]);
+  }
+
+  const rest = expr.replace(new RegExp(DATA_KEY_RE.source, "g"), "");
+
+  return {
+    itemKeys,
+    dataAny: /\$data/.test(rest),
+    host: rest.includes("$host"),
+    parent: rest.includes("$parent"),
+  };
+};
+
 /** 在 template.content 内查询元素（可选逐个执行回调） */
 const searchTemp = (template, expr, func) => {
   const rearr = Array.from(template.content.querySelectorAll(expr));
@@ -195,7 +224,13 @@ const buildBinders = (parent, path, binders, markers) => {
       // xt: 前缀的注释节点是文本插值标记
       if (node.data.startsWith("xt:")) {
         const expr = decodeURIComponent(node.data.slice(3));
-        binders.push({ t: "text", path: childPath, expr, fn: compileExpr(expr) });
+        binders.push({
+          t: "text",
+          path: childPath,
+          expr,
+          fn: compileExpr(expr),
+          deps: analyzeDeps(expr),
+        });
       }
       continue;
     }
@@ -231,6 +266,7 @@ const buildBinders = (parent, path, binders, markers) => {
             key,
             expr,
             fn: compileExpr(expr),
+            deps: analyzeDeps(expr),
           })),
         })),
       });

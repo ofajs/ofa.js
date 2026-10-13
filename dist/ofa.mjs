@@ -1300,6 +1300,35 @@ const nsAttrPrefixes = new Set(["xmlns", "xml", "xlink"]);
 const DIRECTIVE_RE = /(.*):(.+)/;
 const STYLE_DATA_RE = /data\(.+?\)/g;
 
+const DATA_KEY_RE = /\$data\.([A-Za-z_$][\w$]*)/g;
+
+/**
+ * 表达式依赖分析（编译期一次），供轻量行上下文的 tick 过滤使用：
+ * - itemKeys：$data.xxx 的键集合，item 上对应键的变更才重跑该绑定
+ * - dataAny：裸 $data / $data[...] 等无法定位键的整项读取
+ * - host/parent：订阅链上其他目标的依赖标记
+ * - $index 不入依赖：索引变更只发生在结构对账，由对账方主动重跑
+ * 分析是保守超集：字符串字面量里的 "$data.x" 会被多算，只会多跑不会漏跑。
+ */
+const analyzeDeps = (expr) => {
+  const itemKeys = new Set();
+  const re = new RegExp(DATA_KEY_RE.source, "g");
+  let m;
+
+  while ((m = re.exec(expr))) {
+    itemKeys.add(m[1]);
+  }
+
+  const rest = expr.replace(new RegExp(DATA_KEY_RE.source, "g"), "");
+
+  return {
+    itemKeys,
+    dataAny: /\$data/.test(rest),
+    host: rest.includes("$host"),
+    parent: rest.includes("$parent"),
+  };
+};
+
 /** 在 template.content 内查询元素（可选逐个执行回调） */
 const searchTemp = (template, expr, func) => {
   const rearr = Array.from(template.content.querySelectorAll(expr));
@@ -1445,7 +1474,13 @@ const buildBinders = (parent, path, binders, markers) => {
       // xt: 前缀的注释节点是文本插值标记
       if (node.data.startsWith("xt:")) {
         const expr = decodeURIComponent(node.data.slice(3));
-        binders.push({ t: "text", path: childPath, expr, fn: compileExpr(expr) });
+        binders.push({
+          t: "text",
+          path: childPath,
+          expr,
+          fn: compileExpr(expr),
+          deps: analyzeDeps(expr),
+        });
       }
       continue;
     }
@@ -1481,6 +1516,7 @@ const buildBinders = (parent, path, binders, markers) => {
             key,
             expr,
             fn: compileExpr(expr),
+            deps: analyzeDeps(expr),
           })),
         })),
       });
@@ -1766,6 +1802,8 @@ function render({
             textEl.textContent = content;
           }
         };
+        // 编译期依赖分析（轻量行上下文的 tick 过滤用）
+        renderFunc.deps = b.deps;
         tasks.push(renderFunc);
 
         // 撤销列表由 revokeAll 整批清空（done 标记防重复执行），
@@ -1899,6 +1937,8 @@ function render({
 
               return reval;
             };
+            // 编译期依赖分析（轻量行上下文的 tick 过滤用）
+            work.deps = item.deps;
 
             let clearRevs = () => {
               if (clearRevs.__done) return;
@@ -2204,40 +2244,111 @@ function render({
   if (tasks.length) {
     tasks.forEach((f) => f());
 
-    // 数据更新后重跑全部渲染任务；任务清空（绑定全部释放）则退订。
-    // 轻量上下文（fill 行）经 __watchTargets 把订阅挂到数据本体上，
-    // 上下文对象本身不再是 Stanz（建表热路径省一个代理实例）。
+    // 数据更新后重跑渲染任务；任务清空（绑定全部释放）则退订。
+    // 轻量上下文（fill 行）经 __watchTargets 把订阅挂到数据本体与
+    // $host/$parent 上（__watchRoles 记录目标角色），并按编译期依赖
+    // 过滤重跑：item 直写属性只重跑依赖命中的绑定，深层/结构/未知
+    // 事件通配全跑；上下文对象本身不再是 Stanz（建表省一个代理实例）。
     // 数据本体不可订阅（原始值项）时跳过订阅，行更新由结构对账兜底
     const watchTargets = data.__watchTargets;
     const tickTargets = watchTargets || (data.watchTick ? [data] : null);
 
     if (tickTargets) {
-      const rerun = () => {
+      const roles = data.__watchRoles;
+      const rerunAll = () => {
         if (tasks.length) {
           tasks.forEach((f) => f());
         } else {
           untick();
         }
       };
-      const wids = tickTargets.map((t) => t.watchTick(rerun));
+
+      let rerun = rerunAll;
+
+      if (watchTargets) {
+        rerun = (watchers, ti) => {
+          if (!tasks.length) {
+            untick();
+            return;
+          }
+
+          const self = tickTargets[ti];
+          const role = roles && roles[ti];
+          let wildcard = false;
+          const keys = new Set();
+
+          for (const w of watchers) {
+            if (w.type === "array") {
+              wildcard = true;
+              break;
+            }
+
+            if (w.target === self && typeof w.name === "string") {
+              keys.add(w.name);
+            } else {
+              // 深层变更或无法定位的事件：通配全跑，保证不漏更新
+              wildcard = true;
+              break;
+            }
+          }
+
+          if (wildcard) {
+            tasks.forEach((f) => f());
+            return;
+          }
+
+          for (const f of tasks) {
+            const d = f.deps;
+
+            if (!d) {
+              f();
+              continue;
+            }
+
+            if (role !== "item") {
+              // $host/$parent 事件：只重跑声明了对应依赖的绑定
+              if ((role === "host" && d.host) || (role === "parent" && d.parent)) {
+                f();
+              }
+              continue;
+            }
+
+            if (d.dataAny) {
+              f();
+              continue;
+            }
+
+            for (const k of d.itemKeys) {
+              if (keys.has(k)) {
+                f();
+                break;
+              }
+            }
+          }
+        };
+      }
+
+      const wids = tickTargets.map((t, i) =>
+        watchTargets ? t.watchTick((ws) => rerun(ws, i)) : t.watchTick(rerunAll)
+      );
       const untick = () => {
         tickTargets.forEach((t, i) => t.unwatch(wids[i]));
       };
 
       if (watchTargets) {
-        // 轻量上下文的对接面：行销毁退订（__untick）、手动重跑
+        // 轻量上下文的对接面：行销毁退订（__untick）、手动全量重跑
         //（__rerun，$index 修正用）、对账换绑 $data（__retick）
-        data.__rerun = rerun;
+        data.__rerun = rerunAll;
         data.__untick = untick;
         data.__retick = (newTarget) => {
           if (tickTargets[0] === newTarget) {
-            rerun();
+            rerunAll();
             return;
           }
           tickTargets[0].unwatch(wids[0]);
           tickTargets[0] = newTarget;
-          wids[0] = newTarget.watchTick(rerun);
-          rerun();
+          wids[0] = newTarget.watchTick((ws) => rerun(ws, 0));
+          rerunAll();
         };
       }
     }
@@ -3752,8 +3863,14 @@ const getRenderData = (target) => {
  * 更新采用基于 key 的对账（fill-key 或 xid 或引用）+ LIS 最小移动：
  * 复用项只换绑 $data/$index，缺失则删除，新增则插入，乱序部分按最长
  * 递增子序列保证每个元素至多移动一次。触发面上只有 value 的结构变更
- * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更经
- * itemData 冒泡到行内绑定任务粒度消化，不为内容改动付出全量 diff。
+ * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更由行内
+ * 绑定任务直接订阅数据本体粒度消化，且按编译期依赖分析（analyzeDeps）
+ * 过滤：item 直写属性只重跑依赖命中的绑定，深层/结构/未知事件通配。
+ *
+ * 行上下文是轻量对象（$data/$index/$host/$parent/$ele），不再是每行一个
+ * Stanz：变更订阅经 __watchTargets/__watchRoles 挂到数据本体与
+ * $host/$parent 上（见 render 的对接面 __rerun/__untick/__retick），
+ * $index 仅在模板真正引用它时才回写（usesIndex 扫描）。
  */
 
 /**
@@ -3974,8 +4091,13 @@ register$1({
 
         if (itemCtx.$data !== item) {
           itemCtx.$data = item;
-          // 换绑订阅到新数据本体并立即重跑（轻量上下文）
-          itemCtx.__retick && itemCtx.__retick(item);
+          // 换绑订阅到新数据本体并立即重跑（轻量上下文）；新值不可
+          // 订阅（原始值）时只重跑一次，后续由结构对账兜底
+          if (itemCtx.__retick && item.watchTick) {
+            itemCtx.__retick(item);
+          } else if (itemCtx.__rerun) {
+            itemCtx.__rerun();
+          }
         }
         if (indexUsed && itemCtx.$index !== i) {
           itemCtx.$index = i;
@@ -4159,14 +4281,17 @@ const createItem = (
 
   if ($data && $data.watchTick) {
     itemData.__watchTargets = [$data];
+    itemData.__watchRoles = ["item"];
   }
   if ($host && $host.watchTick) {
     (itemData.__watchTargets || (itemData.__watchTargets = [])).push($host);
+    (itemData.__watchRoles || (itemData.__watchRoles = [])).push("host");
   }
   if ($parent) {
     itemData.$parent = $parent;
     if ($parent.watchTick) {
       (itemData.__watchTargets || (itemData.__watchTargets = [])).push($parent);
+      (itemData.__watchRoles || (itemData.__watchRoles = [])).push("parent");
     }
   }
 

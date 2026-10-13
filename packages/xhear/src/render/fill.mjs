@@ -10,12 +10,13 @@
  * 复用项只换绑 $data/$index，缺失则删除，新增则插入，乱序部分按最长
  * 递增子序列保证每个元素至多移动一次。触发面上只有 value 的结构变更
  * （整体替换、数组增删/重排/换元素）才整表对账；item 内部变更由行内
- * 绑定任务直接订阅数据本体粒度消化，不为内容改动付出全量 diff。
+ * 绑定任务直接订阅数据本体粒度消化，且按编译期依赖分析（analyzeDeps）
+ * 过滤：item 直写属性只重跑依赖命中的绑定，深层/结构/未知事件通配。
  *
  * 行上下文是轻量对象（$data/$index/$host/$parent/$ele），不再是每行一个
- * Stanz：变更订阅经 __watchTargets 挂到数据本体与 $host/$parent 上
- * （见 render 的对接面 __rerun/__untick/__retick），$index 仅在模板
- * 真正引用它时才回写（usesIndex 扫描）。
+ * Stanz：变更订阅经 __watchTargets/__watchRoles 挂到数据本体与
+ * $host/$parent 上（见 render 的对接面 __rerun/__untick/__retick），
+ * $index 仅在模板真正引用它时才回写（usesIndex 扫描）。
  */
 import { register } from "../register.mjs";
 import { render } from "./render.mjs";
@@ -197,15 +198,18 @@ register({
       const selfEl = this.ele;
 
       // 旧子元素按 key 建索引（首现优先；重复 key 只复用一次，
-      // 第二个实例走新建，避免两个位置争抢同一元素）
-      const oldEls = Array.from(selfEl.children);
+      // 第二个实例走新建，避免两个位置争抢同一元素）。
+      // 直接迭代 live children，免去每次对账的数组拷贝
+      const oldChildren = selfEl.children;
       const oldByKey = new Map();
-      oldEls.forEach((e, i) => {
-        const key = getKeyVal(e.__render_data.$data, i);
+
+      for (let i = 0, len = oldChildren.length; i < len; i++) {
+        const el = oldChildren[i];
+        const key = getKeyVal(el.__render_data.$data, i);
         if (!oldByKey.has(key)) {
-          oldByKey.set(key, { el: e, index: i });
+          oldByKey.set(key, { el, index: i });
         }
-      });
+      }
 
       // 新序列逐位取复用：取得到旧元素就复用，取不到就新建
       const reused = [];
@@ -243,8 +247,13 @@ register({
 
         if (itemCtx.$data !== item) {
           itemCtx.$data = item;
-          // 换绑订阅到新数据本体并立即重跑（轻量上下文）
-          itemCtx.__retick && itemCtx.__retick(item);
+          // 换绑订阅到新数据本体并立即重跑（轻量上下文）；新值不可
+          // 订阅（原始值）时只重跑一次，后续由结构对账兜底
+          if (itemCtx.__retick && item.watchTick) {
+            itemCtx.__retick(item);
+          } else if (itemCtx.__rerun) {
+            itemCtx.__rerun();
+          }
         }
         if (indexUsed && itemCtx.$index !== i) {
           itemCtx.$index = i;
@@ -428,14 +437,17 @@ export const createItem = (
 
   if ($data && $data.watchTick) {
     itemData.__watchTargets = [$data];
+    itemData.__watchRoles = ["item"];
   }
   if ($host && $host.watchTick) {
     (itemData.__watchTargets || (itemData.__watchTargets = [])).push($host);
+    (itemData.__watchRoles || (itemData.__watchRoles = [])).push("host");
   }
   if ($parent) {
     itemData.$parent = $parent;
     if ($parent.watchTick) {
       (itemData.__watchTargets || (itemData.__watchTargets = [])).push($parent);
+      (itemData.__watchRoles || (itemData.__watchRoles = [])).push("parent");
     }
   }
 

@@ -43,7 +43,7 @@ packages/xhear/
 │       ├── compile.mjs    模板编译（binder 描述符 + markers 共享映射，见文件头注释）
 │       ├── render.mjs     渲染编排 + renderExtends 钩子 + prop/attr/class/watch 动作
 │       ├── condition.mjs  o-if / o-else-if / o-else 条件链（light DOM）
-│       ├── fill.mjs       o-fill 列表渲染（结构变更才整表对账 + LIS 最小移动 + 轻量行上下文 + $index 条件写）
+│       ├── fill.mjs       o-fill 列表渲染（结构变更才整表对账 + LIS 最小移动 + 轻量行上下文 + $index 条件写 + 依赖过滤重跑）
 │       ├── inner-code.mjs o-if/o-fill 内容保护层（inner-code 包裹 + 编译缓存；首编译支持元素搬运）
 │       └── sync.mjs       sync: 双向同步动作
 └── test/

@@ -78,6 +78,50 @@
         assert(ci < ri && ri < ai, `应为 created→ready→attached，实际 ${lifecycle.join(",")}`);
       });
 
+      // detached 生命周期与深层子对象响应（旧 register/attached-detached、
+      // xhear sub object 案例移植）
+      const detachedDemo = { attached: 0, detached: 0 };
+      $.register({
+        tag: "detached-demo",
+        temp: `<span>detached demo</span>`,
+        data: {},
+        attached() {
+          detachedDemo.attached++;
+        },
+        detached() {
+          detachedDemo.detached++;
+        },
+      });
+
+      $.register({
+        tag: "deep-obj-demo",
+        temp: `<span class="deep-val">{{obj.val}}</span>`,
+        data: {
+          obj: { val: 1 },
+        },
+      });
+
+      test("移除组件触发 detached / removal triggers detached", async () => {
+        const el = document.createElement("detached-demo");
+        document.body.appendChild(el);
+        await waitFor(() => detachedDemo.attached === 1);
+        assertEqual(detachedDemo.detached, 0);
+        el.remove();
+        await waitFor(() => detachedDemo.detached === 1);
+      });
+
+      test("深层子对象数据响应 / deep sub-object reactivity", async () => {
+        const el = document.createElement("deep-obj-demo");
+        document.body.appendChild(el);
+        const $el = $(el);
+        await waitFor(() => $el.shadow.$(".deep-val").text === "1");
+
+        $el.obj.val = 2;
+        await waitFor(() => $el.shadow.$(".deep-val").text === "2");
+
+        el.remove();
+      });
+
       test("watch 单键初始化即触发 / single-key watch fires on init", async () => {
         await waitFor(() => lifecycle.some((e) => String(e).startsWith("n1:")));
         assert(

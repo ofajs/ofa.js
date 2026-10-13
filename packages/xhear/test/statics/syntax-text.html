@@ -128,6 +128,24 @@
         );
       });
 
+      test("元素 .text/.html 基础方法 / element text and html methods", async () => {
+        // 旧 base-methods 案例：任意元素的 text/html 读写
+        const box = document.createElement("div");
+        box.innerHTML = "<span>I am target</span>";
+        document.body.appendChild(box);
+        const $box = $(box);
+
+        assertEqual($box.text, "I am target");
+        assert($box.html.includes("<span>I am target</span>"), "html getter 应返回内部结构");
+
+        $box.html = "<b>changed</b>";
+        assertEqual(box.textContent, "changed");
+
+        $box.text = "plain text";
+        assertEqual(box.textContent, "plain text");
+        box.remove();
+      });
+
       run();
     </script>
   </body>

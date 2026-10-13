@@ -124,6 +124,14 @@
         assertEqual(subTexts(), "5,4");
       });
 
+      test("splice 负索引 / splice with negative index", async () => {
+        // 当前顺序 [5,4]：-1 指向末尾的 4，原位替换
+        const removed = $target.splice(-1, 1, $("<da-item>40</da-item>"));
+        assertEqual(removed.length, 1);
+        assertEqual(removed[0].text, "4");
+        assertEqual(subTexts(), "5,40");
+      });
+
       run();
     </script>
   </body>

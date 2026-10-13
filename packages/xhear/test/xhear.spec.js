@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
 // 页面与历史易错用例的对应关系见包内 CONTEXT.md 的「用例覆盖表」。
 
 const PAGES = [
-  { path: "/packages/xhear/test/statics/syntax-text.html", total: 10 },
+  { path: "/packages/xhear/test/statics/syntax-text.html", total: 11 },
   { path: "/packages/xhear/test/statics/syntax-bind.html", total: 8 },
   { path: "/packages/xhear/test/statics/syntax-event.html", total: 7 },
   { path: "/packages/xhear/test/statics/syntax-sync-watch.html", total: 5 },
@@ -19,8 +19,8 @@ const PAGES = [
   { path: "/packages/xhear/test/statics/syntax-template.html", total: 6 },
   { path: "/packages/xhear/test/statics/combo-render.html", total: 7 },
   { path: "/packages/xhear/test/statics/combo-form.html", total: 6 },
-  { path: "/packages/xhear/test/statics/register.html", total: 13 },
-  { path: "/packages/xhear/test/statics/dom-array.html", total: 9 },
+  { path: "/packages/xhear/test/statics/register.html", total: 15 },
+  { path: "/packages/xhear/test/statics/dom-array.html", total: 10 },
   { path: "/packages/xhear/test/statics/memory.html", total: 5 },
   { path: "/packages/xhear/test/statics/svg.html", total: 5 },
 ];

@@ -30,10 +30,19 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
   ],
-  // 测试前自动起静态服务器；本地复用已运行实例
-  webServer: {
-    command: "node scripts/static-server.mjs .",
-    url: "http://localhost:3348/packages/drill/test/statics/loader.html",
-    reuseExistingServer: !process.env.CI,
-  },
+  // 测试前自动起静态服务器；本地复用已运行实例。
+  // 第二台（127.0.0.1:33482）供跨域页面加载用例使用
+  webServer: [
+    {
+      command: "node scripts/static-server.mjs .",
+      url: "http://localhost:3348/packages/drill/test/statics/loader.html",
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: "node scripts/static-server.mjs .",
+      port: 33482,
+      env: { PORT: "33482" },
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

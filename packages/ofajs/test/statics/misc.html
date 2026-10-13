@@ -8,6 +8,10 @@
     <style-host></style-host>
     <!-- inject-host 提升的样式作用于光 DOM -->
     <div class="hosted-color" id="light-target">hosted text</div>
+    <!-- inject-host 响应式检查的目标元素 -->
+    <inject-dyn></inject-dyn>
+    <div class="inj-style-target" id="inj-style-target">style target</div>
+    <div class="inj-link-target" id="inj-link-target">link target</div>
     <match-demo></match-demo>
     <style-data-demo></style-data-demo>
 
@@ -35,6 +39,36 @@
         data: {},
       });
 
+      // inject-host 响应式：注入的 style 文本 / link href 动态变更会
+      // 实时反映到收编副本（旧 inject-host.spec 移植）
+      register({
+        tag: "inject-dyn",
+        temp: `
+        <inject-host>
+          <style class="dyn-style">.inj-style-target { color: rgb(0, 128, 0); }</style>
+          <link rel="stylesheet" class="dyn-link" href="./fixtures/inject-link-red.css" />
+        </inject-host>`,
+        data: {},
+        proto: {
+          setStyleText(t) {
+            this.shadow.$(".dyn-style").text = t;
+          },
+          switchLink(href) {
+            this.ele.shadowRoot
+              .querySelector(".dyn-link")
+              .setAttribute("href", href);
+          },
+          removeLink() {
+            this.ele.shadowRoot.querySelector(".dyn-link").remove();
+          },
+        },
+      });
+
+      const injTargets = () => ({
+        styleTarget: document.querySelector("#inj-style-target"),
+        linkTarget: document.querySelector("#inj-link-target"),
+      });
+
       test("inject-host 收编样式并作用于光 DOM / inject-host hoists styles", async () => {
         const target = document.querySelector("#light-target");
 
@@ -52,6 +86,47 @@
         const contents = new Set();
         hoisted.forEach((s) => contents.add(s.textContent.trim()));
         assertEqual(hoisted.length, contents.size);
+      });
+
+      test("注入 style 文本变更实时生效 / injected style text changes apply live", async () => {
+        const { styleTarget } = injTargets();
+        const dyn = ofa("inject-dyn");
+
+        await waitFor(
+          () => getComputedStyle(styleTarget).color === "rgb(0, 128, 0)",
+        );
+
+        // 改注入 style 的文本：收编副本同步更新
+        dyn.setStyleText(".inj-style-target { color: rgb(0, 0, 255); }");
+        await waitFor(
+          () => getComputedStyle(styleTarget).color === "rgb(0, 0, 255)",
+        );
+
+        dyn.setStyleText(".inj-style-target { color: rgb(0, 128, 0); }");
+        await waitFor(
+          () => getComputedStyle(styleTarget).color === "rgb(0, 128, 0)",
+        );
+      });
+
+      test("注入 link href 切换与移除恢复 / injected link href switch and remove", async () => {
+        const { linkTarget } = injTargets();
+        const dyn = ofa("inject-dyn");
+
+        await waitFor(
+          () => getComputedStyle(linkTarget).color === "rgb(255, 0, 0)",
+        );
+
+        // 切换 href → 收编副本的样式跟着切
+        dyn.switchLink("./fixtures/inject-link-blue.css");
+        await waitFor(
+          () => getComputedStyle(linkTarget).color === "rgb(0, 0, 255)",
+        );
+
+        // 移除注入的 link → 样式失效（回退页面默认文字色 #1d1d1f）
+        dyn.removeLink();
+        await waitFor(
+          () => getComputedStyle(linkTarget).color === "rgb(29, 29, 31)",
+        );
       });
 
       // ---- match-var：属性条件样式 ----

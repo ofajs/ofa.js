@@ -1,0 +1,23 @@
+<template page>
+  <div class="page-root">life page</div>
+<script>
+  // 页面生命周期标记：旧 page attached and detached 案例
+  export default {
+    attached() {
+      const s = (window.__pageLife = window.__pageLife || {
+        attached: 0,
+        detached: 0,
+      });
+      s.attached++;
+    },
+    detached() {
+      const s = (window.__pageLife = window.__pageLife || {
+        attached: 0,
+        detached: 0,
+      });
+      s.detached++;
+    },
+    data: {},
+  };
+</script>
+</template>

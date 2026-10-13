@@ -6,6 +6,17 @@
   </head>
   <body>
     <demo-host></demo-host>
+    <o-provider name="ctx-shadow" color="page-data">
+      <shadow-consumer></shadow-consumer>
+    </o-provider>
+    <shadow-provider>
+      <o-consumer name="ctx-sp" id="sp-light-c"></o-consumer>
+    </shadow-provider>
+    <o-provider name="n-switch-b" color="from-b">
+      <switch-inner>
+        <o-consumer name="n-switch-a" id="ns-c"></o-consumer>
+      </switch-inner>
+    </o-provider>
 
     <script type="module">
       import "../../src/main.mjs";
@@ -35,6 +46,39 @@
             this.$("#prov").color = "light";
           },
         },
+      });
+
+      // shadow 内 consumer：组件模板里的 consumer 接收页面级 provider 广播
+      register({
+        tag: "shadow-consumer",
+        temp: `
+        <o-consumer name="ctx-shadow">
+          <span class="sc">{{color}}</span>
+        </o-consumer>`,
+        data: {},
+      });
+
+      // shadow 内 provider：收编后的 provider 同时服务 shadow 内外 consumer
+      register({
+        tag: "shadow-provider",
+        temp: `
+        <o-provider name="ctx-sp" color="from-shadow">
+          <slot></slot>
+          <o-consumer name="ctx-sp">
+            <span class="sp-inner">{{color}}</span>
+          </o-consumer>
+        </o-provider>`,
+        data: {},
+      });
+
+      // 换 name 测试的内层供应商（shadow 内，深度优先于外层）
+      register({
+        tag: "switch-inner",
+        temp: `
+        <o-provider name="n-switch-a" color="from-a">
+          <slot></slot>
+        </o-provider>`,
+        data: {},
       });
 
       const $demo = ofa("demo-host");
@@ -96,6 +140,119 @@
 
         root.remove();
         await waitFor(() => ofa(consumer)["app-title"] === undefined);
+      });
+
+      // ---- 旧 context.spec 移植（7 条中的深语义部分）----
+
+      const shadowDemo = ofa("shadow-consumer");
+      const spDemo = ofa("shadow-provider");
+
+      test("shadow 内 consumer 接收广播并随更新 / consumer in shadow receives updates", async () => {
+        // 组件 shadow 里的 consumer 跨 shadow 边界拿到祖先 provider 数据
+        const inner = shadowDemo.shadow.$("o-consumer");
+        const $pageProvider = ofa(
+          document.querySelector('o-provider[name="ctx-shadow"]'),
+        );
+        await waitFor(() => ofa(inner).color === "page-data");
+
+        // provider 数据写入（attribute 只在 init 时读取一次）
+        $pageProvider.color = "page-data-2";
+        await waitFor(() => ofa(inner).color === "page-data-2");
+        $pageProvider.color = "page-data";
+      });
+
+      test("shadow 内 provider 服务 shadow 内外 consumer / provider in shadow serves both sides", async () => {
+        // 组件 shadow 里的 provider 同时服务：shadow 内 consumer + 挂在
+        // 组件光子节点（slot 分发）的 consumer
+        const lightConsumer = spDemo.ele.querySelector("#sp-light-c");
+        const innerConsumer = spDemo.shadow.$("o-consumer");
+
+        await waitFor(() => ofa(lightConsumer).color === "from-shadow");
+        await waitFor(() => ofa(innerConsumer).color === "from-shadow");
+
+        // provider 数据变更双向传播
+        ofa(spDemo.shadow.$("o-provider")).color = "from-shadow-2";
+        await waitFor(() => ofa(lightConsumer).color === "from-shadow-2");
+        await waitFor(() => ofa(innerConsumer).color === "from-shadow-2");
+      });
+
+      test("consumer 动态换 name 重连供应商 / consumer re-resolves on name change", async () => {
+        // 拓扑仿旧 change-name 用例：内层 shadow provider（近）与外层
+        // provider（远）depth 不同，切换 name 在不同深度间移动解析
+        const consumer = document.querySelector("#ns-c");
+
+        await waitFor(() => ofa(consumer).color === "from-a");
+
+        // 换 name 后重连外层供应商，旧数据清空
+        consumer.setAttribute("name", "n-switch-b");
+        await waitFor(() => ofa(consumer).color === "from-b");
+
+        // 指向不存在的供应商：数据清空为 undefined
+        consumer.setAttribute("name", "n-switch-none");
+        await waitFor(() => ofa(consumer).color === undefined);
+      });
+
+      test("属性镜像白名单 / attribute mirroring only with declared attr", async () => {
+        // consumer 上写了同名的 dash-case 属性（color），数据才会镜像到
+        // attribute；未声明的 consumer attribute 保持 null
+        const provider = document.createElement("o-provider");
+        provider.setAttribute("name", "n-mirror");
+        provider.setAttribute("color", "green");
+        document.body.appendChild(provider);
+
+        const mirrorOn = document.createElement("o-consumer");
+        mirrorOn.setAttribute("name", "n-mirror");
+        mirrorOn.setAttribute("color", "");
+        provider.appendChild(mirrorOn);
+
+        const mirrorOff = document.createElement("o-consumer");
+        mirrorOff.setAttribute("name", "n-mirror");
+        provider.appendChild(mirrorOff);
+
+        await waitFor(() => mirrorOn.getAttribute("color") === "green");
+        assertEqual(mirrorOff.getAttribute("color"), null);
+
+        // provider 数据写入会同步到已声明的镜像 attribute
+        ofa(provider).color = "blue";
+        await waitFor(() => mirrorOn.getAttribute("color") === "blue");
+        assertEqual(mirrorOff.getAttribute("color"), null);
+
+        provider.remove();
+        mirrorOn.remove();
+        mirrorOff.remove();
+      });
+
+      test("provider 链式字段覆盖 / chained providers merge per field", async () => {
+        // 嵌套 provider：近端字段优先，远端补齐；各自更新只传播对应字段
+        const outer = document.createElement("o-provider");
+        outer.setAttribute("name", "n-chain");
+        outer.setAttribute("color", "outer-color");
+        outer.setAttribute("size", "outer-size");
+        document.body.appendChild(outer);
+
+        const inner = document.createElement("o-provider");
+        inner.setAttribute("name", "n-chain");
+        inner.setAttribute("color", "inner-color");
+        outer.appendChild(inner);
+
+        const consumer = document.createElement("o-consumer");
+        consumer.setAttribute("name", "n-chain");
+        inner.appendChild(consumer);
+
+        await waitFor(() => ofa(consumer).color === "inner-color");
+        await waitFor(() => ofa(consumer).size === "outer-size");
+
+        // 数据写入：近端同名（truthy）字段挡住远端同名更新
+        ofa(outer).color = "outer-color-2";
+        await waitFor(() => ofa(consumer).color === "inner-color");
+        ofa(outer).size = "outer-size-2";
+        await waitFor(() => ofa(consumer).size === "outer-size-2");
+        ofa(inner).color = "inner-color-2";
+        await waitFor(() => ofa(consumer).color === "inner-color-2");
+
+        outer.remove();
+        inner.remove();
+        consumer.remove();
       });
 
       run();

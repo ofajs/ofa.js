@@ -171,6 +171,175 @@
         holder.remove();
       });
 
+      test("页面 style 内 url() 相对地址改写 / style url() rewrites to page base", async () => {
+        // 旧 test style url 案例：style 内的相对 url 基于页面地址改写
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-app style="display:block;height:60px">
+            <o-page src="${location.href.replace(
+              /[^/]+$/,
+              "",
+            )}fixtures/page-style-url.html"></o-page>
+          </o-app>`;
+        document.body.appendChild(holder);
+
+        const $appStyle = ofa(holder.children[0]);
+        const expectedEnd = "/fixtures/logo-relate.png";
+
+        await waitFor(() => {
+          const page = $appStyle.current;
+          const cell = page && page.shadow && page.shadow.$("#bg-cell");
+          if (!cell) {
+            return false;
+          }
+          const bg = getComputedStyle(cell.ele).backgroundImage;
+          return bg.includes(expectedEnd) && bg !== "none";
+        });
+
+        holder.remove();
+      });
+
+      test("页面 attached/detached 生命周期 / page attached & detached lifecycle", async () => {
+        // 旧 page attached and detached 案例：挂载触发 attached，离场触发 detached
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-app style="display:block;height:60px">
+            <o-page src="${location.href.replace(
+              /[^/]+$/,
+              "",
+            )}fixtures/page-life.html"></o-page>
+          </o-app>`;
+        document.body.appendChild(holder);
+
+        const $lifeApp = ofa(holder.children[0]);
+        window.__pageLife = { attached: 0, detached: 0 };
+
+        await waitFor(() => window.__pageLife.attached === 1);
+        assertEqual(window.__pageLife.detached, 0);
+
+        // 离场：换到另一个页面，旧页 detached
+        $lifeApp.current.goto &&
+          (await $lifeApp.goto(
+            location.href.replace(/[^/]+$/, "") +
+              "fixtures/page-two.html",
+          ));
+        await waitFor(() => window.__pageLife.detached === 1);
+
+        holder.remove();
+      });
+
+      test("replace 导航与 routers 栈 / replace navigation and routers stack", async () => {
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-app style="display:block;height:60px">
+            <o-page src="${location.href.replace(
+              /[^/]+$/,
+              "",
+            )}fixtures/page-home.html"></o-page>
+          </o-app>`;
+        document.body.appendChild(holder);
+
+        const $rApp = ofa(holder.children[0]);
+        const srcEnd = (s) => s.endsWith("/fixtures/page-home.html");
+        const srcEndTwo = (s) => s.endsWith("/fixtures/page-two.html");
+        const srcEndThree = (s) => s.endsWith("/fixtures/page-three.html");
+
+        // 初始 routers：只有 home
+        await waitFor(
+          () => $rApp.routers.length === 1 && srcEnd($rApp.routers[0].src),
+        );
+
+        // 先进两页建立历史：[home, two]
+        await $rApp.goto(
+          location.href.replace(/[^/]+$/, "") + "fixtures/page-two.html",
+        );
+        await waitFor(
+          () =>
+            $rApp.routers.length === 2 && srcEndTwo($rApp.routers[1].src),
+        );
+
+        // replace：替换栈顶（two → three），不新增历史
+        await $rApp.replace(
+          location.href.replace(/[^/]+$/, "") + "fixtures/page-three.html",
+        );
+        await waitFor(
+          () =>
+            $rApp.routers.length === 2 && srcEndThree($rApp.routers[1].src),
+        );
+
+        // back：回到 home（three 的历史被 replace 覆盖）
+        await $rApp.back();
+        await waitFor(
+          () => $rApp.routers.length === 1 && srcEnd($rApp.routers[0].src),
+        );
+
+        holder.remove();
+      });
+
+      test("跨域页面加载与路由 / cross-origin page navigation", async () => {
+        // 旧 cross domain page 案例：第二源（127.0.0.1:33482）上的页面
+        // 可加载（需在应用配置声明 access），src 按完整跨域地址追踪
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-app style="display:block;height:60px" src="${location.href.replace(
+            /[^/]+$/,
+            "",
+          )}fixtures/app-cross-config.mjs">
+            <o-page src="http://127.0.0.1:33482/packages/ofajs/test/statics/fixtures/page-sub.html"></o-page>
+          </o-app>`;
+        document.body.appendChild(holder);
+
+        const $xdApp = ofa(holder.children[0]);
+
+        await waitFor(() => {
+          const page = $xdApp.current;
+          return (
+            page &&
+            page.shadow &&
+            page.shadow.$("#sub-title") &&
+            page.src.includes("127.0.0.1:33482")
+          );
+        });
+
+        // 跨域源内的相对导航：解析到当前页面所在的跨域地址
+        await $xdApp.goto(
+          "http://127.0.0.1:33482/packages/ofajs/test/statics/fixtures/page-two.html",
+        );
+        await waitFor(() =>
+          ($xdApp.current.src || "").endsWith(
+            "/fixtures/page-two.html",
+          ),
+        );
+        assert(
+          $xdApp.current.src.includes("127.0.0.1:33482"),
+          "跨域导航后 src 应保持在跨域源 / src should stay on the cross origin",
+        );
+
+        holder.remove();
+      });
+
+      test("页面模块相对 import 解析到页面地址 / relative import in page module resolves", async () => {
+        // 旧 relate import 案例：.mjs 页面模块内的相对导入基于模块
+        // 自身地址解析（不受页面所在位置影响）
+        const holder = document.createElement("div");
+        holder.innerHTML = `
+          <o-page src="${location.href.replace(
+            /[^/]+$/,
+            "",
+          )}fixtures/page-relate.mjs"></o-page>`;
+        document.body.appendChild(holder);
+
+        const $relate = ofa(holder.children[0]);
+        await waitFor(() => $relate.pageIsReady);
+        await waitFor(
+          () =>
+            $relate.shadow.$("#relate-import-out").text ===
+            "d1:I am data1",
+        );
+
+        holder.remove();
+      });
+
       test("动态 attr:href 的 olink 点击读取实时地址 / dynamic attr:href olink reads live href", async () => {
         // 旧 fix-link 案例：锚点 href 由数据驱动，切换后点击应跳新地址
         await ensureHome();

@@ -24,6 +24,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 const ROUNDS = Number(process.env.CROSS_ROUNDS || 3);
 
 const FRAMEWORKS = [
+  { id: "legacy", file: "cross-legacy.html", label: "ofa 4.7" },
   { id: "ofajs", file: "cross-ofajs.html", label: "ofa.js" },
   { id: "vue", file: "cross-vue.html", label: "Vue" },
   { id: "react", file: "cross-react.html", label: "React" },
@@ -106,7 +107,7 @@ const browserVersion = browser.version();
 
 // scenarioId -> { ofajs: [times], vue: [times], react: [times] }
 const samples = {};
-const boot = { ofajs: [], vue: [], react: [] };
+const boot = { legacy: [], ofajs: [], vue: [], react: [] };
 
 try {
   for (let r = 0; r < ROUNDS; r++) {
@@ -160,6 +161,7 @@ const payload = (name, files) => {
 };
 
 const payloads = [
+  payload(`ofa.js 4.7.7 (old)`, ["old/dist/ofa.min.js"]),
   payload(`ofa.js ${ofaVersion}`, ["dist/ofa.min.js"]),
   payload(`Vue ${versions.vue}`, ["packages/ofajs/benchmark/vendor/cross/vue.global.prod.js"]),
   payload(`React ${versions.react}`, [
@@ -171,6 +173,7 @@ const payloads = [
 const fwLabel = (fw) =>
   fw.id === "vue" ? `Vue ${versions.vue.split(".").slice(0, 2).join(".")}`
   : fw.id === "react" ? `React ${versions.react.split(".")[0]}`
+  : fw.id === "legacy" ? "ofa 4.7"
   : `ofa.js ${ofaVersion.split(".").slice(0, 2).join(".")}`;
 
 const med = (id, fwId) => median(samples[id]?.[fwId] ?? []);
@@ -186,7 +189,7 @@ const rangeBoot = (fwId) => {
 
 console.log(
   `\n跨框架性能对比 / cross-framework benchmark（chromium ${browserVersion}，` +
-    `每场景独立页面，三框架交替 × ${ROUNDS} 轮取中位数，单位 ms，越小越好）\n`
+    `每场景独立页面，四框架交替 × ${ROUNDS} 轮取中位数，单位 ms，越小越好）\n`
 );
 
 // 载荷体积
@@ -230,13 +233,50 @@ console.log("（* 最快；(+n%) 相对最慢不超过的量化差距，<3% 记 
 // 样本区间：分配密集场景的样本带可能很宽，结论看中位数也要看区间（方法学 §2.5）
 console.log("样本区间 / sample ranges（各轮页面中位数的 min~max）");
 console.log(
-  `${padW("场景", 52)}${padW("ofa.js", 20)}${padW("Vue", 20)}${padW("React", 20)}`
+  `${padW("场景", 52)}` +
+    FRAMEWORKS.map((fw) => padW(fwLabel(fw), 20)).join("")
 );
 for (const [id, label] of [["load1k", "首屏 / boot"]].concat(SCENARIOS)) {
   const cells = FRAMEWORKS.map((fw) =>
     padW(id === "load1k" ? rangeBoot(fw.id) : range(id, fw.id), 20)
   ).join("");
   console.log(`${padW(label, 52)}${cells}`);
+}
+
+// ofa 4.7 → 5.0 专项提升
+const legacyFw = FRAMEWORKS.find((fw) => fw.id === "legacy");
+const newFw = FRAMEWORKS.find((fw) => fw.id === "ofajs");
+const deltaLine = (label, oldV, newV) => {
+  if (oldV == null || newV == null) return `${padW(label, 52)}-`;
+  const delta = ((oldV - newV) / oldV) * 100;
+  return (
+    `${padW(label, 52)}` +
+    `${padW(fmt(oldV), 14)}${padW(fmt(newV), 14)}${padW((delta >= 0 ? "+" : "") + delta.toFixed(1) + "%", 10)}`
+  );
+};
+console.log("\nofa 4.7 → 5.0 提升 / legacy → current improvement（负数为回退）");
+console.log(
+  `${padW("场景", 52)}${padW("4.7.7", 14)}${padW(ofaVersion, 14)}${padW("提升", 10)}`
+);
+console.log(
+  deltaLine(
+    "首屏：加载 + 渲染 1000 行 / boot + render 1k",
+    medBoot("legacy"),
+    medBoot("ofajs")
+  )
+);
+for (const [id, label] of SCENARIOS) {
+  console.log(deltaLine(label, med(id, "legacy"), med(id, "ofajs")));
+}
+{
+  const oldPl = payloads.find((p) => p && p.name.includes("4.7"));
+  const newPl = payloads.find((p) => p && p.name === `ofa.js ${ofaVersion}`);
+  if (oldPl && newPl) {
+    const gzDelta = ((oldPl.gz - newPl.gz) / oldPl.gz) * 100;
+    console.log(
+      `${padW("运行时载荷 gzip / payload gzipped", 52)}${padW((oldPl.gz / 1024).toFixed(1) + " KB", 14)}${padW((newPl.gz / 1024).toFixed(1) + " KB", 14)}${padW((gzDelta >= 0 ? "+" : "") + gzDelta.toFixed(1) + "%", 10)}`
+    );
+  }
 }
 console.log(
   "\n注：结果受机器负载影响；单轮数字不下结论，看多轮中位数与区间（/ results are machine-dependent; trust medians with ranges, not single rounds）。\n"

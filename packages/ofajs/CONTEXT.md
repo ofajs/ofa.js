@@ -112,12 +112,14 @@ packages/ofajs/
   （createItem 描述符快路径），ofa 层自身的对账算法与旧版一致。
 - 跨框架基准：`npm run bench:cross`（端口 3353，自动起停；首次先
   `node packages/ofajs/benchmark/fetch-cross-vendor.mjs` 下载框架文件到
-  `vendor/cross/`，该目录不进仓库）。ofa.js（dist/ofa.min.js）vs
-  Vue 3.5（vue.global.prod.js）vs React 18.3（UMD，19 起无 UMD），
-  页面 `cross-ofajs|vue|react.html` 的行 DOM 结构与场景逻辑逐字一致，
-  差异只在框架引导与数据操作惯用写法（o-fill fill-key / v-for :key /
-  key+useState 不可变更新）；分场景独立页，一轮内三框架紧挨着采集，
-  CDP 关 HTTP 缓存保证首屏冷加载，场景内行数断言自校验落定。
+  `vendor/cross/`，该目录不进仓库）。**四方对比：ofa.js 4.7.7
+  （old/dist 归档产物，cross-legacy.html，x-fill 旧语法）+ ofa.js
+  5.0（dist/ofa.min.js）+ Vue 3.5（vue.global.prod.js）+ React 18.3
+  （UMD，19 起无 UMD）**，页面 `cross-*.html` 的行 DOM 结构与场景逻辑
+  逐字一致，差异只在框架引导与数据操作惯用写法（x-fill/o-fill
+  fill-key / v-for :key / key+useState 不可变更新）；分场景独立页，
+  一轮内四框架紧挨着采集，CDP 关 HTTP 缓存保证首屏冷加载，场景内
+  行数断言自校验落定，输出含 4.7→5.0 专项提升汇总。
   2026-10 优化前基线（chromium 156，3 轮中位数）：列表运行时操作全面
   落后——交换 3020ms、追加 247ms、替换 128ms、部分更新 ×10 423ms
   （Vue/React 个位数到几十）。根因：① 任何深层 item 变更冒泡命中

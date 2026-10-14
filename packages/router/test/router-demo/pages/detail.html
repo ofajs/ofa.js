@@ -1,0 +1,23 @@
+<template page>
+  <style>
+    .wrap { padding: 24px; }
+  </style>
+  <div class="wrap">
+    <h2>详情页</h2>
+    <!-- default 函数形式：入参里的 query 是页面地址的查询参数 -->
+    <p>商品 id：<b id="detail-id">{{id}}</b></p>
+    <p>来源 query：{{queryText}}</p>
+    <p><a olink href="./list.html">← 回列表</a> / <a olink href="./home.html">回首页</a></p>
+  </div>
+<script>
+  // default 写成函数：入参提供 query（页面地址的查询参数）与 load
+  export default ({ query }) => {
+    return {
+      data: {
+        id: query.id || "(未指定)",
+        queryText: JSON.stringify(query),
+      },
+    };
+  };
+</script>
+</template>

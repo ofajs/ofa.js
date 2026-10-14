@@ -1,0 +1,19 @@
+<template page>
+  <div class="page-root">
+    <h3 id="r2-title">r2</h3>
+    <span id="r2-from">{{from}}</span>
+  </div>
+<script>
+  // default 函数形式：从页面 URL 的 query 读参数（旧 page query 案例）
+  export default ({ query }) => {
+    return {
+      attached() {
+        window.__r2renders = (window.__r2renders || 0) + 1;
+      },
+      data: {
+        from: query.from || "",
+      },
+    };
+  };
+</script>
+</template>

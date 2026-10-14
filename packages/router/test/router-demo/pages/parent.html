@@ -1,0 +1,30 @@
+<template page>
+  <style>
+    .wrap { padding: 24px; }
+    .panel { border: #2456c4 solid 2px; border-radius: 8px; padding: 16px; }
+    menu { display: flex; gap: 12px; list-style: none; padding: 0; }
+  </style>
+  <div class="wrap">
+    <h2>嵌套路由 · 父页（挂载于 <span id="mounted-at">{{mountedAt}}</span>，切换子页时时间不变 = 父页未销毁）</h2>
+    <div class="panel">
+      <menu>
+        <li><a olink href="./child-a.html">子页 A</a></li>
+        <li><a olink href="./child-b.html">子页 B</a></li>
+      </menu>
+      <p>父页计数（点一下，再切子页，数值保留）：
+        <button on:click="count++">+1</button> <b>{{count}}</b>
+      </p>
+      <!-- 子页渲染在父页内容之后（同前缀父页保持不销毁，仅子页层替换） -->
+      <slot></slot>
+    </div>
+    <p><a olink href="./home.html">← 回首页</a></p>
+  </div>
+<script>
+  export default {
+    data: {
+      count: 0,
+      mountedAt: new Date().toLocaleTimeString(),
+    },
+  };
+</script>
+</template>

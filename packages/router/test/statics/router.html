@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-router / hash 路由桥</title>
+    <style>
+      o-app { display: block; height: 120px; border: #ccc solid 1px; }
+    </style>
+  </head>
+  <body>
+    <h3>o-router：o-app 的 hash 路由桥</h3>
+    <!-- 纯页面：无自检 harness，流程由 router.spec.js 驱动断言
+        （旧仓同款设计；harness 层在 hash 页面上有偶发不执行的干扰） -->
+    <o-router fix-body>
+      <o-app src="./fixtures/app-r-config.mjs"></o-app>
+    </o-router>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/router.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

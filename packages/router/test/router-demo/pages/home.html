@@ -1,0 +1,27 @@
+<template page>
+  <style>
+    .wrap { padding: 24px; }
+    menu { padding: 0; list-style: none; }
+    menu li { margin: 8px 0; }
+  </style>
+  <div class="wrap">
+    <h2>首页</h2>
+    <p>o-app + o-router 的完整路由案例。两种导航方式：</p>
+    <menu>
+      <li>程序导航（goto）：<button on:click="goto('./list.html')">商品列表</button></li>
+      <li>声明导航（olink，地址会被 o-router 改写成 hash 形式）：
+        <a olink href="./pages/list.html">商品列表</a>
+      </li>
+      <li>带 query 的直达：<a olink href="./pages/detail.html?id=42">详情 ?id=42</a></li>
+      <li>嵌套路由（父页保持不销毁）：<a olink href="./pages/child-a.html">子页 A</a></li>
+      <li>.mjs 页面模块：<a olink href="./pages/profile.mjs">个人中心 profile.mjs</a></li>
+      <li>加载失败 → 自定义 fail 页：<button on:click="goto('./pages/not-exist.html')">访问不存在的页面</button></li>
+    </menu>
+    <p>提示：地址栏是 #/pages/xxx.html 形式，刷新/直接粘贴地址都能还原当前页。</p>
+  </div>
+<script>
+  export default {
+    data: {},
+  };
+</script>
+</template>

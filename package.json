@@ -10,6 +10,7 @@
   "scripts": {
     "test": "playwright test",
     "test:drill": "playwright test packages/drill",
+    "test:router": "playwright test packages/router",
     "test:stanz": "playwright test packages/stanz",
     "test:ofajs": "playwright test packages/ofajs",
     "build": "rollup -c",

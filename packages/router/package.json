@@ -1,0 +1,33 @@
+{
+  "name": "router",
+  "version": "5.0.0",
+  "description": "Hash router bridge for o-app: syncs app routing with browser history and location.hash",
+  "type": "module",
+  "main": "src/router.mjs",
+  "exports": {
+    ".": "./src/router.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/router"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "router",
+    "hash router",
+    "web components"
+  ]
+}

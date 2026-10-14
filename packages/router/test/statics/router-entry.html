@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-router hash 直达 / entry</title>
+  </head>
+  <body>
+    <!-- 纯净入口页：无自检流程，专供 hash 直达 / reload 类 spec 驱动 -->
+    <o-router fix-body>
+      <o-app src="./fixtures/app-r-config.mjs"></o-app>
+    </o-router>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/router.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

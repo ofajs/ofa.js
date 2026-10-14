@@ -1,0 +1,26 @@
+<template page>
+  <style>
+    .wrap { padding: 24px; }
+    .item { padding: 10px 14px; border: #ddd solid 1px; margin: 8px 0; cursor: pointer; }
+    .item:hover { border-color: #2456c4; }
+    .item a { color: #2456c4; text-decoration: none; }
+  </style>
+  <div class="wrap">
+    <h2>商品列表</h2>
+    <div class="item" o-fill :value="items" fill-key="id">
+      <a olink attr:href="'./detail.html?id=' + $data.id"><b>{{name}}</b>（id:{{$data.id}}）→ 查看详情</a>
+    </div>
+    <p><a olink href="./home.html">← 回首页</a></p>
+  </div>
+<script>
+  export default {
+    data: {
+      items: [
+        { id: 1, name: "机械键盘" },
+        { id: 2, name: "无线鼠标" },
+        { id: 3, name: "显示器" },
+      ],
+    },
+  };
+</script>
+</template>

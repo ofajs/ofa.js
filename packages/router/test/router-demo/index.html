@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-app + o-router 使用案例</title>
+    <style>
+      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 0; color: #1d1d1f; }
+      o-app { display: block; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <!--
+      o-router：o-app 的 hash 路由桥（packages/router）。
+      - 页面地址同步到 location.hash（#/pages/xxx.html?query），刷新、
+        直达、分享链接都不需要服务器重写；
+      - 接管浏览器前进/后退；
+      - fix-body：重置 html/body 尺寸，让 o-app 撑满视口。
+      不需要 hash 地址时，去掉 o-router 直接用 o-app 即可。
+    -->
+    <o-router fix-body>
+      <o-app src="./app-config.mjs"></o-app>
+    </o-router>
+
+    <script type="module">
+      // ofa.js 主体（o-app/o-page/olink）+ o-router hash 路由桥
+      // ofa.js 主体（o-app/o-page/olink）+ o-router hash 路由桥
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/router.mjs";
+    </script>
+  </body>
+</html>

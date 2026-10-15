@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR 案例 · 首页</title>
+    <link rel="stylesheet" href="./demo.css" />
+  </head>
+  <body>
+    <!--
+      SCSR 契约的载体：本文件既是服务端投递的完整文档（首屏静态 HTML，
+      可直接访问/刷新/分享），也是页面模块的源文件（template[page] 由
+      ofa 转译成页面模块）。scsr 接管后，页面本体由 o-page 从当前 URL
+      重新加载渲染，站内跳转的地址是真实路径（非 hash）。
+    -->
+    <o-app src="./app.mjs">
+      <template page>
+        <style>
+          .hero {
+            background:
+              radial-gradient(420px 180px at 90% -30%, rgba(124, 58, 237, 0.12), transparent),
+              var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 34px 34px 30px;
+            box-shadow: 0 16px 36px -18px rgba(15, 23, 42, 0.12);
+          }
+          .eyebrow {
+            margin: 0 0 10px; font-size: 12px; font-weight: 700;
+            letter-spacing: 1.5px; color: var(--accent);
+          }
+          .hero h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.25; letter-spacing: -0.5px; }
+          .grad {
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+          }
+          .sub { margin: 0 0 20px; color: var(--muted); max-width: 560px; }
+          .row { display: flex; gap: 10px; flex-wrap: wrap; }
+          .btn {
+            --bg: var(--accent);
+            display: inline-block; padding: .4em 1em; font: inherit; font-size: 14px;
+            color: #fff; background: var(--bg); border: 1px solid var(--bg);
+            border-radius: .375em; text-decoration: none; cursor: pointer;
+            transition: color .15s ease-in-out, background-color .15s ease-in-out,
+              border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+          }
+          .btn:hover { --bg: color-mix(in srgb, var(--accent) 85%, #000); }
+          .btn.outline { background: none; color: var(--bg); }
+          .btn.outline:hover { background: var(--bg); color: #fff; }
+          .btn.sm { padding: .25em .7em; font-size: 13px; border-radius: .25em; }
+          .grid {
+            margin-top: 16px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px;
+          }
+          .feat {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 18px; display: flex; flex-direction: column; gap: 6px;
+            transition: transform 0.15s, box-shadow 0.15s;
+          }
+          .feat:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -16px rgba(15, 23, 42, 0.2); }
+          .feat .ico { font-size: 22px; }
+          .feat h3 { margin: 2px 0 0; font-size: 15px; }
+          .feat p { margin: 0; color: var(--muted); font-size: 13px; flex: 1; }
+          .feat .btn { align-self: flex-start; margin-top: 8px; }
+          .tip {
+            margin: 18px 4px 0; color: var(--muted); font-size: 13px;
+            background: var(--accent-soft); border: 1px solid #e0e4ff;
+            border-radius: 12px; padding: 12px 16px;
+          }
+          .tip code { background: #fff; border-radius: 6px; padding: 1px 6px; border: 1px solid var(--border); }
+          .anchor-zone { margin-top: 80vh; padding-bottom: 60px; }
+          .anchor-zone h2 { margin: 0 0 6px; }
+        </style>
+        <div class="wrap">
+          <section class="hero">
+            <p class="eyebrow">O-APP + SCSR 案例</p>
+            <h1>一个由<span class="grad">真实 HTML 文件</span>组成的迷你应用</h1>
+            <p class="sub">
+              服务器直接投递完整 HTML（每个页面都是独立文档），scsr 在浏览器端把
+              当前 URL 收编为应用内页面，站内跳转走 o-app 路由。地址是真实路径，
+              顶部导航是嵌套路由的持久布局页。
+            </p>
+            <div class="row">
+              <a class="btn" olink href="./pages/list.html">去商品列表</a>
+              <button class="btn outline" on:click="goto('./pages/not-exist.html')">触发 404 fail 页</button>
+            </div>
+          </section>
+
+          <section class="grid">
+            <article class="feat">
+              <span class="ico">📄</span>
+              <h3>每个 URL 都是文档</h3>
+              <p>任意页面可直接访问、刷新、分享——服务器无需任何 rewrite，这是与 hash 路由的本质区别。</p>
+              <a class="btn sm outline" olink href="./pages/detail.html?id=42">直达详情 ?id=42</a>
+            </article>
+            <article class="feat">
+              <span class="ico">⌨️</span>
+              <h3>程序导航</h3>
+              <p>this.goto() 编程式跳转，地址切换为真实路径，文档不重载。</p>
+              <button class="btn sm outline" on:click="goto('./pages/list.html')">goto 列表页</button>
+            </article>
+            <article class="feat">
+              <span class="ico">🔗</span>
+              <h3>query 传参</h3>
+              <p>query 直接挂在真实路径上（?id=42），页面 default 函数读到。</p>
+              <a class="btn sm outline" olink href="./pages/detail.html?id=42">直达详情 ?id=42</a>
+            </article>
+            <article class="feat">
+              <span class="ico">🧩</span>
+              <h3>.mjs 页面模块</h3>
+              <p>页面也可以是 ES 模块；注意这类 URL 刷新得到的是源码，非文档。</p>
+              <a class="btn sm outline" olink href="./pages/profile.mjs">打开个人中心</a>
+            </article>
+            <article class="feat">
+              <span class="ico">🧪</span>
+              <h3>嵌套路由</h3>
+              <p>同父页的子页互换，父页与其状态保持不销毁。</p>
+              <a class="btn sm outline" olink href="./pages/child-a.html">进嵌套实验</a>
+            </article>
+            <article class="feat">
+              <span class="ico">⚓</span>
+              <h3>页内锚点</h3>
+              <p>锚点只动 hash 不参与路由；应用跳走后再后退，锚点条目照样对账。</p>
+              <a class="btn sm outline" href="#anchor-demo">跳到本页锚点</a>
+            </article>
+          </section>
+
+          <p class="tip">
+            💡 地址栏始终是 <code>/packages/scsr/test/scsr-demo/...</code> 真实路径；
+            刷新、直接粘贴地址都能还原当前页；浏览器前进/后退由 scsr 接管；
+            切页时注意标签页标题也会跟着变（page-loaded 同步 document.title）。
+          </p>
+        </div>
+
+        <!-- 页内锚点目标：scsr 会给这个 hash 条目补写路由栈快照，
+            前进/后退跨过它时按深度差正常对账，应用不脱钩 -->
+        <div class="wrap anchor-zone" id="anchor-demo">
+          <h2>⚓ 锚点位置</h2>
+          <p>你已经通过页内锚点跳到这里——URL 带上了 <code>#anchor-demo</code>，但应用路由栈没有任何变化。</p>
+          <p>试试：先去商品列表，再按浏览器后退——你会回到这个锚点位置，页面内容完整恢复。</p>
+          <p><a class="btn sm outline" olink href="./pages/list.html">去商品列表 →</a></p>
+        </div>
+
+        <script>
+          export const parent = "./pages/layout.html";
+
+          export default {
+            data: {},
+          };
+        </script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

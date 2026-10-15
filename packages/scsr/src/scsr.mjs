@@ -55,9 +55,17 @@ import initRouter from "../../router/src/sync.mjs";
     });
 
     // 同步页面标题：页面模块的 title（HTML 转译页取自 <title>，
-    // .mjs 页取自 export const title）加载完成后写到 document.title
+    // .mjs 页取自 export const title）加载完成后写到 document.title。
+    // 只跟随当前页（栈顶）：嵌套路由的父页（如共享布局）晚于子页
+    // 加载完成时，其 title 不得覆盖用户正在看的页面标题
     app.on("page-loaded", (e) => {
-      const { _defaults } = $(e.target);
+      const page = $(e.target);
+
+      if (page.ele !== app.current?.ele) {
+        return;
+      }
+
+      const { _defaults } = page;
 
       if (typeof _defaults.title === "string") {
         const titleEl = $("head title");

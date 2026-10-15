@@ -21,13 +21,17 @@ packages/scsr/
 │   └── scsr.mjs      全部逻辑：URL 收编 + 历史同步接线（副作用模块，页面直接 <script type="module"> 引入）
 └── test/
     ├── scsr.spec.js          流程断言（纯页面 + spec，无自检 harness）
-    └── statics/              测试页面（本身即 SCSR 契约的载体）
-        ├── scsr01~03.html    三个相互跳转的页面（01 带 t-btn 组件与页内锚点，02 读 query，03 声明 parent）
-        ├── subs/scsr0301.html  子目录页面（深层路径可达性）
-        ├── parent.html       03 的父页（继承链包裹渲染）
-        ├── comps/btn/t-btn.html  template[component] 组件（l-m 加载）
-        ├── app.mjs           应用配置（仅 pageAnime，不声明 home）
-        └── public.css        满尺寸样式
+    ├── statics/              测试页面（本身即 SCSR 契约的载体）
+    │   ├── scsr01~03.html    三个相互跳转的页面（01 带 t-btn 组件与页内锚点，02 读 query，03 声明 parent）
+    │   ├── subs/scsr0301.html  子目录页面（深层路径可达性）
+    │   ├── parent.html       03 的父页（继承链包裹渲染）
+    │   ├── comps/btn/t-btn.html  template[component] 组件（l-m 加载）
+    │   ├── app.mjs           应用配置（仅 pageAnime，不声明 home）
+    │   └── public.css        满尺寸样式
+    └── scsr-demo/            综合使用案例（多 HTML 文件迷你应用，见其 README）：
+        index/layout/list/detail/profile.mjs/parent/child-a/b + demo.css + app.mjs
+        + components/seg-switch.html（分段开关组件，父页 await load 注册）
+        （共享布局父页、方向推入动画、fail 页、锚点演示、目录形式直开归一化）
 ```
 
 ## 三、用法
@@ -51,9 +55,14 @@ packages/scsr/
 - 应用配置**不声明 home**：首页就是当前 URL 的 o-page；
 - 页面跳转用 o-app 的 goto/replace/back（或页面内 this.goto），地址
   同步为真实路径 `location.pathname + search`（`getStateUrl` 钩子）；
-- 页面标题自动同步：page-loaded 时若页面模块导出 `title`（HTML 文件
-  转译的页面取自 `<title>`，.mjs 页取自 `export const title`）则写入
-  `document.title`。
+- **页面标题自动同步**：page-loaded 时若页面模块导出 `title`（HTML 文件
+  转译页取自 `<title>`，.mjs 页取自 `export const title`）则写入
+  `document.title`。**只跟随当前页（栈顶）**：嵌套路由父页（如共享
+  布局页）若也导出 title 且晚于子页加载完成，不得覆盖用户正在看的
+  页面标题（scsr-demo 的 layout 场景）；
+- **目录形式直开**：首页以 `/` 结尾的目录地址直开时，收编的 src 就是
+  目录本身（服务器补 index.html，转译照常）；页面层做导航高亮等
+  src 匹配时需自行归一化（见 scsr-demo layout 的 syncActive）。
 
 ## 四、设计要点
 
@@ -101,5 +110,8 @@ packages/scsr/
 
 - 测试：仓库根 `npx playwright test packages/scsr`（或根 `npm test`、
   `npm run test:scsr`）；
-- 手动预览：根 `npm run server` →
-  `http://localhost:3348/packages/scsr/test/statics/scsr01.html`。
+- 手动预览测试页：根 `npm run server` →
+  `http://localhost:3348/packages/scsr/test/statics/scsr01.html`；
+- 综合案例：根 `npm run server` →
+  `http://localhost:3348/packages/scsr/test/scsr-demo/`
+  （任意子页面均可直接访问，见 scsr-demo/README.md）。

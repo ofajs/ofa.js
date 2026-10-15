@@ -1,0 +1,39 @@
+/* scsr 案例共享样式：每个页面都是独立的 HTML 文档，靠这份真实样式表
+   统一视觉（这正是 SCSR 与 hash 路由的区别——页面就是普通文档）。
+   :root 变量与 body 样式作用于文档层，变量可穿透 shadow 被页面模板
+   引用；shadow 内的类样式由各页面模板与布局页自带（文档类规则穿不进
+   shadow，页面留白来自布局页的 .view 容器）。 */
+:root {
+  --bg: #f4f5fb;
+  --text: #1e293b;
+  --accent: #4f46e5;
+  --accent-2: #7c3aed;
+  --accent-soft: #eef2ff;
+  --card: #ffffff;
+  --border: #e7e9f2;
+  --muted: #64748b;
+}
+
+body {
+  font: 15px/1.65 -apple-system, "PingFang SC", "Segoe UI", sans-serif;
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(1100px 480px at 85% -10%, #e4e8ff 0%, transparent 60%),
+    radial-gradient(900px 420px at -10% 0%, #f2e8ff 0%, transparent 55%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+o-app {
+  display: block;
+  min-height: 100vh;
+}
+
+/* 顶层页面（布局页 / fail 页）：放开 o-app ::slotted 的 height 约束，
+   长内容随文档自然滚动，导航栏才能 sticky */
+o-app > o-page {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+}

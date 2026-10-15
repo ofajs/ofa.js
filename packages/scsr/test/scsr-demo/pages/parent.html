@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR 案例 · 嵌套父页</title>
+    <link rel="stylesheet" href="../demo.css" />
+  </head>
+  <body>
+    <!-- 嵌套实验的父页：child-a/b 声明 parent 指向本页；
+        同父页的子页互换时本页不销毁（计数器与挂载时间保留）。
+        本页再声明 parent 指向 layout，形成 布局 → 父页 → 子页 三层
+        嵌套链：切子页时布局层与父页层都保持不销毁 -->
+    <o-app src="../app.mjs">
+      <template page>
+        <style>
+          .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
+          h2 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.3px; }
+          .muted { margin: 0; color: var(--muted); font-size: 13.5px; }
+          .muted b { color: var(--accent); }
+          .chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+            padding: 7px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;
+          }
+          .chip button {
+            border: 1px solid var(--accent); background: var(--accent); color: #fff;
+            border-radius: .25em; padding: 1px 9px; cursor: pointer;
+            font: inherit; font-size: 12.5px;
+            transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+          }
+          .chip button:hover { background: color-mix(in srgb, var(--accent) 85%, #000); border-color: color-mix(in srgb, var(--accent) 85%, #000); }
+          .chip b { color: var(--accent); }
+          /* 子页容器：relative + overflow hidden 与布局页 .view 同理，
+             让子页过渡的离场页定位在框内、推入位移被裁剪 */
+          .nest {
+            position: relative; overflow: hidden;
+            border: 1.5px dashed #c7cdf8; border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6); padding: 14px; min-height: 130px;
+          }
+          /* 子页 host 必须块级化：o-page 默认 inline，transform 过渡不生效 */
+          ::slotted(o-page) { display: block; }
+          .tip { margin: 14px 2px 0; color: var(--muted); font-size: 13px; }
+          .tip code { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+          .home { display: inline-block; margin-top: 14px; color: var(--muted); font-size: 13.5px; text-decoration: none; }
+          .home:hover { color: var(--accent); }
+        </style>
+        <div class="wrap">
+          <div class="head">
+            <div>
+              <h2>嵌套路由实验场</h2>
+              <p class="muted">父页挂载于 <b>{{mountedAt}}</b> —— 切换子页时它不变，即父页未销毁</p>
+            </div>
+            <span class="chip">父页计数 <button on:click="count++">+1</button> <b>{{count}}</b></span>
+          </div>
+          <!-- 组件案例：seg-switch（../components/seg-switch.html）。选中态经
+               :value 下发、点击派发 change 由本页 goto 真实路径；routerChange
+               同步高亮，浏览器前进/后退切换子页时分段开关也跟着走 -->
+          <seg-switch :value="segActive" :options="segOptions" on:change="onSegChange"></seg-switch>
+          <!-- 子页渲染在 slot 里：仅这一层在 A ↔ B 间替换并参与过渡 -->
+          <div class="nest"><slot></slot></div>
+          <p class="tip">
+            子页声明 <code>export const parent = "./parent.html"</code> 即挂到本页 slot 下；
+            本页自身又声明 parent 挂到布局页下，形成 布局 → 父页 → 子页 三层链——
+            每一层都是可以直接访问的真实路径页面。
+          </p>
+          <a class="home" olink href="../index.html">← 回首页</a>
+        </div>
+<script>
+  // 本页也挂在共享布局下：布局 → 本页 → 子页，三层嵌套路由
+  export const parent = "./layout.html";
+
+  export default async ({ load }) => {
+    // await load 同步注册组件：保证 seg-switch 在本页渲染前可用
+    // （也可在模板里写 <l-m src="../components/seg-switch.html"></l-m> 异步引入）
+    await load("../components/seg-switch.html");
+
+    return {
+      data: {
+        count: 0,
+        mountedAt: new Date().toLocaleTimeString(),
+        segActive: "",
+        segOptions: [
+          { key: "child-a.html", label: "子页 A" },
+          { key: "child-b.html", label: "子页 B" },
+        ],
+      },
+      attached() {
+        this.syncSeg();
+      },
+      // 本页作为父页：子页 A ↔ B 互换时触发（同前缀，本页不销毁）
+      routerChange({ current }) {
+        this.syncSeg(current);
+      },
+      proto: {
+        syncSeg(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.segActive = src.split("/").pop().split("?")[0] || "";
+        },
+        // 分段开关只派发 change，跳转由使用方决定（goto 真实路径）
+        onSegChange(e) {
+          this.goto("./" + e.data.key);
+        },
+      },
+    };
+  };
+</script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

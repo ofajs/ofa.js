@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR 案例 · 子页 B</title>
+    <link rel="stylesheet" href="../demo.css" />
+  </head>
+  <body>
+    <o-app src="../app.mjs">
+      <template page>
+        <style>
+          .box {
+            border-radius: 14px; padding: 16px 20px;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 1px solid #d1fae5;
+          }
+          .badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #059669; }
+          h3 { margin: 4px 0 6px; font-size: 16px; }
+          p { margin: 0; color: #3f6b58; font-size: 13.5px; }
+          p code { background: rgba(255, 255, 255, 0.75); border-radius: 5px; padding: 1px 5px; font-size: 12px; }
+        </style>
+        <div class="wrap">
+          <div class="box">
+            <span class="badge">CHILD · B</span>
+            <h3>子页 B</h3>
+            <p>与子页 A 同父页：互换时父页不销毁，父页的计数与挂载时间保留。</p>
+          </div>
+        </div>
+<script>
+  export const parent = "./parent.html";
+  export default {
+    data: {},
+  };
+</script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

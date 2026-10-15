@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR 案例 · 商品详情</title>
+    <link rel="stylesheet" href="../demo.css" />
+  </head>
+  <body>
+    <!-- 本页演示 SCSR 的招牌能力：带 query 的真实路径直达。
+        从列表点进来（?id=N）和直接在地址栏粘贴本文件地址加 query，
+        走的是同一条收编渲染管线。 -->
+    <o-app src="../app.mjs">
+      <template page>
+        <style>
+          .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 30px 34px;
+            box-shadow: 0 16px 36px -18px rgba(15, 23, 42, 0.12);
+          }
+          h2 { margin: 0 0 14px; font-size: 22px; }
+          .row { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+          .row b { color: var(--accent); }
+          .code {
+            margin: 14px 0 18px; padding: 12px 16px; background: #0f172a; color: #a5f3fc;
+            border-radius: 12px; font-size: 13px; overflow: auto;
+          }
+          .links { display: flex; gap: 10px; }
+          .links a {
+            padding: .3em .9em; font-size: 13px; border-radius: .25em;
+            color: var(--accent); border: 1px solid var(--accent); text-decoration: none;
+            transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+          }
+          .links a:hover { background: var(--accent); color: #fff; }
+        </style>
+        <div class="wrap">
+          <div class="card">
+            <h2>商品详情</h2>
+            <div class="row">
+              <span>商品 id：<b>{{id}}</b></span>
+              <span>进入时携带的 query（来自真实路径 ?id=N）：</span>
+            </div>
+            <pre class="code">{{queryText}}</pre>
+            <div class="links">
+              <a olink href="./list.html">← 回商品列表</a>
+              <a olink href="../index.html">回首页</a>
+            </div>
+          </div>
+        </div>
+<script>
+  // 声明共享布局父页
+  export const parent = "./layout.html";
+
+  // default 写成函数：入参里的 query 是页面地址（真实路径）的查询参数
+  export default ({ query }) => {
+    return {
+      data: {
+        id: query.id || "(未指定)",
+        queryText: JSON.stringify(query),
+      },
+    };
+  };
+</script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

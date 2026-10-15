@@ -7,9 +7,12 @@
   </style>
   <div class="wrap">
     <h2>商品列表</h2>
-    <div class="item" o-fill :value="items" fill-key="id">
-      <a olink attr:href="'./detail.html?id=' + $data.id"><b>{{name}}</b>（id:{{$data.id}}）→ 查看详情</a>
-    </div>
+    <o-fill :value="items" fill-key="id">
+      <div class="item">
+        <!-- olink 点击按文档基准解析：fill 项内的链接写文档相对路径 -->
+        <a olink attr:href="'./pages/detail.html?id=' + $data.id"><b>{{$data.name}}</b>（id:{{$data.id}}）→ 查看详情</a>
+      </div>
+    </o-fill>
     <p><a olink href="./home.html">← 回首页</a></p>
   </div>
 <script>

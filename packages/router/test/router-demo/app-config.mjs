@@ -11,10 +11,14 @@ export const pageAnime = {
   previous: { opacity: 0 },
 };
 
-// 页面加载失败时的自定义内容（如 goto 到不存在的页面）
+// 页面加载失败时的自定义内容（如 goto 到不存在的页面）。
+// 回首页的链接用配置模块地址算绝对 URL：失败页的位置不可靠，
+// 相对路径会基于失败页地址叠加（pages/pages/...）
+const homeUrl = new URL("./pages/home.html", import.meta.url).href;
+
 export const fail = ({ src }) =>
   `<div style="padding:24px;">
     <h2>404 · 页面加载失败</h2>
     <p>地址：${src}</p>
-    <a href="./pages/home.html" olink>回首页</a>
+    <a href="${homeUrl}" olink>回首页</a>
   </div>`;

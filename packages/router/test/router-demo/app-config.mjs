@@ -1,6 +1,24 @@
 // 应用配置模块（o-app 的 src 指向它）
 export const home = "./pages/home.html";
 
+// 应用就绪后把四个导航入口都包一层「导航即回顶」：
+// 本案例走文档自然滚动，离场旧页过渡期会被设为 absolute 脱离文档流，
+// 文档高度随之塌缩，浏览器把 scrollY 钳位到新的可滚动上限——表现为
+// 切页途中视图突然上跳。在导航入口同步回顶（此时 DOM 还没动），过渡
+// 就能稳定在第 0 屏完整播放，与主流 SPA 的 scrollBehavior 一致。
+// popstate 驱动的浏览器前进/后退最终也调用这四个方法，一并覆盖。
+export const ready = function () {
+  for (const name of ["goto", "replace", "back", "forward"]) {
+    const originFn = this[name];
+    this.extend({
+      [name](...args) {
+        window.scrollTo(0, 0);
+        return originFn.apply(this, args);
+      },
+    });
+  }
+};
+
 // 允许 forward()（forward 需要显式开启）
 export const allowForward = true;
 
@@ -43,11 +61,14 @@ export const fail = ({ src }) =>
       font-size: 12px; word-break: break-all; text-align: left;
     }
     .btn {
-      display: inline-block; padding: 9px 20px; border-radius: 11px; text-decoration: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #fff; font-size: 14px; font-weight: 600;
-      box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
+      --bg: var(--accent);
+      display: inline-block; padding: .4em 1.1em; border-radius: .375em;
+      background: var(--bg); border: 1px solid var(--bg); color: #fff;
+      font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
     }
+    .btn:hover { --bg: color-mix(in srgb, var(--accent) 85%, #000); }
+    .btn:active { --bg: color-mix(in srgb, var(--accent) 72%, #000); }
   </style>
   <div class="stage">
     <div class="box">

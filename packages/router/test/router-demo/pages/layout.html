@@ -20,17 +20,15 @@
       box-shadow: 0 4px 10px -3px rgba(79, 70, 229, 0.5);
     }
     .links { display: flex; gap: 4px; flex: 1; }
+    /* 导航项取 Bootstrap 按钮态：hover 淡底，选中为 solid primary */
     .links a {
-      padding: 7px 15px; border-radius: 999px; text-decoration: none;
-      color: var(--muted); font-weight: 500; font-size: 14px;
-      transition: background 0.15s, color 0.15s;
+      padding: .35em .95em; border-radius: .375em; text-decoration: none;
+      color: var(--muted); font-size: 14px;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out;
     }
     .links a:hover { background: var(--accent-soft); color: var(--accent); }
-    .links a.on {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #fff;
-      box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.55);
-    }
+    .links a.on { background: var(--accent); color: #fff; }
+    .links a.on:hover { background: color-mix(in srgb, var(--accent) 85%, #000); }
     .nav-tip { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
     .nav-tip b { color: var(--accent); }
     /* 子页容器：relative 让离场旧页（absolute）定位在内容区；

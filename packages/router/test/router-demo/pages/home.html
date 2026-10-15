@@ -20,19 +20,22 @@
     }
     .sub { margin: 0 0 20px; color: var(--muted); max-width: 520px; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    /* 按钮参考 Bootstrap 6 的 .btn：solid / outline 变体 + sm 小尺寸，
+       hover/active 用 color-mix 加深主色，focus-visible 画软光环 */
     .btn {
-      display: inline-block; padding: 9px 18px; border: none; border-radius: 11px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
-      box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
-      transition: transform 0.15s, box-shadow 0.15s;
+      --bg: var(--accent);
+      display: inline-block; padding: .4em 1em; font: inherit; font-size: 14px;
+      color: #fff; background: var(--bg); border: 1px solid var(--bg);
+      border-radius: .375em; text-decoration: none; cursor: pointer;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out,
+        border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -6px rgba(79, 70, 229, 0.6); }
-    .btn.ghost {
-      background: #fff; color: var(--accent);
-      border: 1px solid #dcdff8; box-shadow: none;
-    }
-    .btn.ghost:hover { border-color: var(--accent); }
+    .btn:hover { --bg: color-mix(in srgb, var(--accent) 85%, #000); }
+    .btn:active { --bg: color-mix(in srgb, var(--accent) 72%, #000); }
+    .btn:focus-visible { outline: 0; box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--accent) 25%, transparent); }
+    .btn.outline { background: none; color: var(--bg); }
+    .btn.outline:hover, .btn.outline:active { background: var(--bg); color: #fff; }
+    .btn.sm { padding: .25em .7em; font-size: 13px; border-radius: .25em; }
     .grid {
       margin-top: 16px;
       display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px;
@@ -46,13 +49,7 @@
     .feat .ico { font-size: 22px; }
     .feat h3 { margin: 2px 0 0; font-size: 15px; }
     .feat p { margin: 0; color: var(--muted); font-size: 13px; flex: 1; }
-    .feat a, .feat button {
-      align-self: flex-start; margin-top: 8px;
-      color: var(--accent); font-weight: 600; font-size: 13px;
-      background: none; border: none; padding: 0; cursor: pointer;
-      font-family: inherit;
-    }
-    .feat a:hover, .feat button:hover { text-decoration: underline; }
+    .feat .btn { align-self: flex-start; margin-top: 8px; }
     .tip {
       margin: 18px 4px 0; color: var(--muted); font-size: 13px;
       background: var(--accent-soft); border: 1px solid #e0e4ff;
@@ -70,7 +67,7 @@
       </p>
       <div class="row">
         <a class="btn" olink href="./list.html">去商品列表</a>
-        <button class="btn ghost" on:click="goto('./not-exist.html')">触发 404 fail 页</button>
+        <button class="btn outline" on:click="goto('./not-exist.html')">触发 404 fail 页</button>
       </div>
     </section>
 
@@ -79,37 +76,37 @@
         <span class="ico">🧭</span>
         <h3>声明导航</h3>
         <p>a[olink] 点击转 goto，地址被 o-router 改写成 hash 形式。</p>
-        <a olink href="./list.html">试一试 →</a>
+        <a class="btn sm outline" olink href="./list.html">试一试</a>
       </article>
       <article class="feat">
         <span class="ico">⌨️</span>
         <h3>程序导航</h3>
         <p>this.goto() 编程式跳转，页面内任意时机可用。</p>
-        <button on:click="goto('./list.html')">goto 列表页</button>
+        <button class="btn sm outline" on:click="goto('./list.html')">goto 列表页</button>
       </article>
       <article class="feat">
         <span class="ico">🔗</span>
         <h3>query 传参</h3>
         <p>地址携带 ?id=42，页面 default 函数直接读到 query。</p>
-        <a olink href="./detail.html?id=42">直达详情 ?id=42</a>
+        <a class="btn sm outline" olink href="./detail.html?id=42">直达详情 ?id=42</a>
       </article>
       <article class="feat">
         <span class="ico">📦</span>
         <h3>.mjs 页面模块</h3>
         <p>页面即 ES 模块：type = PAGE + temp + default。</p>
-        <a olink href="./profile.mjs">打开个人中心</a>
+        <a class="btn sm outline" olink href="./profile.mjs">打开个人中心</a>
       </article>
       <article class="feat">
         <span class="ico">🧪</span>
         <h3>嵌套路由</h3>
         <p>同父页的子页互换，父页与其状态保持不销毁。</p>
-        <a olink href="./child-a.html">进嵌套实验</a>
+        <a class="btn sm outline" olink href="./child-a.html">进嵌套实验</a>
       </article>
       <article class="feat">
         <span class="ico">⏩</span>
         <h3>前进 forward</h3>
         <p>后退一次，再点这里沿栈前进（需 allowForward）。</p>
-        <button on:click="forward()">forward()</button>
+        <button class="btn sm outline" on:click="forward()">forward()</button>
       </article>
     </section>
 

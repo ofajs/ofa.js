@@ -23,9 +23,15 @@
       margin: 0 0 20px; padding: 12px 16px; background: #0f172a; color: #a5f3fc;
       border-radius: 12px; font-size: 13px; overflow: auto;
     }
-    .links { display: flex; gap: 16px; }
-    .links a { color: var(--accent); font-weight: 600; font-size: 13.5px; text-decoration: none; }
-    .links a:hover { text-decoration: underline; }
+    .links { display: flex; gap: 10px; }
+    /* 小号 outline 按钮（Bootstrap .btn 风格） */
+    .links a {
+      padding: .3em .9em; font-size: 13px; border-radius: .25em;
+      color: var(--accent); border: 1px solid var(--accent); text-decoration: none;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+    }
+    .links a:hover { background: var(--accent); color: #fff; }
+    .links a:active { background: color-mix(in srgb, var(--accent) 72%, #000); border-color: color-mix(in srgb, var(--accent) 72%, #000); }
   </style>
   <div class="wrap">
     <p class="back"><a olink href="./list.html">← 返回列表</a></p>

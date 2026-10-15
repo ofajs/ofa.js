@@ -18,13 +18,20 @@ npm run server   # http://localhost:3348
 | 文件 | 演示点 |
 |---|---|
 | `index.html` | `<o-router fix-body>` 包裹 `<o-app src>`；设计令牌（`:root` CSS 变量，可穿透 shadow DOM）与顶层页面滚动样式也在这里 |
-| `app-config.mjs` | 应用配置模块：`home`（首页）、`allowForward`（开启 forward）、`pageAnime`（进出动画：30px 同向漂移 + 淡入淡出）、`fail`（加载失败页自定义） |
+| `app-config.mjs` | 应用配置模块：`home`（首页）、`allowForward`（开启 forward）、`pageAnime`（进出动画：30px 同向漂移 + 淡入淡出）、`fail`（加载失败页自定义）、`ready`（导航即回顶：包装 goto/replace/back/forward，避免滚动后切页时文档高度塌缩导致视图突跳） |
 | `pages/layout.html` | **持久化布局页**：导航栏 + `<slot>`，所有页面 `parent` 指向它——同前缀导航时布局不销毁，仅 slot 内容过渡；`routerChange` 生命周期驱动当前项高亮与导航计数 |
 | `pages/home.html` | 导航入口聚合页：程序导航（`goto`）、声明导航（`<a olink>`）、query 直达、.mjs 页面、嵌套路由、404 触发、`forward()` |
 | `pages/list.html` | `o-fill` 商品卡片；fill 项内 `olink` 按文档基准用 `attr:href` 表达式拼接 query |
 | `pages/detail.html` | **query 读取**：`default` 写成函数，入参 `query` 即页面地址的查询参数 |
 | `pages/parent.html` + `child-a/b.html` | **嵌套路由三层链**（layout → parent → child）：子页声明 `export const parent`，子页互换时父页不销毁（计数保留）；父页同样用 `routerChange` 高亮分段控件 |
 | `pages/profile.mjs` | **.mjs 页面模块**：`type = $.PAGE`、`default` 函数读 query |
+
+## 样式
+
+按钮与导航的交互态参考 [Bootstrap 6 的 Button 组件](https://getbootstrap.com/docs/6.0/components/button/)：
+solid / outline 变体、`sm` 小尺寸、`.375em` 圆角、`0.15s ease-in-out` 状态过渡，
+hover/active 用 `color-mix` 加深主色，focus-visible 画软光环。各页面在各自模板里
+保留最简版实现，配色沿用 `index.html` 的 `:root` 设计令牌。
 
 ## 核心写法速查
 

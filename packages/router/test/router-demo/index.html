@@ -2,10 +2,38 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>o-app + o-router 使用案例</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ofa router · 迷你应用案例</title>
     <style>
-      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 0; color: #1d1d1f; }
-      o-app { display: block; height: 100vh; }
+      /* 设计令牌：CSS 变量可穿透 shadow DOM，被各页面模板直接引用 */
+      :root {
+        --bg: #f4f5fb;
+        --card: #ffffff;
+        --text: #1e293b;
+        --muted: #64748b;
+        --border: #e7e9f2;
+        --accent: #4f46e5;
+        --accent-2: #7c3aed;
+        --accent-soft: #eef2ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font: 15px/1.65 -apple-system, "PingFang SC", "Segoe UI", sans-serif;
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(1100px 480px at 85% -10%, #e4e8ff 0%, transparent 60%),
+          radial-gradient(900px 420px at -10% 0%, #f2e8ff 0%, transparent 55%),
+          var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+      o-app { display: block; min-height: 100vh; }
+      /* 解开 o-router :host 的 height:100%，长内容走文档自然滚动；
+         overflow:hidden 仍保留在 o-router 上，用于裁掉过渡期 30px 位移 */
+      o-router { height: auto; }
+      /* 顶层页面（布局页 / 根级 fail 页）：放开 o-app ::slotted 的
+         height:100%，改为最小满屏、随内容撑高，导航栏才能 sticky */
+      o-app > o-page { display: block; height: auto; min-height: 100vh; }
     </style>
   </head>
   <body>

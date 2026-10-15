@@ -1,27 +1,62 @@
 <template page>
   <style>
-    .wrap { padding: 24px; }
-    .item { padding: 10px 14px; border: #ddd solid 1px; margin: 8px 0; cursor: pointer; }
-    .item:hover { border-color: #2456c4; }
-    .item a { color: #2456c4; text-decoration: none; }
+    .head { display: flex; align-items: baseline; gap: 12px; margin: 2px 2px 16px; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -0.3px; }
+    .count { color: var(--muted); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 14px; }
+    .item {
+      display: block; background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px; text-decoration: none; color: inherit;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 30px -16px rgba(15, 23, 42, 0.22);
+      border-color: #d9dcff;
+    }
+    .thumb {
+      width: 52px; height: 52px; border-radius: 14px; margin-bottom: 12px;
+      display: grid; place-items: center; font-size: 26px; background: var(--accent-soft);
+    }
+    .name { display: block; font-weight: 600; }
+    .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .id { color: var(--muted); font-size: 12px; background: #f1f3f9; padding: 2px 9px; border-radius: 999px; }
+    .go { color: var(--accent); font-size: 13px; font-weight: 600; }
+    .tip { margin: 18px 2px 0; color: var(--muted); font-size: 13px; }
+    .tip code { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
   </style>
   <div class="wrap">
-    <h2>商品列表</h2>
-    <o-fill :value="items" fill-key="id">
-      <div class="item">
-        <!-- olink 点击按文档基准解析：fill 项内的链接写文档相对路径 -->
-        <a olink attr:href="'./pages/detail.html?id=' + $data.id"><b>{{$data.name}}</b>（id:{{$data.id}}）→ 查看详情</a>
-      </div>
-    </o-fill>
-    <p><a olink href="./home.html">← 回首页</a></p>
+    <div class="head">
+      <h2>商品列表</h2>
+      <span class="count">{{items.length}} 件 · o-fill 渲染</span>
+    </div>
+    <div class="grid">
+      <o-fill :value="items" fill-key="id">
+        <a class="item" olink attr:href="'./pages/detail.html?id=' + $data.id">
+          <span class="thumb">{{$data.icon}}</span>
+          <span class="name">{{$data.name}}</span>
+          <span class="meta">
+            <span class="id">id: {{$data.id}}</span>
+            <span class="go">查看详情 →</span>
+          </span>
+        </a>
+      </o-fill>
+    </div>
+    <p class="tip">
+      <!-- olink 点击按文档基准解析：fill 项内的链接写文档相对路径 -->
+      卡片链接在 o-fill 内，olink 地址按文档基准拼接 <code>./pages/detail.html?id=</code>，点击进入 query 传参演示。
+    </p>
   </div>
 <script>
+  export const parent = "./layout.html";
+
   export default {
     data: {
       items: [
-        { id: 1, name: "机械键盘" },
-        { id: 2, name: "无线鼠标" },
-        { id: 3, name: "显示器" },
+        { id: 1, name: "机械键盘", icon: "⌨️" },
+        { id: 2, name: "无线鼠标", icon: "🖱️" },
+        { id: 3, name: "显示器", icon: "🖥️" },
+        { id: 4, name: "降噪耳机", icon: "🎧" },
       ],
     },
   };

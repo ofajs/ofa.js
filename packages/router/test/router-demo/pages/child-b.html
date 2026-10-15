@@ -1,10 +1,20 @@
 <template page>
   <style>
-    .wrap { padding: 12px; background: #fff0f0; }
+    .box {
+      border-radius: 14px; padding: 16px 20px;
+      background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+      border: 1px solid #ffd9dd;
+    }
+    .badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #e11d48; }
+    h3 { margin: 4px 0 6px; font-size: 16px; }
+    p { margin: 0; color: #7a4a55; font-size: 13.5px; }
   </style>
   <div class="wrap">
-    <h3>子页 B</h3>
-    <p>与子页 A 同父页：A ↔ B 切换时，父页与其状态保持不销毁。</p>
+    <div class="box">
+      <span class="badge">CHILD · B</span>
+      <h3>子页 B</h3>
+      <p>与子页 A 同父页：A ↔ B 切换时，父页与其状态保持不销毁。</p>
+    </div>
   </div>
 <script>
   export const parent = "./parent.html";

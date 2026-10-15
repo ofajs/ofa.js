@@ -1,33 +1,84 @@
 <template page>
   <style>
-    .wrap { padding: 24px; }
-    /* overflow:hidden 把子页切换的推入动画裁剪在面板内；
-       min-height 缓解子页高度不同导致的面板高度跳变 */
-    .panel { border: #2456c4 solid 2px; border-radius: 8px; padding: 16px; overflow: hidden; min-height: 140px; }
-    /* 子页 host 需为块级，页面进出的 transform 过渡（位移动画）才会生效 */
+    .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+    h2 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.3px; }
+    .muted { margin: 0; color: var(--muted); font-size: 13.5px; }
+    .muted b { color: var(--accent); }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+      padding: 7px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;
+    }
+    .chip button {
+      border: none; background: var(--accent-soft); color: var(--accent);
+      border-radius: 999px; padding: 2px 10px; font-weight: 700; cursor: pointer;
+      font-family: inherit; font-size: 12.5px;
+    }
+    .chip button:hover { background: #e0e5ff; }
+    .chip b { color: var(--accent); }
+    .seg { display: inline-flex; gap: 4px; background: #e9ebf5; padding: 4px; border-radius: 999px; margin-bottom: 14px; }
+    .seg a {
+      padding: 6px 18px; border-radius: 999px; text-decoration: none;
+      color: var(--muted); font-weight: 600; font-size: 13.5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .seg a:hover { color: var(--accent); }
+    .seg a.on { background: #fff; color: var(--accent); box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1); }
+    /* 子页容器：relative + overflow hidden 与布局页 .view 同理，
+       让子页过渡的离场页定位在框内、位移被裁剪 */
+    .nest {
+      position: relative; overflow: hidden;
+      border: 1.5px dashed #c7cdf8; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.6); padding: 14px; min-height: 130px;
+    }
+    /* 子页 host 必须块级化：o-page 默认 inline，transform 过渡不生效 */
     ::slotted(o-page) { display: block; }
-    menu { display: flex; gap: 12px; list-style: none; padding: 0; }
+    .tip { margin: 14px 2px 0; color: var(--muted); font-size: 13px; }
+    .tip code { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+    .home { display: inline-block; margin-top: 14px; color: var(--muted); font-size: 13.5px; text-decoration: none; }
+    .home:hover { color: var(--accent); }
   </style>
   <div class="wrap">
-    <h2>嵌套路由 · 父页（挂载于 <span id="mounted-at">{{mountedAt}}</span>，切换子页时时间不变 = 父页未销毁）</h2>
-    <div class="panel">
-      <menu>
-        <li><a olink href="./child-a.html">子页 A</a></li>
-        <li><a olink href="./child-b.html">子页 B</a></li>
-      </menu>
-      <p>父页计数（点一下，再切子页，数值保留）：
-        <button on:click="count++">+1</button> <b>{{count}}</b>
-      </p>
-      <!-- 子页渲染在父页内容之后（同前缀父页保持不销毁，仅子页层替换） -->
-      <slot></slot>
+    <div class="head">
+      <div>
+        <h2>嵌套路由实验场</h2>
+        <p class="muted">父页挂载于 <b>{{mountedAt}}</b> —— 切换子页时它不变，即父页未销毁</p>
+      </div>
+      <span class="chip">父页计数 <button on:click="count++">+1</button> <b>{{count}}</b></span>
     </div>
-    <p><a olink href="./home.html">← 回首页</a></p>
+    <div class="seg">
+      <a olink href="./child-a.html" attr:class="segActive === 'child-a.html' ? 'on' : ''">子页 A</a>
+      <a olink href="./child-b.html" attr:class="segActive === 'child-b.html' ? 'on' : ''">子页 B</a>
+    </div>
+    <!-- 子页渲染在 slot 里：仅这一层在 A ↔ B 间替换并参与过渡 -->
+    <div class="nest"><slot></slot></div>
+    <p class="tip">
+      声明 <code>export const parent = "./parent.html"</code> 即挂到父页 slot 下；
+      先点一下 +1 再切子页，计数保留说明父页状态未销毁。本页自身又挂在布局页下，形成 layout → parent → child 三层链。
+    </p>
+    <a class="home" olink href="./home.html">← 回首页</a>
   </div>
 <script>
+  export const parent = "./layout.html";
+
   export default {
     data: {
       count: 0,
       mountedAt: new Date().toLocaleTimeString(),
+      segActive: "",
+    },
+    attached() {
+      this.syncSeg();
+    },
+    // 本页作为父页：子页 A ↔ B 互换时触发（同前缀，本页不销毁）
+    routerChange({ current }) {
+      this.syncSeg(current);
+    },
+    proto: {
+      syncSeg(current) {
+        const src = (current || this.app?.current)?.src || "";
+        this.segActive = src.split("/").pop().split("?")[0] || "";
+      },
     },
   };
 </script>

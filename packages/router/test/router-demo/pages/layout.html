@@ -1,0 +1,104 @@
+<template page>
+  <style>
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 880px; margin: 0 auto; padding: 0 20px;
+      height: 58px; display: flex; align-items: center; gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.2px; }
+    .brand-logo {
+      width: 27px; height: 27px; border-radius: 8px; color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid; place-items: center; font-size: 14px; font-weight: 800;
+      box-shadow: 0 4px 10px -3px rgba(79, 70, 229, 0.5);
+    }
+    .links { display: flex; gap: 4px; flex: 1; }
+    .links a {
+      padding: 7px 15px; border-radius: 999px; text-decoration: none;
+      color: var(--muted); font-weight: 500; font-size: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .links a:hover { background: var(--accent-soft); color: var(--accent); }
+    .links a.on {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.55);
+    }
+    .nav-tip { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+    .nav-tip b { color: var(--accent); }
+    /* 子页容器：relative 让离场旧页（absolute）定位在内容区；
+       overflow hidden 把过渡期的 30px 位移裁剪在栏内 */
+    .view {
+      position: relative; overflow: hidden;
+      flex: 1; width: 100%; max-width: 880px; margin: 0 auto;
+      padding: 28px 20px 44px; min-height: 420px;
+    }
+    /* 子页 host 必须块级化：o-page 默认 inline，transform 过渡不生效 */
+    ::slotted(o-page) { display: block; }
+    .foot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 16px 20px 28px; }
+    .foot code { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
+  </style>
+  <div class="shell">
+    <header class="nav">
+      <div class="nav-inner">
+        <span class="brand"><span class="brand-logo">o</span>ofa router</span>
+        <nav class="links">
+          <a olink href="./home.html" attr:class="active === 'home' ? 'on' : ''">首页</a>
+          <a olink href="./list.html" attr:class="active === 'list' ? 'on' : ''">商品列表</a>
+          <a olink href="./profile.mjs" attr:class="active === 'profile' ? 'on' : ''">个人中心</a>
+          <a olink href="./child-a.html" attr:class="active === 'nest' ? 'on' : ''">嵌套实验</a>
+        </nav>
+        <span class="nav-tip">routerChange × <b>{{navCount}}</b></span>
+      </div>
+    </header>
+    <!-- 子页渲染在 slot 里：所有页面声明 parent 指向本页，
+         同前缀导航时布局页保持不销毁（嵌套路由），只有 slot 内容参与过渡 -->
+    <main class="view"><slot></slot></main>
+    <footer class="foot">
+      o-app + o-router · hash 地址 <code>#/pages/xxx.html</code> 可刷新 / 直达 / 分享
+    </footer>
+  </div>
+<script>
+  // 文件名 → 导航项：详情页归属"商品列表"，子页归属"嵌套实验"
+  const KEYMAP = {
+    "home.html": "home",
+    "list.html": "list",
+    "detail.html": "list",
+    "profile.mjs": "profile",
+    "parent.html": "nest",
+    "child-a.html": "nest",
+    "child-b.html": "nest",
+  };
+
+  export default {
+    data: {
+      active: "",
+      navCount: 0,
+    },
+    // 首挂时子页已就位，attached 里同步一次初始高亮
+    attached() {
+      this.syncActive();
+    },
+    // 父页生命周期：同前缀的子页互相切换时触发，布局页借此常驻并更新高亮
+    routerChange({ current }) {
+      this.navCount++;
+      this.syncActive(current);
+    },
+    proto: {
+      syncActive(current) {
+        const src = (current || this.app?.current)?.src || "";
+        // 页面 src 可能带 query（如 detail.html?id=1），先剥掉再匹配
+        const file = src.split("/").pop().split("?")[0];
+        this.active = KEYMAP[file] || "";
+      },
+    },
+  };
+</script>
+</template>

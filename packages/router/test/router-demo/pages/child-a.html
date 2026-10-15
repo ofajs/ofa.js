@@ -1,10 +1,21 @@
 <template page>
   <style>
-    .wrap { padding: 12px; background: #f0f4ff; }
+    .box {
+      border-radius: 14px; padding: 16px 20px;
+      background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+      border: 1px solid #dfe3ff;
+    }
+    .badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--accent); }
+    h3 { margin: 4px 0 6px; font-size: 16px; }
+    p { margin: 0; color: #3f4a6b; font-size: 13.5px; }
+    p code { background: rgba(255, 255, 255, 0.75); border-radius: 5px; padding: 1px 5px; font-size: 12px; }
   </style>
   <div class="wrap">
-    <h3>子页 A</h3>
-    <p>声明 <code>export const parent = "./parent.html"</code>，作为父页的子页渲染。</p>
+    <div class="box">
+      <span class="badge">CHILD · A</span>
+      <h3>子页 A</h3>
+      <p>声明 <code>export const parent = "./parent.html"</code>，作为父页的子页渲染；A ↔ B 互换只替换这一层。</p>
+    </div>
   </div>
 <script>
   export const parent = "./parent.html";

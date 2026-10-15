@@ -1,5 +1,5 @@
-# CI：五条并行流水线
-# - drill / stanz：各自包的 playwright 全量（三浏览器）
+# CI：七条并行流水线
+# - drill / stanz / router / scsr：各自包的 playwright 全量（三浏览器）
 # - ofa.js：按浏览器拆三条（chromium / firefox / webkit；ofajs 覆盖 xhear，故不单列 xhear）
 # 各任务互不依赖，天然并行；playwright.config.mjs 在 CI 下自动启用
 # forbidOnly / retries=2 / workers=1，并在测试前自动起停 3348 静态服务器。
@@ -57,6 +57,20 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npx playwright test packages/router --reporter=line
+
+  test-scsr:
+    name: scsr（三浏览器）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test packages/scsr --reporter=line
 
   test-ofajs-chromium:
     name: ofa.js（chromium）

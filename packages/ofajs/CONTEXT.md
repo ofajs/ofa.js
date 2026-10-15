@@ -244,3 +244,17 @@ provider 数据镜像在 consumer 元素的**数据属性**上。
 **正确姿势**：断言/使用 consumer 数据用 `ofa(consumer).color`；要在视
 图里展示时，把 consumer 数据绑定到宿主编译范围内的指令上（如
 consumer 元素的 `:attr` 绑定）。
+
+### transform 类页面动画在嵌套子页上静默不生效
+
+**症状**：pageAnime 配了 translate/transform 位移动画，顶层页面切换正常，
+嵌套路由的子页（父页 slot 内）切换时页面纹丝不动（若动画含 opacity 则
+只剩淡化，无报错）。
+
+**根因**：o-page host 没有默认 display，自定义元素即 inline；CSS transform
+对非替换 inline 盒不生效。顶层页面靠 o-app 模板的 `::slotted(*){display:block}`
+间接块级化，父页 slot 里的子页没有对应规则。
+
+**正确姿势**：父页模板样式里加 `::slotted(o-page){display:block}`（配合
+overflow:hidden 可把子页位移裁剪在容器内）。参考 router-demo 的
+pages/parent.html。

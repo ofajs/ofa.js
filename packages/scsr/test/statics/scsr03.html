@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR Page 03</title>
+    <link rel="stylesheet" href="./public.css" />
+  </head>
+  <body>
+    <o-app src="./app.mjs">
+      <template page>
+        <style>
+          h1 {
+            margin: 0;
+          }
+        </style>
+        <h1 id="p03-title">I am scsr page 03</h1>
+        <div>num => <span id="p03-num">{{num}}</span></div>
+        <button on:click="addOne" id="p03-add">Add One</button>
+        <br />
+        <button on:click="back()" id="p03-back">Back</button>
+        <br />
+        <br />
+        <button on:click="goto('./subs/scsr0301.html')" id="p03-goto">
+          Goto sub Page0301
+        </button>
+
+        <script>
+          // 声明父页：渲染为 parent.html 包裹本页的继承链
+          export const parent = "./parent.html";
+
+          export default () => {
+            return {
+              attached() {
+                window.__p03renders = (window.__p03renders || 0) + 1;
+              },
+              data: {
+                num: 30,
+              },
+              proto: {
+                addOne() {
+                  this.num++;
+                },
+              },
+            };
+          };
+        </script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR Page 02</title>
+    <link rel="stylesheet" href="./public.css" />
+  </head>
+  <body>
+    <o-app src="./app.mjs">
+      <template page>
+        <style>
+          h1 {
+            margin: 0;
+          }
+        </style>
+        <h1 id="p02-title">I am scsr page 02</h1>
+        <div>num => <span id="p02-num">{{num}}</span></div>
+        <button on:click="addOne" id="p02-add">Add One</button>
+        <br />
+        <!-- default 函数形式：从页面地址的 query 读参数 -->
+        <div>from => <span id="p02-from">{{from}}</span></div>
+        <br />
+        <button on:click="back()" id="p02-back">Back</button>
+        <br />
+        <br />
+        <button on:click="goto('./scsr03.html')" id="p02-goto">
+          Goto Page03
+        </button>
+
+        <script>
+          export default ({ query }) => {
+            return {
+              attached() {
+                window.__p02renders = (window.__p02renders || 0) + 1;
+              },
+              data: {
+                num: 20,
+                from: query.from || "",
+              },
+              proto: {
+                addOne() {
+                  this.num++;
+                },
+              },
+            };
+          };
+        </script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

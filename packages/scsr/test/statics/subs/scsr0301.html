@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR Page 0301</title>
+    <link rel="stylesheet" href="../public.css" />
+  </head>
+  <body>
+    <!-- 子目录下的页面：验证 scsr 在深层路径上同样成立 -->
+    <o-app src="../app.mjs">
+      <template page>
+        <h1 id="p0301-title">I am scsr page 0301</h1>
+        <div>num => <span id="p0301-num">{{num}}</span></div>
+        <button on:click="addOne" id="p0301-add">Add One</button>
+        <br />
+        <button on:click="back()" id="p0301-back">Back</button>
+
+        <script>
+          export default () => {
+            return {
+              attached() {
+                window.__p0301renders = (window.__p0301renders || 0) + 1;
+              },
+              data: {
+                num: 301,
+              },
+              proto: {
+                addOne() {
+                  this.num++;
+                },
+              },
+            };
+          };
+        </script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

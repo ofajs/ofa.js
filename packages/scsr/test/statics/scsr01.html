@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCSR Page 01</title>
+    <link rel="stylesheet" href="./public.css" />
+  </head>
+  <body>
+    <!-- scsr 页面即 SCSR 契约的载体：服务端投递的完整 HTML，
+        template[page] 内联在 o-app 里承载首屏内容，scsr 接管后由
+        o-page 从当前 URL 重新加载同一份文件渲染成应用内页面 -->
+    <o-app src="./app.mjs">
+      <template page>
+        <style>
+          h1 {
+            margin: 0;
+          }
+        </style>
+        <l-m src="./comps/btn/t-btn.html"></l-m>
+        <h1 id="p01-title">I am scsr page 01</h1>
+        <div>num => <span id="p01-num">{{num}}</span></div>
+        <button on:click="addOne" id="p01-add">Add One</button>
+        <br />
+        <br />
+        <t-btn on:click="goto('./scsr02.html')" id="p01-goto"
+          >Goto Page02</t-btn
+        >
+        <br />
+        <br />
+        <button on:click="back()" id="p01-back">Back</button>
+        <!-- 页内锚点：hash 变化不参与应用路由 -->
+        <p style="margin-top: 600px">
+          <a id="to-anchor" href="#anchor-pos">jump to anchor</a>
+        </p>
+        <p id="anchor-pos">anchor position</p>
+
+        <script>
+          // attached 计数：供 spec 断言「只渲染一次 / 是否重渲染」
+          export default {
+            attached() {
+              window.__p01renders = (window.__p01renders || 0) + 1;
+            },
+            data: {
+              num: 10,
+            },
+            proto: {
+              addOne() {
+                this.num++;
+              },
+            },
+          };
+        </script>
+      </template>
+    </o-app>
+
+    <script type="module">
+      import "../../../ofajs/src/main.mjs";
+      import "../../src/scsr.mjs";
+
+      window.__app = ofa("o-app");
+    </script>
+  </body>
+</html>

@@ -4,11 +4,15 @@ export const home = "./pages/home.html";
 // 允许 forward()（forward 需要显式开启）
 export const allowForward = true;
 
-// 页面进出动画（淡入淡出）
+// 页面进出动画：淡入淡出 + 少量位移（同方向漂移的 shared-axis 风格）
+// - 前进（goto / olink）：新页从右侧 30px 处淡入，旧页向左 30px 淡出；
+// - 后退（back）：方向镜像，新页从左淡入、旧页向右淡出。
+// next / previous 在框架里身兼两职——既是新页入场的起始态，也是旧页
+// 离场的目标态，同一组值天然保证进出两页同向漂移、方向语义一致。
 export const pageAnime = {
-  current: { opacity: 1 },
-  next: { opacity: 0 },
-  previous: { opacity: 0 },
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
 };
 
 // 页面加载失败时的自定义内容（如 goto 到不存在的页面）。

@@ -1,7 +1,11 @@
 <template page>
   <style>
     .wrap { padding: 24px; }
-    .panel { border: #2456c4 solid 2px; border-radius: 8px; padding: 16px; }
+    /* overflow:hidden 把子页切换的推入动画裁剪在面板内；
+       min-height 缓解子页高度不同导致的面板高度跳变 */
+    .panel { border: #2456c4 solid 2px; border-radius: 8px; padding: 16px; overflow: hidden; min-height: 140px; }
+    /* 子页 host 需为块级，页面进出的 transform 过渡（位移动画）才会生效 */
+    ::slotted(o-page) { display: block; }
     menu { display: flex; gap: 12px; list-style: none; padding: 0; }
   </style>
   <div class="wrap">

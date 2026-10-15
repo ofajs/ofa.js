@@ -5,7 +5,8 @@
  * - 应用路由（router-change）→ 写 history：goto/forward 用 pushState、
  *   replace 用 replaceState、back 用 history.go(-delta)；
  * - 浏览器历史（popstate）→ 驱动应用：按条目里保存的路由栈与当前
- *   路由栈的深度差，驱动 app.back(n) / app.goto(target)。
+ *   路由栈的深度差，驱动 app.back(n) / app.goto(target)；带 ignore
+ *   标记的条目直接跳过（scsr 等宿主为锚点定位类条目写入的标记）。
  *
  * 回波抑制不再依赖标志位：应用导航完成后 URL 必然与目标 hash 地址
  * 一致，RC 处理器发现 location.href 已是目标地址时直接跳过写入
@@ -87,6 +88,12 @@ export default function initRouter({ app, getStateUrl, fixStateUrl }) {
         return;
       }
 
+      // scsr 等宿主会给「锚点定位类」条目补写带 ignore 标记的状态：
+      // 这类条目只承载 URL 变化，不驱动应用重渲染
+      if (e.state?.ignore) {
+        return;
+      }
+
       const hisRouters = e.state?.routerMode ? e.state.routers : null;
 
       if (hisRouters) {
@@ -111,7 +118,7 @@ export default function initRouter({ app, getStateUrl, fixStateUrl }) {
 
         // 同深度但栈不同（replaceState 类导航的前后移动）：按条目恢复
         // 路由栈（setter 会渲染恢复后的当前页）
-        if (JSON.stringify(hisRouters) !== JSON.stringify(appRouters)) {
+        if (JSON.stringify(hisRouters) !== JSON.stringify(app.routers)) {
           app.routers = hisRouters;
         }
         return;

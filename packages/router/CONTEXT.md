@@ -43,6 +43,9 @@ packages/router/
   由 driveNav 的 finally 复位，不会卡死后续导航）；
 - **等深不同栈**（replaceState 类导航的前后移动）：按条目保存的路由栈
   恢复（`app.routers = hisRouters`，setter 负责渲染）；
+- **ignore 条目跳过**：带 `state.ignore` 标记的条目直接忽略，不驱动
+  应用（宿主可为「只承载 URL 变化」的条目写此标记，scsr spec 有契约
+  用例）；
 - **应用未就绪忽略 popstate**：与 home 挂载竞态会造成双重渲染
   （旧 first-render 竞态案例，本包 spec 有 hash 直达 + reload 用例防守）；
 - reload 后 `history.state` 仍在：同步恢复路由栈，app 挂载配置 home

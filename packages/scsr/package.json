@@ -1,0 +1,34 @@
+{
+  "name": "scsr",
+  "version": "5.0.0",
+  "description": "Symphony Client-Server Rendering: serve real HTML files, adopt them into an o-app as client-side routed pages",
+  "type": "module",
+  "main": "src/scsr.mjs",
+  "exports": {
+    ".": "./src/scsr.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/scsr"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "scsr",
+    "ssr",
+    "router",
+    "web components"
+  ]
+}

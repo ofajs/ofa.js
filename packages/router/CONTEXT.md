@@ -56,8 +56,9 @@ packages/router/
 - **包内模块的相对导入是上两级**：`../../xhear/src/base.mjs`
   （src → packages/router → packages），写成一级会 404 且模块链
   整体静默失败（页面表现为"元素未注册、脚本未执行"）；
-- **页面上驱动 app 用 `window.__app` 暴露的实例**：测试页不引入
-  harness（hash 页面上 harness 有偶发不执行的干扰，旧仓同款设计）。
+- **测试页不引入 harness**（hash 页面上 harness 有偶发不执行的干扰，
+  旧仓同款设计）；驱动/读取应用直接 `$("o-app")` 取全局单例（元素内
+  则用 `this.app`），不向 window 暴露实例变量。
 
 ## 六、运行方式
 

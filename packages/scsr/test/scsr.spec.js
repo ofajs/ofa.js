@@ -48,7 +48,7 @@ test("页面标题随 page-loaded 同步 / page title syncs on page-loaded", asy
   await page.goto(S1);
   await page.locator("#p01-title").waitFor({ state: "visible", timeout: 30000 });
 
-  await page.evaluate(() => window.__app.goto("./scsr02.html"));
+  await page.evaluate(() => $("o-app").goto("./scsr02.html"));
   await page
     .locator("#p02-title")
     .waitFor({ state: "visible", timeout: 15000 });
@@ -91,7 +91,7 @@ test("浏览器后退/前进驱动应用 / browser back & forward drive the app"
   await page.goto(S1);
   await page.locator("#p01-title").waitFor({ state: "visible", timeout: 30000 });
 
-  await page.evaluate(() => window.__app.goto("./scsr02.html?from=bf"));
+  await page.evaluate(() => $("o-app").goto("./scsr02.html?from=bf"));
   await page
     .locator("#p02-title")
     .waitFor({ state: "visible", timeout: 15000 });
@@ -116,7 +116,7 @@ test("reload 后按历史状态恢复当前页 / reload restores the current pag
   await page.goto(S1);
   await page.locator("#p01-title").waitFor({ state: "visible", timeout: 30000 });
 
-  await page.evaluate(() => window.__app.goto("./scsr02.html?from=reload"));
+  await page.evaluate(() => $("o-app").goto("./scsr02.html?from=reload"));
   await page
     .locator("#p02-title")
     .waitFor({ state: "visible", timeout: 15000 });
@@ -149,7 +149,7 @@ test("页内锚点只动 hash 不重渲染，跨锚点条目前后进不扰动�
   expect(await page.evaluate(() => window.__p01renders)).toBe(1);
 
   // 应用跳走后再后退，回到锚点条目：恢复 page01，hash 保留
-  await page.evaluate(() => window.__app.goto("./scsr02.html"));
+  await page.evaluate(() => $("o-app").goto("./scsr02.html"));
   await page
     .locator("#p02-title")
     .waitFor({ state: "visible", timeout: 15000 });
@@ -180,7 +180,7 @@ test("ignore 标记的条目被内核跳过，不驱动应用 / kernel skips ign
   await page.goto(S1);
   await page.locator("#p01-title").waitFor({ state: "visible", timeout: 30000 });
 
-  await page.evaluate(() => window.__app.goto("./scsr02.html"));
+  await page.evaluate(() => $("o-app").goto("./scsr02.html"));
   await page
     .locator("#p02-title")
     .waitFor({ state: "visible", timeout: 15000 });
@@ -213,7 +213,7 @@ test("ignore 标记的条目被内核跳过，不驱动应用 / kernel skips ign
   await page.goForward();
   expect(new URL(page.url()).pathname).toBe(S2);
   expect(await page.evaluate(() => window.__p03renders)).toBeUndefined();
-  expect(await page.evaluate(() => window.__app.current.src)).toContain(
+  expect(await page.evaluate(() => $("o-app").current.src)).toContain(
     "scsr01.html",
   );
 });
@@ -229,7 +229,7 @@ test("嵌套父页包裹渲染，子目录页可直达可达 / parent chain rend
     .waitFor({ state: "visible", timeout: 15000 });
   expect(await page.evaluate(() => window.__p03renders)).toBe(1);
 
-  await page.evaluate(() => window.__app.goto("./subs/scsr0301.html"));
+  await page.evaluate(() => $("o-app").goto("./subs/scsr0301.html"));
   await page
     .locator("#p0301-title")
     .waitFor({ state: "visible", timeout: 15000 });

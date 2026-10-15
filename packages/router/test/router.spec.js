@@ -9,7 +9,7 @@ const ENTRY_URL = "/packages/router/test/statics/router-entry.html";
 
 const title = (page) =>
   page.evaluate(() => {
-    const app = window.__app;
+    const app = $("o-app");
     const p = app?.current;
     const el =
       p?.shadow && (p.shadow.$("#r-title") || p.shadow.$("#r2-title"));
@@ -28,7 +28,7 @@ test("goto/replace 同步 hash 且 replace 不增历史 / goto & replace sync ha
 
   // goto：push 新条目
   await page.evaluate(() =>
-    window.__app.goto("./fixtures/page-r2.html?from=goto"),
+    $("o-app").goto("./fixtures/page-r2.html?from=goto"),
   );
   await page.locator("#r2-title").waitFor({ state: "visible", timeout: 15000 });
   expect(await page.evaluate(() => location.hash)).toContain("page-r2.html");
@@ -36,7 +36,7 @@ test("goto/replace 同步 hash 且 replace 不增历史 / goto & replace sync ha
 
   // replace：替换栈顶，不新增条目
   await page.evaluate(() =>
-    window.__app.replace("./fixtures/page-r1.html?from=rep"),
+    $("o-app").replace("./fixtures/page-r1.html?from=rep"),
   );
   await page.locator("#r-title").waitFor({ state: "visible", timeout: 15000 });
   expect(await page.evaluate(() => location.hash)).toContain("page-r1.html");
@@ -51,7 +51,7 @@ test("浏览器后退/前进驱动 app（等深恢复路由栈）/ browser back 
 
   // 建 [home, r2] 两层
   await page.evaluate(() =>
-    window.__app.goto("./fixtures/page-r2.html?from=go"),
+    $("o-app").goto("./fixtures/page-r2.html?from=go"),
   );
   await page.locator("#r2-title").waitFor({ state: "visible", timeout: 15000 });
 
@@ -75,12 +75,12 @@ test("程序 back 后浏览器 forward 仍可驱动 / browser forward after prog
   await page.locator("#r-title").waitFor({ state: "visible", timeout: 30000 });
 
   await page.evaluate(() =>
-    window.__app.goto("./fixtures/page-r2.html?from=go"),
+    $("o-app").goto("./fixtures/page-r2.html?from=go"),
   );
   await page.locator("#r2-title").waitFor({ state: "visible", timeout: 15000 });
 
   // 程序 back：router 负责把浏览器历史一并回退
-  await page.evaluate(() => window.__app.back());
+  await page.evaluate(() => $("o-app").back());
   await page.locator("#r-title").waitFor({ state: "visible", timeout: 15000 });
 
   // 此后浏览器 forward：应前进到 r2
@@ -98,7 +98,7 @@ test("hash 直达渲染目标页 / direct hash entry renders the target", async 
   );
 
   await page.locator("#r-title").waitFor({ state: "visible", timeout: 15000 });
-  expect(await page.evaluate(() => window.__app.current.src)).toContain(
+  expect(await page.evaluate(() => $("o-app").current.src)).toContain(
     "page-r1.html",
   );
   expect(await page.evaluate(() => location.hash)).toContain("page-r1.html");
@@ -111,7 +111,7 @@ test("reload 保持当前 hash 页 / reload keeps current hash page", async ({
   await page.locator("#r-title").waitFor({ state: "visible", timeout: 30000 });
 
   await page.evaluate(() =>
-    window.__app.goto("./fixtures/page-r2.html?from=reload"),
+    $("o-app").goto("./fixtures/page-r2.html?from=reload"),
   );
   await page.locator("#r2-title").waitFor({ state: "visible", timeout: 15000 });
 

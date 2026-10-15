@@ -23,8 +23,9 @@ npm run server   # http://localhost:3348
 | `pages/home.html` | 导航入口聚合页：程序导航（`goto`）、声明导航（`<a olink>`）、query 直达、.mjs 页面、嵌套路由、404 触发、`forward()` |
 | `pages/list.html` | `o-fill` 商品卡片；fill 项内 `olink` 按文档基准用 `attr:href` 表达式拼接 query |
 | `pages/detail.html` | **query 读取**：`default` 写成函数，入参 `query` 即页面地址的查询参数 |
-| `pages/parent.html` + `child-a/b.html` | **嵌套路由三层链**（layout → parent → child）：子页声明 `export const parent`，子页互换时父页不销毁（计数保留）；父页同样用 `routerChange` 高亮分段控件 |
+| `pages/parent.html` + `child-a/b.html` | **嵌套路由三层链**（layout → parent → child）：子页声明 `export const parent`，子页互换时父页不销毁（计数保留）；父页同样用 `routerChange` 同步 seg-switch 高亮 |
 | `pages/profile.mjs` | **.mjs 页面模块**：`type = $.PAGE`、`default` 函数读 query |
+| `components/seg-switch.html` | **自定义组件案例**：`<template component>` 声明 `tag` / `data`，`o-fill` 渲染选项、`emit("change")` 上抛选中；parent 页 `await load()` 注册后以 `:value` / `on:change` 使用 |
 
 ## 样式
 

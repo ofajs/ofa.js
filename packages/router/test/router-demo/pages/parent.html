@@ -18,19 +18,6 @@
     .chip button:hover { background: color-mix(in srgb, var(--accent) 85%, #000); border-color: color-mix(in srgb, var(--accent) 85%, #000); }
     .chip button:active { background: color-mix(in srgb, var(--accent) 72%, #000); border-color: color-mix(in srgb, var(--accent) 72%, #000); }
     .chip b { color: var(--accent); }
-    /* 分段控件：Bootstrap 按钮组的方角观感，选中项 solid primary */
-    .seg {
-      display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 14px;
-      background: var(--card); border: 1px solid var(--border); border-radius: .375em;
-    }
-    .seg a {
-      padding: .3em 1.1em; border-radius: .25em; text-decoration: none;
-      color: var(--muted); font-size: 13.5px;
-      transition: color .15s ease-in-out, background-color .15s ease-in-out;
-    }
-    .seg a:hover { background: var(--accent-soft); color: var(--accent); }
-    .seg a.on { background: var(--accent); color: #fff; }
-    .seg a.on:hover { color: #fff; background: color-mix(in srgb, var(--accent) 85%, #000); }
     /* 子页容器：relative + overflow hidden 与布局页 .view 同理，
        让子页过渡的离场页定位在框内、位移被裁剪 */
     .nest {
@@ -53,10 +40,10 @@
       </div>
       <span class="chip">父页计数 <button on:click="count++">+1</button> <b>{{count}}</b></span>
     </div>
-    <div class="seg">
-      <a olink href="./child-a.html" attr:class="segActive === 'child-a.html' ? 'on' : ''">子页 A</a>
-      <a olink href="./child-b.html" attr:class="segActive === 'child-b.html' ? 'on' : ''">子页 B</a>
-    </div>
+    <!-- 组件案例：seg-switch（../components/seg-switch.html）。选中态经
+         :value 下发、点击派发 change 由本页 goto；routerChange 同步高亮，
+         所以浏览器前进/后退切换子页时分段开关也能跟着走 -->
+    <seg-switch :value="segActive" :options="segOptions" on:change="onSegChange"></seg-switch>
     <!-- 子页渲染在 slot 里：仅这一层在 A ↔ B 间替换并参与过渡 -->
     <div class="nest"><slot></slot></div>
     <p class="tip">
@@ -68,25 +55,39 @@
 <script>
   export const parent = "./layout.html";
 
-  export default {
-    data: {
-      count: 0,
-      mountedAt: new Date().toLocaleTimeString(),
-      segActive: "",
-    },
-    attached() {
-      this.syncSeg();
-    },
-    // 本页作为父页：子页 A ↔ B 互换时触发（同前缀，本页不销毁）
-    routerChange({ current }) {
-      this.syncSeg(current);
-    },
-    proto: {
-      syncSeg(current) {
-        const src = (current || this.app?.current)?.src || "";
-        this.segActive = src.split("/").pop().split("?")[0] || "";
+  export default async ({ load }) => {
+    // await load 同步注册组件：保证 seg-switch 在本页渲染前可用
+    // （也可在模板里写 <l-m src="../components/seg-switch.html"></l-m> 异步引入）
+    await load("../components/seg-switch.html");
+
+    return {
+      data: {
+        count: 0,
+        mountedAt: new Date().toLocaleTimeString(),
+        segActive: "",
+        segOptions: [
+          { key: "child-a.html", label: "子页 A" },
+          { key: "child-b.html", label: "子页 B" },
+        ],
       },
-    },
+      attached() {
+        this.syncSeg();
+      },
+      // 本页作为父页：子页 A ↔ B 互换时触发（同前缀，本页不销毁）
+      routerChange({ current }) {
+        this.syncSeg(current);
+      },
+      proto: {
+        syncSeg(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.segActive = src.split("/").pop().split("?")[0] || "";
+        },
+        // 分段开关只派发 change，跳转由使用方决定
+        onSegChange(e) {
+          this.goto("./" + e.data.key);
+        },
+      },
+    };
   };
 </script>
 </template>

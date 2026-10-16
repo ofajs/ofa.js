@@ -6,6 +6,7 @@ import { test, expect } from "@playwright/test";
 
 const ROUTER_URL = "/packages/router/test/statics/router.html";
 const ENTRY_URL = "/packages/router/test/statics/router-entry.html";
+const DIST_URL = "/packages/router/test/statics/dist-host.html";
 
 const title = (page) =>
   page.evaluate(() => {
@@ -119,4 +120,19 @@ test("reload 保持当前 hash 页 / reload keeps current hash page", async ({
   await page.locator("#r2-title").waitFor({ state: "visible", timeout: 15000 });
   expect(await page.evaluate(() => location.hash)).toContain("page-r2.html");
   expect(await page.evaluate(() => location.hash)).toContain("from=reload");
+});
+
+test("dist 产物冒烟：经典脚本加载 dist ofa + dist router / dist artifacts smoke", async ({
+  page,
+}) => {
+  await page.goto(DIST_URL);
+  await page.locator("#r-title").waitFor({ state: "visible", timeout: 30000 });
+
+  // 就绪后初始条目回填 hash 地址 = 全局 $ 挂接的 router 正常工作
+  await page.waitForFunction(() => location.hash.includes("page-r1"), undefined, {
+    timeout: 15000,
+  });
+
+  // dist ofa 与 dist router 是同一份框架实例：渲染一次、无重复注册
+  expect(await page.evaluate(() => window.__r1renders)).toBe(1);
 });

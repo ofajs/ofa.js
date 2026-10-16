@@ -12,8 +12,13 @@
  * 一致，RC 处理器发现 location.href 已是目标地址时直接跳过写入
  * （popstate 驱动的导航正是如此到达的）。app.goto/back 因同 src
  * 等 reason no-op 时也不会有任何副作用——无标志即无卡死。
+ * 桥接包不 import 框架源码（避免与 dist ofa.js 并存时出现第二份框架
+ * 实例），依赖全走页面运行时。
  */
-import { isSafariBrowser } from "../../xhear/src/public.mjs";
+
+// 与 xhear 内部同式的 Safari 判定（内联以免 import 框架源码）
+const isSafariBrowser = () =>
+  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 export default function initRouter({ app, getStateUrl, fixStateUrl }) {
   // reload 后 history.state 仍在：同步恢复路由栈（setter 置

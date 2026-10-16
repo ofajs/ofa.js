@@ -11,12 +11,25 @@
  *
  * 与 o-router 的分工：o-router 用 `#/path` 哈希地址，无需服务器配合；
  * scsr 用真实路径，每个 URL 都是可以直接访问/分享/被爬虫抓取的页面。
+ *
+ * 桥接包不自带框架：挂接页面已加载的 ofa.js 运行时（全局 $，即
+ * window.$ / globalThis.ofa），避免与 dist ofa.js 并存时出现第二份
+ * 框架实例；须在 ofa.js 之后加载（缺失时告警并退出）。唯一的跨包
+ * 源码导入是 o-router 的同步内核（经打包进入 dist，见根 rollup 配置）。
  */
-import $ from "../../xhear/src/base.mjs";
 import initRouter from "../../router/src/sync.mjs";
 
 (() => {
   const ready = () => {
+    const $ = window.$;
+
+    if (!$) {
+      console.error(
+        "[ofa-scsr] ofa.js must be loaded before scsr (window.$ is missing)",
+      );
+      return;
+    }
+
     const app = $("o-app");
 
     if (!app) {

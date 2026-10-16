@@ -19,6 +19,7 @@ scsr 用**真实路径**，每个 URL 都是可直接访问、分享、被爬虫
 packages/scsr/
 ├── src/
 │   └── scsr.mjs      全部逻辑：URL 收编 + 历史同步接线（副作用模块，页面直接 <script type="module"> 引入）
+├── dist/             rollup 产物（ES + UMD + min，UMD 全局名 ofaScsr；根 npm run build 生成，不手改）
 └── test/
     ├── scsr.spec.js          流程断言（纯页面 + spec，无自检 harness）
     ├── statics/              测试页面（本身即 SCSR 契约的载体）
@@ -26,6 +27,7 @@ packages/scsr/
     │   ├── subs/scsr0301.html  子目录页面（深层路径可达性）
     │   ├── parent.html       03 的父页（继承链包裹渲染）
     │   ├── comps/btn/t-btn.html  template[component] 组件（l-m 加载）
+    │   ├── dist-host.html    dist 产物冒烟页（经典脚本 dist ofa + dist scsr）
     │   ├── app.mjs           应用配置（仅 pageAnime，不声明 home）
     │   └── public.css        满尺寸样式
     └── scsr-demo/            综合使用案例（多 HTML 文件迷你应用，见其 README）：
@@ -37,19 +39,22 @@ packages/scsr/
 ## 三、用法
 
 ```html
-<body>
-  <o-app src="./app.mjs">
-    <template page>
-      <!-- 首屏静态内容（SEO/无 JS 可见）；scsr 接管后由 o-page 从当前 URL 重载渲染 -->
-      <h1>首页内容</h1>
-      <button on:click="goto('./page2.html')">下一页</button>
-    </template>
-  </o-app>
-  <script type="module">
-    import "ofajs";            // 注册 o-app/o-page 等
-    import "scsr";             // 本包：URL 收编 + 历史同步
-  </script>
-</body>
+<!-- 源码用法（monorepo / 本地直接引，页面即 SCSR 契约的载体） -->
+<o-app src="./app.mjs">
+  <template page>
+    <!-- 首屏静态内容（SEO/无 JS 可见）；scsr 接管后由 o-page 从当前 URL 重载渲染 -->
+    <h1>首页内容</h1>
+    <button on:click="goto('./page2.html')">下一页</button>
+  </template>
+</o-app>
+<script type="module">
+  import "ofajs";            // 注册 o-app/o-page 等
+  import "scsr";             // 本包：URL 收编 + 历史同步
+</script>
+
+<!-- 经典用法（dist 产物，经典脚本即可） -->
+<script src="dist/ofa.min.js"></script>
+<script src="dist/scsr.min.js"></script>
 ```
 
 - 应用配置**不声明 home**：首页就是当前 URL 的 o-page；
@@ -93,9 +98,12 @@ packages/scsr/
 
 ## 五、踩坑
 
-- **包内模块相对导入是上两级**：`../../xhear/src/base.mjs`、
-  `../../router/src/sync.mjs`（src → packages/scsr → packages），写成
-  一级会 404 且模块链整体静默失败；
+- **桥接包不 import 框架源码**：src 挂接页面已加载的全局 `$`
+  （window.$ / globalThis.ofa），避免与 dist ofa.js 并存时拉起第二份
+  xhear/stanz 实例；须在 ofa.js 之后加载（缺失时告警退出）。唯一的
+  跨包源码导入是 `../../router/src/sync.mjs` 同步内核（src →
+  packages/scsr → packages，写错层级会 404 且模块链整体静默失败；
+  dist 产物已在构建时把它打进去）；
 - **页面文件里 template[page] 必须内联在 o-app 里**：html 转译中间件
   靠 `/<template +page *>/` 识别页面模块；组件同理需要
   `<template component>` 包裹（漏写则 l-m 加载后不注册、页面静默缺块）；
@@ -110,6 +118,8 @@ packages/scsr/
 
 - 测试：仓库根 `npx playwright test packages/scsr`（或根 `npm test`、
   `npm run test:scsr`）；
+- 产物：根 `npm run build` 生成 `dist/`（ES + UMD + min，UMD 全局名
+  ofaScsr），`statics/dist-host.html` 为经典用法冒烟页；
 - 手动预览测试页：根 `npm run server` →
   `http://localhost:3348/packages/scsr/test/statics/scsr01.html`；
 - 综合案例：根 `npm run server` →

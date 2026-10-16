@@ -8,6 +8,7 @@ import { test, expect } from "@playwright/test";
 const S1 = "/packages/scsr/test/statics/scsr01.html";
 const S2 = "/packages/scsr/test/statics/scsr02.html";
 const S3 = "/packages/scsr/test/statics/scsr03.html";
+const DIST = "/packages/scsr/test/statics/dist-host.html";
 
 const stateReady = (page) =>
   page.waitForFunction(() => history.state?.routerMode === 1, undefined, {
@@ -274,4 +275,21 @@ test("带 query 直达：query 进页面地址 / direct entry with query reaches
   expect(new URL(page.url()).search).toBe("?foo=bar");
   const state = await page.evaluate(() => history.state);
   expect(state.routers[0].src).toContain("?foo=bar");
+});
+
+test("dist 产物冒烟：经典脚本加载 dist ofa + dist scsr / dist artifacts smoke", async ({
+  page,
+}) => {
+  await page.goto(DIST);
+  await page
+    .locator("#dist-scsr-title")
+    .waitFor({ state: "visible", timeout: 30000 });
+  await stateReady(page);
+
+  // 当前 URL 被收编为应用内页面，且 dist ofa 与 dist scsr 是同一份
+  // 框架实例（只渲染一次、无重复注册）
+  expect(await page.evaluate(() => window.__distRenders)).toBe(1);
+  expect(await page.evaluate(() => history.state.routers[0].src)).toContain(
+    "dist-host.html",
+  );
 });

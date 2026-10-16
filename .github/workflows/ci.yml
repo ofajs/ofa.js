@@ -56,6 +56,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      - run: npm run build
       - run: npx playwright test packages/router --reporter=line
 
   test-scsr:
@@ -70,6 +72,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      - run: npm run build
       - run: npx playwright test packages/scsr --reporter=line
 
   test-ofajs-chromium:

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>scsr dist 冒烟</title>
+  </head>
+  <body>
+    <!-- dist 产物冒烟：经典脚本加载 dist ofa.js + dist scsr.js，
+        验证桥接包挂全局 $ 的契约（复用页面已加载的框架实例，
+        不出现第二份 xhear/stanz） -->
+    <script src="../../../../dist/ofa.min.js"></script>
+    <script src="../../dist/scsr.min.js"></script>
+
+    <o-app src="./app.mjs">
+      <template page>
+        <h1 id="dist-scsr-title">I am scsr dist page</h1>
+        <script>
+          export default {
+            attached() {
+              window.__distRenders = (window.__distRenders || 0) + 1;
+            },
+            data: {},
+          };
+        </script>
+      </template>
+    </o-app>
+  </body>
+</html>

@@ -12,10 +12,20 @@
  * - 注册 `$.extensions.link`：o-link 的 href 改写为 hash 形式
  *   （o-app 的链接处理器会读取这个扩展点）。
  *
+ * 桥接包不自带框架：挂接页面已加载的 ofa.js 运行时（全局 $，即
+ * window.$ / globalThis.ofa），避免与 dist ofa.js 并存时出现第二份
+ * 框架实例——因此必须在 ofa.js 之后加载，否则直接报错提示。
  * 同步内核在 ./sync.mjs（无标志位的 URL 对比回波抑制，见其模块说明）。
  */
-import $ from "../../xhear/src/base.mjs";
-import { getRandomId } from "../../stanz/src/public.mjs";
+const $ = window.$;
+
+if (!$) {
+  throw new Error("[ofa-router] ofa.js must be loaded before router (window.$ is missing)");
+}
+
+// 与 stanz 内部同式的随机 id（只为 FIXBODY 类名唯一，避免为它引入框架源码）
+const getRandomId = () => Math.random().toString(32).slice(2);
+
 import initRouter from "./sync.mjs";
 
 const FIXBODY = `f-${getRandomId()}`;

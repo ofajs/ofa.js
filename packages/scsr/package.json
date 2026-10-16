@@ -8,7 +8,8 @@
     ".": "./src/scsr.mjs"
   },
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "scripts": {
     "test": "playwright test --config=../../playwright.config.mjs --project=chromium"

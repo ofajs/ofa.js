@@ -14,16 +14,26 @@ packages/router/
 ├── src/
 │   ├── router.mjs     o-router 元素 + $.extensions.link（olink href 改写 hash 形式）+ 首次 hash 进入处理
 │   └── sync.mjs       同步内核：RC 事件 ↔ history 双向对账（无标志位设计，见下）
+├── dist/              rollup 产物（ES + UMD + min，根 npm run build 生成，不手改）
 └── test/              router-demo/ 为 o-app + o-router 综合使用案例（见其 README）；
-                        statics/ 为 spec 页面；router.spec.js 为流程断言
+                        statics/ 为 spec 页面（含 dist-host.html 产物冒烟）；router.spec.js 为流程断言
 ```
 
 ## 三、用法
 
 ```html
+<!-- 源码用法（monorepo / 本地直接引） -->
 <o-router fix-body>
   <o-app src="app-config.mjs"></o-app>
 </o-router>
+<script type="module">
+  import "ofajs";
+  import "router"; // 挂接页面已加载的全局 $，须在 ofa.js 之后加载
+</script>
+
+<!-- 经典用法（dist 产物，经典脚本即可） -->
+<script src="dist/ofa.min.js"></script>
+<script src="dist/router.min.js"></script>
 ```
 
 - `fix-body`：为 html/body 追加满尺寸重置样式（watch 响应式，移除属性即撤销）；
@@ -53,9 +63,11 @@ packages/router/
 
 ## 五、踩坑
 
-- **包内模块的相对导入是上两级**：`../../xhear/src/base.mjs`
-  （src → packages/router → packages），写成一级会 404 且模块链
-  整体静默失败（页面表现为"元素未注册、脚本未执行"）；
+- **桥接包不 import 框架源码**：src 挂接页面已加载的全局 `$`
+  （window.$ / globalThis.ofa），`isSafariBrowser`、随机 id 等小工具
+  直接内联——否则与 dist ofa.js 并存时会拉起第二份 xhear/stanz 实例
+  （组件重复注册、状态分裂）。代价是须在 ofa.js 之后加载（缺失时
+  router 抛错、scsr 告警退出）；
 - **测试页不引入 harness**（hash 页面上 harness 有偶发不执行的干扰，
   旧仓同款设计）；驱动/读取应用直接 `$("o-app")` 取全局单例（元素内
   则用 `this.app`），不向 window 暴露实例变量。
@@ -63,4 +75,6 @@ packages/router/
 ## 六、运行方式
 
 - 测试：仓库根 `npx playwright test packages/router`（或根 `npm test`）；
+- 产物：根 `npm run build` 生成 `dist/`（ES + UMD + min，UMD 全局名
+  ofaRouter），`statics/dist-host.html` 为经典用法冒烟页；
 - 手动预览：根 `npm run server` → `http://localhost:3348/packages/router/test/statics/router.html`。

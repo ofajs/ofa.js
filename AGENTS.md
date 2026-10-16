@@ -124,7 +124,7 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - CI：`.github/workflows/ci.yml`，七条并行任务——drill、stanz、router、scsr（各三浏览器）+ ofa.js 按
   chromium/firefox/webkit 拆三条（ofajs 覆盖 xhear，不单列）。本地等价命令
   `npm run test:drill` / `test:stanz` / `test:router` / `test:scsr` / `test:ofajs`；CI 下 config 自动启用
-  forbidOnly/retries=2/workers=1，ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
+  forbidOnly/retries=2/workers=1，router / scsr / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
 - 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
   `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
 - devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`
@@ -139,13 +139,18 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   错误处理用各包内部的轻量 Error 类
 - **打包器 / 构建步骤**：各包是 source-only ESM，`src/*.mjs` 即发布产物；
   浏览器直接加载源码，"看到的文件 = 运行的文件"。
-  **唯一例外（用户 2026-10-10 确认）**：ofajs 主包经 rollup 打包到根 `dist/`
-  （ES + UMD + min，供 `<script src>` 经典用法与 CDN），配置在根
-  `rollup.config.mjs`；其余包不得引入打包，dist 产物不手改、只由 build 生成
+  **例外（用户确认）**：经 rollup 打包的包统一在根 `rollup.config.mjs` 配置，
+  dist 产物不手改、只由 build 生成——
+  ofajs 主包 → 根 `dist/`（ES + UMD + min，2026-10-10 确认，框架本体经典入口，
+  供 `<script src>` 与 CDN）；
+  router / scsr 桥接包 → 各自包内 `dist/`（2026-10-17 确认，UMD 全局名
+  ofaRouter / ofaScsr；源码挂接全局 `$` 不 import 框架源码，自包含随 npm 发布）；
+  其余包不得引入打包
 - **测试基建新依赖**：静态服务器保持零依赖 `node:http`；不引入 vitest/jest
   等第二测试运行器
 - **浏览器全局副作用**：新增代码不得依赖或写入 window 全局做模块间通信
-  （UMD 包对 window.$ / globalThis.ofa 的约定暴露除外，属框架公开契约）
+  （UMD 包对 window.$ / globalThis.ofa 的约定暴露除外，属框架公开契约；
+  桥接包 router / scsr 挂接全局 `$` 亦属此契约的消费者而非破坏者）
 
 理由：每多一层黑盒（转换、隐式行为、全局耦合），定位问题的能力就弱一分。
 stanz 正是靠"零全局副作用"才实现了新旧两版同页 A/B 对比的基准能力。

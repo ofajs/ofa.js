@@ -4052,15 +4052,18 @@ try{
         const selfEl = this.ele;
 
         // 旧子元素按 key 建索引（首现优先；重复 key 只复用一次，
-        // 第二个实例走新建，避免两个位置争抢同一元素）
-        const oldEls = Array.from(selfEl.children);
+        // 第二个实例走新建，避免两个位置争抢同一元素）。
+        // 直接迭代 live children，免去每次对账的数组拷贝
+        const oldChildren = selfEl.children;
         const oldByKey = new Map();
-        oldEls.forEach((e, i) => {
-          const key = getKeyVal(e.__render_data.$data, i);
+
+        for (let i = 0, len = oldChildren.length; i < len; i++) {
+          const el = oldChildren[i];
+          const key = getKeyVal(el.__render_data.$data, i);
           if (!oldByKey.has(key)) {
-            oldByKey.set(key, { el: e, index: i });
+            oldByKey.set(key, { el, index: i });
           }
-        });
+        }
 
         // 新序列逐位取复用：取得到旧元素就复用，取不到就新建
         const reused = [];

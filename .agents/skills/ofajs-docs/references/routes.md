@@ -17,16 +17,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>router test</title>
-    <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs" type="module"></script>
+    <script
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.mjs"
+      type="module"
+    ></script>
   </head>
   <body>
-    <l-m src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/libs/router/dist/router.min.mjs"></l-m>
+    <l-m
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs"
+    ></l-m>
     <o-router>
       <o-app src="./app-config.js"></o-app>
     </o-router>
   </body>
 </html>
 ```
+
+> **版本线**：上面是 **v5 分支**地址（v5 未合并 `main`、未发布 npm）。
+> v4 主线的对应地址是 `.../dist/ofa.mjs` + `.../libs/router/dist/router.min.mjs`。
+> 为什么 v5 必须写 `@refs/heads/v5`、`libs/` 与 `packages/` 的区别，见
+> [版本与资源地址](./version-resources.md)。
+>
+> **加载顺序**：router 是桥接包，挂接页面已加载的全局 `$`，**必须在 ofa.js 之后
+> 加载**，否则启动即报 `$ is missing`。用 ESM 时写成
+> `import "ofa.js"; import "router";`（monorepo/npm 场景），或按上面的 script 顺序。
+
 
 ## fix-body 属性
 
@@ -68,6 +83,7 @@
 ## 关键要点
 
 - **o-router 组件**：包裹 `o-app` 实现单页面应用
+- **加载顺序**：router（v5 在 `packages/router/dist/`，v4 在 `libs/router/dist/`）必须在 ofa.js 之后加载
 - **fix-body 属性**：自动重置 `html` 和 `body` 样式
 - **Hash 模式**：基于浏览器 Hash 实现路由同步
 - **路由状态保持**：刷新页面保持当前路由状态

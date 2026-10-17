@@ -1,6 +1,6 @@
 # 模块返回对象属性
 
-> 本文档外链自：[模块返回对象属性](../../../tutorial/cn/api/others/module-return.md)
+> 本文档外链自：[模块返回对象属性](https://github.com/ofajs/ofa.js/blob/main/tutorial/cn/api/others/module-return.md)（tutorial 目录仅存在于 v4 的 `main` 分支，v5 分支未收录）
 
 在 ofa.js 中，无论是页面模块还是组件模块，都需要通过 `export default async () => {}` 返回一个对象来定义模块的配置和行为。
 
@@ -99,4 +99,4 @@ export default async ({ query }) => {
 | `loaded` | `function` | ✅ | ✅ | 完全加载完成时调用 |
 | `routerChange` | `function` | ✅ 父页面 | ❌ | 路由变化时调用 |
 
-> **完整文档请查看**：[模块返回对象属性](../../../tutorial/cn/api/others/module-return.md)
+> **完整文档请查看**：[模块返回对象属性](https://github.com/ofajs/ofa.js/blob/main/tutorial/cn/api/others/module-return.md)（v4 `main` 分支的 tutorial）

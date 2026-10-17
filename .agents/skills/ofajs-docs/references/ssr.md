@@ -50,8 +50,8 @@ ofa.js 的 同构渲染模式基于以下机制：
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page Title</title>
-  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs#debug" type="module"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/libs/scsr/dist/scsr.min.mjs" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.mjs#debug" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs" type="module"></script>
   <style>
     html, body {
       height: 100%;
@@ -89,6 +89,11 @@ ofa.js 的 同构渲染模式基于以下机制：
 </html>
 ```
 
+> **版本线**：上面的地址指向 **v5 分支**（scsr 在 v5 中位于 `packages/scsr/dist/`，
+> v4 在 `libs/scsr/dist/`）。v5 未合并 `main`、未发布 npm，必须带
+> `@refs/heads/v5` 前缀才取到 v5 产物；原因与完整地址表见
+> [版本与资源地址](./version-resources.md)。scsr 是桥接包，**必须在 ofa.js 之后加载**。
+
 所以，你可以使用任意的开发语言（Go、Java、PHP、Nodejs、Python 等），任意的后端模板渲染引擎（如 Go 的 `html/template`、PHP 的 Smarty/Twig/Blade 等），将 ofa.js 的同构渲染代码结构嵌入到模板中，就能实现 SSR。
 
 ### 同构渲染模板结构
@@ -102,8 +107,8 @@ ofa.js 的 同构渲染模式基于以下机制：
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page Title</title>
-  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs#debug" type="module"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/libs/scsr/dist/scsr.min.mjs" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.mjs#debug" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs" type="module"></script>
   <style>
     html, body {
       height: 100%;

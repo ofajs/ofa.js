@@ -23,7 +23,7 @@
   </head>
   <body>
     <script
-      src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js@main/dist/ofa.min.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
       type="module"
     ></script>
     <o-page src="./page.html"></o-page>
@@ -360,9 +360,12 @@
 
 #### 1. 引入 ofa.js
 ```html
-<script src="https://cdn.jsdelivr.net/gh/kirakiray/ofa.js@main/dist/ofa.min.mjs" type="module"></script>
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs" type="module"></script>
 ```
-**说明**：通过 ES Module 方式引入 ofa.js，无需 Node.js 和构建工具。
+**说明**：通过 ES Module 方式引入 ofa.js，无需 Node.js 和构建工具。地址带
+`@refs/heads/v5` 表示引用 **v5 分支**（v5 未合并 `main`、未发布 npm）；v4 主线用
+`https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.min.mjs`，详见
+[版本与资源地址](./version-resources.md)。
 
 #### 2. 页面容器
 ```html

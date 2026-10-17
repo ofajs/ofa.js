@@ -19,7 +19,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ofa.js 示例</title>
     <script
-      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.mjs"
       type="module"
     ></script>
   </head>
@@ -28,6 +28,10 @@
   </body>
 </html>
 ```
+
+> 上面是 **v5 分支**地址；v5 未合并 `main`、未发布 npm。若项目在 v4（`main` /
+> npm latest），把地址换回 `https://cdn.jsdelivr.net/gh/ofajs/ofa.js/dist/ofa.mjs`，
+> 详见 [版本与资源地址](./version-resources.md)。
 
 该文件的主要作用是：
 - 引入 ofa.js 框架

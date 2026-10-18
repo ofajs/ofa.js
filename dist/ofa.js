@@ -1,4 +1,4 @@
-//! ofa.js - v5.0.0 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
+//! ofa.js - v5.0.1 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -8084,7 +8084,7 @@ ${scriptContent}`;
    * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
    */
 
-  const version = "ofa.js@5.0.0";
+  const version = "ofa.js@5.0.1";
   $.version = version.replace("ofa.js@", "");
 
   // URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源

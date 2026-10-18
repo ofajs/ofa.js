@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js — 把组件，写成 HTML</title>
+    <meta
+      name="description"
+      content="ofa.js 是一个零构建、零依赖的 Web Components 前端框架。一个 HTML 文件就是一个组件，浏览器直接运行，无需 npm、Node.js 或打包器。"
+    />
+    <meta name="theme-color" content="#06070d" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js — 把组件，写成 HTML" />
+    <meta
+      property="og:description"
+      content="零构建、零依赖的 Web Components 框架。一个 HTML 文件就是一个组件，浏览器直接运行。"
+    />
+    <meta property="og:url" content="https://ofajs.com" />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #06070d;
+        color: #eef2fb;
+        overflow-x: hidden;
+        /* clip 不产生滚动容器，position: sticky 才能正常工作 */
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          sans-serif;
+      }
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      .boot-error {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #06070d;
+      }
+      .boot-error[hidden] {
+        display: none;
+      }
+      .boot-error-card {
+        max-width: 520px;
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.04);
+        line-height: 1.8;
+      }
+      .boot-error-card h1 {
+        margin: 0 0 12px;
+        font-size: 22px;
+      }
+      .boot-error-card p {
+        margin: 0 0 8px;
+        color: #9aa6bd;
+        font-size: 14px;
+      }
+      .boot-error-card code {
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 13px;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #9aa6bd;
+      }
+    </style>
+  </head>
+  <body>
+    <o-page src="./page.html"></o-page>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <div class="boot-error" id="boot-error" hidden>
+      <div class="boot-error-card">
+        <h1>ofa.js 加载失败</h1>
+        <p>无法从本地 <code>dist/</code> 或 jsDelivr CDN 加载框架文件。</p>
+        <p>
+          本地预览请在仓库根目录运行 <code>npm run server</code>，然后访问
+          <code>http://localhost:3348/docs/website/</code>。
+        </p>
+        <p>如果网络受限，也可以先执行 <code>npm run build</code> 生成本地产物。</p>
+      </div>
+    </div>
+
+    <script type="module">
+      // 优先使用仓库内的 dist（本地开发无需联网），失败时回退到 jsDelivr CDN。
+      const sources = [
+        "../../dist/ofa.min.mjs",
+        "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs",
+      ];
+
+      let loaded = false;
+      for (const src of sources) {
+        try {
+          await import(src);
+          loaded = true;
+          break;
+        } catch (error) {
+          console.warn(`[ofa] failed to load ${src}`, error);
+        }
+      }
+
+      if (!loaded) {
+        document.getElementById("boot-error").hidden = false;
+      }
+    </script>
+  </body>
+</html>

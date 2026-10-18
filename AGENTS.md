@@ -139,6 +139,10 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`
   （仅构建 ofajs dist）；浏览器二进制缺失时报
   "Executable doesn't exist"，用 `npx playwright install <browser>` 安装
+- **macOS 26 上 Firefox 报 `browserContext.newPage: Target crashed`**：Firefox
+  内容沙箱在本机 `sandbox_init() failed`（环境限制，非用例问题）。用
+  `MOZ_DISABLE_CONTENT_SANDBOX=1 npm test` 跑全量即可全绿；Chromium/WebKit
+  不受影响
 
 ## 九、技术选型禁令
 

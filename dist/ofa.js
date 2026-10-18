@@ -2919,8 +2919,8 @@ try{
    * 原生表单属性接入数据观察（如 $input.value = x 会触发更新事件，
    * watchers 与模板能感知）。
    *
-   * 容器级双向绑定 formData 使用频率低，拆分到独立的可选插件模块
-   * formdata.mjs（不随默认构建加载，按需引入）。
+   * 容器级双向绑定 formData 使用频率低，拆分为可选插件
+   * packages/plugins/formdata.mjs（不随默认构建加载、不进 dist，按需引入）。
    */
 
   const { defineProperty } = Object;
@@ -3128,6 +3128,27 @@ try{
   };
 
   /**
+   * 框架内部调试日志开关：[xt-register] / [xt-data] / [xt-comp] 等前缀的
+   * console.debug 诊断统一走这里。
+   *
+   * 门禁由 ofa.js 入口计算并推送：**#debug 调试模式 且 显式日志开关
+   * （globalThis.OFA_SHOWLOG / $.showlog）两者都开才显示**——#debug 只给
+   * sourcemap，不夹带日志。开关本体放在 xhear：register 等核心模块无法
+   * 反向依赖 ofa.js。
+   */
+  let isEnabled = false;
+
+  const setDebugLog = (val) => {
+    isEnabled = !!val;
+  };
+
+  const debugLog = (tag, ...args) => {
+    if (isEnabled) {
+      console.debug(tag, ...args);
+    }
+  };
+
+  /**
    * $ 函数本体：字符串且非 HTML → 页面选择器；其余交给 createXEle 归一化。
    * $.extensions 是上层框架（ofa.js）注册生命周期钩子的容器。
    */
@@ -3191,7 +3212,7 @@ try{
 
       for (let [key, value] of Object.entries(data)) {
         // 元素上已存在的值（如升级前外部已赋值）不覆盖
-        console.debug(
+        debugLog(
           "[xt-data]",
           key,
           "has=" + $ele.hasOwnProperty(key),
@@ -3314,7 +3335,7 @@ try{
     try {
       validateTagName(defaults.tag);
 
-      console.debug(
+      debugLog(
         "[xt-register]",
         defaults.tag,
         "dataKeys=" + Object.keys(defaults.data || {}).join(","),
@@ -6838,7 +6859,7 @@ ${scriptContent}`;
 
     const { default: defaultData } = moduleData;
 
-    console.debug(
+    debugLog(
       "[xt-comp]",
       "modKeys=" + Object.keys(moduleData).join(","),
       "defaultType=" + typeof defaultData,
@@ -8066,7 +8087,8 @@ ${scriptContent}`;
   const version = "ofa.js@5.0.0";
   $.version = version.replace("ofa.js@", "");
 
-  // URL 带 #debug 时开启调试模式（转译模块生成 sourcemap）
+  // URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源
+  // HTML）——只管 sourcemap；内部诊断日志由 $.showlog / OFA_SHOWLOG 独立控制
   let isDebug = false;
 
   try {
@@ -8075,6 +8097,23 @@ ${scriptContent}`;
   } catch (err) {
     isDebug = false;
   }
+
+  // 框架内部诊断日志开关：默认关，显示需**同时**满足——① #debug 已开启
+  // （isDebug）；② 显式设置日志开关：加载前设 globalThis.OFA_SHOWLOG = true
+  // （可捕获启动期日志），加载后随时 $.showlog = true/false 开关
+  let showLog = globalThis.OFA_SHOWLOG === true;
+
+  const updateLogGate = () => setDebugLog(isDebug && showLog);
+
+  updateLogGate();
+
+  Object.defineProperty($, "showlog", {
+    get: () => showLog,
+    set: (val) => {
+      showLog = !!val;
+      updateLogGate();
+    },
+  });
 
   Object.defineProperty($, "debugMode", {
     get: () => isDebug,

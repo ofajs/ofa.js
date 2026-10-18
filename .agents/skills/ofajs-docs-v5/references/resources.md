@@ -82,11 +82,28 @@ npm + 打包器场景的包名是 `ofa.js` / `router` / `scsr`（`import "ofa.js
 - 本地预览：仓库根 `npm run server` → `http://localhost:3348`
 - 测试：根 `npm test`（三浏览器）；产物重建：根 `npm run build`
 
-## 调试模式
+## 调试模式与内部日志
 
-URL 带 `#debug` 时 ofa.js 开启调试（转译模块生成 sourcemap，报错行号映射
-回源 HTML）：
+`#debug` 只控制 **sourcemap**（转译模块生成 sourcemap，报错行号映射回源
+HTML），默认关闭：
 
 ```html
 <script src=".../dist/ofa.min.mjs#debug" type="module"></script>
 ```
+
+框架内部诊断日志（console.debug 级别：`[xt-register]` 组件注册参数、
+`[xt-data]` data 初始化、`[xt-comp]` 组件模块转译）**默认关闭**，显示需
+**同时满足两个条件**：
+
+1. 资源地址带 `#debug`（调试模式开启）；
+2. 显式设置日志开关——加载前设 `globalThis.OFA_SHOWLOG = true`（能捕获
+   启动期日志），或加载后随时 `$.showlog = true/false` 开关。
+
+```html
+<!-- 典型排障组合：sourcemap + 日志全开 -->
+<script>globalThis.OFA_SHOWLOG = true;</script>
+<script src=".../dist/ofa.min.mjs#debug" type="module"></script>
+```
+
+日常使用两个都不设，控制台保持干净。
+

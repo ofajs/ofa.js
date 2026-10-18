@@ -8,6 +8,7 @@
  * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
  */
 import $ from "../../xhear/src/base.mjs";
+import { setDebugLog } from "../../xhear/src/debug.mjs";
 import "./inject-host.mjs";
 import "./comp.mjs";
 import "./page.mjs";
@@ -21,7 +22,8 @@ import Stanz from "../../stanz/src/main.mjs";
 const version = "ofa.js@5.0.0";
 $.version = version.replace("ofa.js@", "");
 
-// URL 带 #debug 时开启调试模式（转译模块生成 sourcemap）
+// URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源
+// HTML）——只管 sourcemap；内部诊断日志由 $.showlog / OFA_SHOWLOG 独立控制
 let isDebug = false;
 
 try {
@@ -30,6 +32,23 @@ try {
 } catch (err) {
   isDebug = false;
 }
+
+// 框架内部诊断日志开关：默认关，显示需**同时**满足——① #debug 已开启
+// （isDebug）；② 显式设置日志开关：加载前设 globalThis.OFA_SHOWLOG = true
+// （可捕获启动期日志），加载后随时 $.showlog = true/false 开关
+let showLog = globalThis.OFA_SHOWLOG === true;
+
+const updateLogGate = () => setDebugLog(isDebug && showLog);
+
+updateLogGate();
+
+Object.defineProperty($, "showlog", {
+  get: () => showLog,
+  set: (val) => {
+    showLog = !!val;
+    updateLogGate();
+  },
+});
 
 Object.defineProperty($, "debugMode", {
   get: () => isDebug,

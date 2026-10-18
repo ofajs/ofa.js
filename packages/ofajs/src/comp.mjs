@@ -7,6 +7,7 @@
  */
 import lm from "../../drill/src/main.mjs";
 import $ from "../../xhear/src/base.mjs";
+import { debugLog } from "../../xhear/src/debug.mjs";
 import { isFunction, toDashCase } from "../../xhear/src/public.mjs";
 import { dispatchLoad } from "./page.mjs";
 import { drawUrl } from "./draw-template.mjs";
@@ -64,7 +65,7 @@ lm.use(["js", "mjs"], async (ctx, next) => {
 
   const { default: defaultData } = moduleData;
 
-  console.debug(
+  debugLog(
     "[xt-comp]",
     "modKeys=" + Object.keys(moduleData).join(","),
     "defaultType=" + typeof defaultData,

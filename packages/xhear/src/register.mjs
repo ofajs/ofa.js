@@ -10,6 +10,7 @@
  * - attributeChangedCallback：外部属性写入 → 实例数据（数字串自动转数值）。
  */
 import { getErr, getErrDesc } from "./error.mjs";
+import { debugLog } from "./debug.mjs";
 import { getType } from "../../stanz/src/public.mjs";
 import {
   hyphenToUpperCase,
@@ -51,7 +52,7 @@ export const renderElement = ({ defaults, ele, template, temps }) => {
 
     for (let [key, value] of Object.entries(data)) {
       // 元素上已存在的值（如升级前外部已赋值）不覆盖
-      console.debug(
+      debugLog(
         "[xt-data]",
         key,
         "has=" + $ele.hasOwnProperty(key),
@@ -174,7 +175,7 @@ export const register = (opts = {}) => {
   try {
     validateTagName(defaults.tag);
 
-    console.debug(
+    debugLog(
       "[xt-register]",
       defaults.tag,
       "dataKeys=" + Object.keys(defaults.data || {}).join(","),

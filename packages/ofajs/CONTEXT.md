@@ -21,8 +21,7 @@ packages/ofajs/
 ├── CONTEXT.md             本文件
 ├── package.json           name: ofa.js, version: 5.0.0, exports ./src/main.mjs
 ├── src/
-│   ├── main.mjs           入口：装配 $（$.version/debugMode/COMP/PAGE/window.$/globalThis.ofa）
-│   ├── public.mjs         resolvePath、fixRelate(PathContent)、getPagesData（页面继承链）、createPage
+│   ├── main.mjs           入口：装配 $（$.version/debugMode/COMP/PAGE/window.$/globalThis.ofa）│   ├── public.mjs         resolvePath、fixRelate(PathContent)、getPagesData（页面继承链）、createPage
 │   ├── error.mjs          本地错误码表（复用 xhear 的 XhearError，替代 ofa-error）
 │   ├── draw-template.mjs  HTML→data URI 模块转译器（行号对齐 sourcemap、import 重写、VLQ）
 │   ├── comp.mjs           组件中间件（template[component] → 注册自定义元素，tag 由文件名推断）
@@ -43,7 +42,8 @@ packages/ofajs/
 
 | API | 说明 |
 |---|---|
-| `ofa.version` / `ofa.debugMode` | 版本（5.0.0）与调试模式（URL `#debug` 开启 sourcemap） |
+| `ofa.version` / `ofa.debugMode` | 版本（5.0.0）；`debugMode` 只读（URL `#debug` 开启 sourcemap） |
+| `$.showlog` + `globalThis.OFA_SHOWLOG` | 内部诊断日志开关（[xt-register]/[xt-data]/[xt-comp]）：默认关，显示需 `#debug` 开启且二者之一显式设置；运行时可写 |
 | `$.register(opts)` | 转发 xhear；组件通常经文件模块自动注册 |
 | `$.COMP` / `$.PAGE` | 组件/页面模块的 type 标记（Symbol） |
 | `$.getRootProvider(name)` | 取应用级 root provider |

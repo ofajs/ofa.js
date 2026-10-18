@@ -31,7 +31,7 @@ packages/xhear/
 │   ├── event.mjs          on/off/one/emit + 模板事件绑定解析
 │   ├── css.mjs            css 存取器（内联样式代理 + 计算样式兜底）
 │   ├── form.mjs           表单元素核心支持（value/checked 接入数据观察）
-│   ├── formdata.mjs       formData 可选插件（不在默认构建，按需 import）
+│   ├── debug.mjs          框架内部调试日志开关（setDebugLog/debugLog，默认关；门禁由 ofa 入口按 #debug + OFA_SHOWLOG/$.showlog 双条件计算）
 │   ├── path.mjs           点路径 get/set（stanz 裁剪掉的能力，归属本包）
 │   ├── public.mjs         字符串/DOM 工具（hyphenToUpperCase/searchEle…）
 │   ├── error.mjs          XhearError + 本地错误码表（替代已废弃的 ofa-error）

@@ -19,7 +19,12 @@ ofa.js 的可选插件：把 shadow 内 `<inject-host>` 包裹的 `<link>`/`<sty
 
 ## 用法
 
-组件模块 `user-list.html`（`<template component>` 文件，供 `l-m` 引用）：
+典型场景是**组件用在 o-page 页面模块里**：`user-list` 的样式要命中内层
+`user-list-item` 插槽里的内容。原生方案做不到——组件自身 shadow 的样式
+出不了自己的作用域，`::slotted()` 只能改子级别一层；`<inject-host>` 则把
+样式直接收编进 o-page 的 shadow，页面作用域内多层选择器全部可命中。
+
+组件模块 `user-list.html`（外层组件，供 `l-m` 引用）：
 
 ```html
 <template component>
@@ -36,29 +41,55 @@ ofa.js 的可选插件：把 shadow 内 `<inject-host>` 包裹的 `<link>`/`<sty
 </template>
 ```
 
-使用页（已引入 ofa.js 与本插件）：
+组件模块 `user-list-item.html`（内层组件，自带 shadow 的普通组件）：
 
 ```html
-<body>
+<template component>
+  <style>
+    :host { display: block; padding: 4px 8px; border: 1px solid #ccc; }
+  </style>
+  <slot></slot>
+</template>
+```
+
+页面模块 `user-list-page.html`（`<template page>`，双组件嵌套使用）：
+
+```html
+<template page>
+  <l-m src="./user-list.html"></l-m>
+  <l-m src="./user-list-item.html"></l-m>
   <user-list>
     <user-list-item>
       <span class="item-name">Yao</span>
     </user-list-item>
   </user-list>
-  <l-m src="./user-list.html"></l-m>
+</template>
+```
+
+使用页（已引入 ofa.js 与本插件）——收编样式塞进 o-page 的 shadowRoot，
+`.item-name` 虽渲染在内层组件的 shadow 槽内仍被命中：
+
+```html
+<body>
+  <o-app>
+    <o-page src="./user-list-page.html"></o-page>
+  </o-app>
 </body>
 ```
 
 - `<inject-host>` 内放 `<link rel="stylesheet">` 或 `<style>`，内容会被
-  提升到宿主根（shadow 内则进 shadowRoot，顶层则进 document.head）；
+  提升到**宿主的根节点**：宿主组件直接用在页面里时进 `document.head`
+  （全局生效）；宿主组件嵌在其他组件 shadow 内时（如页面模块的 o-page），
+  进该外层 shadowRoot；
 - 相同内容按 hash 去重共享一份；元素移除时自动回收；
 - `style` 内**不要用 `data()`**（会抛错）；`link` 的 rel 只接受
   `stylesheet`（会自动转成 `host` 记录来源）；
-- ⚠️ 注入的样式作用于宿主所在作用域，**务必用具体选择器**（完整组件
-  标签路径），避免污染其他组件。
+- ⚠️ 提升后的样式作用于宿主根对应的作用域（组件直接用在页面里时即全局
+  文档），**务必用具体选择器**（完整组件标签路径），避免污染其他组件。
 
 ## 测试
 
 仓库根执行：`npm run test:plugins`（或全量 `npm test`）。
 `test/statics/` 下的 `inject-host.html` 覆盖：光 DOM 生效、head 收编去重、
-style 文本实时变更、link href 切换与移除恢复。
+双重组件嵌于 o-page（样式收编进页面 shadow，多层选择器命中内层组件槽内
+内容）、style 文本实时变更、link href 切换与移除恢复。

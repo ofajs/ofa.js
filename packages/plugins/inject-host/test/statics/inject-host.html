@@ -20,8 +20,16 @@
     <div class="inj-style-target" id="inj-style-target">style target</div>
     <div class="inj-link-target" id="inj-link-target">link target</div>
 
+    <!-- 双重组件嵌于 o-page：user-list 声明的样式收编进页面 shadowRoot，
+         多层选择器命中内层组件 user-list-item 槽内的 .item-name -->
+    <o-app style="display:block">
+      <o-page src="./fixtures/user-list-page.html"></o-page>
+    </o-app>
+
     <l-m src="./style-host.html"></l-m>
     <l-m src="./inject-dyn.html"></l-m>
+    <l-m src="./user-list.html"></l-m>
+    <l-m src="./user-list-item.html"></l-m>
 
     <script type="module">
       import "../../../../ofajs/src/main.mjs";

@@ -1,0 +1,11 @@
+<template component>
+  <style>
+    /* 第一层插槽优先用 ::slotted(user-list-item) */
+  </style>
+  <inject-host>
+    <style>
+      user-list user-list-item .item-name { color: rgb(255, 0, 0); font-weight: bold; }
+    </style>
+  </inject-host>
+  <slot></slot>
+</template>

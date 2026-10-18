@@ -29,6 +29,51 @@ test("收编样式并作用于光 DOM / injected style applies to light DOM", as
   expect(deduped.count).toBe(deduped.unique);
 });
 
+test("双重组件嵌于 o-page：样式收编进页面 shadow 多层命中 / hoisted into o-page shadow", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+
+  // .item-name 在 o-page 的 shadow 树内（裸 querySelector 穿不透，显式走
+  // shadowRoot）；虽经内层组件 user-list-item 的槽渲染仍被命中
+  await page.waitForFunction(
+    () => {
+      const op = document.querySelector("o-page");
+      const el = op?.shadowRoot?.querySelector("#nested-name");
+      return el && getComputedStyle(el).color === "rgb(255, 0, 0)";
+    },
+    undefined,
+    { timeout: 15000 },
+  );
+
+  // 收编样式塞进 o-page 的 shadowRoot（宿主根），head 中没有这份规则
+  const state = await page.evaluate(() => {
+    const rule = "user-list user-list-item .item-name";
+    const op = document.querySelector("o-page");
+    const hoisted = op?.shadowRoot?.querySelector("style[inject-host]");
+    const inHead = Array.from(
+      document.head.querySelectorAll("style[inject-host]"),
+    ).some((s) => s.textContent.includes(rule));
+    return {
+      inPageShadow:
+        !!hoisted && hoisted.textContent.includes(rule),
+      notInHead: !inHead,
+    };
+  });
+  expect(state.inPageShadow).toBe(true);
+  expect(state.notInHead).toBe(true);
+
+  // 且 .item-name 确实渲染在内层组件 user-list-item 的 shadow 槽内
+  const nested = await page.evaluate(() => {
+    const op = document.querySelector("o-page");
+    const el = op?.shadowRoot?.querySelector("#nested-name");
+    const item = op?.shadowRoot?.querySelector("user-list-item");
+    const slot = el && el.assignedSlot;
+    return !!slot && !!item && slot.getRootNode() === item.shadowRoot;
+  });
+  expect(nested).toBe(true);
+});
+
 test("注入 style 文本变更实时生效 / injected style text changes apply live", async ({
   page,
 }) => {

@@ -17,6 +17,8 @@ ofa.js 的可选插件：把一个容器内全部表单项的值与一个 **stan
 
 ## 用法
 
+组件模块 `user-form.html`（`<template component>` 文件，供 `l-m` 引用）：
+
 ```html
 <template component>
   <input type="text" name="username" />
@@ -35,8 +37,17 @@ ofa.js 的可选插件：把一个容器内全部表单项的值与一个 **stan
 </template>
 ```
 
+使用页（已引入 ofa.js 与本插件）：
+
+```html
+<body>
+  <user-form></user-form>
+  <l-m src="./user-form.html"></l-m>
+</body>
+```
+
 ```javascript
-const data = $("form").formData();                       // 任意容器的 $ 实例
+const data = $("user-form").shadow.formData();           // 组件内也可 this.shadow.formData()
 const data2 = $("#myForm").formData(".use-it", { wait: 500 }); // 自定义选择器与防抖
 
 data.username;          // 读

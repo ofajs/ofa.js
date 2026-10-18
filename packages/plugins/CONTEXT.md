@@ -28,9 +28,11 @@ packages/plugins/
 │   ├── package.json / README.md / inject-host.mjs / dist/ / test/
 │   └── shadow 内 link/style 收编到宿主根（::slotted 之外的深层样式穿透）
 ├── body-ghost/            同构子包（ofa-body-ghost）
-│   └── 模板内容传送到 body 末尾渲染，事件仍沿原位置冒泡（弹窗/浮层）
+│   └── 模板内容传送到 body 末尾渲染（框架绑定随元素走，原生冒泡在真实
+│       位置；弹窗/浮层）
 └── global-link/           同构子包（ofa-global-link）
-    └── <o-global-link href> 把一份样式表注入所有组件 shadow（⚠️ 污染全局，谨慎使用）
+    └── <o-global-link href> 把一份样式表注入其后挂载组件 shadow（只影响
+        之后挂载的组件；⚠️ 污染全局，谨慎使用）
 ```
 
 - 依赖只用 packages 内部源码的相对导入（子包文件位于 `plugins/<名>/`，
@@ -49,8 +51,8 @@ packages/plugins/
 |------|------|------|
 | `formdata/` | 容器表单值 ↔ stanz 对象双向绑定（加载后注册 `$.fn.formData`，`$('容器').formData()` 返回可 `revoke()` 的 stanz） | [formdata/README.md](./formdata/README.md) |
 | `inject-host/` | shadow 内 link/style 收编到宿主根（slot 深层样式穿透；hash 去重、移除回收） | [inject-host/README.md](./inject-host/README.md) |
-| `body-ghost/` | 模板内容传送到 body 末尾渲染，事件沿原位置冒泡 | [body-ghost/README.md](./body-ghost/README.md) |
-| `global-link/` | `<o-global-link href>` 把一份样式表注入所有组件 shadow（⚠️ 污染全局，谨慎使用） | [global-link/README.md](./global-link/README.md) |
+| `body-ghost/` | 模板内容传送到 body 末尾渲染，框架绑定随元素走、原生事件在真实位置冒泡 | [body-ghost/README.md](./body-ghost/README.md) |
+| `global-link/` | `<o-global-link href>` 把一份样式表注入其后挂载组件 shadow，只影响之后挂载的组件（⚠️ 污染全局，谨慎使用） | [global-link/README.md](./global-link/README.md) |
 
 ## 五、历史
 

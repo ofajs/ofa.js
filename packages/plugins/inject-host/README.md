@@ -19,6 +19,8 @@ ofa.js 的可选插件：把 shadow 内 `<inject-host>` 包裹的 `<link>`/`<sty
 
 ## 用法
 
+组件模块 `user-list.html`（`<template component>` 文件，供 `l-m` 引用）：
+
 ```html
 <template component>
   <style>
@@ -32,6 +34,19 @@ ofa.js 的可选插件：把 shadow 内 `<inject-host>` 包裹的 `<link>`/`<sty
   </inject-host>
   <slot></slot>
 </template>
+```
+
+使用页（已引入 ofa.js 与本插件）：
+
+```html
+<body>
+  <user-list>
+    <user-list-item>
+      <span class="item-name">Yao</span>
+    </user-list-item>
+  </user-list>
+  <l-m src="./user-list.html"></l-m>
+</body>
 ```
 
 - `<inject-host>` 内放 `<link rel="stylesheet">` 或 `<style>`，内容会被

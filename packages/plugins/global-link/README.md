@@ -1,8 +1,8 @@
 # ofa-global-link（global-link 插件）
 
 ofa.js 的可选插件：`<o-global-link href="./global.css">` 把一份样式表注入
-**所有组件**的 shadow 内——shadow DOM 隔离了页面级样式，这个插件让"全局
-组件样式"成为可能（组件内 link 引入的样式天然隔离，页面级 link 进不了
+**其后挂载组件**的 shadow 内——shadow DOM 隔离了页面级样式，这个插件让
+"全局组件样式"成为可能（组件内 link 引入的样式天然隔离，页面级 link 进不了
 shadow）。引用才生效，不进 ofa.js 默认构建。
 
 ## 引入方式
@@ -26,8 +26,18 @@ shadow）。引用才生效，不进 ofa.js 默认构建。
 </body>
 ```
 
-- `href` 变更会实时切换全部组件的样式（旧份额自动移除）；
-- 组件卸载/换页不影响份额，`o-global-link` 自身移除时份额清空。
+行为语义（忠实于实现，`afterAttached` 注入，无回溯）：
+
+- **只影响其后挂载的组件**：组件挂载时把当时份额内的样式 link 注入其
+  shadow；`o-global-link` 初始化前已在文档中的组件**不会**回溯注入；
+- `href` 变更只更新份额表：**之后**挂载的组件拿到新样式；已注入组件的
+  shadow 副本**不会**随之切换，也不会被回收；
+- `o-global-link` 自身移除后，**之后**挂载的组件不再注入；已注入的副本
+  保留；
+- 组件卸载后再挂载，按当时份额重新注入（`o-global-link` 仍在文档时）。
+
+需要"运行中整体换肤"时，应换用组件内可控的样式方案（如 `public.css`
+按组件引入后自行切换），本插件不做已注入副本的回收。
 
 ## ⚠️ 使用需谨慎
 
@@ -43,5 +53,5 @@ shadow）。引用才生效，不进 ofa.js 默认构建。
 ## 测试
 
 仓库根执行：`npm run test:plugins`（或全量 `npm test`）。
-`test/statics/global-link.html` 覆盖：shadow 注入生效、href 实时切换、
-移除后样式恢复。
+`test/statics/global-link.html` 覆盖：shadow 注入生效、href 切换只影响
+其后挂载的组件、移除后新组件不再被注入（已有组件不受影响）。

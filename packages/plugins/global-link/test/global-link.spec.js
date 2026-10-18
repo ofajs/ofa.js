@@ -20,7 +20,7 @@ const gColors = (page) =>
     }),
   );
 
-test("全局样式注入所有组件 shadow / global style reaches every shadow", async ({
+test("全局样式注入其后挂载的组件 shadow / global style reaches later-mounted shadows", async ({
   page,
 }) => {
   await page.goto(PAGE);

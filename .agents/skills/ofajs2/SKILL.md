@@ -83,6 +83,16 @@ version: 5.0.0
 └─ 嵌套布局 → 父页 <slot>，子页 export const parent = "./layout.html"
 ```
 
+## 交付前自检
+
+- 页面模块的 `<script>` 在 `<template>` 内；组件有 `tag` 且与使用标签一致
+- 模板里每个变量都能在 `data`/`attrs` 找到声明（否则 ReferenceError 整页中断）
+- 动态属性用 `attr:`/`:prop`，布尔属性用 `attr:`，属性值里没有 `{{}}`，
+  指令值里的字符串字面量都加了引号
+- 列表项用 `$data`，根级没有误用 `$host`；`sync:` 没绑对象/attrs
+- 控制台无 `Error evaluating ... expression`、无 `x-if/x-fill deprecated`
+- `console.log($.version)` 确认加载的是目标版本线
+
 ## 文档索引
 
 | 文档 | 内容 |

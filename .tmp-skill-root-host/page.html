@@ -1,0 +1,9 @@
+<template page>
+  <input id="inp" on:keydown="$host.addOnEnter($event)" />
+  <script>
+    export default async () => ({
+      data: {},
+      proto: { addOnEnter(e) { window.__entered = (window.__entered || 0) + 1; } },
+    });
+  </script>
+</template>

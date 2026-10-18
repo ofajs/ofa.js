@@ -1,0 +1,57 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+    }
+    .detail-card {
+      padding: 30px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .back-btn {
+      padding: 10px 20px;
+      background: #6c757d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .back-btn:hover {
+      background: #5a6268;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .info {
+      color: #666;
+      line-height: 1.8;
+    }
+  </style>
+  <button class="back-btn" on:click="goBack">返回列表</button>
+  <div class="detail-card">
+    <h1>商品详情 {{id}}</h1>
+    <div class="info">
+      <p><strong>商品ID：</strong>{{id}}</p>
+      <p><strong>当前路由：</strong>{{src}}</p>
+      <p>这是商品详情页面，展示了嵌套路由的用法。</p>
+    </div>
+  </div>
+  <script>
+    export const parent = "./layout.html";
+    export default async ({ query }) => {
+      return {
+        data: {
+          id: query.id || '未知',
+        },
+        proto: {
+          goBack() {
+            this.back();
+          },
+        },
+      };
+    };
+  </script>
+</template>

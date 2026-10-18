@@ -1,0 +1,53 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+    }
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .item-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .text {
+      flex: 1;
+    }
+    .remove-btn {
+      color: red;
+      cursor: pointer;
+      padding: 2px 8px;
+    }
+  </style>
+
+  <div class="item-content" class:completed="completed">
+    <input type="checkbox" sync:checked="completed" />
+    <span class="text">{{idx + 1}}. {{content}}</span>
+    <span class="remove-btn" on:click="removeSelf">✕</span>
+  </div>
+
+  <script>
+    export default {
+      tag: "todo-item",
+      attrs: {
+        content: "",
+      },
+      data: {
+        idx: 0,
+        completed: false,
+      },
+      proto: {
+        removeSelf() {
+          this.emit("remove");
+        },
+      },
+    };
+  </script>
+</template>

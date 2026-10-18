@@ -1,0 +1,37 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+      color: Green;
+    }
+
+    h2 {
+      font-size: 18px;
+    }
+  </style>
+  <h2>{{val}} - {{doubleNum}}</h2>
+  <button on:click="handleButtonClick">Click me</button>
+  <!-- <button on:click="addNum">Add num</button> -->
+  <button on:click="num++">Add num</button>
+  <script>
+    export default async ({ query }) => {
+      return {
+        data: {
+          val: query.val || "Hello World",
+          num: 0,
+        },
+        proto: {
+          handleButtonClick() {
+            this.val = "Change the value";
+          },
+          //   addNum() {
+          //     this.num++;
+          //   },
+          get doubleNum() {
+            return this.num * 2;
+          },
+        },
+      };
+    };
+  </script>
+</template>

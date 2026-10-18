@@ -101,7 +101,9 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 | 技能 | 触发场景 |
 |------|---------|
 | `benchmark-methodology` | 新建/修改 benchmark、解读 benchmark 结果、怀疑性能回退时 |
-| `ofajs-docs` | 写/改 ofa.js 页面、组件、路由、状态管理时（`packages/ofajs` 已是正源；该技能为使用方文档，两者行为不一致时以 `packages/ofajs` 为准并同步修订） |
+| `ofajs2` | 写/改 ofa.js 页面、组件、路由、状态管理时（**v5 修订版使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。已按 v5 源修订过期声明、移除项目特定泄漏，全文去重至 7 个主题 references） |
+| `ofajs1` | ofajs-docs 的上一轮精简候选（保底备份，未做 v5 逐条校订） |
+| `ofajs-docs` | 原始完整版（内容冗余、含 v4 残留声明与他项目调试痕迹）；已被 ofajs2 取代，确认后可删 |
 
 **同步维护**：新增或删除 `.agents/skills/` 下的技能时，必须同步更新上表。
 

@@ -1,6 +1,6 @@
 {
   "name": "router",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Hash router bridge for o-app: syncs app routing with browser history and location.hash",
   "type": "module",
   "main": "src/router.mjs",

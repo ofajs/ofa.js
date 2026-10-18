@@ -1,6 +1,6 @@
 {
   "name": "scsr",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Symphony Client-Server Rendering: serve real HTML files, adopt them into an o-app as client-side routed pages",
   "type": "module",
   "main": "src/scsr.mjs",

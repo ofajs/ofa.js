@@ -1,6 +1,6 @@
 {
   "name": "ofa.js",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "ofa.js framework: components, pages and app routing on top of xhear",
   "type": "module",
   "main": "src/main.mjs",

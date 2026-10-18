@@ -19,7 +19,7 @@ import "./context.mjs";
 import "./match-var.mjs";
 import Stanz from "../../stanz/src/main.mjs";
 
-const version = "ofa.js@5.0.0";
+const version = "ofa.js@5.0.1";
 $.version = version.replace("ofa.js@", "");
 
 // URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源

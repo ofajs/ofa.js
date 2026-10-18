@@ -132,6 +132,10 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   forbidOnly/retries=2/workers=1，router / scsr / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
 - 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
   `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
+- 版本：`npm run bump -- patch|minor|major|x.y.z`（统一 bump 根与全部
+  packages 的 package.json、ofa.js 运行时版本串，并同步 package-lock；
+  各包维护独立版本线，显式版本号为全包 lockstep 对齐；`--dry` 只打印计划；
+  bump 后需 `npm run build` 刷新 dist banner + 全量回归）
 - devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`
   （仅构建 ofajs dist）；浏览器二进制缺失时报
   "Executable doesn't exist"，用 `npx playwright install <browser>` 安装

@@ -1,6 +1,6 @@
 {
   "name": "xhear",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "web components library with reactive template rendering, driven by stanz",
   "type": "module",
   "main": "src/base.mjs",

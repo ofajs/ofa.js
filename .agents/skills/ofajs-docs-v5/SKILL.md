@@ -50,7 +50,7 @@ version: 5.0.0
 | `<o-app src="./page.html">` | `<o-page src="./page.html">` / `<o-app src="app-config.js">` | o-app 只加载应用配置；嵌页面用 o-page |
 | 初始化后再给 `<o-page>` 赋 `src`（含 `:src`） | 运行时调用子页面方法传参 | o-page 的 src 初始化后不可变，再赋值直接抛错 |
 | `<script>` 放在 `<template>` 外 | script 放 template 内部 | 转译只提取 template[page|component] 内的 script |
-| `$("#form").formData()` | `import { formData } from ".../plugins/formdata/formdata.mjs"` 后 `formData($ele)` | formData 是 `packages/plugins/formdata/` 下的可选插件，引用才生效；仅 monorepo 源码场景可用，不进 dist |
+| `$("#form").formData()` | `import { formData } from ".../plugins/formdata/formdata.mjs"`（dist 经典脚本用全局 `ofaFormData.formData`） | formData 是 `packages/plugins/formdata/` 下的可选插件，引用才生效；不进 ofa.js 默认构建，源码与 dist 双形态可用 |
 | 模板引用了 data/attrs 未声明的键 | 所有被引用键先声明并给默认值 | 初始化求值直接 ReferenceError，整页渲染中断 |
 
 完整报错对照与排查口诀见 [pitfalls.md](./references/pitfalls.md)。

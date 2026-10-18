@@ -31,11 +31,6 @@ const errorDescs = {
   comp_registered:
     "Component '{tag}' has been registered, and the component cannot be registered again",
   load_comp_module: "Error loading component module, wrong module address: {url}",
-  "inject-link-rel":
-    "The rel attribute value of the link element in the inject-host component can only be 'stylesheet'",
-  "use-data-inject":
-    "Please do not use data() on the style element in the inject-host, because it will cause serious performance crisis",
-  invalidated_inject_host: "This element will be invalidated in 'inject-host'",
   olink_out_app: "The element of [olink] is only allowed in o-app",
   no_provider:
     "The consumer named '{name}' was not captured by the corresponding provider",

@@ -1,6 +1,6 @@
 {
   "name": "stanz",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "reactive data with observable child objects, driven by Proxy",
   "type": "module",
   "main": "src/base.mjs",

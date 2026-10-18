@@ -126,10 +126,10 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
 - 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352）；跨框架对比 `npm run bench:cross`（自管 3353，首次先跑 fetch-cross-vendor.mjs）
-- CI：`.github/workflows/ci.yml`，七条并行任务——drill、stanz、router、scsr（各三浏览器）+ ofa.js 按
+- CI：`.github/workflows/ci.yml`，八条并行任务——drill、stanz、router、scsr、plugins（各三浏览器）+ ofa.js 按
   chromium/firefox/webkit 拆三条（ofajs 覆盖 xhear，不单列）。本地等价命令
-  `npm run test:drill` / `test:stanz` / `test:router` / `test:scsr` / `test:ofajs`；CI 下 config 自动启用
-  forbidOnly/retries=2/workers=1，router / scsr / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
+  `npm run test:drill` / `test:stanz` / `test:router` / `test:scsr` / `test:plugins` / `test:ofajs`；CI 下 config 自动启用
+  forbidOnly/retries=2/workers=1，router / scsr / plugins / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
 - 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
   `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
 - 版本：`npm run bump -- patch|minor|major|x.y.z`（统一 bump 根与全部
@@ -154,6 +154,8 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   供 `<script src>` 与 CDN）；
   router / scsr 桥接包 → 各自包内 `dist/`（2026-10-17 确认，UMD 全局名
   ofaRouter / ofaScsr；源码挂接全局 `$` 不 import 框架源码，自包含随 npm 发布）；
+  `packages/plugins/` 下插件 → 各自子包 `dist/`（2026-10-18 确认，同桥接原则
+  挂全局 `$`，UMD 全局名如 ofaFormData）；
   其余包不得引入打包（`packages/plugins/` 下的插件为引用即用，同样不参与打包）
 - **测试基建新依赖**：静态服务器保持零依赖 `node:http`；不引入 vitest/jest
   等第二测试运行器

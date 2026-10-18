@@ -1,0 +1,36 @@
+{
+  "name": "ofa-global-link",
+  "version": "5.0.1",
+  "description": "ofa.js plugin: <o-global-link href> injects a shared stylesheet into every component's shadow root (global-link)",
+  "type": "module",
+  "main": "global-link.mjs",
+  "exports": {
+    ".": "./global-link.mjs"
+  },
+  "files": [
+    "global-link.mjs",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/plugins/global-link"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "plugin",
+    "global-link",
+    "global style",
+    "web components"
+  ]
+}

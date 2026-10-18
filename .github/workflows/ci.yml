@@ -76,6 +76,22 @@ jobs:
       - run: npm run build
       - run: npx playwright test packages/scsr --reporter=line
 
+  test-plugins:
+    name: plugins（三浏览器）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      - run: npm run build
+      - run: npx playwright test packages/plugins --reporter=line
+
   test-ofajs-chromium:
     name: ofa.js（chromium）
     runs-on: ubuntu-latest

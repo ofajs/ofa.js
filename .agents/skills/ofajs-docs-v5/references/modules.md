@@ -164,10 +164,13 @@ replace-temp + 命名模板引用：
 
 纯 JS 动态创建 DOM（createElement + append）不受解析器限制，无需此写法。
 
-## inject-host（注入宿主样式）
+## inject-host（注入宿主样式 · 可选插件）
 
 slot 分发内容的深层元素无法用组件内样式直接命中（`::slotted()` 只及第一层），
-`<inject-host>` 把组件内的 style 提升到宿主作用域：
+`<inject-host>` 把组件内的 style 提升到宿主作用域。它是 `packages/plugins/inject-host/`
+下的**可选插件**，需显式引入（dist 经典脚本加载 `inject-host.min.js`，或
+源码 `import ".../plugins/inject-host/inject-host.mjs"`），且须在 ofa.js
+之后加载：
 
 ```html
 <template component>

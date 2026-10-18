@@ -156,8 +156,15 @@ $.fn.color.always = true;
 
 ## formData（可选插件）
 
-v5 中 formData 是统一插件目录（`packages/plugins/`）里的可选插件，
-**引用才生效**——不进默认构建、不进任何 dist，当前仅 monorepo 源码场景可用：
+v5 中 formData 是 `packages/plugins/formdata/` 下的可选插件，**引用才
+生效**（不进 ofa.js 默认构建）。插件挂接页面已加载的全局 `$`（`$.stanz`
+与页面框架同实例），源码与 dist 双形态都可用：
+
+| 场景 | 引入方式 |
+|------|---------|
+| monorepo / npm 源码 | `import { formData } from ".../plugins/formdata/formdata.mjs"` |
+| dist 经典脚本（配 dist ofa.js） | `<script src=".../packages/plugins/formdata/dist/formdata.min.js"></script>`，全局 `ofaFormData.formData` |
+| dist ESM / CDN | `import { formData } from "...@refs/heads/v5/packages/plugins/formdata/dist/formdata.min.mjs"` |
 
 ```javascript
 // monorepo 内按使用文件深度相对导入
@@ -171,11 +178,9 @@ data.username = "Yao"; // 写 → 相关表单元素自动更新（双向）
 data.revoke();        // 不再需要时释放绑定
 ```
 
-**为什么别处用不了**：插件会 import 框架内部模块——
-- 从 CDN 独立引入会拉起**第二份 stanz 实例**（与页面框架分裂），所以不进
-  dist、也没有 CDN 形态；
-- npm 场景待 v5 发布工程统一解决（`xhear` 的 exports 目前只开放 `"."`）。
+**前提**：须在 ofa.js 之后加载（插件挂接全局 `$`，缺失时直接抛错）。
 
 自定义表单组件接入：暴露 `value` 属性并设置 `name` attribute。
 checkbox 聚合成数组、select 多选、radio/file 均有处理。插件目录约定见
-`packages/plugins/CONTEXT.md`（每插件一个子目录）。
+`packages/plugins/CONTEXT.md`（每插件一个子目录），完整用法见
+`packages/plugins/formdata/README.md`。

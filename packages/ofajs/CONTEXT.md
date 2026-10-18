@@ -32,7 +32,8 @@ packages/ofajs/
 │   ├── inject-host.mjs    shadow 内 link/style 收编到宿主根（hash 去重、移除回收）
 │   ├── context.mjs        o-provider / o-consumer / o-root-provider + $.fn.getProvider
 │   ├── match-var.mjs      CSS 属性条件样式（container style query + 降级轮询）
-│   └── （o-if/o-else-if/o-else/o-fill 已下沉 xhear v9，由 base.mjs 的 import 链供给）
+│   └── （o-if/o-else-if/o-else/o-fill 已下沉 xhear v9，由 base.mjs 的 import 链供给；
+│        inject-host 已拆分为 packages/plugins/inject-host 独立插件）
 └── test/
     ├── statics/           5 个自检页 + harness + fixtures/（组件/页面样例文件）
     └── ofajs.spec.js      断言各页 N/N 通过

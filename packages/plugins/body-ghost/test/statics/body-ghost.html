@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>body-ghost 插件自检</title>
+  </head>
+  <body>
+    <!-- body-ghost 插件自检（纯页面，spec 驱动）：
+        内容传送至 body 末尾、事件沿原位置冒泡、移除清理 -->
+    <ghost-wrap id="wrap-a"></ghost-wrap>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../body-ghost/body-ghost.mjs";
+
+      const { register } = ofa;
+
+      register({
+        tag: "ghost-wrap",
+        temp: `
+        <div id="wrap-box">
+          <body-ghost>
+            <button id="ghost-btn" on:click="count++">浮层按钮</button>
+          </body-ghost>
+          <span id="wrap-count">{{count}}</span>
+        </div>`,
+        data: { count: 0 },
+      });
+
+      window.__wrap = ofa("ghost-wrap");
+    </script>
+  </body>
+</html>

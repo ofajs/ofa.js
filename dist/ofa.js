@@ -4857,296 +4857,6 @@ try{
   });
 
   /**
-   * ofa.js 的统一错误机制：本地错误码描述表 + XhearError。
-   * 旧版依赖 ofa-error 在线加载文案（被认定的失败设计），现随源码走。
-   */
-
-  /** 错误码 → 描述模板；{name} 等占位符由 getErr 用 options 填充 */
-  const errorDescs = {
-    loading_nothing: "Loading function has no return content",
-    not_page_module:
-      "{src} is not a page module and cannot be set as the src of the page component",
-    page_no_defaults:
-      "The current page ({src}) has been rendered and cannot be rendered again",
-    page_invalid_key:
-      "The registration parameters of page {src} are incorrect. '{name}' on '{targetName}' is already taken. Please change '{name}' to another name.",
-    load_page_module: "Loading page module {url} failed",
-    page_failed: "Loading page failed: {src}",
-    fetch_temp_err: "Page module {url} failed to load template {tempSrc}",
-    page_wrap_fetch: "Page {before} failed to get the parent page ({current})",
-    app_src_change:
-      "The app element that has been initialized cannot modify the src attribute",
-    app_noback:
-      "This is already the first page, and the 'back' operation cannot be performed again",
-    app_noforward:
-      "This is the last page, you can no longer perform the 'forward' operation",
-    need_forwards:
-      "The target o-app does not allow forward operations, please add the '_forwards' attribute to the target; or in the app config file, add 'export const allowForward = true'",
-    no_cross_access_func:
-      "To jump to a page across domains, you must set the access function",
-    access_return_error: "Jumping to {src} is not allowed",
-    comp_registered:
-      "Component '{tag}' has been registered, and the component cannot be registered again",
-    load_comp_module: "Error loading component module, wrong module address: {url}",
-    "inject-link-rel":
-      "The rel attribute value of the link element in the inject-host component can only be 'stylesheet'",
-    "use-data-inject":
-      "Please do not use data() on the style element in the inject-host, because it will cause serious performance crisis",
-    invalidated_inject_host: "This element will be invalidated in 'inject-host'",
-    olink_out_app: "The element of [olink] is only allowed in o-app",
-    no_provider:
-      "The consumer named '{name}' was not captured by the corresponding provider",
-    root_provider_exist:
-      "An exception occurred in the root provider named '{name}'. The root provider component can only appear once",
-    root_provider_name_change:
-      "An exception occurred in the root provider named '{name}'. The root provider component cannot change the 'name' attribute",
-  };
-
-  /** 按错误码 + 占位符生成描述文本 */
-  const getErrDesc = (key, options) => {
-    let desc = errorDescs[key];
-
-    if (!desc) {
-      return `Unknown error code: "${key}"`;
-    }
-
-    if (options) {
-      for (let k in options) {
-        desc = desc.replace(new RegExp(`\\{${k}\\}`, "g"), options[k]);
-      }
-    }
-
-    return desc;
-  };
-
-  /** 快捷工厂：生成带 code 的 XhearError，cause 可选 */
-  const getErr = (key, options, cause) =>
-    new XhearError(key, getErrDesc(key, options), { cause });
-
-  /**
-   * inject-host：把 shadow 内的 link/style 收编到宿主根节点。
-   *
-   * 组件内放置 link[rel=stylesheet] 或 style，inject-host 会将它们提升到
-   * 宿主根（document.head 或 shadowRoot），按内容 hash 去重共享，并在
-   * 元素移除时自动回收；o-if/o-fill 等渲染型组件不参与处理。
-   */
-
-  $.register({
-    tag: "inject-host",
-    temp: `<slot></slot>`,
-    data: {},
-    proto: {
-      init() {
-        if (!this.ele.isConnected) {
-          return;
-        }
-
-        this.forEach((e) => this._init(e));
-      },
-
-      _init(e) {
-        if (e.ele.__inited) {
-          return;
-        }
-
-        switch (e.tag) {
-          case "link":
-            this._initLink(e);
-            break;
-          case "style":
-            this._initStyle(e);
-            break;
-          case "o-if":
-          case "o-else-if":
-          case "o-else":
-          case "o-fill":
-            // Components of a rendered nature do not need to be alerted
-            break;
-          default:
-            const err = getErr("invalidated_inject_host");
-            console.warn(err, e);
-        }
-      },
-
-      _initLink(e) {
-        const href = e.attr("href");
-
-        const rel = e.attr("rel");
-
-        if (rel !== "stylesheet" && rel !== "host") {
-          throw getErr("inject-link-rel");
-        }
-
-        let { ele } = e;
-
-        if (rel !== "host") {
-          e.attr("rel", "host");
-          // It needs to be reset or it will contaminate itself
-          e.attr("href", href);
-        }
-
-        ele.__inited = true;
-
-        ele._revoke = () => {
-          revokeLink(ele);
-          ele._revoke = null;
-        };
-
-        initInjectEle(
-          this,
-          href,
-          () => {
-            const newEl = e.clone();
-            newEl.attr("rel", "stylesheet");
-            return newEl;
-          },
-          ele
-        );
-      },
-      async _initStyle(e) {
-        if (/data\(.+?\)/.test(e.html)) {
-          const err = getErr("use-data-inject");
-          console.warn(err, e.ele);
-          throw err;
-        }
-
-        // Use only the text inside the style to prevent contaminating yourself
-        const com = new Comment(e.html);
-        com.__inited = true;
-
-        com._revoke = () => {
-          revokeLink(e.ele);
-          delete com.__inited;
-          delete e.ele.__inited;
-          com._revoke = null;
-          e.ele._revoke = null;
-        };
-
-        e.html = "";
-        e.push(com);
-        e.ele.__inited = true;
-        e.ele._revoke = com._revoke;
-
-        // const hash = await getHash(com.data);
-        const hash = getStringHash(com.data);
-
-        initInjectEle(this, hash, () => $(`<style>${com.data}</style>`), e.ele);
-      },
-    },
-    attached() {
-      const observer = (this._obs = new MutationObserver((mutationsList) => {
-        for (let mutation of mutationsList) {
-          if (mutation.type === "attributes") {
-            if (mutation.attributeName === "x-bind-data") {
-              // x component render
-              continue;
-            }
-
-            // Logic for handling attribute changes
-            const { target } = mutation;
-
-            if (target.__inited) {
-              target._revoke();
-              this._init(eleX(target));
-            }
-          } else if (mutation.type === "childList") {
-            mutation.removedNodes.forEach((e) => {
-              if (e.__inited) {
-                e._revoke();
-              }
-            });
-
-            mutation.addedNodes.forEach((e) => {
-              if (!e.__inited) {
-                if (e instanceof Text) {
-                  if (e.parentElement.tagName === "STYLE") {
-                    // change style text
-                    this.init(e.parentNode);
-                  }
-                }
-
-                if (e.__inited) {
-                  // Don't get involved if you've been initialized.
-                  return;
-                }
-
-                if (e instanceof Text || e instanceof Comment) {
-                  // Invalid content
-                  return;
-                }
-
-                this._init(eleX(e));
-              }
-            });
-          }
-        }
-      }));
-
-      const config = { attributes: true, childList: true, subtree: true };
-
-      observer.observe(this.ele, config);
-
-      this.init();
-    },
-    detached() {
-      this.forEach((e) => revokeLink(e.ele));
-
-      this._obs.disconnect();
-    },
-  });
-
-  function getStringHash(str) {
-    let hash = 0;
-    let len = str.length;
-    for (let i = 0; i < len; i++) {
-      const charCode = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) ^ charCode;
-      hash = (hash << 13) | (hash >>> 19);
-      hash = hash * 7 - hash * 3;
-    }
-    return hash.toString(36) + "--" + len;
-  }
-
-  function initInjectEle(injectEl, mark, cloneFunc, item) {
-    const hostRoot = injectEl.host.root;
-
-    let clink = hostRoot.$(`[inject-host="${mark}"]`);
-
-    if (clink) {
-      clink.ele.__items.add(item);
-      item.__host_link = clink;
-      return;
-    }
-
-    clink = cloneFunc();
-
-    clink.attr("inject-host", mark);
-
-    clink.ele.__items = new Set([item]);
-    item.__host_link = clink;
-
-    const { root } = injectEl.host;
-    if (root.ele === document) {
-      document.head.appendChild(clink.ele);
-    } else {
-      root.root.push(clink);
-    }
-  }
-
-  function revokeLink(item) {
-    if (item.__inited && item.__host_link) {
-      const items = item.__host_link.ele.__items;
-      items.delete(item);
-
-      if (!items.size) {
-        item.__host_link.remove();
-      }
-
-      delete item.__inited;
-    }
-  }
-
-  /**
    * drill 的统一错误类型：携带稳定的机器可读错误码（code），
    * 并通过 ES2022 cause 保留底层错误的完整链路。
    */
@@ -5603,6 +5313,68 @@ try{
   if (typeof window !== "undefined") {
     window.lm = lm;
   }
+
+  /**
+   * ofa.js 的统一错误机制：本地错误码描述表 + XhearError。
+   * 旧版依赖 ofa-error 在线加载文案（被认定的失败设计），现随源码走。
+   */
+
+  /** 错误码 → 描述模板；{name} 等占位符由 getErr 用 options 填充 */
+  const errorDescs = {
+    loading_nothing: "Loading function has no return content",
+    not_page_module:
+      "{src} is not a page module and cannot be set as the src of the page component",
+    page_no_defaults:
+      "The current page ({src}) has been rendered and cannot be rendered again",
+    page_invalid_key:
+      "The registration parameters of page {src} are incorrect. '{name}' on '{targetName}' is already taken. Please change '{name}' to another name.",
+    load_page_module: "Loading page module {url} failed",
+    page_failed: "Loading page failed: {src}",
+    fetch_temp_err: "Page module {url} failed to load template {tempSrc}",
+    page_wrap_fetch: "Page {before} failed to get the parent page ({current})",
+    app_src_change:
+      "The app element that has been initialized cannot modify the src attribute",
+    app_noback:
+      "This is already the first page, and the 'back' operation cannot be performed again",
+    app_noforward:
+      "This is the last page, you can no longer perform the 'forward' operation",
+    need_forwards:
+      "The target o-app does not allow forward operations, please add the '_forwards' attribute to the target; or in the app config file, add 'export const allowForward = true'",
+    no_cross_access_func:
+      "To jump to a page across domains, you must set the access function",
+    access_return_error: "Jumping to {src} is not allowed",
+    comp_registered:
+      "Component '{tag}' has been registered, and the component cannot be registered again",
+    load_comp_module: "Error loading component module, wrong module address: {url}",
+    olink_out_app: "The element of [olink] is only allowed in o-app",
+    no_provider:
+      "The consumer named '{name}' was not captured by the corresponding provider",
+    root_provider_exist:
+      "An exception occurred in the root provider named '{name}'. The root provider component can only appear once",
+    root_provider_name_change:
+      "An exception occurred in the root provider named '{name}'. The root provider component cannot change the 'name' attribute",
+  };
+
+  /** 按错误码 + 占位符生成描述文本 */
+  const getErrDesc = (key, options) => {
+    let desc = errorDescs[key];
+
+    if (!desc) {
+      return `Unknown error code: "${key}"`;
+    }
+
+    if (options) {
+      for (let k in options) {
+        desc = desc.replace(new RegExp(`\\{${k}\\}`, "g"), options[k]);
+      }
+    }
+
+    return desc;
+  };
+
+  /** 快捷工厂：生成带 code 的 XhearError，cause 可选 */
+  const getErr = (key, options, cause) =>
+    new XhearError(key, getErrDesc(key, options), { cause });
 
   /**
    * ofa.js 公共工具：路径解析、相对资源修正、页面数据加载链。
@@ -8081,7 +7853,8 @@ ${scriptContent}`;
    * - o-page / o-app 页面路由（嵌套路由、前进后退、页面动画）
    * - o-if / o-fill 模板语法（实现已下沉 xhear）
    * - o-provider / o-consumer 上下文通信
-   * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
+   * - o-link 路由链接、match-var 属性样式
+   * （inject-host 已拆分为 packages/plugins/inject-host 独立插件）
    */
 
   const version = "ofa.js@5.0.1";

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>global-link dist 冒烟</title>
+    <style>
+      body { color: rgb(29, 29, 31); }
+    </style>
+  </head>
+  <body>
+    <!-- dist 产物冒烟：经典脚本加载 dist ofa.js + dist global-link.min.js -->
+    <o-global-link href="./fixtures/global-red.css"></o-global-link>
+    <gl-demo></gl-demo>
+
+    <script src="../../../../dist/ofa.min.js"></script>
+    <script src="../../dist/global-link.min.js"></script>
+    <script>
+      $.register({
+        tag: "gl-demo",
+        temp: `<div class="g-text" id="gd">gl-demo</div>`,
+      });
+    </script>
+  </body>
+</html>

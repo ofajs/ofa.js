@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>body-ghost dist 冒烟</title>
+  </head>
+  <body>
+    <!-- dist 产物冒烟：经典脚本加载 dist ofa.js + dist body-ghost.min.js，
+        验证插件挂全局 $ 的契约 -->
+    <body-ghost>
+      <div id="bg-in">ghost content</div>
+    </body-ghost>
+
+    <script src="../../../../dist/ofa.min.js"></script>
+    <script src="../../dist/body-ghost.min.js"></script>
+  </body>
+</html>

@@ -9,7 +9,7 @@ const PAGES = [
   { path: "/packages/ofajs/test/statics/if-fill.html", total: 17 },
   { path: "/packages/ofajs/test/statics/app.html", total: 17 },
   { path: "/packages/ofajs/test/statics/context.html", total: 10 },
-  { path: "/packages/ofajs/test/statics/misc.html", total: 7 },
+  { path: "/packages/ofajs/test/statics/misc.html", total: 3 },
   { path: "/packages/ofajs/test/statics/dist-host.html", total: 3 },
 ];
 

@@ -6,6 +6,10 @@ import terser from "@rollup/plugin-terser";
 // - ofajs 主包 → 根 dist/（框架本体的经典入口，UMD 全局名 $）
 // - router / scsr 桥接包 → 各自包内 dist/（自包含，npm 发布物与
 //   产物同包；源码挂接全局 $，无框架导入，UMD 全局名 ofaRouter/ofaScsr）
+// - plugins/formdata 插件 → 插件子包内 dist/（同桥接原则挂全局 $，
+//   UMD 全局名 ofaFormData；named 导出 formData）
+// - plugins/inject-host 插件 → 插件子包内 dist/（同上，纯副作用注册
+//   inject-host 元素，无导出）
 const TARGETS = [
   {
     name: "ofajs",
@@ -30,6 +34,38 @@ const TARGETS = [
     outDir: "packages/scsr/dist",
     file: "scsr",
     umdName: "ofaScsr",
+    exports: "none",
+  },
+  {
+    name: "plugins/formdata", // 仅用于定位 package.json（读版本/作者信息）
+    input: "packages/plugins/formdata/formdata.mjs",
+    outDir: "packages/plugins/formdata/dist",
+    file: "formdata",
+    umdName: "ofaFormData",
+    exports: "named",
+  },
+  {
+    name: "plugins/inject-host", // 仅用于定位 package.json
+    input: "packages/plugins/inject-host/inject-host.mjs",
+    outDir: "packages/plugins/inject-host/dist",
+    file: "inject-host",
+    umdName: "ofaInjectHost",
+    exports: "none",
+  },
+  {
+    name: "plugins/body-ghost", // 仅用于定位 package.json
+    input: "packages/plugins/body-ghost/body-ghost.mjs",
+    outDir: "packages/plugins/body-ghost/dist",
+    file: "body-ghost",
+    umdName: "ofaBodyGhost",
+    exports: "none",
+  },
+  {
+    name: "plugins/global-link", // 仅用于定位 package.json
+    input: "packages/plugins/global-link/global-link.mjs",
+    outDir: "packages/plugins/global-link/dist",
+    file: "global-link",
+    umdName: "ofaGlobalLink",
     exports: "none",
   },
 ];

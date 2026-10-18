@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>formData 插件 dist 冒烟</title>
+  </head>
+  <body>
+    <!-- dist 产物冒烟：经典脚本加载 dist ofa.js + dist 插件，验证插件
+        挂全局 $ 的契约（$.stanz 与页面框架同实例，双向可用） -->
+    <form id="demo-form">
+      <input type="text" name="a" value="I am A" />
+      <input type="checkbox" name="agree" value="yes" />
+    </form>
+    <div id="target"></div>
+
+    <script src="../../../../dist/ofa.min.js"></script>
+    <script src="../../dist/formdata.min.js"></script>
+    <script>
+      const data = ofaFormData.formData($("#demo-form"));
+      const target = document.getElementById("target");
+
+      const render = () => {
+        target.textContent = JSON.stringify(data);
+      };
+      data.watch(render);
+      render();
+
+      // 初始收集快照（供 spec 断言）
+      window.__initialData = target.textContent;
+
+      // 供 spec 驱动（data → 表单方向）
+      window.__setData = (key, val) => {
+        data[key] = val;
+      };
+    </script>
+  </body>
+</html>

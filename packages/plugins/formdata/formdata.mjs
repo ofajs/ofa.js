@@ -1,18 +1,27 @@
 /**
- * formData 插件（可选，引用即用，不进 dist）：
+ * formData 插件（可选，引用才生效，不进 ofa.js 默认构建）：
  * 容器表单值 ↔ stanz 对象的双向绑定。
  *
- * 统一存放于 packages/plugins/（每插件一个子目录，约定见 ../CONTEXT.md）。
+ * 桥接形态：挂接页面已加载的 ofa.js 运行时（全局 $，即 window.$ /
+ * globalThis.ofa），`$.stanz` 与页面框架是同一实例——因此源码引入与
+ * dist 引入（UMD 全局 ofaFormData）都天然单实例，须在 ofa.js 之后加载。
  *
- * 用法（monorepo 内按使用文件深度相对导入）：
- *   import { formData } from "../../../plugins/formdata/formdata.mjs";
+ * 用法：
+ *   import { formData } from ".../plugins/formdata/formdata.mjs"; // 或 dist 形态
  *   const data = formData(this.shadow);
  *   // 之后 data 上的值与表单双向同步；不再需要时 data.revoke() 释放
+ *
+ * 自定义表单组件接入：暴露 value 属性 + 设置 name attribute 即可参与收集。
  */
-import stanz from "../../stanz/src/base.mjs";
+const $ = window.$;
+
+if (!$) {
+  throw new Error(
+    "[ofa-formdata] ofa.js must be loaded before the formdata plugin (window.$ is missing)",
+  );
+}
 
 const { assign } = Object;
-import { mergeObjects, searchEle } from "../../xhear/src/public.mjs";
 
 /** 收集容器内全部表单项的当前值（checkbox 聚合成数组、select 支持多选） */
 const getFormData = (target, expr) => {
@@ -46,12 +55,14 @@ const getFormData = (target, expr) => {
     } else if (tag === "textarea") {
       data[name] = ele.value;
     } else if (tag === "select") {
-      const selectedsOpt = searchEle(ele, `option:checked`);
+      const selectedOptions = Array.from(
+        ele.querySelectorAll("option:checked"),
+      );
 
       if (ele.multiple) {
-        data[name] = selectedsOpt.map((e) => e.value || e.textContent);
+        data[name] = selectedOptions.map((e) => e.value || e.textContent);
       } else {
-        const [e] = selectedsOpt;
+        const [e] = selectedOptions;
         data[name] = e.value || e.textContent;
       }
     } else {
@@ -119,7 +130,7 @@ function resetValue(el, expr, data) {
  * @returns {Object} 与表单双向同步的 stanz 对象，revoke 时解除两侧监听
  */
 export const formData = (el, expr, opts = {}) => {
-  const data = stanz({});
+  const data = $.stanz({});
 
   const selector = expr || "input,select,textarea";
 
@@ -145,3 +156,16 @@ export const formData = (el, expr, opts = {}) => {
 
   return data;
 };
+
+/** 以 obj2 为准同步 obj1：删掉 obj1 多出的键，再覆盖 obj2 的全部键 */
+function mergeObjects(obj1, obj2) {
+  for (const key of Object.keys(obj1)) {
+    if (!obj2.hasOwnProperty(key)) {
+      delete obj1[key];
+    }
+  }
+
+  for (const [key, value] of Object.entries(obj2)) {
+    obj1[key] = value;
+  }
+}

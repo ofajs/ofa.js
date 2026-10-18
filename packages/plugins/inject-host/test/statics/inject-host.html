@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>inject-host 插件自检</title>
+  </head>
+  <body>
+    <!-- inject-host 插件自检（纯页面，spec 驱动）：
+        收编样式作用于光 DOM、head 去重、style 文本实时变更、link 切换移除 -->
+    <style-host></style-host>
+    <!-- inject-host 提升的样式作用于光 DOM -->
+    <div class="hosted-color" id="light-target">hosted text</div>
+    <!-- inject-host 响应式检查的目标元素 -->
+    <inject-dyn></inject-dyn>
+    <div class="inj-style-target" id="inj-style-target">style target</div>
+    <div class="inj-link-target" id="inj-link-target">link target</div>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../inject-host.mjs";
+
+      const { register } = ofa;
+
+      // ---- inject-host：shadow 内样式收编到宿主根（光 DOM 生效）----
+      register({
+        tag: "style-host",
+        temp: `
+        <inject-host>
+          <style>
+            .hosted-color { color: rgb(0, 128, 0); }
+          </style>
+        </inject-host>`,
+        data: {},
+      });
+
+      // inject-host 响应式：注入的 style 文本 / link href 动态变更会
+      // 实时反映到收编副本
+      register({
+        tag: "inject-dyn",
+        temp: `
+        <inject-host>
+          <style class="dyn-style">.inj-style-target { color: rgb(0, 128, 0); }</style>
+          <link rel="stylesheet" class="dyn-link" href="./fixtures/inject-link-red.css" />
+        </inject-host>`,
+        data: {},
+        proto: {
+          setStyleText(t) {
+            this.shadow.$(".dyn-style").text = t;
+          },
+          switchLink(href) {
+            this.ele.shadowRoot
+              .querySelector(".dyn-link")
+              .setAttribute("href", href);
+          },
+          removeLink() {
+            this.ele.shadowRoot.querySelector(".dyn-link").remove();
+          },
+        },
+      });
+
+      window.__dyn = ofa("inject-dyn");
+    </script>
+  </body>
+</html>

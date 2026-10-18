@@ -5,11 +5,11 @@
  * - o-page / o-app 页面路由（嵌套路由、前进后退、页面动画）
  * - o-if / o-fill 模板语法（实现已下沉 xhear）
  * - o-provider / o-consumer 上下文通信
- * - o-link 路由链接、inject-host 样式收编、match-var 属性样式
+ * - o-link 路由链接、match-var 属性样式
+ * （inject-host 已拆分为 packages/plugins/inject-host 独立插件）
  */
 import $ from "../../xhear/src/base.mjs";
 import { setDebugLog } from "../../xhear/src/debug.mjs";
-import "./inject-host.mjs";
 import "./comp.mjs";
 import "./page.mjs";
 import "./app.mjs";
@@ -19,7 +19,7 @@ import "./context.mjs";
 import "./match-var.mjs";
 import Stanz from "../../stanz/src/main.mjs";
 
-const version = "ofa.js@5.0.1";
+const version = "ofa.js@5.0.2";
 $.version = version.replace("ofa.js@", "");
 
 // URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源

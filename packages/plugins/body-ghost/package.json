@@ -1,0 +1,36 @@
+{
+  "name": "ofa-body-ghost",
+  "version": "5.0.1",
+  "description": "ofa.js plugin: teleport template content to the end of body (ghost mapping on document.body) while events keep bubbling from the original position (body-ghost)",
+  "type": "module",
+  "main": "body-ghost.mjs",
+  "exports": {
+    ".": "./body-ghost.mjs"
+  },
+  "files": [
+    "body-ghost.mjs",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/plugins/body-ghost"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "plugin",
+    "body-ghost",
+    "portal",
+    "web components"
+  ]
+}

@@ -1,4 +1,4 @@
-//! scsr - v5.0.0 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
+//! scsr - v5.0.1 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
 (function (factory) {
   typeof define === 'function' && define.amd ? define(factory) :
   factory();

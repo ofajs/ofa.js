@@ -1,4 +1,4 @@
-//! router - v5.0.0 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
+//! router - v5.0.1 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
 /**
  * o-router 的 history 同步内核。
  *

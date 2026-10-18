@@ -1,16 +1,18 @@
 /**
- * formData 插件（可选，不随 xhear 默认加载）：
+ * formData 插件（可选，引用即用，不进 dist）：
  * 容器表单值 ↔ stanz 对象的双向绑定。
  *
- * 用法：
- *   import { formData } from "xhear/src/formdata.mjs";
+ * 统一存放于 packages/plugins/（每插件一个子目录，约定见 ../CONTEXT.md）。
+ *
+ * 用法（monorepo 内按使用文件深度相对导入）：
+ *   import { formData } from "../../../plugins/formdata/formdata.mjs";
  *   const data = formData(this.shadow);
  *   // 之后 data 上的值与表单双向同步；不再需要时 data.revoke() 释放
  */
 import stanz from "../../stanz/src/base.mjs";
 
 const { assign } = Object;
-import { mergeObjects, searchEle } from "./public.mjs";
+import { mergeObjects, searchEle } from "../../xhear/src/public.mjs";
 
 /** 收集容器内全部表单项的当前值（checkbox 聚合成数组、select 支持多选） */
 const getFormData = (target, expr) => {

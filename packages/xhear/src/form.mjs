@@ -3,8 +3,8 @@
  * 原生表单属性接入数据观察（如 $input.value = x 会触发更新事件，
  * watchers 与模板能感知）。
  *
- * 容器级双向绑定 formData 使用频率低，拆分到独立的可选插件模块
- * formdata.mjs（不随默认构建加载，按需引入）。
+ * 容器级双向绑定 formData 使用频率低，拆分为可选插件
+ * packages/plugins/formdata.mjs（不随默认构建加载、不进 dist，按需引入）。
  */
 import { emitUpdate } from "../../stanz/src/watch.mjs";
 

@@ -15,10 +15,14 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 - `packages/stanz/CONTEXT.md` —— Proxy 驱动的响应式数据
 - `packages/xhear/CONTEXT.md` —— Web Components 底座与模板渲染语法
 - `packages/ofajs/CONTEXT.md` —— ofa.js 框架本体（组件/页面/路由/上下文）
+- `packages/plugins/CONTEXT.md` —— 统一插件目录（formData 等，引用即用，
+  不进 dist、不发 npm）
 
 **目录约定**：
 
 - `packages/<名>/` —— 各库源码 + 各自的 test/ 与 benchmark/，互不依赖运行时
+- `packages/plugins/` —— 可选插件统一存放（自包含 .mjs，消费方相对导入，
+  见其 CONTEXT.md）
 - `old/` —— 旧仓库完整归档，**只读参考，禁止修改或从中直接拷贝代码**
 - `scripts/static-server.mjs` —— 测试用的零依赖静态服务器（端口 3348）
 - `playwright.config.mjs` —— 根级测试配置，扫描 `packages/*/test/**/*.spec.js`
@@ -101,9 +105,8 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 | 技能 | 触发场景 |
 |------|---------|
 | `benchmark-methodology` | 新建/修改 benchmark、解读 benchmark 结果、怀疑性能回退时 |
-| `ofajs2` | 写/改 ofa.js 页面、组件、路由、状态管理时（**v5 修订版使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。已按 v5 源修订过期声明、移除项目特定泄漏，全文去重至 7 个主题 references） |
-| `ofajs1` | ofajs-docs 的上一轮精简候选（保底备份，未做 v5 逐条校订） |
-| `ofajs-docs` | 原始完整版（内容冗余、含 v4 残留声明与他项目调试痕迹）；已被 ofajs2 取代，确认后可删 |
+| `ofajs-docs-v5` | 写/改 ofa.js 页面、组件、路由、状态管理时（**v5 修订版使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。已按 v5 源修订过期声明、移除项目特定泄漏，全文去重至 9 个文件——SKILL.md + syntax/modules/app-routing/state/api/pitfalls/examples/resources） |
+| `ofajs-docs` | 原始完整版（内容冗余、含 v4 残留声明如"o-fill && 必炸"、他项目调试痕迹，且部分说法与 v5 行为相悖）；已被 `ofajs-docs-v5` 取代，**建议删除以免误触发**（两技能触发场景几乎相同） |
 
 **同步维护**：新增或删除 `.agents/skills/` 下的技能时，必须同步更新上表。
 
@@ -147,7 +150,7 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   供 `<script src>` 与 CDN）；
   router / scsr 桥接包 → 各自包内 `dist/`（2026-10-17 确认，UMD 全局名
   ofaRouter / ofaScsr；源码挂接全局 `$` 不 import 框架源码，自包含随 npm 发布）；
-  其余包不得引入打包
+  其余包不得引入打包（`packages/plugins/` 下的插件为引用即用，同样不参与打包）
 - **测试基建新依赖**：静态服务器保持零依赖 `node:http`；不引入 vitest/jest
   等第二测试运行器
 - **浏览器全局副作用**：新增代码不得依赖或写入 window 全局做模块间通信

@@ -5,53 +5,15 @@
     <title>formData 插件自检（源码形态）</title>
   </head>
   <body>
-    <!-- formData 插件与 o-if / o-fill 协作的集成自检（纯页面，spec 驱动） -->
+    <!-- formData 插件与 o-if / o-fill 协作的集成自检（纯页面，spec 驱动）。
+        演示组件按 ofa.js 正统方式：HTML 文件 + l-m 引用 -->
     <formdata-demo></formdata-demo>
+
+    <l-m src="./formdata-demo.html"></l-m>
 
     <script type="module">
       import "../../../../ofajs/src/main.mjs";
       import "../../../formdata/formdata.mjs";
-
-      $.register({
-        tag: "formdata-demo",
-        temp: `
-        <div><input type="text" name="a" value="I am A" /></div>
-        <o-if :value="count % 2">
-          <div><input type="text" name="b" value="I am B" /></div>
-        </o-if>
-        <div id="fill-inputs">
-          <o-fill :value="arr">
-            <div>
-              <input type="text" attr:name="$data.name" sync:value="$data.val" />
-            </div>
-          </o-fill>
-        </div>
-        <div id="target">{{fdata}}</div>
-        `,
-        data: {
-          fdata: {},
-          count: 0,
-          arr: [
-            { name: "K1", val: 1 },
-            { name: "K2", val: "2" },
-          ],
-        },
-        proto: {
-          addItem() {
-            this.addItemCount = (this.addItemCount || 2) + 1;
-            this.arr.push({
-              name: `K${this.addItemCount}`,
-              val: this.addItemCount,
-            });
-          },
-        },
-        attached() {
-          this.fdata = this.shadow.formData();
-        },
-        detached() {
-          this.fdata = {};
-        },
-      });
     </script>
   </body>
 </html>

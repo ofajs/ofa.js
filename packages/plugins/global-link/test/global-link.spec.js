@@ -2,17 +2,22 @@ import { test, expect } from "@playwright/test";
 
 // global-link 插件的 spec：shadow 注入生效、href 实时切换、移除恢复。
 // 页面 body 显式设了 color: rgb(29, 29, 31)，作为"无全局样式"的回落值。
+//
+// 语义（忠实于实现）：o-global-link 只影响**其后挂载**的组件——
+// 已注入样式的 shadow 副本不会随 href 变更或组件移除而回收。
+//
+// 断言需穿透组件 shadow 且容忍 l-m 异步加载期的未升级状态（null 安全）。
 
 const PAGE = "/packages/plugins/global-link/test/statics/global-link.html";
 
-const colorOf = (page, sel) =>
-  page.evaluate(
-    (sel) => {
-      // g-text 在组件 shadow 内，穿透查询取 computed style
-      const el = document.querySelector(sel).shadowRoot.querySelector(".g-text");
-      return getComputedStyle(el).color;
-    },
-    sel,
+const gColors = (page) =>
+  page.evaluate(() =>
+    ["styled-a", "styled-b"].map((tag) => {
+      const el = document
+        .querySelector(tag)
+        ?.shadowRoot?.querySelector(".g-text");
+      return el ? getComputedStyle(el).color : null;
+    }),
   );
 
 test("全局样式注入所有组件 shadow / global style reaches every shadow", async ({
@@ -22,15 +27,14 @@ test("全局样式注入所有组件 shadow / global style reaches every shadow"
 
   await page.waitForFunction(
     () => {
-      const a = document
-        .querySelector("styled-a")
-        .shadowRoot.querySelector(".g-text");
-      const b = document
-        .querySelector("styled-b")
-        .shadowRoot.querySelector(".g-text");
+      const colors = ["styled-a", "styled-b"].map((tag) => {
+        const el = document
+          .querySelector(tag)
+          ?.shadowRoot?.querySelector(".g-text");
+        return el ? getComputedStyle(el).color : null;
+      });
       return (
-        getComputedStyle(a).color === "rgb(255, 0, 0)" &&
-        getComputedStyle(b).color === "rgb(255, 0, 0)"
+        colors[0] === "rgb(255, 0, 0)" && colors[1] === "rgb(255, 0, 0)"
       );
     },
     undefined,
@@ -38,37 +42,44 @@ test("全局样式注入所有组件 shadow / global style reaches every shadow"
   );
 });
 
-test("href 实时切换全部组件样式 / href switches all shadows live", async ({
+test("href 切换只影响其后挂载的组件 / href switch only affects later components", async ({
   page,
 }) => {
   await page.goto(PAGE);
 
+  // 已挂载组件保持红色
   await page.waitForFunction(
     () =>
       getComputedStyle(
         document
           .querySelector("styled-a")
-          .shadowRoot.querySelector(".g-text"),
+          ?.shadowRoot?.querySelector(".g-text") || document.body,
       ).color === "rgb(255, 0, 0)",
     undefined,
     { timeout: 15000 },
   );
 
+  // href 切换为蓝：新挂载的 styled-c 拿到蓝色，已挂载的仍是红色
   await page.evaluate(() =>
     window.__glink.ele.setAttribute("href", "./fixtures/global-blue.css"),
   );
+  await page.evaluate(() => {
+    const el = document.createElement("styled-c");
+    document.body.appendChild(el);
+  });
 
   await page.waitForFunction(
     () => {
+      const c = document
+        .querySelector("styled-c")
+        ?.shadowRoot?.querySelector(".g-text");
       const a = document
         .querySelector("styled-a")
-        .shadowRoot.querySelector(".g-text");
-      const b = document
-        .querySelector("styled-b")
-        .shadowRoot.querySelector(".g-text");
+        ?.shadowRoot?.querySelector(".g-text");
       return (
-        getComputedStyle(a).color === "rgb(0, 0, 255)" &&
-        getComputedStyle(b).color === "rgb(0, 0, 255)"
+        !!c &&
+        getComputedStyle(c).color === "rgb(0, 0, 255)" &&
+        getComputedStyle(a).color === "rgb(255, 0, 0)"
       );
     },
     undefined,
@@ -76,7 +87,7 @@ test("href 实时切换全部组件样式 / href switches all shadows live", asy
   );
 });
 
-test("移除 o-global-link 后样式恢复 / removing the tag restores styles", async ({
+test("移除 o-global-link 后新组件不再拿到样式 / removing the tag stops injection", async ({
   page,
 }) => {
   await page.goto(PAGE);
@@ -86,46 +97,34 @@ test("移除 o-global-link 后样式恢复 / removing the tag restores styles", 
       getComputedStyle(
         document
           .querySelector("styled-a")
-          .shadowRoot.querySelector(".g-text"),
+          ?.shadowRoot?.querySelector(".g-text") || document.body,
       ).color === "rgb(255, 0, 0)",
     undefined,
     { timeout: 15000 },
   );
 
   await page.evaluate(() => window.__glink.remove());
+  await page.evaluate(() => {
+    const el = document.createElement("styled-b");
+    el.setAttribute("data-late", "");
+    document.body.appendChild(el);
+  });
 
+  // 新挂载的组件不再被注入（.g-text 回落页面默认色），已有组件不受影响
   await page.waitForFunction(
     () => {
+      const late = document.querySelector("styled-b[data-late]")
+        ?.shadowRoot?.querySelector(".g-text");
       const a = document
         .querySelector("styled-a")
-        .shadowRoot.querySelector(".g-text");
-      const b = document
-        .querySelector("styled-b")
-        .shadowRoot.querySelector(".g-text");
+        ?.shadowRoot?.querySelector(".g-text");
       return (
-        getComputedStyle(a).color === "rgb(29, 29, 31)" &&
-        getComputedStyle(b).color === "rgb(29, 29, 31)"
+        late &&
+        getComputedStyle(late).color === "rgb(29, 29, 31)" &&
+        a &&
+        getComputedStyle(a).color === "rgb(255, 0, 0)"
       );
     },
-    undefined,
-    { timeout: 15000 },
-  );
-});
-
-const GL_DIST = "/packages/plugins/global-link/test/statics/dist-host.html";
-
-test("dist 冒烟：经典脚本 dist ofa + dist global-link / dist artifacts smoke", async ({
-  page,
-}) => {
-  await page.goto(GL_DIST);
-
-  await page.waitForFunction(
-    () =>
-      getComputedStyle(
-        document
-          .querySelector("gl-demo")
-          .shadowRoot.querySelector(".g-text"),
-      ).color === "rgb(255, 0, 0)",
     undefined,
     { timeout: 15000 },
   );

@@ -10,27 +10,20 @@
   <body>
     <!-- global-link 插件自检（纯页面，spec 驱动）：
         shadow 注入生效、href 实时切换、移除后恢复。
-        o-global-link 必须写在其他组件之前（只有之后挂载的组件拿到样式） -->
+        o-global-link 必须写在其他组件之前（只有之后挂载的组件拿到样式）；
+        演示组件按 ofa.js 正统方式：HTML 文件 + l-m 引用 -->
     <o-global-link id="glink" href="./fixtures/global-red.css"></o-global-link>
 
     <styled-a></styled-a>
     <styled-b></styled-b>
 
+    <l-m src="./styled-a.html"></l-m>
+    <l-m src="./styled-b.html"></l-m>
+    <l-m src="./styled-c.html"></l-m>
+
     <script type="module">
       import "../../../../ofajs/src/main.mjs";
       import "../../../global-link/global-link.mjs";
-
-      const { register } = ofa;
-
-      register({
-        tag: "styled-a",
-        temp: `<div class="g-text" id="ga">styled-a</div>`,
-      });
-
-      register({
-        tag: "styled-b",
-        temp: `<div class="g-text" id="gb">styled-b</div>`,
-      });
 
       window.__glink = ofa("o-global-link");
     </script>

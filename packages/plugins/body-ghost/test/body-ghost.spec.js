@@ -39,7 +39,7 @@ test("mapping 载体挂到 body，内容传送进其 shadow / mapping mounts on 
   ).toBe("none");
 });
 
-test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubble to original position", async ({
+test("ghost 内容交互在原组件作用域生效 / ghost content interactions run in host scope", async ({
   page,
 }) => {
   await page.goto(PAGE);
@@ -47,6 +47,7 @@ test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubb
   const ghostBtn = page.locator("#ghost-btn");
   await ghostBtn.waitFor({ state: "visible", timeout: 15000 });
 
+  // on:click 绑定在原组件作用域（ghost-wrap 的 data），传送后依然生效
   await ghostBtn.click();
   await page.waitForFunction(
     () =>
@@ -57,8 +58,19 @@ test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubb
     { timeout: 15000 },
   );
 
-  // wrap 内的按钮同样可计数（同一组件实例）
-  await page.locator("#wrap-box button").click();
+  // 事件在真实 DOM 位置（body 下的 mapping）正常冒泡
+  await page.evaluate(() => {
+    window.__bubbleAtBody = false;
+    document.body.addEventListener(
+      "click",
+      () => {
+        window.__bubbleAtBody = true;
+      },
+      { once: true },
+    );
+  });
+
+  await ghostBtn.click();
   await page.waitForFunction(
     () =>
       document
@@ -67,6 +79,10 @@ test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubb
     undefined,
     { timeout: 15000 },
   );
+
+  expect(
+    await page.evaluate(() => window.__bubbleAtBody),
+  ).toBe(true);
 });
 
 test("宿主移除后 mapping 清理 / mapping removed with host", async ({

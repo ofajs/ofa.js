@@ -104,9 +104,9 @@ test("dist 产物冒烟：经典脚本 dist ofa + dist 插件 / dist artifacts s
   const target = page.locator("#target"); // dist 页的 #target 在光 DOM
   await target.waitFor({ state: "visible", timeout: 15000 });
 
-  // 初始收集：文本 + checkbox（未勾选时无 agree 键）
+  // 初始收集：文本值 + checkbox（未勾选也以空数组形态收集）
   expect(await page.evaluate(() => window.__initialData)).toBe(
-    '{"a":"I am A"}',
+    '{"a":"I am A","agree":[]}',
   );
 
   // 用户输入 → data

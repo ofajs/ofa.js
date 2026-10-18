@@ -15,8 +15,10 @@ version: 5.0.0
 2. 不要套用 Vue/React/Angular 习惯；ofa.js 无需 Node.js/Webpack/构建
 3. 资源地址先看下方速查表；细节与 monorepo 源码引用见
    [resources.md](./references/resources.md)
-4. 示例项目可参考仓库内 `packages/router/test/router-demo/`（o-app + o-router）
-   与 `packages/scsr/test/scsr-demo/`（scsr 真实路径）
+4. 需要完整可运行的文件骨架时，以 [examples.md](./references/examples.md)
+   的四个示例为基准模板；更大的综合案例在仓库内
+   `packages/router/test/router-demo/`（o-app + o-router）与
+   `packages/scsr/test/scsr-demo/`（scsr 真实路径）
 
 ## 资源速查
 
@@ -91,4 +93,5 @@ version: 5.0.0
 | [state.md](./references/state.md) | `$.stanz()` 状态管理（挂载/清理约定）、o-provider/o-consumer/o-root-provider、getProvider/dispatch |
 | [api.md](./references/api.md) | `$` 包装对象全参考：获取/实例化、树导航、子元素操作、text/html/attr/css/classList/data、on/one/emit/off、o-app/o-page 成员、stanz 数据特征、extend、formData 插件 |
 | [pitfalls.md](./references/pitfalls.md) | 报错对照全集与排查口诀：ReferenceError/SyntaxError/TypeError 三类渲染崩溃、保留名冲突、布尔属性、包装对象与 .ele 边界、hash URL 格式、模块缓存 |
+| [examples.md](./references/examples.md) | 四个完整可运行示例（文件内容完整给出）：最小应用、自定义组件、待办清单（列表+双向绑定）、路由应用 |
 | [resources.md](./references/resources.md) | 版本线对照（v5 分支 / v4 npm）、CDN 地址与 `@refs/heads/v5` 原因、dist 产物、monorepo 源码引用、加载顺序 |

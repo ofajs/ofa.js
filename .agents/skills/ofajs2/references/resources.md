@@ -54,20 +54,19 @@ jsdelivr 的 `@` 后**先按 semver/tag 解析**再回退分支；分支名 `v5`
 ## 加载顺序
 
 ```html
-<!-- ESM：import 顺序即加载顺序 -->
+<!-- 浏览器直接可用：CDN 全路径（import 顺序即加载顺序） -->
 <script type="module">
   import "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
-</script>
-<!-- 或页面内模块 -->
-<script type="module">
-  import "ofajs";
-  import "router";
 </script>
 
 <!-- 经典脚本：书写顺序 -->
 <script src=".../dist/ofa.min.js"></script>
 <script src=".../packages/router/dist/router.min.js"></script>
 ```
+
+npm + 打包器场景的包名是 `ofa.js` / `router` / `scsr`（`import "ofa.js"` +
+`import "router"`）；裸说明符在浏览器需要 import map 或打包器，纯 CDN 页面
+一律写全路径。
 
 ## monorepo 源码引用（本仓开发）
 

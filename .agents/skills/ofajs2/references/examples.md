@@ -1,8 +1,8 @@
 # 完整示例（可直接保存运行）
 
-三个由小到大的完整例子，文件内容完整给出，存为同名文件、任意静态服务器
-（或直接双击打开 index.html，模块加载走 CDN）即可运行。语法细节见
-[syntax.md](./syntax.md)；仓库内的综合案例：`packages/router/test/router-demo/`
+三个由小到大的完整例子加一个路由应用，文件内容完整给出，需通过静态服务器
+访问（`file://` 下模块脚本与页面 fetch 会被 CORS 拦截，双击打不开）。语法
+细节见 [syntax.md](./syntax.md)；仓库内的综合案例：`packages/router/test/router-demo/`
 （o-app + o-router）与 `packages/scsr/test/scsr-demo/`（scsr 真实路径多页应用）。
 
 ## 例一：最小应用（入口 + 页面模块）
@@ -146,7 +146,7 @@ page.html 的模板与逻辑：
 
   <h2>待办（{{todos.length}}）</h2>
   <input sync:value="newItem" placeholder="输入待办，回车添加"
-         on:keydown="$host.addOnEnter($event)" />
+         on:keydown="addOnEnter($event)" />
   <ul>
     <o-fill :value="todos" fill-key="id">
       <li class:done="$data.done">
@@ -235,8 +235,8 @@ export const pageAnime = {
 ```html
 <template page>
   <h1>首页</h1>
-  <a olink href="./pages/detail.html?id=42">去详情（带 query）</a>
-  <button on:click="goto('./pages/detail.html?id=42')">goto 详情</button>
+  <a olink href="./detail.html?id=42">去详情（带 query）</a>
+  <button on:click="goto('./detail.html?id=42')">goto 详情</button>
 
   <script>
     export default async () => ({ data: {} });

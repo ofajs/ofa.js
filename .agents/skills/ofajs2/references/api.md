@@ -25,8 +25,9 @@ const $obj = $({ tag: "div", text: "hi" });         // 对象描述 → 元素�
 
 | 场景 | ✅ 正确 | ❌ 错误 |
 |------|---------|---------|
-| ofa.js 自己的属性/方法（`.src` `.data` `.text` `.html` `.on` `.app`） | 直接访问 | — |
+| ofa.js 自己的属性/方法（`.src` `.text` `.html` `.on` `.app`） | 直接访问 | — |
 | 浏览器原生属性（`.shadowRoot` `.scrollTop` `.querySelector`） | `el.ele.shadowRoot` | `el.shadowRoot`（undefined） |
+| 组件/页面的 data 字段 | `el.count`（字段是实例上的直接属性） | `el.data.count`（`.data` 是 dataset 映射，与原生一致，别用来读组件数据） |
 | shadow 查询 | `this.shadow.$("#id")` | `this.shadow.querySelector("#id")` |
 | 全局获取元素 | `$("#id")` | `document.querySelector` 返回原生元素，无增强方法 |
 | 原生属性读写 | `$("#target").ele.scrollTop = x` | 直接在包装对象上读写 |
@@ -155,10 +156,10 @@ $.fn.color.always = true;
 
 ## formData（可选插件）
 
-v5 中 formData 不在默认构建里，需显式引入插件：
+v5 中 formData 不在默认构建与 dist 里，是独立的可选插件：
 
 ```javascript
-import { formData } from "xhear/src/formdata.mjs"; // 可选插件，不在默认构建/dist 内
+import { formData } from "xhear/src/formdata.mjs"; // 仅 npm/monorepo 源码场景
 
 const data = formData(this.shadow);           // 收集容器内全部表单项（传 $ 实例）
 const data2 = formData($("#myForm"), ".use-it"); // 只收集带 .use-it 的表单项
@@ -167,6 +168,10 @@ data.username;        // 读
 data.username = "Yao"; // 写 → 相关表单元素自动更新（双向）
 data.revoke();        // 不再需要时释放绑定
 ```
+
+**适用前提**：该导入只在 npm / monorepo 源码场景可用——插件会 import 框架
+内部模块，独立从 CDN 引入会拉起**第二份 stanz 实例**（与页面的框架实例
+分裂）。dist/CDN 经典用法暂无 formData。
 
 自定义表单组件接入：暴露 `value` 属性并设置 `name` attribute。
 checkbox 聚合成数组、select 多选、radio/file 均有处理。

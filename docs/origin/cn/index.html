@@ -4,23 +4,23 @@
   docs/website/cn/index.html。
 -->
 <template page>
-  <link rel="stylesheet" href="../../website/styles/site.css" />
-  <l-m src="../../website/components/site-shell.html"></l-m>
-  <l-m src="../../website/components/demo-counter.html"></l-m>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <l-m src="{{SITE}}/components/site-shell.html"></l-m>
+  <l-m src="{{SITE}}/components/demo-counter.html"></l-m>
 
   <site-shell
     attr:label-nav="site.shell.actions.nav"
-    attr:label-features="site.shell.nav.features"
-    attr:label-demo="site.shell.nav.demo"
-    attr:label-start="site.shell.nav.start"
-    attr:label-ecosystem="site.shell.nav.ecosystem"
+    attr:label-tutorial="site.shell.nav.tutorial"
     attr:label-docs="site.shell.nav.docs"
+    attr:label-home="site.shell.actions.home"
     attr:label-github="site.shell.actions.github"
     attr:label-github-repo="site.shell.actions.githubRepo"
     attr:label-cta="site.shell.actions.cta"
     attr:label-menu="site.shell.actions.menu"
-    attr:label-top="site.shell.actions.top"
     attr:label-languages="site.shell.actions.languages"
+    attr:home-url="navUrls.home"
+    attr:tutorial-url="navUrls.tutorial"
+    attr:languages-url="navUrls.languages"
     attr:docs-url="site.urls.docs"
     attr:footer-tagline="site.shell.footer.tagline"
     attr:footer-resources="site.shell.footer.resources"
@@ -692,8 +692,9 @@
   </div>
 
   <script>
-    import { createLandingPage } from "../../website/content/page-runtime.mjs";
+    import { createLandingPage } from "{{SITE}}/content/page-runtime.mjs";
 
-    export default (args) => createLandingPage(args);
+    export default (args) =>
+      createLandingPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
   </script>
 </template>

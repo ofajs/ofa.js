@@ -9,7 +9,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="{{TITLE}}" />
     <meta property="og:description" content="{{DESCRIPTION}}" />
-    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="{{SITE}}/assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <style>
       html,
@@ -47,7 +47,7 @@
       页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
       收编为 o-page，站内跳转使用真实路径。
     -->
-    <o-app src="../app.mjs">
+    <o-app src="{{SITE}}/app.mjs">
       <template page>
 {{PAGE_CONTENT}}
       </template>
@@ -55,6 +55,6 @@
 
     <noscript>{{NOSCRIPT}}</noscript>
 
-    <script type="module" src="../boot.js"></script>
+    <script type="module" src="{{SITE}}/boot.js"></script>
   </body>
 </html>

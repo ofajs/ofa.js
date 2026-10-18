@@ -56,6 +56,22 @@ const fill = (template, values) =>
     return values[key];
   });
 
+const walkFiles = (dir, base = "") => {
+  const result = [];
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const rel = base ? `${base}/${entry.name}` : entry.name;
+
+    if (entry.isDirectory()) {
+      result.push(...walkFiles(path.join(dir, entry.name), rel));
+    } else if (entry.isFile()) {
+      result.push(rel);
+    }
+  }
+
+  return result;
+};
+
 if (!fs.existsSync(originRoot)) {
   fail(`找不到语言源目录：${path.relative(root, originRoot)}`);
 }
@@ -100,8 +116,8 @@ const locales = localeDirs.map((name) => {
 
 locales.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 
-const localeIndexTemplate = fs.readFileSync(
-  path.join(templateRoot, "locale-index.html"),
+const localePageTemplate = fs.readFileSync(
+  path.join(templateRoot, "locale-page.html"),
   "utf8",
 );
 const rootIndexTemplate = fs.readFileSync(
@@ -137,7 +153,7 @@ for (const oldName of previousLocales) {
 }
 
 for (const locale of locales) {
-  const { name, dir, meta } = locale;
+  const { name, dir, meta, site } = locale;
   const outDir = path.resolve(websiteRoot, name);
 
   if (!outDir.startsWith(websiteRoot + path.sep)) {
@@ -148,37 +164,79 @@ for (const locale of locales) {
   fs.mkdirSync(outDir, { recursive: true });
   fs.cpSync(dir, outDir, { recursive: true });
 
-  // 源文件相对 docs/origin/<locale> 写成 ../../website/...，这样在仓库里
-  // 直接预览 origin 也能命中共享资源；构建产物改写为 ../...，使
-  // docs/website 无论作为站点根还是 docs 的子目录部署都能正确解析。
-  // 源 index.html 是页面模块（template[page]），构建时覆盖为完整 SCSR 文档。
-  const pagePath = path.join(outDir, "index.html");
-  const pageSource = fs.readFileSync(pagePath, "utf8");
-  const openMatch = pageSource.match(/<template\s+page\s*>/);
-  const closeIndex = pageSource.lastIndexOf("</template>");
-  if (!openMatch || closeIndex <= openMatch.index) {
-    fail(`docs/origin/${name}/index.html 缺少完整的 <template page>`);
+  const pages = site.pages || {};
+  let pageCount = 0;
+
+  for (const rel of walkFiles(dir)) {
+    if (!/\.html?$/i.test(rel)) continue;
+
+    const sourcePath = path.join(dir, rel);
+    const pageSource = fs.readFileSync(sourcePath, "utf8");
+
+    if (!/<template\s+page\s*>/.test(pageSource)) {
+      if (rel === "index.html") {
+        fail(`docs/origin/${name}/index.html 缺少 <template page>`);
+      }
+      continue;
+    }
+
+    const openMatch = pageSource.match(/<template\s+page\s*>/);
+    const closeIndex = pageSource.lastIndexOf("</template>");
+    if (!openMatch || closeIndex <= openMatch.index) {
+      fail(`docs/origin/${name}/${rel} 缺少完整的 <template page>`);
+    }
+
+    const pageMeta = pages[rel] || (rel === "index.html" ? meta : null);
+    if (!pageMeta) {
+      fail(
+        `docs/origin/${name}/site.json 缺少 pages["${rel}"]（需要 title/description）`,
+      );
+    }
+
+    const title = pageMeta.title || meta.title;
+    const description = pageMeta.description || meta.description;
+
+    if (!title || !description) {
+      fail(`docs/origin/${name}/site.json 中 ${rel} 的 title/description 为空`);
+    }
+
+    // 页面所在目录到 docs/website 根目录的相对前缀：
+    //   index.html           -> ..
+    //   tutorial/usage.html   -> ../..
+    const dirRel = path.posix.dirname(rel);
+    const depth = dirRel === "." ? 0 : dirRel.split("/").length;
+    const sitePrefix = "../".repeat(depth + 1).replace(/\/$/, "");
+    const localePrefix =
+      depth === 0 ? "." : "../".repeat(depth).replace(/\/$/, "");
+
+    // 源页面统一用 {{SITE}} 指向共享资源，这里替换成当前页面深度对应的前缀。
+    const pageContent = pageSource
+      .slice(openMatch.index + openMatch[0].length, closeIndex)
+      .replaceAll("{{SITE}}", sitePrefix)
+      .replaceAll("{{LOCALE}}", localePrefix);
+
+    const output = fill(localePageTemplate, {
+      LANG: escapeHtml(meta.lang),
+      TITLE: escapeHtml(title),
+      DESCRIPTION: escapeHtml(description),
+      NOSCRIPT: escapeHtml(meta.noscript || "This page requires JavaScript."),
+      SITE: sitePrefix,
+      LOCALE: localePrefix,
+      PAGE_CONTENT: pageContent,
+    });
+
+    const outputPath = path.join(outDir, ...rel.split("/"));
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, output);
+    pageCount += 1;
   }
 
-  // SCSR：页面内容直接内联进 index.html 的 template[page]，当前 HTML
-  // 既是可访问文档，也是 scsr 收编的页面模块源文件。
-  const pageContent = pageSource
-    .slice(openMatch.index + openMatch[0].length, closeIndex)
-    .replaceAll("../../website/", "../");
-
-  const index = fill(localeIndexTemplate, {
-    LANG: escapeHtml(meta.lang),
-    TITLE: escapeHtml(meta.title),
-    DESCRIPTION: escapeHtml(meta.description),
-    NOSCRIPT: escapeHtml(meta.noscript || "This page requires JavaScript."),
-    PAGE_CONTENT: pageContent,
-  });
-
-  // 用完整 SCSR 文档覆盖拷贝过来的页面模块源文件。
-  fs.writeFileSync(pagePath, index);
+  if (!pageCount) {
+    fail(`docs/origin/${name} 没有可构建的页面`);
+  }
 
   console.log(
-    `[build:website] ${name}: docs/origin/${name}/index.html → docs/website/${name}/index.html（SCSR）`,
+    `[build:website] ${name}: ${pageCount} 个 SCSR 页面 → docs/website/${name}/`,
   );
 }
 

@@ -14,12 +14,36 @@ let uid = 100;
 export const CDN_URL =
   "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
 
-export const createLandingPage = async ({ url }) => {
-  const res = await fetch(new URL("./site.json", url));
+const loadSite = async (url, sitePath = "./site.json") => {
+  const res = await fetch(new URL(sitePath, url));
+
   if (!res.ok) {
     throw new Error("Failed to load site.json: " + res.status);
   }
-  const site = await res.json();
+
+  return res.json();
+};
+
+const getNavUrls = (url, tutorial = false) => {
+  if (tutorial) {
+    return {
+      home: new URL("../", url).href,
+      tutorial: new URL("./", url).href,
+      languages: new URL("../../", url).href,
+      usage: new URL("./usage.html", url).href,
+      template: new URL("./template.html", url).href,
+    };
+  }
+
+  return {
+    home: new URL("./", url).href,
+    tutorial: new URL("./tutorial/", url).href,
+    languages: new URL("../", url).href,
+  };
+};
+
+export const createLandingPage = async ({ url, sitePath }) => {
+  const site = await loadSite(url, sitePath);
 
   const todos = site.demo.todos.map((text, index) => ({
     id: index + 1,
@@ -30,6 +54,7 @@ export const createLandingPage = async ({ url }) => {
   return {
     data: {
       site,
+      navUrls: getNavUrls(url),
       toastVisible: false,
       toastText: "",
       draft: "",
@@ -47,6 +72,13 @@ export const createLandingPage = async ({ url }) => {
     },
 
     proto: {
+      jump(id) {
+        const target = this.ele.shadowRoot?.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      },
+
       addTodo() {
         const text = this.draft.trim();
         if (!text) return;
@@ -140,6 +172,20 @@ export const createLandingPage = async ({ url }) => {
     detached() {
       if (this._observer) this._observer.disconnect();
       clearTimeout(this._toastTimer);
+    },
+  };
+};
+
+export const createTutorialPage = async ({ url, sitePath }) => {
+  const site = await loadSite(url, sitePath);
+
+  return {
+    data: {
+      site,
+      navUrls: getNavUrls(url, true),
+    },
+    ready() {
+      window.scrollTo(0, 0);
     },
   };
 };

@@ -20,33 +20,25 @@
 
   <div class="nav-wrap">
     <nav class="nav" attr:aria-label="labelNav">
-      <button class="brand" type="button" on:click="jump('top')" attr:aria-label="labelTop">
+      <a class="brand" attr:href="homeUrl" attr:aria-label="labelHome">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
           <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
         </svg>
         <span class="wordmark">ofa<span>.js</span></span>
         <span class="ver">v5</span>
-      </button>
+      </a>
 
       <div class="nav-links" class:open="menuOpen">
-        <button class="nav-link" type="button" on:click="jump('features')">
-          {{labelFeatures}}
-        </button>
-        <button class="nav-link" type="button" on:click="jump('demo')">
-          {{labelDemo}}
-        </button>
-        <button class="nav-link" type="button" on:click="jump('start')">
-          {{labelStart}}
-        </button>
-        <button class="nav-link" type="button" on:click="jump('ecosystem')">
-          {{labelEcosystem}}
-        </button>
+        <a class="nav-link" olink attr:href="tutorialUrl" on:click="closeMenu">
+          {{labelTutorial}}
+        </a>
         <a
           class="nav-link"
           attr:href="docsUrl"
           target="_blank"
           rel="noreferrer"
+          on:click="closeMenu"
         >
           {{labelDocs}}
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -68,12 +60,12 @@
           </svg>
           <span>{{labelGithub}}</span>
         </a>
-        <button class="nav-cta" type="button" on:click="jump('start')">
+        <a class="nav-cta" olink attr:href="tutorialUrl" on:click="closeMenu">
           {{labelCta}}
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6"></path>
           </svg>
-        </button>
+        </a>
         <button
           class="nav-burger"
           class:open="menuOpen"
@@ -129,7 +121,7 @@
 
     <div class="footer-bottom">
       <span>© 2018–2026 ofa.js · MIT License</span>
-      <a class="lang-link" href="../" attr:aria-label="labelLanguages">
+      <a class="lang-link" attr:href="languagesUrl" attr:aria-label="labelLanguages">
         <span aria-hidden="true">◎</span>{{labelLanguages}}
       </a>
       <span class="made"><i></i>{{footerNote}}</span>
@@ -141,17 +133,17 @@
       tag: "site-shell",
       attrs: {
         labelNav: "Main navigation",
-        labelFeatures: "Features",
-        labelDemo: "Live demo",
-        labelStart: "Quick start",
-        labelEcosystem: "Ecosystem",
+        labelHome: "Home",
+        labelTutorial: "Tutorial",
         labelDocs: "Docs",
         labelGithub: "GitHub",
         labelGithubRepo: "GitHub repository",
-        labelCta: "Get started",
+        labelCta: "Start learning",
         labelMenu: "Toggle menu",
-        labelTop: "Back to top",
         labelLanguages: "Languages",
+        homeUrl: "./",
+        tutorialUrl: "./tutorial/",
+        languagesUrl: "../",
         docsUrl: "https://ofajs.com/en/index.html",
         footerTagline:
           "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
@@ -166,15 +158,11 @@
         menuOpen: false,
       },
       proto: {
-        jump(id) {
-          this.menuOpen = false;
-          const target = this.ele.querySelector("#" + id);
-          if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        },
         toggleMenu() {
           this.menuOpen = !this.menuOpen;
+        },
+        closeMenu() {
+          this.menuOpen = false;
         },
       },
       attached() {

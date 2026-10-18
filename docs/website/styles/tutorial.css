@@ -1,0 +1,254 @@
+/*
+ * 教程模式的内容排版（所有语言共用）。
+ * 顶部/底部由 site-shell 提供，左侧文章列表由 tutorial-layout 提供。
+ */
+
+.doc {
+  max-width: 800px;
+  min-width: 0;
+}
+
+.doc h1 {
+  margin: 0 0 18px;
+  font-size: clamp(32px, 4.6vw, 46px);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.doc h2 {
+  margin: 46px 0 14px;
+  font-size: 23px;
+  font-weight: 680;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  scroll-margin-top: 96px;
+}
+
+.doc h3 {
+  margin: 30px 0 10px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  scroll-margin-top: 96px;
+}
+
+.doc p {
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  line-height: 1.9;
+  color: #aab6cc;
+}
+
+.doc strong {
+  color: #e7ecf7;
+  font-weight: 600;
+}
+
+.doc a {
+  color: #c4b5fd;
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 181, 253, 0.35);
+  text-underline-offset: 3px;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+.doc a:hover {
+  color: #e9d5ff;
+  text-decoration-color: rgba(233, 213, 255, 0.7);
+}
+
+.doc .doc-kicker {
+  margin: 0 0 14px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.doc .doc-lead {
+  max-width: 660px;
+  margin-bottom: 30px;
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: #9aa6bd;
+}
+
+.doc ul,
+.doc ol {
+  margin: 0 0 18px;
+  padding-left: 22px;
+}
+
+.doc li {
+  margin: 7px 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #aab6cc;
+}
+
+.doc li::marker {
+  color: #6f7c95;
+}
+
+.doc code {
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: #c4b5fd;
+}
+
+.doc pre {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0b0f1a, #080b13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  scrollbar-width: thin;
+}
+
+.doc pre code {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #c9d3e8;
+  white-space: pre;
+}
+
+.doc .doc-note {
+  margin: 22px 0;
+  padding: 15px 18px;
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-left: 2px solid var(--cyan);
+  border-radius: 10px;
+  background: rgba(34, 211, 238, 0.05);
+  font-size: 13px;
+  line-height: 1.8;
+  color: #9fb4c9;
+}
+
+.doc .doc-note strong {
+  color: #d7f7ff;
+}
+
+.doc hr {
+  margin: 40px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.doc .doc-end {
+  margin-top: 44px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: #6f7c95;
+}
+
+.doc .doc-end a {
+  color: #c4b5fd;
+}
+
+/* 教程首页的文章卡片 */
+
+.tutorial-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 34px 0 10px;
+}
+
+.tutorial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045),
+    rgba(255, 255, 255, 0.012)
+  );
+  text-decoration: none;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease;
+}
+
+.tutorial-card:hover {
+  border-color: rgba(124, 92, 255, 0.45);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-2px);
+}
+
+.tutorial-card .num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--violet);
+}
+
+.tutorial-card h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  color: #e7ecf7;
+}
+
+.tutorial-card p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #8b97b0;
+}
+
+.tutorial-card .more {
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 11.5px;
+  color: #5eead4;
+}
+
+@media (max-width: 640px) {
+  .doc h1 {
+    font-size: 34px;
+  }
+
+  .doc h2 {
+    margin-top: 36px;
+    font-size: 20px;
+  }
+
+  .doc p {
+    font-size: 14px;
+  }
+
+  .doc pre {
+    padding: 13px 14px;
+    border-radius: 10px;
+  }
+
+  .doc pre code {
+    font-size: 11px;
+  }
+
+  .tutorial-cards {
+    grid-template-columns: 1fr;
+  }
+}

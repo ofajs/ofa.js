@@ -2,21 +2,36 @@ import { test, expect } from "@playwright/test";
 
 // formdata 插件的 spec：覆盖源码形态（插件与 o-if/o-fill 协作）与
 // dist 形态（经典脚本 dist ofa.js + dist 插件，挂全局 $ 的单实例契约）。
+//
+// 注意：#target 位于 formdata-demo 的 shadow 内，断言必须显式穿透
+// shadowRoot（裸 document.querySelector 不跨 shadow 边界）。
 
 const SRC = "/packages/plugins/formdata/test/statics/formdata.html";
 const DIST = "/packages/plugins/formdata/test/statics/dist-host.html";
+
+/** 穿透 shadow 读取 #target 的文本（未就绪时返回 null，供 waitForFunction 轮询） */
+const targetText = (page) =>
+  page.evaluate(() => {
+    const t = document
+      .querySelector("formdata-demo")
+      ?.shadowRoot?.querySelector("#target");
+    return t ? t.textContent.trim() : null;
+  });
 
 test("源码形态：键随 o-if 显隐与 fill 项增删跟随 / source mode tracks keys", async ({
   page,
 }) => {
   await page.goto(SRC);
-  const target = page.locator("#target");
-  await target.waitFor({ state: "visible", timeout: 30000 });
+  await page
+    .locator("formdata-demo")
+    .waitFor({ state: "visible", timeout: 30000 });
 
   // 初始：常驻 a + fill 项 K1/K2
   await page.waitForFunction(
     () =>
-      document.querySelector("#target").textContent.trim() ===
+      document
+        .querySelector("formdata-demo")
+        ?.shadowRoot?.querySelector("#target")?.textContent?.trim() ===
       '{"a":"I am A","K1":"1","K2":"2"}',
     undefined,
     { timeout: 15000 },
@@ -27,8 +42,10 @@ test("源码形态：键随 o-if 显隐与 fill 项增删跟随 / source mode tr
   await page.waitForFunction(
     () =>
       document
-        .querySelector("#target")
-        .textContent.startsWith('{"a":"I am A","K1":"1","K2":"2","b"'),
+        .querySelector("formdata-demo")
+        ?.shadowRoot?.querySelector("#target")?.textContent?.startsWith(
+          '{"a":"I am A","K1":"1","K2":"2","b"',
+        ),
     undefined,
     { timeout: 15000 },
   );
@@ -36,7 +53,9 @@ test("源码形态：键随 o-if 显隐与 fill 项增删跟随 / source mode tr
   await page.evaluate(() => window.$("formdata-demo").count++);
   await page.waitForFunction(
     () =>
-      document.querySelector("#target").textContent.trim() ===
+      document
+        .querySelector("formdata-demo")
+        ?.shadowRoot?.querySelector("#target")?.textContent?.trim() ===
       '{"a":"I am A","K1":"1","K2":"2"}',
     undefined,
     { timeout: 15000 },
@@ -45,7 +64,12 @@ test("源码形态：键随 o-if 显隐与 fill 项增删跟随 / source mode tr
   // fill 项增加 → K3 出现
   await page.evaluate(() => window.$("formdata-demo").addItem());
   await page.waitForFunction(
-    () => document.querySelector("#target").textContent.includes('"K3":"3"'),
+    () =>
+      document
+        .querySelector("formdata-demo")
+        ?.shadowRoot?.querySelector("#target")?.textContent?.includes(
+          '"K3":"3"',
+        ),
     undefined,
     { timeout: 15000 },
   );
@@ -55,7 +79,11 @@ test("源码形态：键随 o-if 显隐与 fill 项增删跟随 / source mode tr
   await input.fill("I am A2");
   await page.waitForFunction(
     () =>
-      document.querySelector("#target").textContent.startsWith('{"a":"I am A2"'),
+      document
+        .querySelector("formdata-demo")
+        ?.shadowRoot?.querySelector("#target")?.textContent?.startsWith(
+          '{"a":"I am A2"',
+        ),
     undefined,
     { timeout: 15000 },
   );
@@ -66,14 +94,14 @@ test("dist 产物冒烟：经典脚本 dist ofa + dist 插件 / dist artifacts s
 }) => {
   await page.goto(DIST);
 
-  // UMD 全局就位
+  // 插件把 formData 注册到了 $.fn 上
   await page.waitForFunction(
-    () => typeof window.ofaFormData?.formData === "function",
+    () => typeof window.$.fn.formData === "function",
     undefined,
     { timeout: 15000 },
   );
 
-  const target = page.locator("#target");
+  const target = page.locator("#target"); // dist 页的 #target 在光 DOM
   await target.waitFor({ state: "visible", timeout: 15000 });
 
   // 初始收集：文本 + checkbox（未勾选时无 agree 键）
@@ -106,7 +134,9 @@ test("dist 产物冒烟：经典脚本 dist ofa + dist 插件 / dist artifacts s
     { timeout: 15000 },
   );
 
-  // 与 dist ofa 同一份框架实例
+  // 与 dist ofa 同一份框架实例；版本随 bump 演进，只校验形态
   expect(await page.evaluate(() => typeof window.$.stanz)).toBe("function");
-  expect(await page.evaluate(() => window.$.version)).toBe("5.0.0");
+  expect(await page.evaluate(() => /^\d+\.\d+\.\d+$/.test(window.$.version))).toBe(
+    true,
+  );
 });

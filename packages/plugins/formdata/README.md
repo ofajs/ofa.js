@@ -2,18 +2,18 @@
 
 ofa.js 的可选插件：把一个容器内全部表单项的值与一个 **stanz 对象双向绑定**
 ——表单变化实时汇入对象，对象变化实时回填表单。引用才生效，不进 ofa.js
-默认构建。
+默认构建。插件加载后把 `formData` 注册到 `$.fn`，除 `$` 外不新增任何全局。
 
 ## 引入方式
 
 | 场景 | 方式 |
 |------|------|
-| dist 经典脚本（配 dist ofa.js） | `<script src="dist/ofa.min.js"></script>` `<script src="dist/formdata.min.js"></script>`（全局 `ofaFormData.formData`） |
-| dist ESM | `import { formData } from ".../packages/plugins/formdata/dist/formdata.min.mjs"` |
-| monorepo / npm 源码 | `import { formData } from ".../plugins/formdata/formdata.mjs"` |
+| dist 经典脚本（配 dist ofa.js） | `<script src="dist/ofa.min.js"></script>` `<script src="dist/formdata.min.js"></script>` |
+| dist ESM / CDN | `import ".../packages/plugins/formdata/dist/formdata.min.mjs"` |
+| monorepo / npm 源码 | `import ".../plugins/formdata/formdata.mjs"` |
 
 > 必须在 ofa.js 之后加载：插件挂接页面已加载的全局 `$`（`$.stanz` 与页面
-> 框架是同一实例），缺失时直接抛错提示。
+> 框架是同一实例），缺失时直接抛错。
 
 ## 用法
 
@@ -24,8 +24,8 @@ ofa.js 的可选插件：把一个容器内全部表单项的值与一个 **stan
   <script>
     export default {
       attached() {
-        // 收集 shadow 内全部表单项（默认 input,select,textarea）
-        this.fdata = formData(this.shadow);
+        // 容器的 $ 实例直接调用（this.shadow / $("#myForm") 均可）
+        this.fdata = this.shadow.formData();
       },
       detached() {
         this.fdata.revoke();   // 卸载时释放两侧监听
@@ -36,8 +36,8 @@ ofa.js 的可选插件：把一个容器内全部表单项的值与一个 **stan
 ```
 
 ```javascript
-const data = formData($container, "input,select,textarea"); // 自定义选择器
-const data2 = formData($("#myForm"), ".use-it", { wait: 500 }); // 收集防抖
+const data = $("form").formData();                       // 任意容器的 $ 实例
+const data2 = $("#myForm").formData(".use-it", { wait: 500 }); // 自定义选择器与防抖
 
 data.username;          // 读
 data.username = "Yao";  // 写 → 表单元素自动更新（双向）
@@ -53,8 +53,7 @@ data.revoke();          // 释放
 ## API
 
 ```javascript
-formData(el, expr?, opts?)
-// el    容器的 $ 实例（组件 this、this.shadow、$("#myForm") 均可）
+$container.formData(expr?, opts?)
 // expr  表单项选择器，默认 "input,select,textarea"
 // opts  { wait?: number } 收集防抖间隔，默认 200ms
 // 返回  与表单双向同步的 stanz 对象；.revoke() 释放

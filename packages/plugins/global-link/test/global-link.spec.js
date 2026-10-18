@@ -55,7 +55,7 @@ test("href 实时切换全部组件样式 / href switches all shadows live", asy
   );
 
   await page.evaluate(() =>
-    window.__glink.setAttribute("href", "./fixtures/global-blue.css"),
+    window.__glink.ele.setAttribute("href", "./fixtures/global-blue.css"),
   );
 
   await page.waitForFunction(

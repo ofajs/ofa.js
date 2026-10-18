@@ -40,7 +40,8 @@
       test("UMD 包暴露全局 $ 与 ofa / UMD bundle exposes global $ and ofa", async () => {
         assert(typeof window.$ === "function", "window.$ 应存在 / window.$ should exist");
         assert(globalThis.ofa === window.$, "globalThis.ofa 应可用 / globalThis.ofa should exist");
-        assertEqual(window.$.version, "5.0.0", "版本号应正确 / version should match");
+        // 版本号跟随 bump 演进，只校验 semver 形态
+        assert(/^\d+\.\d+\.\d+$/.test(window.$.version), "版本号应正确 / version should match");
       });
 
       test("经典脚本注册的组件可渲染 / component registered via classic script renders", async () => {

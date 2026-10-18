@@ -47,7 +47,7 @@ packages/plugins/
 
 | 插件 | 功能 | 文档 |
 |------|------|------|
-| `formdata/` | 容器表单值 ↔ stanz 对象双向绑定（`formData($container, expr?)`，`revoke()` 释放） | [formdata/README.md](./formdata/README.md) |
+| `formdata/` | 容器表单值 ↔ stanz 对象双向绑定（加载后注册 `$.fn.formData`，`$('容器').formData()` 返回可 `revoke()` 的 stanz） | [formdata/README.md](./formdata/README.md) |
 | `inject-host/` | shadow 内 link/style 收编到宿主根（slot 深层样式穿透；hash 去重、移除回收） | [inject-host/README.md](./inject-host/README.md) |
 | `body-ghost/` | 模板内容传送到 body 末尾渲染，事件沿原位置冒泡 | [body-ghost/README.md](./body-ghost/README.md) |
 | `global-link/` | `<o-global-link href>` 把一份样式表注入所有组件 shadow（⚠️ 污染全局，谨慎使用） | [global-link/README.md](./global-link/README.md) |

@@ -27,11 +27,15 @@ test("mapping 载体挂到 body，内容传送进其 shadow / mapping mounts on 
   expect(state.ghostInMappingShadow).toBe(true);
   expect(state.ghostId).toBeTruthy();
 
-  // 原位置壳不占布局（display:none）
+  // 原位置壳不占布局（display:none）；body-ghost 在 ghost-wrap 的 shadow 内，
+  // 裸 querySelector 穿不透，需显式走 shadowRoot
   expect(
-    await page.evaluate(
-      () => getComputedStyle(document.querySelector("body-ghost")).display,
-    ),
+    await page.evaluate(() => {
+      const host = document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("body-ghost");
+      return host ? getComputedStyle(host).display : null;
+    }),
   ).toBe("none");
 });
 
@@ -45,7 +49,10 @@ test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubb
 
   await ghostBtn.click();
   await page.waitForFunction(
-    () => document.querySelector("#wrap-count").textContent === "1",
+    () =>
+      document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("#wrap-count")?.textContent === "1",
     undefined,
     { timeout: 15000 },
   );
@@ -53,7 +60,10 @@ test("事件沿原位置冒泡：ghost 内点击计入外层计数 / events bubb
   // wrap 内的按钮同样可计数（同一组件实例）
   await page.locator("#wrap-box button").click();
   await page.waitForFunction(
-    () => document.querySelector("#wrap-count").textContent === "2",
+    () =>
+      document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("#wrap-count")?.textContent === "2",
     undefined,
     { timeout: 15000 },
   );

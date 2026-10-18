@@ -16,7 +16,7 @@
     <script src="../../../../dist/ofa.min.js"></script>
     <script src="../../dist/formdata.min.js"></script>
     <script>
-      const data = ofaFormData.formData($("#demo-form"));
+      const data = $("#demo-form").formData();
       const target = document.getElementById("target");
 
       const render = () => {

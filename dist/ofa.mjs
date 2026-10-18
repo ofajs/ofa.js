@@ -1,4 +1,4 @@
-//! ofa.js - v5.0.1 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
+//! ofa.js - v5.0.2 git+https://github.com/ofajs/ofa.js.git (c) 2018-2026 YAO
 const getRandomId = () => Math.random().toString(32).slice(2);
 
 const objectToString = Object.prototype.toString;
@@ -7850,7 +7850,7 @@ function supportsContainerStyleQueries() {
  * （inject-host 已拆分为 packages/plugins/inject-host 独立插件）
  */
 
-const version = "ofa.js@5.0.1";
+const version = "ofa.js@5.0.2";
 $.version = version.replace("ofa.js@", "");
 
 // URL 带 #debug 时开启调试（转译模块生成 sourcemap，报错行号映射回源

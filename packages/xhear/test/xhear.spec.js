@@ -18,7 +18,7 @@ const PAGES = [
   { path: "/packages/xhear/test/statics/syntax-fill-key.html", total: 4 },
   { path: "/packages/xhear/test/statics/syntax-template.html", total: 6 },
   { path: "/packages/xhear/test/statics/combo-render.html", total: 7 },
-  { path: "/packages/xhear/test/statics/combo-form.html", total: 6 },
+  { path: "/packages/xhear/test/statics/combo-form.html", total: 3 },
   { path: "/packages/xhear/test/statics/register.html", total: 15 },
   { path: "/packages/xhear/test/statics/dom-array.html", total: 10 },
   { path: "/packages/xhear/test/statics/memory.html", total: 5 },

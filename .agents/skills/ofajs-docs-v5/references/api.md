@@ -157,21 +157,19 @@ $.fn.color.always = true;
 ## formData（可选插件）
 
 v5 中 formData 是 `packages/plugins/formdata/` 下的可选插件，**引用才
-生效**（不进 ofa.js 默认构建）。插件挂接页面已加载的全局 `$`（`$.stanz`
-与页面框架同实例），源码与 dist 双形态都可用：
+生效**（不进 ofa.js 默认构建）。插件挂接页面已加载的全局 `$`，加载后把
+`formData` 注册到 `$.fn`——除 `$` 外不新增任何全局变量：
 
 | 场景 | 引入方式 |
 |------|---------|
-| monorepo / npm 源码 | `import { formData } from ".../plugins/formdata/formdata.mjs"` |
-| dist 经典脚本（配 dist ofa.js） | `<script src=".../packages/plugins/formdata/dist/formdata.min.js"></script>`，全局 `ofaFormData.formData` |
-| dist ESM / CDN | `import { formData } from "...@refs/heads/v5/packages/plugins/formdata/dist/formdata.min.mjs"` |
+| monorepo / npm 源码 | `import ".../plugins/formdata/formdata.mjs"` |
+| dist 经典脚本（配 dist ofa.js） | `<script src=".../packages/plugins/formdata/dist/formdata.min.js"></script>` |
+| dist ESM / CDN | `import "...@refs/heads/v5/packages/plugins/formdata/dist/formdata.min.mjs"` |
 
 ```javascript
-// monorepo 内按使用文件深度相对导入
-import { formData } from "../../../plugins/formdata/formdata.mjs";
-
-const data = formData(this.shadow);           // 收集容器内全部表单项（传 $ 实例）
-const data2 = formData($("#myForm"), ".use-it"); // 只收集带 .use-it 的表单项
+// 引入插件后，任意容器的 $ 实例都可直接调用
+const data = this.shadow.formData();          // 收集 shadow 内全部表单项
+const data2 = $("#myForm").formData(".use-it"); // 只收集带 .use-it 的表单项
 
 data.username;        // 读
 data.username = "Yao"; // 写 → 相关表单元素自动更新（双向）

@@ -7,7 +7,7 @@ import terser from "@rollup/plugin-terser";
 // - router / scsr 桥接包 → 各自包内 dist/（自包含，npm 发布物与
 //   产物同包；源码挂接全局 $，无框架导入，UMD 全局名 ofaRouter/ofaScsr）
 // - plugins/formdata 插件 → 插件子包内 dist/（同桥接原则挂全局 $，
-//   UMD 全局名 ofaFormData；named 导出 formData）
+//   把 formData 注册到 $.fn，纯副作用无导出）
 // - plugins/inject-host 插件 → 插件子包内 dist/（同上，纯副作用注册
 //   inject-host 元素，无导出）
 const TARGETS = [
@@ -41,8 +41,8 @@ const TARGETS = [
     input: "packages/plugins/formdata/formdata.mjs",
     outDir: "packages/plugins/formdata/dist",
     file: "formdata",
-    umdName: "ofaFormData",
-    exports: "named",
+    umdName: "ofaFormData", // 仅占位：纯副作用无导出，不会真正挂全局
+    exports: "none",
   },
   {
     name: "plugins/inject-host", // 仅用于定位 package.json

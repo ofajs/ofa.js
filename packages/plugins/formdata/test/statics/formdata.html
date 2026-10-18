@@ -46,7 +46,7 @@
           },
         },
         attached() {
-          this.fdata = formData(this.shadow);
+          this.fdata = this.shadow.formData();
         },
         detached() {
           this.fdata = {};

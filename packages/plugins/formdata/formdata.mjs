@@ -3,12 +3,12 @@
  * 容器表单值 ↔ stanz 对象的双向绑定。
  *
  * 桥接形态：挂接页面已加载的 ofa.js 运行时（全局 $，即 window.$ /
- * globalThis.ofa），`$.stanz` 与页面框架是同一实例——因此源码引入与
- * dist 引入（UMD 全局 ofaFormData）都天然单实例，须在 ofa.js 之后加载。
+ * globalThis.ofa），加载后把 `formData` 注册到 `$.fn`——除 `$` 外不新增
+ * 任何全局变量。须在 ofa.js 之后加载（缺失时直接抛错）。
  *
  * 用法：
- *   import { formData } from ".../plugins/formdata/formdata.mjs"; // 或 dist 形态
- *   const data = formData(this.shadow);
+ *   import ".../plugins/formdata/formdata.mjs"; // 或 dist 形态
+ *   const data = this.shadow.formData();        // 容器的 $ 实例直接调用
  *   // 之后 data 上的值与表单双向同步；不再需要时 data.revoke() 释放
  *
  * 自定义表单组件接入：暴露 value 属性 + 设置 name attribute 即可参与收集。
@@ -55,9 +55,7 @@ const getFormData = (target, expr) => {
     } else if (tag === "textarea") {
       data[name] = ele.value;
     } else if (tag === "select") {
-      const selectedOptions = Array.from(
-        ele.querySelectorAll("option:checked"),
-      );
+      const selectedOptions = Array.from(ele.querySelectorAll("option:checked"));
 
       if (ele.multiple) {
         data[name] = selectedOptions.map((e) => e.value || e.textContent);
@@ -121,15 +119,28 @@ function resetValue(el, expr, data) {
   });
 }
 
+/** 以 obj2 为准同步 obj1：删掉 obj1 多出的键，再覆盖 obj2 的全部键 */
+function mergeObjects(obj1, obj2) {
+  for (const key of Object.keys(obj1)) {
+    if (!obj2.hasOwnProperty(key)) {
+      delete obj1[key];
+    }
+  }
+
+  for (const [key, value] of Object.entries(obj2)) {
+    obj1[key] = value;
+  }
+}
+
 /**
- * 双向表单数据绑定。
+ * 双向表单数据绑定的实现体。
  *
  * @param {Object} el 容器元素实例（组件或 shadow 根的 Xhear 实例）
  * @param {string} [expr] 表单项选择器，默认 "input,select,textarea"
  * @param {{wait?: number}} [opts] 收集防抖间隔，默认 200ms
  * @returns {Object} 与表单双向同步的 stanz 对象，revoke 时解除两侧监听
  */
-export const formData = (el, expr, opts = {}) => {
+function createFormData(el, expr, opts = {}) {
   const data = $.stanz({});
 
   const selector = expr || "input,select,textarea";
@@ -155,17 +166,11 @@ export const formData = (el, expr, opts = {}) => {
   });
 
   return data;
-};
-
-/** 以 obj2 为准同步 obj1：删掉 obj1 多出的键，再覆盖 obj2 的全部键 */
-function mergeObjects(obj1, obj2) {
-  for (const key of Object.keys(obj1)) {
-    if (!obj2.hasOwnProperty(key)) {
-      delete obj1[key];
-    }
-  }
-
-  for (const [key, value] of Object.entries(obj2)) {
-    obj1[key] = value;
-  }
 }
+
+// 插件的全部效果：把 formData 挂到 $ 原型上（$('容器').formData(...)）
+$.fn.extend({
+  formData(expr, opts) {
+    return createFormData(this, expr, opts);
+  },
+});

@@ -93,15 +93,6 @@
       color: transparent;
     }
 
-    .value small {
-      margin-left: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: #7c8aa5;
-      -webkit-text-fill-color: #7c8aa5;
-    }
-
     .actions {
       position: relative;
       z-index: 1;
@@ -162,37 +153,32 @@
       position: relative;
       z-index: 1;
       margin: 12px 0 0;
-      font-size: 11.5px;
+      font-size: 11px;
+      letter-spacing: 0.02em;
       color: #75819a;
     }
-
-    .hint b {
-      color: #a5b4cf;
-      font-weight: 600;
-    }
   </style>
-
   <div class="counter">
     <div class="meta">
       <span>Reactive Counter</span>
       <span class="live"><i></i>Live</span>
     </div>
 
-    <div class="value">{{currentValue}}<small>次</small></div>
+    <div class="value">{{currentValue}}</div>
 
     <div class="actions">
-      <button type="button" on:click="decrement" aria-label="减一">−1</button>
-      <button type="button" class="primary" on:click="increment" aria-label="加一">+1</button>
-      <button type="button" on:click="resetCount">重置</button>
+      <button type="button" on:click="decrement">−1</button>
+      <button type="button" class="primary" on:click="increment">+1</button>
+      <button type="button" on:click="resetCount">{{resetLabel}}</button>
     </div>
 
-    <p class="hint">改数据 → 界面自动更新，<b>没有一行手动 DOM</b></p>
+    <p class="hint">state → UI, automatically</p>
   </div>
 
   <script>
     export default {
       tag: "demo-counter",
-      attrs: { start: 0 },
+      attrs: { start: 0, resetLabel: "Reset" },
       data: { currentValue: 0 },
       watch: {
         start(val) {

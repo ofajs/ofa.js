@@ -132,6 +132,9 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   forbidOnly/retries=2/workers=1，router / scsr / plugins / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
 - 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
   `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
+- 官网：`npm run build:website`（`docs/origin/<locale>` → `docs/website/<locale>`，
+  生成 SCSR 页面与根语言选择页；共享外壳在 `docs/website/components` 与
+  `styles`，详见 `docs/website/README.md`）
 - 版本：`npm run bump -- patch|minor|major|x.y.z`（统一 bump 根与全部
   packages 的 package.json、ofa.js 运行时版本串，并同步 package-lock；
   各包维护独立版本线，显式版本号为全包 lockstep 对齐；`--dry` 只打印计划；

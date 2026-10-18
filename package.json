@@ -16,6 +16,7 @@
     "test:stanz": "playwright test packages/stanz",
     "test:ofajs": "playwright test packages/ofajs",
     "build": "rollup -c",
+    "build:website": "node scripts/build-website.mjs",
     "bump": "node scripts/bump.mjs",
     "bench": "npm run bench:drill && npm run bench:stanz && npm run bench:xhear && npm run bench:ofajs",
     "bench:drill": "node packages/drill/benchmark/run.mjs",

@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "lang": "zh-CN",
+    "language": "简体中文",
+    "title": "ofa.js — 把组件，写成 HTML",
+    "description": "ofa.js 是一个零构建、零依赖的 Web Components 前端框架。一个 HTML 文件就是一个组件，浏览器直接运行，无需 npm、Node.js 或打包器。",
+    "noscript": "此页面需要启用 JavaScript 才能运行 ofa.js。",
+    "order": 10
+  },
+  "urls": {
+    "docs": "https://ofajs.com/cn/index.html"
+  },
+  "shell": {
+    "nav": {
+      "features": "特性",
+      "demo": "在线演示",
+      "start": "快速开始",
+      "ecosystem": "生态",
+      "docs": "文档"
+    },
+    "actions": {
+      "nav": "主导航",
+      "github": "GitHub",
+      "githubRepo": "GitHub 仓库",
+      "cta": "开始使用",
+      "menu": "切换菜单",
+      "top": "回到顶部",
+      "languages": "语言"
+    },
+    "footer": {
+      "tagline": "零构建、零依赖的 Web Components 框架。把组件写成 HTML，把开发还给浏览器。",
+      "resources": "资源",
+      "ecosystem": "生态",
+      "community": "社区",
+      "docs": "官方文档",
+      "plugins": "插件",
+      "note": "这个页面本身，也是用 ofa.js 写的。"
+    }
+  },
+  "demo": {
+    "reset": "重置",
+    "kicker": "Today",
+    "heading": "要完成的事",
+    "remainingSuffix": "项待办",
+    "placeholder": "今天想完成什么？",
+    "inputAria": "新的待办事项",
+    "add": "添加",
+    "clear": "清除已完成",
+    "doneSuffix": "已完成",
+    "checkAria": "标记完成",
+    "deleteAria": "删除",
+    "todos": [
+      "用一份 HTML 写出第一个组件",
+      "用 o-fill 渲染待办列表",
+      "把页面丢到任意静态服务器"
+    ]
+  },
+  "toast": {
+    "copied": "已复制到剪贴板",
+    "failed": "复制失败，请手动选择"
+  }
+}

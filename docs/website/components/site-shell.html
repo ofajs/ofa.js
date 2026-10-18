@@ -1,0 +1,194 @@
+<template component>
+  <link rel="stylesheet" href="../styles/shell.css" />
+
+  <svg class="svg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="brand-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#a78bfa"></stop>
+        <stop offset="0.55" stop-color="#7c5cff"></stop>
+        <stop offset="1" stop-color="#22d3ee"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="grid"></span>
+  </div>
+
+  <div class="nav-wrap">
+    <nav class="nav" attr:aria-label="labelNav">
+      <button class="brand" type="button" on:click="jump('top')" attr:aria-label="labelTop">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
+          <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
+        </svg>
+        <span class="wordmark">ofa<span>.js</span></span>
+        <span class="ver">v5</span>
+      </button>
+
+      <div class="nav-links" class:open="menuOpen">
+        <button class="nav-link" type="button" on:click="jump('features')">
+          {{labelFeatures}}
+        </button>
+        <button class="nav-link" type="button" on:click="jump('demo')">
+          {{labelDemo}}
+        </button>
+        <button class="nav-link" type="button" on:click="jump('start')">
+          {{labelStart}}
+        </button>
+        <button class="nav-link" type="button" on:click="jump('ecosystem')">
+          {{labelEcosystem}}
+        </button>
+        <a
+          class="nav-link"
+          attr:href="docsUrl"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {{labelDocs}}
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M8 7h9v9"></path>
+          </svg>
+        </a>
+      </div>
+
+      <div class="nav-actions">
+        <a
+          class="icon-link"
+          href="https://github.com/ofajs/ofa.js"
+          target="_blank"
+          rel="noreferrer"
+          attr:aria-label="labelGithubRepo"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path>
+          </svg>
+          <span>{{labelGithub}}</span>
+        </a>
+        <button class="nav-cta" type="button" on:click="jump('start')">
+          {{labelCta}}
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6"></path>
+          </svg>
+        </button>
+        <button
+          class="nav-burger"
+          class:open="menuOpen"
+          type="button"
+          on:click="toggleMenu"
+          attr:aria-expanded="menuOpen"
+          attr:aria-label="labelMenu"
+        >
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <div class="shell-content"><slot></slot></div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="f-brand">
+        <span class="brand">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
+            <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
+          </svg>
+          <span class="wordmark">ofa<span>.js</span></span>
+        </span>
+        <p>{{footerTagline}}</p>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerResources}}</h4>
+        <a attr:href="docsUrl" target="_blank" rel="noreferrer">{{footerDocs}}</a>
+        <a href="https://github.com/ofajs/ofa.js" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs" target="_blank" rel="noreferrer">CDN</a>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerEcosystem}}</h4>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/router" target="_blank" rel="noreferrer">o-router</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/scsr" target="_blank" rel="noreferrer">scsr</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/plugins" target="_blank" rel="noreferrer">{{footerPlugins}}</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/xhear" target="_blank" rel="noreferrer">xhear</a>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerCommunity}}</h4>
+        <a href="https://github.com/ofajs/discussion/discussions" target="_blank" rel="noreferrer">Discussions</a>
+        <a href="https://github.com/ofajs/ofa.js/issues" target="_blank" rel="noreferrer">Issues</a>
+        <a href="https://github.com/ofajs/ofa.js/blob/v5/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2018–2026 ofa.js · MIT License</span>
+      <a class="lang-link" href="../" attr:aria-label="labelLanguages">
+        <span aria-hidden="true">◎</span>{{labelLanguages}}
+      </a>
+      <span class="made"><i></i>{{footerNote}}</span>
+    </div>
+  </footer>
+
+  <script>
+    export default {
+      tag: "site-shell",
+      attrs: {
+        labelNav: "Main navigation",
+        labelFeatures: "Features",
+        labelDemo: "Live demo",
+        labelStart: "Quick start",
+        labelEcosystem: "Ecosystem",
+        labelDocs: "Docs",
+        labelGithub: "GitHub",
+        labelGithubRepo: "GitHub repository",
+        labelCta: "Get started",
+        labelMenu: "Toggle menu",
+        labelTop: "Back to top",
+        labelLanguages: "Languages",
+        docsUrl: "https://ofajs.com/en/index.html",
+        footerTagline:
+          "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
+        footerResources: "Resources",
+        footerEcosystem: "Ecosystem",
+        footerCommunity: "Community",
+        footerDocs: "Documentation",
+        footerPlugins: "Plugins",
+        footerNote: "This page is built with ofa.js itself.",
+      },
+      data: {
+        menuOpen: false,
+      },
+      proto: {
+        jump(id) {
+          this.menuOpen = false;
+          const target = this.ele.querySelector("#" + id);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        },
+        toggleMenu() {
+          this.menuOpen = !this.menuOpen;
+        },
+      },
+      attached() {
+        const root = this.ele.shadowRoot;
+        this._navWrap = root && root.querySelector(".nav-wrap");
+        this._onScroll = () => {
+          this._navWrap?.classList.toggle("scrolled", window.scrollY > 8);
+        };
+        window.addEventListener("scroll", this._onScroll, { passive: true });
+        this._onScroll();
+      },
+      detached() {
+        window.removeEventListener("scroll", this._onScroll);
+      },
+    };
+  </script>
+</template>

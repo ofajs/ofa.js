@@ -58,10 +58,16 @@
   },
   "tutorial": {
     "label": "教程",
-    "backHome": "返回首页",
+    "overview": "教程总览",
+    "groups": {
+      "start": "开始使用",
+      "template": "模板语法"
+    },
     "articles": {
       "usage": "如何使用 ofa.js（引用 script）",
-      "template": "使用模板渲染"
+      "template": "使用模板渲染",
+      "usageShort": "脚本引用",
+      "templateShort": "模板渲染"
     }
   },
   "pages": {

@@ -221,7 +221,8 @@ footer {
     background 0.2s ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: #fff;
   background: rgba(255, 255, 255, 0.05);
 }
@@ -457,6 +458,20 @@ footer {
 }
 
 
+
+/* ---------------- 文档模式 ---------------- */
+
+:host([variant="docs"]) .bg {
+  display: none;
+}
+
+:host([variant="docs"]) .nav-wrap {
+  background: rgba(6, 7, 13, 0.94);
+}
+
+:host([variant="docs"]) .nav-cta {
+  display: none;
+}
 
 /* ---------------- 响应式 ---------------- */
 

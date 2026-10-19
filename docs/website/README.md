@@ -177,8 +177,12 @@ npm run server
 
 ## 教程模式
 
-- `components/tutorial-layout.html` 提供左侧文章列表 + 右侧内容插槽；
-- `styles/tutorial.css` 提供文章排版、代码块、提示块与教程首页卡片样式；
+- `components/tutorial-layout.html` 提供 240px 的扁平文章目录和居中的
+  900px 正文区；分组可折叠，当前文章整行高亮；
+- `styles/tutorial.css` 提供接近旧版文档站的排版：32px 标题、24px 二级标题、
+  标题下边框、代码块与教程首页卡片；
+- 教程页给 `site-shell` 传 `variant="docs"`：关闭首页的极光背景和顶部
+  CTA，让文档页面更安静；
 - 教程入口 `/cn/tutorial/` 由 `origin/cn/tutorial/index.html` 生成；
 - 两篇文章分别是 `usage.html`（引用 script）与 `template.html`（模板渲染）；
 - 导航栏的「教程」项指向教程入口；侧栏在文章之间用真实路径跳转。

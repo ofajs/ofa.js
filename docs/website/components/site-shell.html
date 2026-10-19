@@ -30,7 +30,7 @@
       </a>
 
       <div class="nav-links" class:open="menuOpen">
-        <a class="nav-link" olink attr:href="tutorialUrl" on:click="closeMenu">
+        <a class="nav-link" data-nav="tutorial" olink attr:href="tutorialUrl" on:click="closeMenu">
           {{labelTutorial}}
         </a>
         <a
@@ -141,6 +141,7 @@
         labelCta: "Start learning",
         labelMenu: "Toggle menu",
         labelLanguages: "Languages",
+        variant: "site",
         homeUrl: "./",
         tutorialUrl: "./tutorial/",
         languagesUrl: "../",
@@ -168,6 +169,11 @@
       attached() {
         const root = this.ele.shadowRoot;
         this._navWrap = root && root.querySelector(".nav-wrap");
+        const tutorialLink = root && root.querySelector('[data-nav="tutorial"]');
+        tutorialLink?.classList.toggle(
+          "active",
+          /\/tutorial(?:\/|$)/.test(location.pathname),
+        );
         this._onScroll = () => {
           this._navWrap?.classList.toggle("scrolled", window.scrollY > 8);
         };

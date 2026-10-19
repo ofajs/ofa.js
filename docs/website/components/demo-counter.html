@@ -2,8 +2,6 @@
   <style>
     :host {
       display: block;
-      --counter-accent: #7c5cff;
-      --counter-cyan: #22d3ee;
     }
 
     * {
@@ -11,30 +9,10 @@
     }
 
     .counter {
-      position: relative;
-      overflow: hidden;
-      padding: 18px 18px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      background:
-        radial-gradient(120% 100% at 100% 0%, rgba(34, 211, 238, 0.13), transparent 55%),
-        radial-gradient(100% 90% at 0% 0%, rgba(124, 92, 255, 0.16), transparent 60%),
-        rgba(9, 12, 21, 0.78);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 18px 40px rgba(2, 4, 10, 0.45);
-    }
-
-    .counter::after {
-      content: "";
-      position: absolute;
-      inset: -40% -20% auto auto;
-      width: 160px;
-      height: 160px;
-      border-radius: 999px;
-      background: radial-gradient(circle, rgba(124, 92, 255, 0.28), transparent 65%);
-      filter: blur(6px);
-      pointer-events: none;
+      padding: 20px;
+      border: 1px solid var(--md-sys-color-outline-variant, #43474e);
+      border-radius: var(--md-sys-shape-corner-xl, 24px);
+      background: var(--md-sys-color-surface-container-high, #272a2f);
     }
 
     .meta {
@@ -42,60 +20,38 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #8c99b4;
+      margin-bottom: 12px;
+      color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: none;
     }
 
     .live {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: #5eead4;
-      letter-spacing: 0.1em;
+      color: var(--md-sys-color-secondary, #ccc2dc);
     }
 
     .live i {
       width: 6px;
       height: 6px;
-      border-radius: 999px;
-      background: #2dd4bf;
-      box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.12);
-      animation: pulse 2.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.45;
-        transform: scale(0.8);
-      }
+      border-radius: var(--md-sys-shape-corner-full, 999px);
+      background: var(--md-sys-color-primary, #a2c9ff);
     }
 
     .value {
-      position: relative;
-      z-index: 1;
-      font-size: 54px;
-      font-weight: 750;
-      line-height: 1;
-      letter-spacing: -0.055em;
+      color: var(--md-sys-color-on-surface, #e2e2e9);
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
-      background: linear-gradient(120deg, #ffffff 10%, #c4b5fd 55%, #67e8f9 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
     }
 
     .actions {
-      position: relative;
-      z-index: 1;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -106,56 +62,53 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 38px;
-      height: 34px;
-      padding: 0 12px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #dfe6f5;
+      min-width: 40px;
+      height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--md-sys-color-outline, #8d9199);
+      border-radius: var(--md-sys-shape-corner-full, 999px);
+      background: transparent;
+      color: var(--md-sys-color-primary, #a2c9ff);
       font: inherit;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition:
-        background 0.18s ease,
-        border-color 0.18s ease,
-        transform 0.18s ease;
+        background var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)),
+        border-color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
     }
 
     button:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.24);
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(0) scale(0.97);
+      border-color: var(--md-sys-color-primary, #a2c9ff);
+      background: color-mix(in srgb, var(--md-sys-color-primary, #a2c9ff) 8%, transparent);
     }
 
     button:focus-visible {
-      outline: 2px solid #22d3ee;
+      outline: 2px solid var(--md-sys-color-primary, #a2c9ff);
       outline-offset: 2px;
     }
 
     button.primary {
       border-color: transparent;
-      background: linear-gradient(120deg, #7c5cff, #4f46e5);
-      color: #fff;
-      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+      background: var(--md-sys-color-primary, #a2c9ff);
+      color: var(--md-sys-color-on-primary, #00315b);
     }
 
     button.primary:hover {
-      background: linear-gradient(120deg, #8b6dff, #5b52ff);
+      background: color-mix(in srgb, var(--md-sys-color-primary, #a2c9ff) 90%, var(--md-sys-color-on-primary, #00315b) 10%);
+      box-shadow: var(--md-sys-elevation-1, 0 1px 2px rgba(0, 0, 0, 0.3));
     }
 
     .hint {
-      position: relative;
-      z-index: 1;
       margin: 12px 0 0;
-      font-size: 11px;
-      letter-spacing: 0.02em;
-      color: #75819a;
+      color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition-duration: 0.001ms;
+      }
     }
   </style>
   <div class="counter">

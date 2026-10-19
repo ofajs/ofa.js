@@ -1,6 +1,7 @@
 <template page>
   <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
   <link rel="stylesheet" href="{{SITE}}/styles/tutorial.css" />
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
   <l-m src="{{SITE}}/components/site-shell.html"></l-m>
   <l-m src="{{SITE}}/components/tutorial-layout.html"></l-m>
 
@@ -33,6 +34,7 @@
       attr:label-overview="site.tutorial.overview"
       attr:label-group-start="site.tutorial.groups.start"
       attr:label-group-template="site.tutorial.groups.template"
+      attr:label-on-this-page="site.tutorial.onThisPage"
       attr:title-usage-short="site.tutorial.articles.usageShort"
       attr:title-template-short="site.tutorial.articles.templateShort"
       attr:overview-url="navUrls.tutorial"
@@ -47,15 +49,15 @@
           不需要 npm、Node.js 或打包器，写 HTML 就能运行。
         </p>
 
-        <div class="tutorial-cards">
-          <a class="tutorial-card" olink href="./usage.html">
+        <div class="tutorial-list">
+          <a class="tutorial-row" olink href="./usage.html">
             <span class="num">01</span>
             <h2>如何使用 ofa.js（引用 script）</h2>
             <p>通过 CDN 引入框架，写第一个页面模块，并在浏览器里跑起来。</p>
             <span class="more">开始阅读 →</span>
           </a>
 
-          <a class="tutorial-card" olink href="./template.html">
+          <a class="tutorial-row" olink href="./template.html">
             <span class="num">02</span>
             <h2>使用模板渲染</h2>
             <p>文本插值、事件、双向绑定、条件、列表，以及一个完整待办示例。</p>

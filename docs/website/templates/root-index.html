@@ -8,17 +8,24 @@
       name="description"
       content="Choose a language for the ofa.js website."
     />
-    <meta name="theme-color" content="#06070d" />
+    <meta name="theme-color" content="#111318" />
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
     <style>
       :root {
-        --bg: #06070d;
-        --text: #eef2fb;
-        --muted: #9aa6bd;
-        --line: rgba(255, 255, 255, 0.09);
-        --line-2: rgba(255, 255, 255, 0.17);
-        --violet: #7c5cff;
-        --cyan: #22d3ee;
+        --md-sys-color-primary: #a2c9ff;
+        --md-sys-color-on-primary: #00315b;
+        --md-sys-color-primary-container: #00497d;
+        --md-sys-color-on-primary-container: #d3e3ff;
+        --md-sys-color-secondary-container: #3c4858;
+        --md-sys-color-on-secondary-container: #d8e3f8;
+        --md-sys-color-surface: #111318;
+        --md-sys-color-surface-container-low: #191c20;
+        --md-sys-color-surface-container: #1d2024;
+        --md-sys-color-surface-container-high: #272a2f;
+        --md-sys-color-on-surface: #e2e2e9;
+        --md-sys-color-on-surface-variant: #c3c7cf;
+        --md-sys-color-outline-variant: #43474e;
+        --md-sys-color-outline: #8d9199;
       }
 
       * {
@@ -29,10 +36,11 @@
       body {
         margin: 0;
         min-height: 100%;
-        background: var(--bg);
-        color: var(--text);
+        background: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
         overflow-x: hidden;
         overflow-x: clip;
+        color-scheme: dark;
       }
 
       body {
@@ -41,8 +49,8 @@
         min-height: 100vh;
         padding: 32px 20px;
         font-family:
-          "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont,
-          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
         -webkit-font-smoothing: antialiased;
       }
@@ -52,62 +60,7 @@
         text-decoration: none;
       }
 
-      .glow {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        overflow: hidden;
-        pointer-events: none;
-      }
-
-      .glow::before,
-      .glow::after {
-        content: "";
-        position: absolute;
-        width: 620px;
-        height: 620px;
-        border-radius: 50%;
-        filter: blur(110px);
-      }
-
-      .glow::before {
-        top: -260px;
-        left: -160px;
-        background: #4f46e5;
-        opacity: 0.3;
-      }
-
-      .glow::after {
-        right: -220px;
-        bottom: -260px;
-        background: #0891b2;
-        opacity: 0.2;
-      }
-
-      .grid {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 72px 72px;
-        -webkit-mask-image: radial-gradient(
-          ellipse 80% 70% at 50% 0%,
-          #000 10%,
-          transparent 75%
-        );
-        mask-image: radial-gradient(
-          ellipse 80% 70% at 50% 0%,
-          #000 10%,
-          transparent 75%
-        );
-        pointer-events: none;
-      }
-
       main {
-        position: relative;
-        z-index: 1;
         width: 100%;
         max-width: 720px;
       }
@@ -115,62 +68,51 @@
       .brand {
         display: inline-flex;
         align-items: center;
-        gap: 11px;
+        gap: 12px;
         margin-bottom: 48px;
       }
 
       .brand svg {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         display: block;
       }
 
       .wordmark {
-        font-size: 21px;
-        font-weight: 720;
-        letter-spacing: -0.03em;
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
       }
 
       .wordmark span {
-        color: #8b97b0;
-        font-weight: 500;
+        color: var(--md-sys-color-on-surface-variant);
       }
 
       .kicker {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 0 0 16px;
-        font-size: 10.5px;
-        font-weight: 600;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: #8b97b0;
-      }
-
-      .kicker::before {
-        content: "";
-        width: 18px;
-        height: 1px;
-        background: linear-gradient(90deg, var(--violet), var(--cyan));
+        margin: 0 0 8px;
+        color: var(--md-sys-color-primary);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
       }
 
       h1 {
-        margin: 0 0 12px;
-        font-size: clamp(36px, 7vw, 60px);
-        font-weight: 780;
+        margin: 0 0 8px;
+        font-size: clamp(40px, 7vw, 57px);
+        font-weight: 400;
         line-height: 1.08;
-        letter-spacing: -0.045em;
+        letter-spacing: -0.02em;
       }
 
       h1 em {
         display: block;
         margin-top: 8px;
+        color: var(--md-sys-color-on-surface-variant);
         font-style: normal;
-        font-size: 0.46em;
-        font-weight: 500;
-        letter-spacing: 0.01em;
-        color: var(--muted);
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 1.4;
+        letter-spacing: 0;
       }
 
       .langs {
@@ -183,47 +125,36 @@
         display: flex;
         align-items: center;
         gap: 16px;
-        padding: 20px 22px;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.04),
-          rgba(255, 255, 255, 0.012)
-        );
+        padding: 20px 24px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 24px;
+        background: var(--md-sys-color-surface-container-low);
         transition:
-          border-color 0.22s ease,
-          background 0.22s ease,
-          transform 0.22s ease;
+          background 150ms cubic-bezier(0.2, 0, 0, 1),
+          border-color 150ms cubic-bezier(0.2, 0, 0, 1);
       }
 
       .lang-card:hover {
-        border-color: rgba(124, 92, 255, 0.5);
-        background: rgba(255, 255, 255, 0.055);
-        transform: translateY(-2px);
+        border-color: var(--md-sys-color-outline);
+        background: var(--md-sys-color-surface-container);
       }
 
       .lang-card:focus-visible {
-        outline: 2px solid var(--cyan);
-        outline-offset: 3px;
+        outline: 2px solid var(--md-sys-color-primary);
+        outline-offset: 2px;
       }
 
       .lang-mark {
         display: grid;
         place-items: center;
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         flex: none;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        background: linear-gradient(
-          145deg,
-          rgba(124, 92, 255, 0.24),
-          rgba(34, 211, 238, 0.08)
-        );
-        font-family: ui-monospace, "SF Mono", Menlo, monospace;
-        font-size: 11px;
-        color: #c4b5fd;
+        border-radius: 16px;
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+        font-family: "Roboto Mono", ui-monospace, monospace;
+        font-size: 12px;
         text-transform: uppercase;
       }
 
@@ -233,37 +164,38 @@
 
       .lang-native {
         display: block;
-        font-size: 16px;
-        font-weight: 650;
-        letter-spacing: -0.01em;
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: 0;
       }
 
       .lang-title {
         display: block;
-        margin-top: 3px;
+        margin-top: 2px;
         overflow: hidden;
-        font-size: 11.5px;
-        color: #6f7c95;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 13px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
       .lang-arrow {
         margin-left: auto;
-        color: #4d5970;
-        font-size: 17px;
-        transition: transform 0.22s ease, color 0.22s ease;
-      }
-
-      .lang-card:hover .lang-arrow {
-        transform: translateX(3px);
-        color: var(--cyan);
+        color: var(--md-sys-color-primary);
+        font-size: 18px;
       }
 
       .foot {
         margin-top: 40px;
-        font-size: 11px;
-        color: #5f6b83;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 12px;
+      }
+
+      @media (max-width: 640px) {
+        .lang-card {
+          padding: 16px 18px;
+          border-radius: 20px;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -276,21 +208,11 @@
     </style>
   </head>
   <body>
-    <div class="glow" aria-hidden="true"></div>
-    <div class="grid" aria-hidden="true"></div>
-
     <main>
       <span class="brand">
         <svg viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="brand-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#a78bfa"></stop>
-              <stop offset="0.55" stop-color="#7c5cff"></stop>
-              <stop offset="1" stop-color="#22d3ee"></stop>
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
-          <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
+          <circle cx="32" cy="32" r="16" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="7"></circle>
+          <circle cx="47" cy="17" r="5" fill="var(--md-sys-color-tertiary, #9bd7e8)"></circle>
         </svg>
         <span class="wordmark">ofa<span>.js</span></span>
       </span>

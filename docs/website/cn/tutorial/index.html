@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ofa.js 教程</title>
     <meta name="description" content="从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。" />
-    <meta name="theme-color" content="#06070d" />
+    <meta name="theme-color" content="#111318" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="ofa.js 教程" />
     <meta property="og:description" content="从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。" />
@@ -17,15 +17,15 @@
         margin: 0;
         padding: 0;
         min-height: 100%;
-        background: #06070d;
-        color: #eef2fb;
+        background: #111318;
+        color: #e2e2e9;
         overflow-x: hidden;
         overflow-x: clip;
       }
       body {
         font-family:
-          "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont,
-          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
       }
       o-app,
@@ -37,7 +37,7 @@
         display: block;
         padding: 48px 24px;
         text-align: center;
-        color: #9aa6bd;
+        color: #c3c7cf;
       }
     </style>
   </head>
@@ -52,6 +52,7 @@
 
   <link rel="stylesheet" href="../../styles/site.css" />
   <link rel="stylesheet" href="../../styles/tutorial.css" />
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
   <l-m src="../../components/site-shell.html"></l-m>
   <l-m src="../../components/tutorial-layout.html"></l-m>
 
@@ -84,6 +85,7 @@
       attr:label-overview="site.tutorial.overview"
       attr:label-group-start="site.tutorial.groups.start"
       attr:label-group-template="site.tutorial.groups.template"
+      attr:label-on-this-page="site.tutorial.onThisPage"
       attr:title-usage-short="site.tutorial.articles.usageShort"
       attr:title-template-short="site.tutorial.articles.templateShort"
       attr:overview-url="navUrls.tutorial"
@@ -98,15 +100,15 @@
           不需要 npm、Node.js 或打包器，写 HTML 就能运行。
         </p>
 
-        <div class="tutorial-cards">
-          <a class="tutorial-card" olink href="./usage.html">
+        <div class="tutorial-list">
+          <a class="tutorial-row" olink href="./usage.html">
             <span class="num">01</span>
             <h2>如何使用 ofa.js（引用 script）</h2>
             <p>通过 CDN 引入框架，写第一个页面模块，并在浏览器里跑起来。</p>
             <span class="more">开始阅读 →</span>
           </a>
 
-          <a class="tutorial-card" olink href="./template.html">
+          <a class="tutorial-row" olink href="./template.html">
             <span class="num">02</span>
             <h2>使用模板渲染</h2>
             <p>文本插值、事件、双向绑定、条件、列表，以及一个完整待办示例。</p>

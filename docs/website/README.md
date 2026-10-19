@@ -4,6 +4,10 @@
 打包或任何第三方运行时；多语言、多页面内容由 `npm run build:website` 做
 纯文件组装。
 
+官网基础 UI 采用 **Material Design 3**（深色配色、蓝色主色、24px 大圆角、
+M3 状态层与 Motion easing）。颜色、形状、阴影和动效统一走 CSS 变量，
+首页、文档页、语言选择页和 demo 组件共用同一套 token。
+
 官网采用「共享外壳 + 分语言内容」结构：
 
 - 顶部导航、底部、背景、教程侧栏、主题样式、启动器放在 `docs/website/`
@@ -177,12 +181,16 @@ npm run server
 
 ## 教程模式
 
-- `components/tutorial-layout.html` 提供 240px 的扁平文章目录和居中的
-  900px 正文区；分组可折叠，当前文章整行高亮；
-- `styles/tutorial.css` 提供接近旧版文档站的排版：32px 标题、24px 二级标题、
-  标题下边框、代码块与教程首页卡片；
-- 教程页给 `site-shell` 传 `variant="docs"`：关闭首页的极光背景和顶部
-  CTA，让文档页面更安静；
+- `components/tutorial-layout.html` 使用 Senti-UI 的 `st-list` /
+  `st-list-item` 做左侧目录：分组自带折叠动画，当前文章用蓝色文字 +
+  下划线标记；
+- 教程采用 MDN 式三栏：260px 目录 + 800px 正文 + 220px「本页内容」，
+  不再用卡片包裹正文；
+- 教程页通过 CDN `l-m` 引入 `senti-ui/packages/list/list.html`，
+  不增加构建步骤；
+- `styles/tutorial.css` 提供 MDN 式文章排版：40px h1、32px h2、
+  16px body、M3 代码块与教程首页列表；
+- 教程页给 `site-shell` 传 `variant="docs"`：隐藏顶部 CTA，保留文档导航；
 - 教程入口 `/cn/tutorial/` 由 `origin/cn/tutorial/index.html` 生成；
 - 两篇文章分别是 `usage.html`（引用 script）与 `template.html`（模板渲染）；
 - 导航栏的「教程」项指向教程入口；侧栏在文章之间用真实路径跳转。

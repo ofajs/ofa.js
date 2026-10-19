@@ -15,217 +15,190 @@
 
     .docs {
       display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
+      grid-template-columns: 260px minmax(0, 1fr) 220px;
       align-items: start;
+      gap: 48px;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px;
     }
 
     .side {
       position: sticky;
-      top: 70px;
-      align-self: start;
-      height: calc(100vh - 70px);
-      overflow-y: auto;
-      overflow-x: hidden;
+      top: 96px;
+      min-width: 0;
     }
 
-    .side-inner {
-      padding: 26px 0 40px;
+    .side-list {
+      font-size: 13.5px;
     }
 
-    .side-nav {
-      display: flex;
-      flex-direction: column;
+    .side-list st-list-item {
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 13.5px;
     }
 
-    .side-link {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 34px;
-      padding: 0 36px;
-      font-size: 14px;
-      line-height: 1.2;
-      color: #d4d4d4;
-      transition:
-        color 0.15s ease,
-        background 0.15s ease;
+    .side-list .side-label {
+      display: block;
+      line-height: 1.45;
     }
 
-    .side-link:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.04);
+    .side-list st-list-item[collapsible] .side-label {
+      color: var(--md-sys-color-on-surface);
+      font-weight: 500;
     }
 
-    .side-link.active {
-      color: #a2c9ff;
-      background: #00315b;
+    .side-list st-list-item.active {
+      color: var(--md-sys-color-primary);
     }
 
-    .side-sub {
-      padding-left: 44px;
+    .side-list st-list-item.active .side-label {
+      color: var(--md-sys-color-primary);
+      font-weight: 500;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
     }
 
-    .side-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 34px;
-      padding: 0 36px;
-      border: 0;
-      background: none;
-      font: inherit;
-      font-size: 14px;
-      line-height: 1.2;
-      color: #e3e2e2;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .side-group:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .side-group:focus-visible,
-    .side-link:focus-visible {
-      outline: 2px solid var(--cyan);
+    .side-list st-list-item:focus-visible {
+      outline: 2px solid var(--md-sys-color-primary);
       outline-offset: -2px;
     }
 
-    .side-chevron {
-      width: 11px;
-      height: 11px;
-      margin-left: auto;
-      color: #8b97b0;
-      transition: transform 0.2s ease;
+    .doc-slot {
+      min-width: 0;
+      padding: 0 0 80px;
     }
 
-    .side-chevron.collapsed {
-      transform: rotate(-90deg);
+    .toc {
+      position: sticky;
+      top: 96px;
+      min-width: 0;
     }
 
-    .side-link.collapsed {
+    .toc[hidden] {
       display: none;
     }
 
-    .doc-slot {
+    .toc-kicker {
+      margin: 0 0 10px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .toc-nav {
       display: flex;
-      justify-content: center;
-      min-width: 0;
-      padding: 40px 32px 96px;
+      flex-direction: column;
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .toc-link {
+      display: block;
+      margin-left: -1px;
+      padding: 4px 0 4px 12px;
+      border-left: 2px solid transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 13px;
+      line-height: 1.5;
+      transition:
+        color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)),
+        border-color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+    }
+
+    .toc-link:hover {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .toc-link.active {
+      color: var(--md-sys-color-primary);
+      border-left-color: var(--md-sys-color-primary);
+    }
+
+    .toc-link:focus-visible {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1180px) {
+      .docs {
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 40px;
+      }
+
+      .toc {
+        display: none;
+      }
     }
 
     @media (max-width: 900px) {
       .docs {
-        grid-template-columns: 1fr;
+        display: block;
+        padding: 24px 20px 0;
       }
 
       .side {
-        position: static;
-        height: auto;
-        overflow: visible;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .side-inner {
-        padding: 10px 20px;
-      }
-
-      .side-nav {
-        flex-direction: row;
-        gap: 6px;
-        overflow-x: auto;
-        scrollbar-width: none;
-      }
-
-      .side-nav::-webkit-scrollbar {
         display: none;
-      }
-
-      .side-group {
-        display: none;
-      }
-
-      .side-link {
-        width: auto;
-        height: 30px;
-        flex: none;
-        padding: 0 9px;
-        border-radius: 4px;
-        font-size: 13.5px;
-        white-space: nowrap;
-      }
-
-      .side-sub {
-        padding-left: 9px;
-      }
-
-      .side-link.collapsed {
-        display: flex;
       }
 
       .doc-slot {
-        padding: 28px 20px 80px;
+        padding-bottom: 64px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .toc-link {
+        transition-duration: 0.001ms;
       }
     }
   </style>
 
   <div class="docs">
-    <aside class="side">
-      <div class="side-inner">
-        <nav class="side-nav" attr:aria-label="labelTutorial">
-          <a
-            class="side-link"
-            class:active="current === 'index'"
-            olink
-            attr:href="overviewUrl"
-          >{{labelOverview}}</a>
+    <aside class="side" attr:aria-label="labelTutorial">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="current === 'index'"
+          on:click="navigate('overview')"
+        >
+          <span class="side-label">{{labelOverview}}</span>
+        </st-list-item>
 
-          <button
-            class="side-group"
-            type="button"
-            on:click="toggleGroup('start')"
-            attr:aria-expanded="startOpen ? 'true' : 'false'"
-          >
-            <span>{{labelGroupStart}}</span>
-            <svg class="side-chevron" class:collapsed="!startOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m6 9 6 6 6-6"></path>
-            </svg>
-          </button>
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{labelGroupStart}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'usage'"
+              on:click="navigate('usage')"
+            >
+              <span class="side-label">{{titleUsageShort}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
 
-          <a
-            class="side-link side-sub"
-            class:collapsed="!startOpen"
-            class:active="current === 'usage'"
-            olink
-            attr:href="usageUrl"
-          >{{titleUsageShort}}</a>
-
-          <button
-            class="side-group"
-            type="button"
-            on:click="toggleGroup('template')"
-            attr:aria-expanded="templateOpen ? 'true' : 'false'"
-          >
-            <span>{{labelGroupTemplate}}</span>
-            <svg class="side-chevron" class:collapsed="!templateOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m6 9 6 6 6-6"></path>
-            </svg>
-          </button>
-
-          <a
-            class="side-link side-sub"
-            class:collapsed="!templateOpen"
-            class:active="current === 'template'"
-            olink
-            attr:href="templateUrl"
-          >{{titleTemplateShort}}</a>
-        </nav>
-      </div>
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{labelGroupTemplate}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'template'"
+              on:click="navigate('template')"
+            >
+              <span class="side-label">{{titleTemplateShort}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+      </st-list>
     </aside>
 
     <div class="doc-slot"><slot></slot></div>
+
+    <aside class="toc" hidden>
+      <p class="toc-kicker">{{labelOnThisPage}}</p>
+      <nav class="toc-nav" attr:aria-label="labelOnThisPage"></nav>
+    </aside>
   </div>
 
   <script>
@@ -239,19 +212,74 @@
         labelGroupTemplate: "Template syntax",
         titleUsageShort: "Script include",
         titleTemplateShort: "Template rendering",
+        labelOnThisPage: "On this page",
         overviewUrl: "./",
         usageUrl: "./usage.html",
         templateUrl: "./template.html",
       },
-      data: {
-        startOpen: true,
-        templateOpen: true,
-      },
       proto: {
-        toggleGroup(name) {
-          this[name === "start" ? "startOpen" : "templateOpen"] =
-            !this[name === "start" ? "startOpen" : "templateOpen"];
+        navigate(key) {
+          const url = this[`${key}Url`];
+          if (!url) return;
+
+          const app = this.ele.app;
+          if (app?.goto) {
+            app.goto(url);
+          } else {
+            location.href = url;
+          }
         },
+      },
+      ready() {
+        const root = this.ele.shadowRoot;
+        const toc = root?.querySelector(".toc");
+        const nav = root?.querySelector(".toc-nav");
+        if (!toc || !nav) return;
+
+        const headings = [...this.ele.querySelectorAll("article.doc > h2")];
+        if (!headings.length) {
+          toc.hidden = true;
+          return;
+        }
+
+        const links = headings.map((heading, index) => {
+          const id = heading.id || `doc-section-${index + 1}`;
+          heading.id = id;
+
+          const link = document.createElement("a");
+          link.className = "toc-link";
+          link.href = `#${id}`;
+          link.textContent = heading.textContent.trim();
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            heading.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+          nav.appendChild(link);
+          return link;
+        });
+
+        toc.hidden = false;
+
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                const index = headings.indexOf(entry.target);
+                links.forEach((link, i) => {
+                  link.classList.toggle("active", i === index);
+                });
+              }
+            },
+            { rootMargin: "-96px 0px -65% 0px", threshold: 0 },
+          );
+
+          headings.forEach((heading) => observer.observe(heading));
+          this._observer = observer;
+        }
+      },
+      detached() {
+        if (this._observer) this._observer.disconnect();
       },
     };
   </script>

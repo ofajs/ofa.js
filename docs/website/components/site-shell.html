@@ -1,29 +1,12 @@
 <template component>
   <link rel="stylesheet" href="../styles/shell.css" />
 
-  <svg class="svg-defs" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="brand-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#a78bfa"></stop>
-        <stop offset="0.55" stop-color="#7c5cff"></stop>
-        <stop offset="1" stop-color="#22d3ee"></stop>
-      </linearGradient>
-    </defs>
-  </svg>
-
-  <div class="bg" aria-hidden="true">
-    <span class="orb orb-a"></span>
-    <span class="orb orb-b"></span>
-    <span class="orb orb-c"></span>
-    <span class="grid"></span>
-  </div>
-
   <div class="nav-wrap">
     <nav class="nav" attr:aria-label="labelNav">
       <a class="brand" attr:href="homeUrl" attr:aria-label="labelHome">
         <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
-          <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
+          <circle cx="32" cy="32" r="16" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="7"></circle>
+          <circle cx="47" cy="17" r="5" fill="var(--md-sys-color-tertiary)"></circle>
         </svg>
         <span class="wordmark">ofa<span>.js</span></span>
         <span class="ver">v5</span>
@@ -88,8 +71,8 @@
       <div class="f-brand">
         <span class="brand">
           <svg viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="16" fill="none" stroke="url(#brand-grad)" stroke-width="7"></circle>
-            <circle cx="47" cy="17" r="5" fill="#22d3ee"></circle>
+            <circle cx="32" cy="32" r="16" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="7"></circle>
+            <circle cx="47" cy="17" r="5" fill="var(--md-sys-color-tertiary)"></circle>
           </svg>
           <span class="wordmark">ofa<span>.js</span></span>
         </span>

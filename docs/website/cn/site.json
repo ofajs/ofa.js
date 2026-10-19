@@ -68,7 +68,8 @@
       "template": "使用模板渲染",
       "usageShort": "脚本引用",
       "templateShort": "模板渲染"
-    }
+    },
+    "onThisPage": "本页内容"
   },
   "pages": {
     "tutorial/index.html": {

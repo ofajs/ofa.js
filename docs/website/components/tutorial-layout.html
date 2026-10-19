@@ -222,7 +222,7 @@
           const url = this[`${key}Url`];
           if (!url) return;
 
-          const app = this.ele.app;
+          const app = (window.$ ? window.$(this.ele) : this.ele).app;
           if (app?.goto) {
             app.goto(url);
           } else {

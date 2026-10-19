@@ -2,32 +2,8 @@
   <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
   <link rel="stylesheet" href="{{SITE}}/styles/tutorial.css" />
   <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
-  <l-m src="{{SITE}}/components/site-shell.html"></l-m>
   <l-m src="{{SITE}}/components/tutorial-layout.html"></l-m>
 
-  <site-shell
-    variant="docs"
-    attr:label-nav="site.shell.actions.nav"
-    attr:label-tutorial="site.shell.nav.tutorial"
-    attr:label-docs="site.shell.nav.docs"
-    attr:label-home="site.shell.actions.home"
-    attr:label-github="site.shell.actions.github"
-    attr:label-github-repo="site.shell.actions.githubRepo"
-    attr:label-cta="site.shell.actions.cta"
-    attr:label-menu="site.shell.actions.menu"
-    attr:label-languages="site.shell.actions.languages"
-    attr:home-url="navUrls.home"
-    attr:tutorial-url="navUrls.tutorial"
-    attr:languages-url="navUrls.languages"
-    attr:docs-url="site.urls.docs"
-    attr:footer-tagline="site.shell.footer.tagline"
-    attr:footer-resources="site.shell.footer.resources"
-    attr:footer-ecosystem="site.shell.footer.ecosystem"
-    attr:footer-community="site.shell.footer.community"
-    attr:footer-docs="site.shell.footer.docs"
-    attr:footer-plugins="site.shell.footer.plugins"
-    attr:footer-note="site.shell.footer.note"
-  >
     <tutorial-layout
       current="index"
       attr:label-tutorial="site.tutorial.label"
@@ -75,10 +51,11 @@
         </p>
       </article>
     </tutorial-layout>
-  </site-shell>
 
   <script>
     import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
 
     export default (args) =>
       createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });

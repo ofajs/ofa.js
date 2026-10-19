@@ -189,3 +189,31 @@ export const createTutorialPage = async ({ url, sitePath }) => {
     },
   };
 };
+
+/**
+ * 顶层布局页（layout.html）的页面数据。
+ * 由所有内容页通过 export const parent 挂入，负责常驻的 header/footer。
+ */
+export const createLayoutPage = async ({ url, sitePath }) => {
+  const site = await loadSite(url, sitePath);
+
+  return {
+    data: {
+      site,
+      navUrls: getNavUrls(url),
+      docsMode: false,
+    },
+    attached() {
+      this.syncDocsMode();
+    },
+    routerChange() {
+      this.syncDocsMode();
+      window.scrollTo(0, 0);
+    },
+    proto: {
+      syncDocsMode() {
+        this.docsMode = /\/tutorial(?:\/|$)/.test(location.pathname);
+      },
+    },
+  };
+};

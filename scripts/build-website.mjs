@@ -124,6 +124,10 @@ const rootIndexTemplate = fs.readFileSync(
   path.join(templateRoot, "root-index.html"),
   "utf8",
 );
+const layoutPageTemplate = fs.readFileSync(
+  path.join(templateRoot, "layout-page.html"),
+  "utf8",
+);
 
 // 上一次构建的语言目录清单，用于清理已删除的翻译
 let previousLocales = [];
@@ -235,8 +239,26 @@ for (const locale of locales) {
     fail(`docs/origin/${name} 没有可构建的页面`);
   }
 
+  // 每个语言生成一份嵌套路由 layout：子页通过 export const parent 挂入，
+  // header/footer 只创建一次并跨页面保留。
+  const layoutContent = layoutPageTemplate
+    .replaceAll("{{SITE}}", "..")
+    .replaceAll("{{LOCALE}}", ".");
+
+  const layoutOutput = fill(localePageTemplate, {
+    LANG: escapeHtml(meta.lang),
+    TITLE: escapeHtml(meta.title),
+    DESCRIPTION: escapeHtml(meta.description),
+    NOSCRIPT: escapeHtml(meta.noscript || "This page requires JavaScript."),
+    SITE: "..",
+    LOCALE: ".",
+    PAGE_CONTENT: layoutContent,
+  });
+
+  fs.writeFileSync(path.join(outDir, "layout.html"), layoutOutput);
+
   console.log(
-    `[build:website] ${name}: ${pageCount} 个 SCSR 页面 → docs/website/${name}/`,
+    `[build:website] ${name}: ${pageCount} 个 SCSR 页面 + layout → docs/website/${name}/`,
   );
 }
 

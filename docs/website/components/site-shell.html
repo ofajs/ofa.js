@@ -148,15 +148,26 @@
         closeMenu() {
           this.menuOpen = false;
         },
+        syncActive() {
+          const tutorialLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="tutorial"]',
+          );
+          tutorialLink?.classList.toggle(
+            "active",
+            /\/tutorial(?:\/|$)/.test(location.pathname),
+          );
+        },
       },
       attached() {
         const root = this.ele.shadowRoot;
         this._navWrap = root && root.querySelector(".nav-wrap");
-        const tutorialLink = root && root.querySelector('[data-nav="tutorial"]');
-        tutorialLink?.classList.toggle(
-          "active",
-          /\/tutorial(?:\/|$)/.test(location.pathname),
-        );
+        this._app = (window.$ ? window.$(this.ele) : this.ele).app;
+        this._onRoute = () => {
+          this.syncActive();
+          this.closeMenu();
+        };
+        this._app?.on?.("router-change", this._onRoute);
+        this.syncActive();
         this._onScroll = () => {
           this._navWrap?.classList.toggle("scrolled", window.scrollY > 8);
         };
@@ -164,6 +175,7 @@
         this._onScroll();
       },
       detached() {
+        this._app?.off?.("router-change", this._onRoute);
         window.removeEventListener("scroll", this._onScroll);
       },
     };

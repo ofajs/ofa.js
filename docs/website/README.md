@@ -10,8 +10,8 @@ M3 状态层与 Motion easing）。颜色、形状、阴影和动效统一走 CS
 
 官网采用「共享外壳 + 分语言内容」结构：
 
-- 顶部导航、底部、背景、教程侧栏、主题样式、启动器放在 `docs/website/`
-  的共享目录；
+- 顶部/底部通过嵌套路由 layout 常驻（`layout.html`），教程侧栏、
+  主题样式、启动器放在 `docs/website/` 的共享目录；
 - 每个语言的页面放在 `docs/origin/<locale>/`，只包含页面结构与文案；
 - `npm run build:website` 把 `docs/origin/<locale>/` 组装到
   `docs/website/<locale>/`，路径一一对应；
@@ -47,8 +47,10 @@ docs/
     │   └── tutorial.css             教程文章排版
     ├── templates/
     │   ├── locale-page.html         单页 SCSR 文档模板
+    │   ├── layout-page.html         嵌套路由父页（header/footer + slot）
     │   └── root-index.html          根语言选择页模板
     └── cn/                          构建产物，勿手改
+        ├── layout.html              内容页共享的嵌套路由 layout
         ├── index.html
         ├── site.json
         └── tutorial/
@@ -76,8 +78,10 @@ npm run build:website
    替换成当前页面深度对应的路径；
 5. 读取 `site.pages[相对路径]`（首页回退到 `meta`）得到该页 title/description，
    用 `templates/locale-page.html` 生成完整 SCSR 文档，写回同路径；
-6. 生成根语言选择页；
-7. 读取 `docs/website/.locales.json` 清理已删除语言的旧产物。
+6. 为每个语言生成 `layout.html`：所有内容页通过
+   `export const parent = "…/layout.html"` 挂到这个父页的 `<slot>` 下；
+7. 生成根语言选择页；
+8. 读取 `docs/website/.locales.json` 清理已删除语言的旧产物。
 
 路径映射是一对一的：
 
@@ -177,7 +181,12 @@ npm run server
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 + 教程三页，共四份真实路径 HTML，站内跳转不会整页刷新。
+- 当前站点有首页 + 教程三页，共四份内容页 HTML，另有共享的
+  `layout.html`；站内跳转不会整页刷新；
+- header/footer 只在 `layout.html` 创建一次：同 layout 下的内容页互相切换时
+  layout 不销毁，只有 `<slot>` 里的子页参与过渡；
+- 父页通过 `routerChange` 更新 `docsMode` 和滚动位置，`site-shell` 也监听
+  `router-change` 同步「教程」高亮与移动菜单状态。
 
 ## 教程模式
 
@@ -190,18 +199,21 @@ npm run server
   不增加构建步骤；
 - `styles/tutorial.css` 提供 MDN 式文章排版：40px h1、32px h2、
   16px body、M3 代码块与教程首页列表；
-- 教程页给 `site-shell` 传 `variant="docs"`：隐藏顶部 CTA，保留文档导航；
+- 教程页切换时由 layout 的 `docsMode` 驱动 `site-shell` 的 `variant`：
+  自动隐藏顶部 CTA，保留文档导航；
 - 教程入口 `/cn/tutorial/` 由 `origin/cn/tutorial/index.html` 生成；
 - 两篇文章分别是 `usage.html`（引用 script）与 `template.html`（模板渲染）；
 - 导航栏的「教程」项指向教程入口；侧栏在文章之间用真实路径跳转。
 
 新增文章：
 
-1. 在 `docs/origin/<locale>/tutorial/` 复制一篇文章页面模块，改标题与正文；
+1. 在 `docs/origin/<locale>/tutorial/` 复制一篇文章页面模块，改标题与正文，
+   并保留 `export const parent = "{{LOCALE}}/layout.html";`（教程目录下
+   `{{LOCALE}}` 会替换成 `..`）；
 2. 在 `site.json` 的 `pages` 里补该路径的 title/description；
 3. 在 `site.json` 的 `tutorial.articles` 加标签；
 4. 在 `tutorial-layout.html` 的侧栏加一项，并在 `tutorial/index.html`
-   加一张入口卡片（如需要）；
+   加一行入口列表（如需要）；
 5. 重新执行 `npm run build:website`。
 
 ## 首屏展示的接入方式

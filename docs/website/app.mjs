@@ -16,6 +16,6 @@ export const pageAnime = reducedMotion
     }
   : {
       current: { opacity: 1, transform: "none" },
-      next: { opacity: 0, transform: "translate3d(0, 12px, 0)" },
-      previous: { opacity: 0, transform: "translate3d(0, -6px, 0)" },
+      next: { opacity: 0, transform: "translate3d(40px, 0, 0)" },
+      previous: { opacity: 0, transform: "translate3d(-20px, 0, 0)" },
     };

@@ -192,28 +192,54 @@ export const createTutorialPage = async ({ url, sitePath }) => {
 
 /**
  * 顶层布局页（layout.html）的页面数据。
- * 由所有内容页通过 export const parent 挂入，负责常驻的 header/footer。
+ * 由所有内容页通过 export const parent 挂入，负责常驻的 header/footer，
+ * 以及教程路由下的左侧教程目录。
  */
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
+  const navUrls = getNavUrls(url);
+  navUrls.usage = new URL("./tutorial/usage.html", url).href;
+  navUrls.template = new URL("./tutorial/template.html", url).href;
 
   return {
     data: {
       site,
-      navUrls: getNavUrls(url),
+      navUrls,
       docsMode: false,
+      current: "index",
     },
     attached() {
-      this.syncDocsMode();
+      this.syncRoute();
     },
     routerChange() {
-      this.syncDocsMode();
+      this.syncRoute();
       window.scrollTo(0, 0);
     },
     proto: {
-      syncDocsMode() {
-        this.docsMode = /\/tutorial(?:\/|$)/.test(location.pathname);
+      syncRoute() {
+        const path = location.pathname;
+        this.docsMode = /\/tutorial(?:\/|$)/.test(path);
+
+        const file = path.replace(/\/+$/, "").split("/").pop();
+        this.current =
+          file === "usage.html"
+            ? "usage"
+            : file === "template.html"
+              ? "template"
+              : "index";
+      },
+      navigateTutorial(key) {
+        const url = key === "tutorial" ? this.navUrls.tutorial : this.navUrls[key];
+        if (!url) return;
+
+        const app = (window.$ ? window.$(this.ele) : this.ele).app;
+        if (app?.goto) {
+          app.goto(url);
+        } else {
+          location.href = url;
+        }
       },
     },
   };
 };
+

@@ -1,9 +1,12 @@
 <!--
   所有内容页的嵌套路由父页（layout）。
   子页通过 `export const parent = "…/layout.html"` 挂到这里，
-  在 slot 中切换；顶部/底部只在首次加载时创建一次。
+  在 slot 中切换；header/footer 与教程左侧目录只创建一次。
 -->
+<link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+<link rel="stylesheet" href="{{SITE}}/styles/tutorial.css" />
 <l-m src="{{SITE}}/components/site-shell.html"></l-m>
+<l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
 
 <style>
   :host {
@@ -48,7 +51,49 @@
   attr:footer-plugins="site.shell.footer.plugins"
   attr:footer-note="site.shell.footer.note"
 >
-  <slot></slot>
+  <div class="tutorial-shell" class:no-nav="!docsMode">
+    <aside class="tutorial-nav" attr:aria-label="site.tutorial.label">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="current === 'index'"
+          on:click="navigateTutorial('tutorial')"
+        >
+          <span class="side-label">{{site.tutorial.overview}}</span>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.start}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'usage'"
+              on:click="navigateTutorial('usage')"
+            >
+              <span class="side-label">{{site.tutorial.articles.usageShort}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.template}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'template'"
+              on:click="navigateTutorial('template')"
+            >
+              <span class="side-label">{{site.tutorial.articles.templateShort}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+      </st-list>
+    </aside>
+
+    <div class="tutorial-content">
+      <slot></slot>
+    </div>
+  </div>
 </site-shell>
 
 <script>

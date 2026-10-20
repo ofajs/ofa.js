@@ -13,61 +13,21 @@
       text-decoration: none;
     }
 
-    .docs {
+    .doc-wrap {
       display: grid;
-      grid-template-columns: 260px minmax(0, 1fr) 220px;
+      grid-template-columns: minmax(0, 800px) 220px;
       align-items: start;
       gap: 48px;
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 32px;
+      max-width: 1068px;
     }
 
-    .side {
-      position: sticky;
-      top: 96px;
-      min-width: 0;
-    }
-
-    .side-list {
-      font-size: 13.5px;
-    }
-
-    .side-list st-list-item {
-      color: var(--md-sys-color-on-surface-variant);
-      font-size: 13.5px;
-    }
-
-    .side-list .side-label {
+    .doc-wrap.no-toc {
       display: block;
-      line-height: 1.45;
-    }
-
-    .side-list st-list-item[collapsible] .side-label {
-      color: var(--md-sys-color-on-surface);
-      font-weight: 500;
-    }
-
-    .side-list st-list-item.active {
-      color: var(--md-sys-color-primary);
-    }
-
-    .side-list st-list-item.active .side-label {
-      color: var(--md-sys-color-primary);
-      font-weight: 500;
-      text-decoration: underline;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 4px;
-    }
-
-    .side-list st-list-item:focus-visible {
-      outline: 2px solid var(--md-sys-color-primary);
-      outline-offset: -2px;
+      max-width: 800px;
     }
 
     .doc-slot {
       min-width: 0;
-      padding: 0 0 80px;
     }
 
     .toc {
@@ -122,9 +82,9 @@
     }
 
     @media (max-width: 1180px) {
-      .docs {
-        grid-template-columns: 260px minmax(0, 1fr);
-        gap: 40px;
+      .doc-wrap {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 800px;
       }
 
       .toc {
@@ -133,17 +93,9 @@
     }
 
     @media (max-width: 900px) {
-      .docs {
-        display: block;
-        padding: 24px 20px 0;
-      }
-
-      .side {
-        display: none;
-      }
-
-      .doc-slot {
-        padding-bottom: 64px;
+      .doc-wrap,
+      .doc-wrap.no-toc {
+        max-width: none;
       }
     }
 
@@ -154,45 +106,7 @@
     }
   </style>
 
-  <div class="docs">
-    <aside class="side" attr:aria-label="labelTutorial">
-      <st-list class="side-list">
-        <st-list-item
-          button
-          class:active="current === 'index'"
-          on:click="navigate('overview')"
-        >
-          <span class="side-label">{{labelOverview}}</span>
-        </st-list-item>
-
-        <st-list-item collapsible expanded>
-          <span class="side-label">{{labelGroupStart}}</span>
-          <st-list slot="sublist">
-            <st-list-item
-              button
-              class:active="current === 'usage'"
-              on:click="navigate('usage')"
-            >
-              <span class="side-label">{{titleUsageShort}}</span>
-            </st-list-item>
-          </st-list>
-        </st-list-item>
-
-        <st-list-item collapsible expanded>
-          <span class="side-label">{{labelGroupTemplate}}</span>
-          <st-list slot="sublist">
-            <st-list-item
-              button
-              class:active="current === 'template'"
-              on:click="navigate('template')"
-            >
-              <span class="side-label">{{titleTemplateShort}}</span>
-            </st-list-item>
-          </st-list>
-        </st-list-item>
-      </st-list>
-    </aside>
-
+  <div class="doc-wrap" class:no-toc="noHeadings">
     <div class="doc-slot"><slot></slot></div>
 
     <aside class="toc" hidden>
@@ -205,30 +119,10 @@
     export default {
       tag: "tutorial-layout",
       attrs: {
-        current: "index",
-        labelTutorial: "Tutorial",
-        labelOverview: "Tutorial overview",
-        labelGroupStart: "Getting started",
-        labelGroupTemplate: "Template syntax",
-        titleUsageShort: "Script include",
-        titleTemplateShort: "Template rendering",
         labelOnThisPage: "On this page",
-        overviewUrl: "./",
-        usageUrl: "./usage.html",
-        templateUrl: "./template.html",
       },
-      proto: {
-        navigate(key) {
-          const url = this[`${key}Url`];
-          if (!url) return;
-
-          const app = (window.$ ? window.$(this.ele) : this.ele).app;
-          if (app?.goto) {
-            app.goto(url);
-          } else {
-            location.href = url;
-          }
-        },
+      data: {
+        noHeadings: false,
       },
       ready() {
         const root = this.ele.shadowRoot;
@@ -239,6 +133,7 @@
         const headings = [...this.ele.querySelectorAll("article.doc > h2")];
         if (!headings.length) {
           toc.hidden = true;
+          this.noHeadings = true;
           return;
         }
 

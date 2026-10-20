@@ -276,3 +276,88 @@
   }
 
 }
+
+/* 教程区嵌套路由：左侧目录在 tutorial/layout.html 中常驻 */
+
+.tutorial-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+  gap: 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.tutorial-nav {
+  position: sticky;
+  top: 96px;
+  min-width: 0;
+}
+
+.tutorial-content {
+  min-width: 0;
+}
+
+.tutorial-nav .side-list {
+  font-size: 13.5px;
+}
+
+.tutorial-nav st-list-item {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13.5px;
+}
+
+.tutorial-nav .side-label {
+  display: block;
+  line-height: 1.45;
+}
+
+.tutorial-nav st-list-item[collapsible] .side-label {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 500;
+}
+
+.tutorial-nav st-list-item.active {
+  color: var(--md-sys-color-primary);
+}
+
+.tutorial-nav st-list-item.active .side-label {
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 1180px) {
+  .tutorial-shell {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .tutorial-shell {
+    display: block;
+    padding: 24px 20px 0;
+  }
+
+  .tutorial-nav {
+    display: none;
+  }
+}
+
+/* 站点 layout 的站点模式：不显示教程目录，内容占满整行 */
+
+.tutorial-shell.no-nav {
+  display: block;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tutorial-shell.no-nav .tutorial-nav {
+  display: none;
+}

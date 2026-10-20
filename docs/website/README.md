@@ -10,7 +10,7 @@ M3 状态层与 Motion easing）。颜色、形状、阴影和动效统一走 CS
 
 官网采用「共享外壳 + 分语言内容」结构：
 
-- 顶部/底部通过嵌套路由 layout 常驻（`layout.html`），教程侧栏、
+- 顶部/底部与教程侧栏通过嵌套路由 layout 常驻（`layout.html`），
   主题样式、启动器放在 `docs/website/` 的共享目录；
 - 每个语言的页面放在 `docs/origin/<locale>/`，只包含页面结构与文案；
 - `npm run build:website` 把 `docs/origin/<locale>/` 组装到
@@ -37,7 +37,7 @@ docs/
     ├── assets/favicon.svg
     ├── components/
     │   ├── site-shell.html          顶部/底部/背景外壳
-    │   ├── tutorial-layout.html     教程侧栏 + 文档内容布局
+    │   ├── tutorial-layout.html     文章正文 + 右侧本页目录
     │   └── demo-counter.html        首页响应式计数器组件
     ├── content/
     │   └── page-runtime.mjs         首页/教程页共享运行时
@@ -47,10 +47,10 @@ docs/
     │   └── tutorial.css             教程文章排版
     ├── templates/
     │   ├── locale-page.html         单页 SCSR 文档模板
-    │   ├── layout-page.html         嵌套路由父页（header/footer + slot）
+    │   ├── layout-page.html         嵌套路由 layout（header/footer + 教程目录 + slot）
     │   └── root-index.html          根语言选择页模板
     └── cn/                          构建产物，勿手改
-        ├── layout.html              内容页共享的嵌套路由 layout
+        ├── layout.html              嵌套路由 layout（header/footer + 教程目录）
         ├── index.html
         ├── site.json
         └── tutorial/
@@ -183,19 +183,22 @@ npm run server
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
 - 当前站点有首页 + 教程三页，共四份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
-- header/footer 只在 `layout.html` 创建一次：同 layout 下的内容页互相切换时
-  layout 不销毁，只有 `<slot>` 里的子页参与过渡；
-- 父页通过 `routerChange` 更新 `docsMode` 和滚动位置，`site-shell` 也监听
-  `router-change` 同步「教程」高亮与移动菜单状态。
+- `layout.html` 常驻 header/footer；进入教程路由时再展开左侧教程目录
+  （同一 layout 的 docs 区域），文章页与教程首页只负责 slot 内容；
+- 切换教程文章时 layout 不销毁，只有文章子页参与过渡；首页与教程之间
+  切换也不重建 layout；
+- 站点 layout 通过 `routerChange` 更新 `docsMode`、教程高亮和滚动位置；
+  `site-shell` 监听 `router-change` 同步「教程」高亮与移动菜单状态。
 
 ## 教程模式
 
-- `components/tutorial-layout.html` 使用 Senti-UI 的 `st-list` /
+- 站点 layout 的教程区域使用 Senti-UI 的 `st-list` /
   `st-list-item` 做左侧目录：分组自带折叠动画，当前文章用蓝色文字 +
-  下划线标记；
+  下划线标记；该目录在教程页之间常驻；
+- `components/tutorial-layout.html` 只负责文章正文 + 右侧「本页内容」；
 - 教程采用 MDN 式三栏：260px 目录 + 800px 正文 + 220px「本页内容」，
   不再用卡片包裹正文；
-- 教程页通过 CDN `l-m` 引入 `senti-ui/packages/list/list.html`，
+- 站点 layout 通过 CDN `l-m` 引入 `senti-ui/packages/list/list.html`，
   不增加构建步骤；
 - `styles/tutorial.css` 提供 MDN 式文章排版：40px h1、32px h2、
   16px body、M3 代码块与教程首页列表；
@@ -208,12 +211,11 @@ npm run server
 新增文章：
 
 1. 在 `docs/origin/<locale>/tutorial/` 复制一篇文章页面模块，改标题与正文，
-   并保留 `export const parent = "{{LOCALE}}/layout.html";`（教程目录下
-   `{{LOCALE}}` 会替换成 `..`）；
+   并保留 `export const parent = "{{LOCALE}}/layout.html";`（挂到站点 layout）；
 2. 在 `site.json` 的 `pages` 里补该路径的 title/description；
 3. 在 `site.json` 的 `tutorial.articles` 加标签；
-4. 在 `tutorial-layout.html` 的侧栏加一项，并在 `tutorial/index.html`
-   加一行入口列表（如需要）；
+4. 在 `templates/layout-page.html` 的左侧目录加一项（以及对应的
+   `navUrls` / 导航方法），并在 `tutorial/index.html` 加一行入口列表；
 5. 重新执行 `npm run build:website`。
 
 ## 首屏展示的接入方式

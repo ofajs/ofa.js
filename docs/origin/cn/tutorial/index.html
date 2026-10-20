@@ -1,22 +1,9 @@
 <template page>
   <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
   <link rel="stylesheet" href="{{SITE}}/styles/tutorial.css" />
-  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
   <l-m src="{{SITE}}/components/tutorial-layout.html"></l-m>
 
-    <tutorial-layout
-      current="index"
-      attr:label-tutorial="site.tutorial.label"
-      attr:label-overview="site.tutorial.overview"
-      attr:label-group-start="site.tutorial.groups.start"
-      attr:label-group-template="site.tutorial.groups.template"
-      attr:label-on-this-page="site.tutorial.onThisPage"
-      attr:title-usage-short="site.tutorial.articles.usageShort"
-      attr:title-template-short="site.tutorial.articles.templateShort"
-      attr:overview-url="navUrls.tutorial"
-      attr:usage-url="navUrls.usage"
-      attr:template-url="navUrls.template"
-    >
+    <tutorial-layout attr:label-on-this-page="site.tutorial.onThisPage">
       <article class="doc tutorial-intro">
         <p class="doc-kicker">Tutorial</p>
         <h1>ofa.js 教程</h1>

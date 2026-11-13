@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="mul">
+<html lang="mul" class="st-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,26 +8,17 @@
       name="description"
       content="Choose a language for the ofa.js website."
     />
-    <meta name="theme-color" content="#111318" />
+    <meta name="theme-color" content="#1a1c1e" />
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
     <style>
-      :root {
-        --md-sys-color-primary: #a2c9ff;
-        --md-sys-color-on-primary: #00315b;
-        --md-sys-color-primary-container: #00497d;
-        --md-sys-color-on-primary-container: #d3e3ff;
-        --md-sys-color-secondary-container: #3c4858;
-        --md-sys-color-on-secondary-container: #d8e3f8;
-        --md-sys-color-surface: #111318;
-        --md-sys-color-surface-container-low: #191c20;
-        --md-sys-color-surface-container: #1d2024;
-        --md-sys-color-surface-container-high: #272a2f;
-        --md-sys-color-on-surface: #e2e2e9;
-        --md-sys-color-on-surface-variant: #c3c7cf;
-        --md-sys-color-outline-variant: #43474e;
-        --md-sys-color-outline: #8d9199;
-      }
-
       * {
         box-sizing: border-box;
       }

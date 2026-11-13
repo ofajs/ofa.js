@@ -5,8 +5,13 @@
 纯文件组装。
 
 官网基础 UI 采用 **Material Design 3**（深色配色、蓝色主色、24px 大圆角、
-M3 状态层与 Motion easing）。颜色、形状、阴影和动效统一走 CSS 变量，
-首页、文档页、语言选择页和 demo 组件共用同一套 token。
+M3 状态层与 Motion easing）。形状、阴影和动效走 `site.css` / `shell.css`
+里的 `--md-sys-shape-*` / `--md-sys-elevation-*` / `--md-sys-motion-*` 变量；
+**颜色全部来自 Senti-UI 的颜色体系**：`templates/*.html` 在 `<head>` 引入
+`st-boot.js`（senti-ui 颜色初始化，首帧同步注入 `--md-sys-color-*`，
+默认种子色 `#0061A4`），官网自身不再手写任何颜色 token。官网为纯深色
+设计，首次访问会把 `st-theme-mode` 锁定为 `dark`（尊重用户已有偏好），
+之后全站（含教程页、语言选择页）强制深色。
 
 官网采用「共享外壳 + 分语言内容」结构：
 

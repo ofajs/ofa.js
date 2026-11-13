@@ -7,31 +7,6 @@
  */
 
 :host {
-  --md-sys-color-primary: #a2c9ff;
-  --md-sys-color-on-primary: #00315b;
-  --md-sys-color-primary-container: #00497d;
-  --md-sys-color-on-primary-container: #d3e3ff;
-  --md-sys-color-secondary: #bcc7dc;
-  --md-sys-color-on-secondary: #263141;
-  --md-sys-color-secondary-container: #3c4858;
-  --md-sys-color-on-secondary-container: #d8e3f8;
-  --md-sys-color-tertiary: #9bd7e8;
-  --md-sys-color-on-tertiary: #00363f;
-  --md-sys-color-tertiary-container: #1b4d59;
-  --md-sys-color-on-tertiary-container: #b7ebf8;
-  --md-sys-color-surface: #111318;
-  --md-sys-color-surface-container-lowest: #0c0e13;
-  --md-sys-color-surface-container-low: #191c20;
-  --md-sys-color-surface-container: #1d2024;
-  --md-sys-color-surface-container-high: #272a2f;
-  --md-sys-color-surface-container-highest: #32353a;
-  --md-sys-color-on-surface: #e2e2e9;
-  --md-sys-color-on-surface-variant: #c3c7cf;
-  --md-sys-color-outline: #8d9199;
-  --md-sys-color-outline-variant: #43474e;
-  --md-sys-color-inverse-surface: #e2e2e9;
-  --md-sys-color-inverse-on-surface: #2f3033;
-  --md-sys-color-error: #f2b8b5;
   --md-sys-shape-corner-xs: 4px;
   --md-sys-shape-corner-sm: 8px;
   --md-sys-shape-corner-md: 12px;
@@ -100,7 +75,6 @@ button {
   display: block;
 }
 
-
 .bg {
   position: fixed;
   inset: 0;
@@ -166,8 +140,6 @@ footer {
   position: relative;
   z-index: 1;
 }
-
-
 
 .nav-wrap {
   position: sticky;
@@ -346,8 +318,6 @@ footer {
   transform: translateY(-3.25px) rotate(-45deg);
 }
 
-
-
 .shell-content {
   position: relative;
   z-index: 1;
@@ -394,7 +364,6 @@ footer {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
 }
-
 
 footer {
   border-top: 1px solid var(--line);
@@ -494,8 +463,6 @@ footer {
   background: var(--teal);
   box-shadow: 0 0 7px var(--teal);
 }
-
-
 
 /* ---------------- 文档模式 ---------------- */
 
@@ -880,7 +847,6 @@ footer {
     padding: 16px 20px 24px;
   }
 }
-
 
 @media (max-width: 640px) {
   .icon-link {

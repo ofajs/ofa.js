@@ -1,24 +1,32 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="st-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ofa.js 教程</title>
     <meta name="description" content="从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。" />
-    <meta name="theme-color" content="#111318" />
+    <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="ofa.js 教程" />
     <meta property="og:description" content="从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
     <style>
       html,
       body {
         margin: 0;
         padding: 0;
         min-height: 100%;
-        background: #111318;
-        color: #e2e2e9;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
         overflow-x: hidden;
         overflow-x: clip;
       }

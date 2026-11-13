@@ -6,6 +6,9 @@
 <template page>
   <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
   <l-m src="{{SITE}}/components/demo-counter.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/button/button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/button/icon-button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/code/code.html"></l-m>
 
   <main class="main">
       <!-- ============ HERO ============ -->
@@ -25,29 +28,27 @@
             </p>
   
             <div class="actions">
-              <button class="btn btn-primary" type="button" on:click="jump('start')">
+              <st-button class="btn btn-primary" on:click="jump('start')">
                 5 分钟上手
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6"></path>
                 </svg>
-              </button>
-              <a
+              </st-button>
+              <st-button
                 class="btn btn-ghost"
-                href="https://github.com/ofajs/ofa.js"
-                target="_blank"
-                rel="noreferrer"
+                variant="outlined"
+                on:click="openExternal(githubUrl)"
               >
                 在 GitHub 上查看
-              </a>
+              </st-button>
             </div>
   
             <div class="cdn-box">
               <div class="cdn-top">
                 <span class="cdn-tag">CDN · v5</span>
                 <span class="cdn-label">ESM</span>
-                <button
+                <st-icon-button
                   class="copy-btn"
-                  type="button"
                   on:click="copySnippet(cdnUrl)"
                   aria-label="复制 v5 ESM 地址"
                   title="复制 v5 ESM 地址"
@@ -56,7 +57,7 @@
                     <rect x="9" y="9" width="11" height="11" rx="2"></rect>
                     <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
                   </svg>
-                </button>
+                </st-icon-button>
               </div>
               <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
               <p class="cdn-hint">复制地址，粘贴到 &lt;script type="module"&gt; 或 import 中。</p>
@@ -83,19 +84,17 @@
           </div>
   
           <div class="hero-visual" data-reveal style="--d: 120ms">
-            <div class="window">
-              <div class="window-top">
-                <span class="dots"><i></i><i></i><i></i></span>
-                <span class="file-name">components/hello-ofa.html</span>
-                <span class="window-badge">HTML MODULE</span>
-              </div>
+            <st-code
+              frame
+              lang="html"
+              title="components/hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-xl);"
+              :code="codeHero"
+            ></st-code>
   
-              <pre class="code-body"><code><span class="line"><span class="tk-tag">&lt;template</span> <span class="tk-attr">component</span><span class="tk-tag">&gt;</span></span><span class="line">  <span class="tk-tag">&lt;style&gt;</span></span><span class="line">    <span class="tk-selector">:host</span> <span class="tk-punc">{</span> <span class="tk-prop">display</span><span class="tk-punc">:</span> <span class="tk-str">grid</span><span class="tk-punc">;</span> <span class="tk-punc">}</span></span><span class="line">  <span class="tk-tag">&lt;/style&gt;</span></span><span class="line"> </span><span class="line">  <span class="tk-tag">&lt;h3&gt;</span>Hello, <span class="tk-brace">{{name}}</span><span class="tk-tag">&lt;/h3&gt;</span></span><span class="line">  <span class="tk-tag">&lt;button</span> <span class="tk-dir">on:click</span><span class="tk-punc">=</span><span class="tk-str">"count++"</span><span class="tk-tag">&gt;</span></span><span class="line">    点了 <span class="tk-brace">{{count}}</span> 次</span><span class="line">  <span class="tk-tag">&lt;/button&gt;</span></span><span class="line"> </span><span class="line">  <span class="tk-tag">&lt;script&gt;</span></span><span class="line">    <span class="tk-key">export default</span> <span class="tk-punc">{</span></span><span class="line">      <span class="tk-prop">tag</span><span class="tk-punc">:</span> <span class="tk-str">"hello-ofa"</span><span class="tk-punc">,</span></span><span class="line">      <span class="tk-prop">data</span><span class="tk-punc">:</span> <span class="tk-punc">{</span></span><span class="line">        <span class="tk-prop">name</span><span class="tk-punc">:</span> <span class="tk-str">"ofa.js"</span><span class="tk-punc">,</span></span><span class="line">        <span class="tk-prop">count</span><span class="tk-punc">:</span> <span class="tk-num">0</span><span class="tk-punc">,</span></span><span class="line">      <span class="tk-punc">},</span></span><span class="line">    <span class="tk-punc">};</span></span><span class="line">  <span class="tk-tag">&lt;/script&gt;</span></span><span class="line"><span class="tk-tag">&lt;/template&gt;</span></span></code></pre>
-  
-              <div class="window-status">
-                <span class="ok"><i></i>No build step</span>
-                <span>HTML → Browser</span>
-              </div>
+            <div class="window-status">
+              <span class="ok"><i></i>No build step</span>
+              <span>HTML → Browser</span>
             </div>
   
             <div class="hero-float">
@@ -170,25 +169,14 @@
               </div>
             </div>
   
-            <div class="mini-window" aria-hidden="true">
-              <div class="mini-top">
-                <span></span><span></span><span></span>
-                <em>hello-ofa.html</em>
-              </div>
-              <pre class="mini-code"><code>&lt;template component&gt;
-    &lt;h3&gt;Hello, <span class="tk-brace">{{name}}</span>&lt;/h3&gt;
-    &lt;button on:click=<span class="tk-str">"count++"</span>&gt;
-      点了 <span class="tk-brace">{{count}}</span> 次
-    &lt;/button&gt;
-  
-    &lt;script&gt;
-      export default {
-        tag: <span class="tk-str">"hello-ofa"</span>,
-        data: { name: <span class="tk-str">"ofa.js"</span>, count: <span class="tk-num">0</span> },
-      };
-    &lt;/script&gt;
-  &lt;/template&gt;</code></pre>
-            </div>
+            <st-code
+              aria-hidden="true"
+              frame
+              lang="html"
+              title="hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeMini"
+            ></st-code>
           </article>
   
           <article class="card span-2 card-counter" data-reveal style="--d: 80ms">
@@ -360,11 +348,11 @@
                   attr:placeholder="site.demo.placeholder"
                   attr:aria-label="site.demo.inputAria"
                 />
-                <button
-                  type="button"
+                <st-button
+                  class="todo-add"
                   on:click="addTodo"
                   attr:disabled="!draft.trim()"
-                >{{site.demo.add}}</button>
+                >{{site.demo.add}}</st-button>
               </div>
   
               <ul class="todo-list">
@@ -378,22 +366,22 @@
                       attr:aria-label="$host.site.demo.checkAria"
                     />
                     <span class="todo-text">{{$data.text}}</span>
-                    <button
+                    <st-icon-button
                       class="todo-del"
-                      type="button"
                       on:click="$host.removeTodo($data.id)"
                       attr:aria-label="$host.site.demo.deleteAria"
-                    >×</button>
+                    >×</st-icon-button>
                   </li>
                 </o-fill>
               </ul>
   
               <div class="todo-foot">
-                <button
-                  type="button"
+                <st-button
+                  class="todo-clear"
+                  variant="text"
                   on:click="clearDone"
                   attr:disabled="doneCount === 0"
-                >{{site.demo.clear}}</button>
+                >{{site.demo.clear}}</st-button>
                 <span>{{doneCount}} / {{todos.length}} {{site.demo.doneSuffix}}</span>
               </div>
             </div>
@@ -414,62 +402,46 @@
             <span class="step-no">STEP 01</span>
             <h3>引入 ofa.js</h3>
             <p>复制 v5 的 mjs 地址即可使用，没有依赖，没有构建。</p>
-            <div class="snippet">
-              <div class="snippet-top">
-                <span>index.html</span>
-                <button
-                  class="copy-btn"
-                  type="button"
-                  on:click="copySnippet(cdnSnippet)"
-                  aria-label="复制 CDN 引用"
-                >
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
-                  </svg>
-                </button>
-              </div>
-              <pre><code>&lt;script
-    type=<span class="tk-str">"module"</span>
-    src=<span class="tk-str">"https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"</span>
-  &gt;&lt;/script&gt;</code></pre>
-            </div>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+            >
+              <textarea hidden>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+></script>
+              </textarea>
+            </st-code>
           </article>
   
           <article class="step" data-reveal style="--d: 70ms">
             <span class="step-no">STEP 02</span>
             <h3>写一个页面</h3>
             <p>模板、样式、逻辑写在同一个文件里，保存即可运行。</p>
-            <div class="snippet">
-              <div class="snippet-top"><span>index.html</span></div>
-              <pre><code>&lt;template page&gt;
-    &lt;h1&gt;Hello, <span class="tk-brace">{{name}}</span>&lt;/h1&gt;
-    &lt;button on:click=<span class="tk-str">"count++"</span>&gt;
-      点了 <span class="tk-brace">{{count}}</span> 次
-    &lt;/button&gt;
-  
-    &lt;script&gt;
-      export default async () =&gt; ({
-        data: { name: <span class="tk-str">"ofa.js"</span>, count: <span class="tk-num">0</span> },
-      });
-    &lt;/script&gt;
-  &lt;/template&gt;</code></pre>
-            </div>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codePage"
+            ></st-code>
           </article>
   
           <article class="step" data-reveal style="--d: 140ms">
             <span class="step-no">STEP 03</span>
             <h3>打开浏览器</h3>
             <p>把文件放进任意静态目录，用浏览器打开——完成了。</p>
-            <div class="snippet">
-              <div class="snippet-top"><span>terminal</span></div>
-              <pre><code><span class="tk-selector">$</span> npx serve .
-  
-  <span class="tk-com"># 或任意静态服务器</span>
-  <span class="tk-selector">$</span> python3 -m http.server
-  
-  <span class="tk-com"># 打开 http://localhost:3000</span></code></pre>
-            </div>
+            <st-code
+              frame
+              lang="js"
+              format="off"
+              title="terminal"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeTerminal"
+            ></st-code>
           </article>
         </div>
   
@@ -618,25 +590,22 @@
           </p>
   
           <div class="actions">
-            <a
+            <st-button
               class="btn btn-primary"
-              attr:href="site.urls.docs"
-              target="_blank"
-              rel="noreferrer"
+              on:click="openExternal(site.urls.docs)"
             >
               阅读文档
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6"></path>
               </svg>
-            </a>
-            <a
+            </st-button>
+            <st-button
               class="btn btn-ghost"
-              href="https://github.com/ofajs/ofa.js"
-              target="_blank"
-              rel="noreferrer"
+              variant="outlined"
+              on:click="openExternal(githubUrl)"
             >
               GitHub 仓库
-            </a>
+            </st-button>
           </div>
   
           <div class="cdn-box">

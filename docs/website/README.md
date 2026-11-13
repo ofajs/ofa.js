@@ -195,6 +195,20 @@ npm run server
 - 站点 layout 的教程区域使用 Senti-UI 的 `st-list` /
   `st-list-item` 做左侧目录：分组自带折叠动画，当前文章用蓝色文字 +
   下划线标记；该目录在教程页之间常驻；
+- 首页与外壳的按钮类 UI 同样使用 Senti-UI：`st-button` /
+  `st-icon-button`（hero CTA、复制按钮、待办演示、CTA 区、
+  `site-shell` 导航 CTA、`demo-counter` 计数按钮）。页面与组件各自通过
+  CDN `l-m` 引入 `senti-ui/packages/button/button.html` 与
+  `button/icon-button.html`；颜色沿用站点自有的 `--md-sys-color-*`
+  token（CSS 变量沿 shadow 边界继承），外观微调（尺寸/圆角）仍写在
+  `site.css` / `shell.css` 里，不新增构建步骤；
+- 首页代码窗口（hero、bento 卡片、Quick Start 三步）使用 Senti-UI 的
+  `st-code`（`frame` 模式：圆点 / 文件名 / 内置复制），通过 CDN `l-m`
+  引入 `senti-ui@main/packages/code/code.html`（`packages/code` 尚未进
+  正式发布版本，需锁定 `@main`）。注意坑：代码样例里的 `{{name}}`
+  必须作为字符串放进 `page-runtime.mjs` 并用 `:code` 绑定——写在
+  `<textarea>` / 文本节点里会被 ofa 模板引擎当插值编译吞掉
+  （`<pre>`/`<code>` 文本节点是例外，ofa 不编译，但 st-code 不走这条路）；
 - `components/tutorial-layout.html` 只负责文章正文 + 右侧「本页内容」；
 - 教程采用 MDN 式三栏：260px 目录 + 800px 正文 + 220px「本页内容」，
   不再用卡片包裹正文；

@@ -63,6 +63,60 @@ export const createLandingPage = async ({ url, sitePath }) => {
       doneCount: todos.filter((item) => item.done).length,
       cdnUrl: CDN_URL,
       cdnSnippet: `<script type="module" src="${CDN_URL}"><\/script>`,
+      githubUrl: "https://github.com/ofajs/ofa.js",
+
+      // st-code 展示用的代码样例（字符串绑定 :code，绕开 ofa 对 {{...}} 的插值编译）
+      codeHero: `<template component>
+  <style>
+    :host { display: grid; }
+  </style>
+
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: {
+        name: "ofa.js",
+        count: 0,
+      },
+    };
+  <\/script>
+</template>`,
+      codeMini: `<template component>
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: { name: "ofa.js", count: 0 },
+    };
+  <\/script>
+</template>`,
+      codePage: `<template page>
+  <h1>Hello, {{name}}</h1>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default async () => ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  <\/script>
+</template>`,
+      codeTerminal: `$ npx serve .
+
+# 或任意静态服务器
+$ python3 -m http.server
+
+# 打开 http://localhost:3000`,
     },
 
     watch: {
@@ -77,6 +131,10 @@ export const createLandingPage = async ({ url, sitePath }) => {
         if (target) {
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         }
+      },
+
+      openExternal(url) {
+        if (url) window.open(url, "_blank", "noopener");
       },
 
       addTodo() {

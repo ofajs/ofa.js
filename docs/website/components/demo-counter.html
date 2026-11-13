@@ -1,4 +1,5 @@
 <template component>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/button/button.html"></l-m>
   <style>
     :host {
       display: block;
@@ -58,57 +59,11 @@
       margin-top: 16px;
     }
 
-    button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 40px;
-      height: 40px;
-      padding: 0 16px;
-      border: 1px solid var(--md-sys-color-outline, #8d9199);
-      border-radius: var(--md-sys-shape-corner-full, 999px);
-      background: transparent;
-      color: var(--md-sys-color-primary, #a2c9ff);
-      font: inherit;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition:
-        background var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)),
-        border-color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
-    }
-
-    button:hover {
-      border-color: var(--md-sys-color-primary, #a2c9ff);
-      background: color-mix(in srgb, var(--md-sys-color-primary, #a2c9ff) 8%, transparent);
-    }
-
-    button:focus-visible {
-      outline: 2px solid var(--md-sys-color-primary, #a2c9ff);
-      outline-offset: 2px;
-    }
-
-    button.primary {
-      border-color: transparent;
-      background: var(--md-sys-color-primary, #a2c9ff);
-      color: var(--md-sys-color-on-primary, #00315b);
-    }
-
-    button.primary:hover {
-      background: color-mix(in srgb, var(--md-sys-color-primary, #a2c9ff) 90%, var(--md-sys-color-on-primary, #00315b) 10%);
-      box-shadow: var(--md-sys-elevation-1, 0 1px 2px rgba(0, 0, 0, 0.3));
-    }
-
     .hint {
       margin: 12px 0 0;
       color: var(--md-sys-color-on-surface-variant, #c3c7cf);
       font-size: 12px;
       line-height: 1.5;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      button {
-        transition-duration: 0.001ms;
-      }
     }
   </style>
   <div class="counter">
@@ -120,9 +75,9 @@
     <div class="value">{{currentValue}}</div>
 
     <div class="actions">
-      <button type="button" on:click="decrement">−1</button>
-      <button type="button" class="primary" on:click="increment">+1</button>
-      <button type="button" on:click="resetCount">{{resetLabel}}</button>
+      <st-button variant="outlined" on:click="decrement">−1</st-button>
+      <st-button on:click="increment">+1</st-button>
+      <st-button variant="outlined" on:click="resetCount">{{resetLabel}}</st-button>
     </div>
 
     <p class="hint">state → UI, automatically</p>

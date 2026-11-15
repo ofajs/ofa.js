@@ -59,19 +59,21 @@
       .brand {
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         margin-bottom: 48px;
       }
 
-      .brand svg {
-        width: 40px;
-        height: 40px;
+      .brand-logo {
+        width: auto;
+        height: 44px;
         display: block;
+        flex: none;
       }
 
       .wordmark {
         font-size: 22px;
         font-weight: 500;
+        line-height: 1;
         letter-spacing: -0.01em;
       }
 
@@ -201,10 +203,7 @@
   <body>
     <main>
       <span class="brand">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="32" cy="32" r="16" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="7"></circle>
-          <circle cx="47" cy="17" r="5" fill="var(--md-sys-color-tertiary, #9bd7e8)"></circle>
-        </svg>
+        <img class="brand-logo" src="./assets/logo.svg" alt="" aria-hidden="true" />
         <span class="wordmark">ofa<span>.js</span></span>
       </span>
 

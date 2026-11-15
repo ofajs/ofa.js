@@ -40,6 +40,7 @@ docs/
     ├── boot.js                      共享启动器：ofa.js → scsr
     ├── app.mjs                      共享 o-app 配置（不声明 home）
     ├── assets/favicon.svg
+    ├── assets/logo.svg
     ├── components/
     │   ├── site-shell.html          顶部/底部/背景外壳
     │   ├── tutorial-layout.html     文章正文 + 右侧本页目录
@@ -67,6 +68,10 @@ docs/
 > 注意：`docs/origin/<locale>/*.html` 是页面模块源文件（`template[page]`），
 > `docs/website/<locale>/*.html` 是构建后的完整 SCSR 文档。两者路径同名、
 > 职责不同，不要直接互换。
+
+品牌标识统一使用 `docs/website/assets/logo.svg`（ofa.js 官方红黄标志），
+`favicon.svg` 由同一图形生成；header、footer 与根语言页都引用该文件，
+不要再手绘替代图标。
 
 ## 构建
 

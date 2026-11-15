@@ -173,22 +173,24 @@ footer {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
 }
 
-.brand svg {
-  width: 30px;
-  height: 30px;
+.brand-logo {
+  width: auto;
+  height: 32px;
   display: block;
+  flex: none;
 }
 
 .wordmark {
   font-size: 18px;
   font-weight: 720;
+  line-height: 1;
   letter-spacing: -0.03em;
 }
 
@@ -198,11 +200,15 @@ footer {
 }
 
 .ver {
-  padding: 2px 5px;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 6px;
   border: 1px solid var(--line);
   border-radius: 5px;
   font-family: var(--mono);
   font-size: 9px;
+  line-height: 1;
   letter-spacing: 0.04em;
   color: #7c88a1;
 }
@@ -604,17 +610,18 @@ footer {
 }
 
 .brand {
-  gap: 10px;
+  gap: 12px;
 }
 
-.brand svg {
-  width: 34px;
+.brand-logo {
+  width: auto;
   height: 34px;
 }
 
 .wordmark {
   font-size: 20px;
   font-weight: 500;
+  line-height: 1;
   letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
 }

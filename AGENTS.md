@@ -123,7 +123,9 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 
 ## 八、运行环境约定
 
-- 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）
+- 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）；
+  `npm run server:website` 以 `docs/website` 为根目录，直接预览官网产物
+  （`http://localhost:3348/`，可用 `PORT` 指定端口）
 - 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
 - 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352）；跨框架对比 `npm run bench:cross`（自管 3353，首次先跑 fetch-cross-vendor.mjs）
 - CI：`.github/workflows/ci.yml`，八条并行任务——drill、stanz、router、scsr、plugins（各三浏览器）+ ofa.js 按
@@ -146,6 +148,17 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
   内容沙箱在本机 `sandbox_init() failed`（环境限制，非用例问题）。用
   `MOZ_DISABLE_CONTENT_SANDBOX=1 npm test` 跑全量即可全绿；Chromium/WebKit
   不受影响
+- **macOS 27 上 Firefox 报 `Could not find profile folder` 或 launch 一直挂起**：
+  系统的 TCC 保护了 `~/Library/Application Support/Firefox`，Playwright 自带的
+  Firefox 从终端启动时读不到这个 app-data 根目录（本机装有 Firefox 时必现）。
+  `MOZ_DISABLE_CONTENT_SANDBOX` 对此无效；用 `CFFIXED_USER_HOME` 把 Gecko 的
+  app-data 根目录改到临时目录即可（不影响 Node/Playwright 的 `$HOME` 和浏览器
+  缓存查找）：
+
+  ```bash
+  mkdir -p /tmp/ffhome/Library/Application\ Support
+  CFFIXED_USER_HOME=/tmp/ffhome npm test
+  ```
 
 ## 九、技术选型禁令
 

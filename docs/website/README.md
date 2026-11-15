@@ -133,6 +133,19 @@ npm run server
 - 中文首页：http://localhost:3348/docs/website/cn/
 - 教程：http://localhost:3348/docs/website/cn/tutorial/
 
+如果只想预览官网构建产物，可以直接以 `docs/website` 为服务根目录：
+
+```bash
+npm run server:website
+```
+
+- 根语言选择页：http://localhost:3348/
+- 中文首页：http://localhost:3348/cn/
+- 教程：http://localhost:3348/cn/tutorial/
+
+两个脚本默认都用 3348 端口，同时只能启动一个；需要并存时用
+`PORT=4000 npm run server:website` 指定其他端口。
+
 不要直接双击 `index.html` 打开——SCSR 页面、`o-page` 与 `site.json` 的加载
 需要 HTTP 环境，`file://` 会被浏览器模块 CORS 策略拦截。
 

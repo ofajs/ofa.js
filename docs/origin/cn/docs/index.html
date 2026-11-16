@@ -8,29 +8,75 @@
         <p class="doc-kicker">Documentation</p>
         <h1>ofa.js 文档</h1>
         <p class="doc-lead">
-          两篇文章，从一行 script 引用开始，走到组件、页面与模板渲染。
-          不需要 npm、Node.js 或打包器，写 HTML 就能运行。
+          从一行 script 开始，到组件、页面、模板、状态、路由与部署。
+          文档按使用顺序组织，也可以直接从左侧目录跳到需要的章节。
         </p>
 
         <div class="docs-list">
-          <a class="docs-row" olink href="./usage.html">
+          <a class="docs-row" olink href="./getting-started.html">
             <span class="num">01</span>
-            <h2>如何使用 ofa.js（引用 script）</h2>
-            <p>通过 CDN 引入框架，写第一个页面模块，并在浏览器里跑起来。</p>
+            <h2>安装与引入</h2>
+            <p>用 CDN 或本地 dist 引入 ofa.js，运行第一个页面。</p>
+            <span class="more">开始阅读 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>第一个组件</h2>
+            <p>创建自定义 Web Component，理解 tag、attrs、data 与插槽。</p>
             <span class="more">开始阅读 →</span>
           </a>
 
           <a class="docs-row" olink href="./template.html">
-            <span class="num">02</span>
-            <h2>使用模板渲染</h2>
-            <p>文本插值、事件、双向绑定、条件、列表，以及一个完整待办示例。</p>
+            <span class="num">03</span>
+            <h2>模板指令总览</h2>
+            <p>一次掌握插值、属性、事件、双向绑定、条件与列表。</p>
+            <span class="more">开始阅读 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>路由与导航</h2>
+            <p>o-app 页面栈、goto/replace/back、o-router 与嵌套布局。</p>
+            <span class="more">开始阅读 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn 与包装对象</h2>
+            <p>选择、树导航、DOM 操作、事件、stanz 与实例扩展。</p>
+            <span class="more">开始阅读 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">06</span>
+            <h2>完整示例</h2>
+            <p>最小页面、自定义组件、待办清单与路由应用。</p>
             <span class="more">开始阅读 →</span>
           </a>
         </div>
 
+        <h2>文档覆盖范围</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>章节</th><th>内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>开始使用</td><td>安装、第一个组件、第一个页面</td></tr>
+            <tr><td>组件与页面</td><td>组件契约、页面模块、生命周期</td></tr>
+            <tr><td>模板语法</td><td>指令总览、绑定与样式、事件与表单、条件与列表</td></tr>
+            <tr><td>数据与状态</td><td>data、计算属性、watch、$.stanz、provider/consumer</td></tr>
+            <tr><td>应用与路由</td><td>o-app、o-router、嵌套路由、scsr 真实路径</td></tr>
+            <tr><td>参考</td><td>$ API、插件、常见错误、完整示例、部署</td></tr>
+          </tbody>
+        </table>
+        </div>
+
         <div class="doc-note">
           <strong>先读哪篇？</strong>
-          如果还没有跑起来过 ofa.js，从第一篇开始；已经能加载页面，可以直接看模板语法。
+          第一次使用从「安装与引入」开始；已经有页面在跑，可以直接看
+          「模板指令总览」或从左侧目录挑选章节。
         </div>
       </article>
     </docs-layout>

@@ -55,30 +55,154 @@
   "docs": {
     "label": "文档",
     "overview": "文档总览",
-    "groups": {
-      "start": "开始使用",
-      "template": "模板语法"
-    },
-    "articles": {
-      "usage": "如何使用 ofa.js（引用 script）",
-      "template": "使用模板渲染",
-      "usageShort": "脚本引用",
-      "templateShort": "模板渲染"
-    },
-    "onThisPage": "本页内容"
+    "onThisPage": "本页内容",
+    "nav": {
+      "start": {
+        "label": "开始使用",
+        "items": {
+          "gettingStarted": "安装与引入",
+          "firstComponent": "第一个组件",
+          "firstPage": "第一个页面"
+        }
+      },
+      "basics": {
+        "label": "组件与页面",
+        "items": {
+          "component": "组件",
+          "page": "页面",
+          "lifecycle": "生命周期"
+        }
+      },
+      "template": {
+        "label": "模板语法",
+        "items": {
+          "template": "指令总览",
+          "binding": "绑定与样式",
+          "events": "事件与表单",
+          "render": "条件与列表"
+        }
+      },
+      "data": {
+        "label": "数据与状态",
+        "items": {
+          "data": "数据与侦听",
+          "state": "全局状态",
+          "context": "跨组件上下文"
+        }
+      },
+      "app": {
+        "label": "应用与路由",
+        "items": {
+          "app": "o-app 应用",
+          "routing": "路由与导航",
+          "nestedRouting": "嵌套路由",
+          "scsr": "真实路径 scsr"
+        }
+      },
+      "reference": {
+        "label": "参考",
+        "items": {
+          "api": "$.fn 与包装对象",
+          "plugins": "插件与扩展",
+          "pitfalls": "常见错误",
+          "examples": "完整示例",
+          "deployment": "部署"
+        }
+      }
+    }
   },
   "pages": {
     "docs/index.html": {
       "title": "ofa.js 文档",
-      "description": "从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。"
+      "description": "ofa.js v5 文档总览：从安装、组件、页面到路由、状态与 API 参考。"
     },
-    "docs/usage.html": {
-      "title": "如何使用 ofa.js（引用 script） — ofa.js 文档",
-      "description": "通过 CDN script 引入 ofa.js，写出第一个页面模块。"
+    "docs/getting-started.html": {
+      "title": "安装与引入 — ofa.js 文档",
+      "description": "通过 CDN 或本地文件引入 ofa.js v5，并运行第一个页面。"
+    },
+    "docs/first-component.html": {
+      "title": "第一个组件 — ofa.js 文档",
+      "description": "创建第一个自定义 Web Component，理解 tag、data、attrs 与 slot。"
+    },
+    "docs/first-page.html": {
+      "title": "第一个页面 — ofa.js 文档",
+      "description": "使用 template[page] 创建页面模块，并通过 o-page 或 o-app 运行。"
+    },
+    "docs/component.html": {
+      "title": "组件 — ofa.js 文档",
+      "description": "ofa.js 组件的结构、attrs/data、props 传递、插槽、自定义事件与组件复用。"
+    },
+    "docs/page.html": {
+      "title": "页面 — ofa.js 文档",
+      "description": "页面模块、query 参数、o-page 内嵌子页面与页面拆分。"
+    },
+    "docs/lifecycle.html": {
+      "title": "生命周期 — ofa.js 文档",
+      "description": "ready、attached、loaded、detached 的时机、顺序与资源清理。"
     },
     "docs/template.html": {
-      "title": "使用模板渲染 — ofa.js 文档",
-      "description": "学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。"
+      "title": "模板指令总览 — ofa.js 文档",
+      "description": "ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。"
+    },
+    "docs/binding.html": {
+      "title": "绑定与样式 — ofa.js 文档",
+      "description": "attr:、:prop、sync:、class:、:style 与布尔属性的正确写法。"
+    },
+    "docs/events.html": {
+      "title": "事件与表单 — ofa.js 文档",
+      "description": "on:、one:、$event、表单双向绑定、自定义事件与事件冒泡。"
+    },
+    "docs/render.html": {
+      "title": "条件与列表 — ofa.js 文档",
+      "description": "o-if/o-else-if/o-else 条件渲染，o-fill 列表与 $data 作用域。"
+    },
+    "docs/data.html": {
+      "title": "数据与侦听 — ofa.js 文档",
+      "description": "响应式 data、computed getter、watch 侦听器与常见边界。"
+    },
+    "docs/state.html": {
+      "title": "全局状态 — ofa.js 文档",
+      "description": "使用 $.stanz() 创建跨页面共享的响应式状态，并正确挂载与清理。"
+    },
+    "docs/context.html": {
+      "title": "跨组件上下文 — ofa.js 文档",
+      "description": "o-provider、o-consumer、o-root-provider、getProvider 与 dispatch。"
+    },
+    "docs/app.html": {
+      "title": "o-app 应用 — ofa.js 文档",
+      "description": "o-app 应用配置、页面栈、切换动画、loading/fail 与扩展 proto。"
+    },
+    "docs/routing.html": {
+      "title": "路由与导航 — ofa.js 文档",
+      "description": "goto/replace/back、olink、query 传参、o-router hash 路由与 router-change。"
+    },
+    "docs/nested-routing.html": {
+      "title": "嵌套路由 — ofa.js 文档",
+      "description": "通过 export const parent 与 slot 建立共享布局的多级嵌套路由。"
+    },
+    "docs/scsr.html": {
+      "title": "真实路径路由 scsr — ofa.js 文档",
+      "description": "用 scsr 让每个 URL 都是可直接访问的完整文档，适合 SEO 与分享。"
+    },
+    "docs/api.html": {
+      "title": "$.fn 与包装对象 — ofa.js 文档",
+      "description": "ofa.js 包装对象 API：选择、树导航、DOM 操作、事件、属性与扩展。"
+    },
+    "docs/plugins.html": {
+      "title": "插件与扩展 — ofa.js 文档",
+      "description": "ofa.js 可选插件：formData、inject-host、body-ghost、global-link 的引入方式与使用场景。"
+    },
+    "docs/pitfalls.html": {
+      "title": "常见错误与排查 — ofa.js 文档",
+      "description": "ReferenceError、保留名冲突、布尔属性、o-page src 与缓存问题排查。"
+    },
+    "docs/examples.html": {
+      "title": "完整示例 — ofa.js 文档",
+      "description": "最小应用、自定义组件、待办清单与路由应用四个完整示例。"
+    },
+    "docs/deployment.html": {
+      "title": "部署 — ofa.js 文档",
+      "description": "把 ofa.js 应用部署到任意静态服务器、CDN 与子目录的注意事项。"
     }
   }
 }

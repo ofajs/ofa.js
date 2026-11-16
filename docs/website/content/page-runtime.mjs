@@ -30,8 +30,6 @@ const getNavUrls = (url, docs = false) => {
       home: new URL("../", url).href,
       docs: new URL("./", url).href,
       languages: new URL("../../", url).href,
-      usage: new URL("./usage.html", url).href,
-      template: new URL("./template.html", url).href,
     };
   }
 
@@ -256,8 +254,6 @@ export const createDocsPage = async ({ url, sitePath }) => {
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const navUrls = getNavUrls(url);
-  navUrls.usage = new URL("./docs/usage.html", url).href;
-  navUrls.template = new URL("./docs/template.html", url).href;
 
   return {
     data: {
@@ -265,6 +261,13 @@ export const createLayoutPage = async ({ url, sitePath }) => {
       navUrls,
       docsMode: false,
       current: "index",
+    },
+    watch: {
+      current() {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => this.scrollActiveDocIntoView());
+        });
+      },
     },
     attached() {
       this.syncRoute();
@@ -280,14 +283,26 @@ export const createLayoutPage = async ({ url, sitePath }) => {
 
         const file = path.replace(/\/+$/, "").split("/").pop();
         this.current =
-          file === "usage.html"
-            ? "usage"
-            : file === "template.html"
-              ? "template"
-              : "index";
+          !file || file === "index.html"
+            ? "index"
+            : file.replace(/\.html$/, "");
+      },
+      scrollActiveDocIntoView() {
+        const nav = this.ele.shadowRoot?.querySelector(".docs-nav");
+        const active = nav?.querySelector("st-list-item.active");
+        if (!nav || !active) return;
+
+        const navRect = nav.getBoundingClientRect();
+        const itemRect = active.getBoundingClientRect();
+        if (itemRect.top < navRect.top || itemRect.bottom > navRect.bottom) {
+          nav.scrollTop += itemRect.top - navRect.top - 16;
+        }
       },
       navigateDocs(key) {
-        const url = key === "docs" ? this.navUrls.docs : this.navUrls[key];
+        const url =
+          key === "index"
+            ? this.navUrls.docs
+            : new URL(`${key}.html`, this.navUrls.docs).href;
         if (!url) return;
 
         const app = (window.$ ? window.$(this.ele) : this.ele).app;

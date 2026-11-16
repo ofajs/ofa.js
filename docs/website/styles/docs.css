@@ -111,6 +111,43 @@
   font-size: 0.875em;
 }
 
+.doc-table-wrap {
+  margin: 0 0 24px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.doc .doc-table {
+  width: 100%;
+  min-width: 560px;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.doc .doc-table th,
+.doc .doc-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc .doc-table th {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 500;
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.doc .doc-table td {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.doc .doc-table tr:last-child td {
+  border-bottom: 0;
+}
+
 .doc pre {
   margin: 0 0 24px;
   padding: 20px;
@@ -132,6 +169,32 @@
   font-size: 13.5px;
   line-height: 1.65;
   white-space: pre;
+}
+
+.doc pre code .tok-comment {
+  color: var(--md-sys-color-outline);
+  font-style: italic;
+}
+
+.doc pre code .tok-str {
+  color: var(--md-sys-color-tertiary);
+}
+
+.doc pre code .tok-kw {
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
+}
+
+.doc pre code .tok-tag {
+  color: var(--md-sys-color-primary);
+}
+
+.doc pre code .tok-num {
+  color: var(--md-sys-color-tertiary);
+}
+
+.doc pre code .tok-expr {
+  color: var(--md-sys-color-primary);
 }
 
 .doc .doc-note {
@@ -290,9 +353,17 @@
 }
 
 .docs-nav {
+  --st-list-gap: 1px;
+  --st-list-item-height: 32px;
+  --st-list-item-padding: 0 8px;
+  --st-list-step: 12px;
   position: sticky;
   top: 96px;
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+  padding-right: 8px;
   min-width: 0;
+  scrollbar-width: thin;
 }
 
 .docs-content {

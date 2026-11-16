@@ -1,0 +1,131 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>生命周期</h1>
+      <p class="doc-lead">
+        组件和页面共享同一组生命周期钩子。理解它们的执行顺序，
+        可以避免在 DOM 还不存在时操作元素，也能正确清理定时器和监听器。
+      </p>
+
+      <h2>四个钩子</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>钩子</th><th>时机</th><th>典型用途</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ready()</code></td>
+            <td>模板渲染完成、DOM 已创建，但不一定已进入文档</td>
+            <td>初始化 DOM、第三方库、测量初始状态</td>
+          </tr>
+          <tr>
+            <td><code>attached()</code></td>
+            <td>元素挂载到 DOM</td>
+            <td>启动定时器、添加全局监听、加载共享状态</td>
+          </tr>
+          <tr>
+            <td><code>loaded()</code></td>
+            <td>自身与子组件、异步资源全部加载完成</td>
+            <td>依赖完整组件树的收尾工作、关闭 loading</td>
+          </tr>
+          <tr>
+            <td><code>detached()</code></td>
+            <td>元素从 DOM 移除</td>
+            <td>清理定时器、监听器、共享状态引用</td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>首次挂载顺序：<code>ready → attached → loaded</code>；移除时调用 <code>detached</code>。</p>
+
+      <h2>一个完整的清理示例</h2>
+      <pre><code>export default {
+  tag: "clock-view",
+  data: {
+    now: Date.now(),
+  },
+  attached() {
+    this._timer = setInterval(() =&gt; {
+      this.now = Date.now();
+    }, 1000);
+    this._onResize = () =&gt; {
+      this.width = window.innerWidth;
+    };
+    window.addEventListener("resize", this._onResize);
+  },
+  detached() {
+    clearInterval(this._timer);
+    window.removeEventListener("resize", this._onResize);
+  },
+};</code></pre>
+      <p>
+        定时器、全局事件监听、共享状态引用都应在 <code>detached</code>
+        里释放；否则组件销毁后仍可能触发更新，造成内存泄漏。
+      </p>
+
+      <h2>ready 与 attached 的区别</h2>
+      <p>
+        <code>ready</code> 适合操作组件自己的 Shadow DOM，例如查询
+        <code>this.shadow.$("#id")</code>。如果逻辑依赖元素真实尺寸或
+        在文档中的位置，放到 <code>attached</code> 更安全。
+      </p>
+      <pre><code>ready() {
+  this.shadow.$("#canvas").css.width = "100%";
+},
+attached() {
+  const rect = this.ele.getBoundingClientRect();
+  this.width = rect.width;
+},</code></pre>
+
+      <h2>异步数据与计算属性</h2>
+      <p>
+        <code>proto</code> 里的 getter 会在模板初始化时立即求值，早于
+        <code>ready</code>。它只适合依赖同步初始值的简单计算：
+      </p>
+      <pre><code>data: { count: 0 },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+},</code></pre>
+      <p>
+        如果计算依赖异步接口，不要写在 getter 里。改用 data 字段，
+        在异步回调中赋值：
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = user.role === "admin" ? "管理员" : "普通用户";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+      <p>
+        更多排查场景见 <a olink href="./pitfalls.html">常见错误</a>。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./page.html">页面 →</a>
+        　·　下一篇：<a olink href="./template.html">模板指令总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>插件与扩展 — ofa.js 文档</title>
+    <meta name="description" content="ofa.js 可选插件：formData、inject-host、body-ghost、global-link 的引入方式与使用场景。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="插件与扩展 — ofa.js 文档" />
+    <meta property="og:description" content="ofa.js 可选插件：formData、inject-host、body-ghost、global-link 的引入方式与使用场景。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>插件与扩展</h1>
+      <p class="doc-lead">
+        插件是「引用才生效」的可选能力，不属于 ofa.js 默认构建。
+        它们挂接页面已加载的全局 <code>$</code>，不会引入第二份框架实例。
+      </p>
+
+      <h2>现有插件</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>插件</th><th>能力</th><th>使用方式</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>容器表单值 ↔ stanz 对象双向绑定</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>把 shadow 内的 style/link 提升到宿主，穿透 slot 深层</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>把模板内容传送到 body 末尾渲染（弹窗 / 浮层）</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>向其后挂载的组件注入全局样式表</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>引入方式</h2>
+      <p>源码形态直接 import，dist 形态用经典脚本或 ESM：</p>
+      <pre><code>// monorepo / npm 源码
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist 经典脚本（配合 dist ofa.js）
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        插件必须在 ofa.js 之后加载，因为它要挂接全局 <code>$</code>；
+        缺失时会直接抛错。
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // 读取
+data.username = "Yao";  // 写回表单
+data.revoke();          // 释放绑定</code></pre>
+      <p>
+        复选框会聚合成数组，select 多选、radio、file 都有对应处理。
+        自定义表单组件只要暴露 <code>value</code> 属性并设置
+        <code>name</code> 即可接入。
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> 只能命中插槽内容的第一层。需要给 slot
+        深处的元素写样式时，用 <code>&lt;inject-host&gt;</code> 把样式提升到宿主：
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        选择器要写完整组件路径，避免污染其他组件；频繁更新样式的场景慎用。
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        弹窗、toast、浮层需要跳出父级 <code>overflow</code> 或
+        <code>transform</code> 限制时，把内容传送到 body：
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        框架绑定会跟随元素移动，原生事件在真实 DOM 位置冒泡。
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        样式表只会注入到它<strong>之后挂载</strong>的组件 shadow；
+        移除 <code>o-global-link</code> 后，新组件不再获得样式。
+        它会污染全局作用域，谨慎使用。
+      </p>
+
+      <h2>match-var（核心样式查询）</h2>
+      <p>
+        需要按 CSS 变量切换组件内部样式时，可以用核心的
+        <code>&lt;match-var&gt;</code>，它不需要额外插件：
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./api.html">$.fn 与包装对象 →</a>
+        　·　下一篇：<a olink href="./pitfalls.html">常见错误 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>事件与表单 — ofa.js 文档</title>
+    <meta name="description" content="on:、one:、$event、表单双向绑定、自定义事件与事件冒泡。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="事件与表单 — ofa.js 文档" />
+    <meta property="og:description" content="on:、one:、$event、表单双向绑定、自定义事件与事件冒泡。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>事件与表单</h1>
+      <p class="doc-lead">
+        事件绑定用 <code>on:</code>，一次性事件用 <code>one:</code>。
+        表单控件的值通过 <code>sync:</code> 与数据双向同步。
+      </p>
+
+      <h2>绑定方法</h2>
+      <pre><code>&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="add(5)"&gt;加 5&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;</code></pre>
+      <p>
+        纯标识符（<code>save</code>）会被解析为 <code>proto</code> 方法并自动绑定
+        <code>this</code>。复杂表达式会直接执行。表达式里的字符串字面量
+        必须加引号，否则会被当成变量名。
+      </p>
+
+      <h2>事件对象</h2>
+      <pre><code>&lt;input on:keydown="onKeydown($event)" /&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { draft: "" },
+    proto: {
+      onKeydown(event) {
+        if (event.key !== "Enter") return;
+        this.submit();
+      },
+      submit() {
+        console.log(this.draft);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        <code>$event</code> 是原生事件对象。自定义事件的数据在
+        <code>event.data</code> 中，网页事件原有字段仍然可用。
+      </p>
+
+      <h2>一次性事件</h2>
+      <pre><code>&lt;img one:load="onImageReady" src="./cover.jpg" /&gt;
+&lt;div one:click="dismiss"&gt;点击后解绑&lt;/div&gt;</code></pre>
+      <p>
+        <code>one:</code> 在第一次触发后自动解绑，适合初始化、提示关闭等场景。
+      </p>
+
+      <h2>表单双向绑定</h2>
+      <pre><code>&lt;input type="text" sync:value="form.name" placeholder="姓名" /&gt;
+&lt;input type="checkbox" sync:checked="form.agree" /&gt;
+&lt;select sync:value="form.city"&gt;
+  &lt;option value="shanghai"&gt;上海&lt;/option&gt;
+  &lt;option value="beijing"&gt;北京&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      <p>
+        <code>sync:</code> 只用于标量。表单对象可以整体放在 <code>data</code>
+        里，但每个字段的绑定仍然要落到具体标量上。
+      </p>
+
+      <h2>提交表单</h2>
+      <pre><code>&lt;form on:submit="onSubmit($event)"&gt;
+  &lt;input sync:value="form.name" required /&gt;
+  &lt;button type="submit"&gt;保存&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { form: { name: "" } },
+    proto: {
+      onSubmit(event) {
+        event.preventDefault();
+        if (!this.form.name.trim()) return;
+        console.log("submit", this.form.name);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+
+      <h2>自定义事件</h2>
+      <p>组件或页面主动抛事件：</p>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "张三" },
+  bubbles: true,   // 默认就是 true
+  composed: true,  // 需要穿出 Shadow DOM 时设置
+});</code></pre>
+      <p>使用方监听并读取 <code>event.data</code>：</p>
+      <pre><code>&lt;user-form on:save="onSaved"&gt;&lt;/user-form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { savedName: "" },
+    proto: {
+      onSaved(event) {
+        this.savedName = event.data.name;
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        内嵌在宿主 Shadow DOM 里的 <code>o-page</code> 向上抛事件时，
+        <code>bubbles: true</code> 与 <code>composed: true</code> 必须同时存在，
+        否则宿主收不到。
+      </p>
+
+      <h2>命名建议</h2>
+      <ul>
+        <li>事件名用小写短横线：<code>data-changed</code>、<code>form-save</code>；</li>
+        <li>原生事件直接沿用 <code>click</code>、<code>input</code>、<code>submit</code>；</li>
+        <li>不要在事件名里带 <code>on</code> 前缀，模板已经用 <code>on:</code> 表达。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./binding.html">绑定与样式 →</a>
+        　·　下一篇：<a olink href="./render.html">条件与列表 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

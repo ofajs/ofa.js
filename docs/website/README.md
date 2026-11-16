@@ -31,10 +31,14 @@ docs/
 │   └── cn/
 │       ├── index.html               首页页面模块（结构 + 文案）
 │       ├── site.json                文案、导航/页脚/文档标签、页面元信息
-│       └── docs/
-│           ├── index.html           文档首页
-│           ├── usage.html           如何使用 ofa.js（引用 script）
-│           └── template.html        使用模板渲染
+│       └── docs/                    文档（23 页）
+│           ├── index.html           文档总览
+│           ├── getting-started.html 安装与引入
+│           ├── component.html       组件与页面
+│           ├── template.html        模板语法
+│           ├── routing.html         应用与路由
+│           ├── api.html             API 参考
+│           └── ...                  其余章节见 site.json 的 docs.nav
 └── website/                         共享资源 + 构建产物
     ├── index.html                   构建生成的根语言选择页
     ├── boot.js                      共享启动器：ofa.js → scsr
@@ -46,7 +50,8 @@ docs/
     │   ├── docs-layout.html           文章正文 + 右侧本页目录
     │   └── demo-counter.html          首页响应式计数器组件
     ├── content/
-    │   └── page-runtime.mjs           首页/文档页共享运行时
+    │   ├── page-runtime.mjs           首页/文档页共享运行时
+    │   └── highlight.mjs              文档代码高亮（零依赖 tokenizer）
     ├── styles/
     │   ├── site.css                   首页与通用设计系统
     │   ├── shell.css                  导航/页脚/背景样式
@@ -59,10 +64,12 @@ docs/
         ├── layout.html              嵌套路由 layout（header/footer + 文档目录）
         ├── index.html
         ├── site.json
-        └── docs/
+        └── docs/                    构建产物（23 页）
             ├── index.html
-            ├── usage.html
-            └── template.html
+            ├── getting-started.html
+            ├── component.html
+            ├── template.html
+            └── ...
 ```
 
 > 注意：`docs/origin/<locale>/*.html` 是页面模块源文件（`template[page]`），
@@ -97,7 +104,7 @@ npm run build:website
 
 ```text
 docs/origin/cn/index.html              → docs/website/cn/index.html
-docs/origin/cn/docs/usage.html         → docs/website/cn/docs/usage.html
+docs/origin/cn/docs/getting-started.html → docs/website/cn/docs/getting-started.html
 docs/origin/cn/site.json               → docs/website/cn/site.json
 ```
 
@@ -115,8 +122,8 @@ docs/origin/cn/site.json               → docs/website/cn/site.json
       "title": "ofa.js 文档",
       "description": "..."
     },
-    "docs/usage.html": {
-      "title": "如何使用 ofa.js（引用 script） — ofa.js 文档",
+    "docs/getting-started.html": {
+      "title": "安装与引入 — ofa.js 文档",
       "description": "..."
     }
   }
@@ -204,7 +211,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 + 文档三页，共四份内容页 HTML，另有共享的
+- 当前站点有首页 + 文档 23 页，共 24 份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -238,21 +245,26 @@ npm run server:website
 - 站点 layout 通过 CDN `l-m` 引入 `senti-ui/packages/list/list.html`，
   不增加构建步骤；
 - `styles/docs.css` 提供 MDN 式文章排版：40px h1、32px h2、
-  16px body、M3 代码块与文档首页列表；
+  16px body、M3 代码块与文档首页列表；侧栏通过 `--st-list-item-height`
+  等变量压缩为 32px 行高；
+- `content/highlight.mjs` 用零依赖 tokenizer 给文档里的
+  `pre code` 上色（HTML 标签 / JS 关键字 / 字符串 / 注释 / 数字 /
+  `{{}}` 表达式），不引入第三方高亮库；
 - 文档页切换时由 layout 的 `docsMode` 驱动 `site-shell` 的 `variant`：
   自动隐藏顶部 CTA，保留文档导航；
 - 文档入口 `/cn/docs/` 由 `origin/cn/docs/index.html` 生成；
-- 两篇文章分别是 `usage.html`（引用 script）与 `template.html`（模板渲染）；
-- 导航栏的「文档」项指向文档入口；侧栏在文章之间用真实路径跳转。
+- 文档按「开始使用 / 组件与页面 / 模板语法 / 数据与状态 / 应用与路由 / 参考」
+  六组组织，完整清单在 `site.json` 的 `docs.nav`；
+- 导航栏的「文档」项指向文档入口；侧栏在文档页之间用真实路径跳转。
 
 新增文章：
 
 1. 在 `docs/origin/<locale>/docs/` 复制一篇文章页面模块，改标题与正文，
    并保留 `export const parent = "{{LOCALE}}/layout.html";`（挂到站点 layout）；
 2. 在 `site.json` 的 `pages` 里补该路径的 title/description；
-3. 在 `site.json` 的 `docs.articles` 加标签；
-4. 在 `templates/layout-page.html` 的左侧目录加一项（以及对应的
-   `navUrls` / 导航方法），并在 `docs/index.html` 加一行入口列表；
+3. 在 `site.json` 的 `docs.nav` 对应分组里加标签，并在
+   `templates/layout-page.html` 的左侧目录加一项；
+4. 在 `docs/index.html` 视需要加入口；
 5. 重新执行 `npm run build:website`。
 
 ## 首屏展示的接入方式

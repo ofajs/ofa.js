@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>绑定与样式 — ofa.js 文档</title>
+    <meta name="description" content="attr:、:prop、sync:、class:、:style 与布尔属性的正确写法。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="绑定与样式 — ofa.js 文档" />
+    <meta property="og:description" content="attr:、:prop、sync:、class:、:style 与布尔属性的正确写法。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>绑定与样式</h1>
+      <p class="doc-lead">
+        属性绑定是 ofa.js 模板里最容易混淆的部分：什么时候用
+        <code>:</code>、什么时候用 <code>attr:</code>、什么时候用
+        <code>sync:</code>，决定了页面能否正确更新。
+      </p>
+
+      <h2>先看一张表</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>写法</th><th>方向</th><th>适合</th><th>布尔属性</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:prop</code></td><td>数据 → 属性</td><td>普通值、对象、数组</td><td>不适合</td></tr>
+          <tr><td><code>sync:prop</code></td><td>双向</td><td>字符串、数字、布尔等标量</td><td>可以，但更推荐 attr:</td></tr>
+          <tr><td><code>attr:name</code></td><td>数据 → HTML attribute</td><td>href/title/data-*、布尔属性</td><td>必须用它</td></tr>
+          <tr><td><code>class:name</code></td><td>数据 → 类名</td><td>active/done/disabled 等状态</td><td>—</td></tr>
+          <tr><td><code>:style.prop</code></td><td>数据 → 内联样式</td><td>颜色、尺寸等动态样式</td><td>—</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>单向绑定</h2>
+      <pre><code>&lt;input :value="keyword" /&gt;
+&lt;my-card :user="user"&gt;&lt;/my-card&gt;
+&lt;div :html="articleHtml"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        <code>:</code> 只把数据写进属性，用户操作不会回写数据。
+        对象和数组通过 <code>:prop</code> 传入组件，不会被序列化成字符串。
+      </p>
+
+      <h2>双向绑定</h2>
+      <pre><code>&lt;input sync:value="keyword" /&gt;
+&lt;input type="checkbox" sync:checked="done" /&gt;
+&lt;textarea sync:value="content"&gt;&lt;/textarea&gt;</code></pre>
+      <p>
+        表单控件通常用 <code>sync:</code>。<strong>不要用它绑定对象或数组</strong>：
+        v5 明确禁止对象双向同步，避免引用混乱；也避免把
+        <code>sync:</code> 绑到 <code>attrs</code> 声明的属性上，
+        字符串序列化可能造成循环更新。
+      </p>
+
+      <h2>attr：HTML 属性与布尔值</h2>
+      <pre><code>&lt;a attr:href="detailUrl" attr:title="tip"&gt;详情&lt;/a&gt;
+&lt;img attr:src="cover" attr:alt="title" /&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;
+&lt;input attr:readonly="locked" /&gt;
+&lt;section attr:hidden="collapsed"&gt;&lt;/section&gt;</code></pre>
+      <p>
+        <code>attr:</code> 会把值序列化为字符串；但遇到
+        <code>false</code> 时会直接移除属性，遇到 <code>true</code>
+        时设置空值。这正是布尔属性需要的行为。
+      </p>
+      <div class="doc-note">
+        <strong>不要用 <code>:disabled="false"</code>。</strong>
+        它会渲染出 <code>disabled="false"</code>，属性仍然存在，按钮照样禁用。
+        布尔属性统一写 <code>attr:disabled="loading"</code>。
+      </div>
+
+      <h2>类名</h2>
+      <pre><code>&lt;li class="todo" class:done="item.done" class:active="item.id === currentId"&gt;
+  {{item.text}}
+&lt;/li&gt;</code></pre>
+      <p>
+        <code>class:name</code> 的条件为真时添加类名，为假时移除。
+        一个元素可以同时写多个。数据固有属性（type、status、level）
+        更适合 <code>attr:</code> + 属性选择器：
+      </p>
+      <pre><code>&lt;div class="message" attr:type="$data.type"&gt;&lt;/div&gt;
+
+.message[type="sent"] { color: #2563eb; }
+.message[type="failed"] { color: #dc2626; }</code></pre>
+
+      <h2>内联样式</h2>
+      <pre><code>&lt;p :style.color="active ? '#0f766e' : '#64748b'"&gt;&lt;/p&gt;
+&lt;div :style.width="width + 'px'" :style.height="height + 'px'"&gt;&lt;/div&gt;
+&lt;div :style.backgroundImage="'url(' + cover + ')'"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        样式属性名使用驼峰形式（<code>fontSize</code>、<code>borderRadius</code>）。
+        值必须是合法 CSS 字符串，需要单位时自己拼接。
+      </p>
+
+      <h2>样式表里的 data()</h2>
+      <p>
+        除了内联样式，还可以在 <code>&lt;style&gt;</code> 里用
+        <code>data(field)</code> 读取数据，适合根据状态批量切换样式：
+      </p>
+      <pre><code>&lt;style&gt;
+  :host {
+    --accent: data(accentColor);
+    border-color: var(--accent);
+  }
+  .title {
+    color: data(titleColor);
+  }
+&lt;/style&gt;</code></pre>
+      <p>这种写法只适合组件自己的样式；跨组件主题请使用 CSS 变量或 match-var。</p>
+
+      <h2>属性值里没有 {{ }}</h2>
+      <p>
+        <code>{{ }}</code> 只解析元素文本内容。下面两种写法都是错的：
+      </p>
+      <pre><code>&lt;!-- 错误：属性里的 {{ }} 不会解析 --&gt;
+&lt;a href="{{url}}"&gt;链接&lt;/a&gt;
+&lt;img title="{{name}}" /&gt;
+
+&lt;!-- 正确 --&gt;
+&lt;a attr:href="url"&gt;链接&lt;/a&gt;
+&lt;img attr:title="name" /&gt;</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./template.html">模板指令总览 →</a>
+        　·　下一篇：<a olink href="./events.html">事件与表单 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

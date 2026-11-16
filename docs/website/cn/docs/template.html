@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>使用模板渲染 — ofa.js 文档</title>
-    <meta name="description" content="学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。" />
+    <title>模板指令总览 — ofa.js 文档</title>
+    <meta name="description" content="ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="使用模板渲染 — ofa.js 文档" />
-    <meta property="og:description" content="学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。" />
+    <meta property="og:title" content="模板指令总览 — ofa.js 文档" />
+    <meta property="og:description" content="ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -62,59 +62,80 @@
   <link rel="stylesheet" href="../../styles/docs.css" />
   <l-m src="../../components/docs-layout.html"></l-m>
 
-    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
-      <article class="doc">
-        <p class="doc-kicker">Template rendering</p>
-        <h1>使用模板渲染</h1>
-        <p class="doc-lead">
-          ofa.js 的模板语法直接写在 HTML 里。数据变化时，页面自动更新，
-          不需要手动操作 DOM，也没有额外的编译步骤。
-        </p>
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>模板指令总览</h1>
+      <p class="doc-lead">
+        ofa.js 的模板语法直接写在 HTML 上：用指令绑定数据、事件和渲染逻辑，
+        没有 JSX，也没有需要编译的模板文件。
+      </p>
 
-        <h2>1. data 与文本插值</h2>
-        <p>
-          页面模块和组件模块都可以返回一个 <code>data</code> 对象。模板中用
-          <code>{{ }}</code> 读取数据：
-        </p>
-        <pre><code>&lt;h2&gt;你好，{{name}}&lt;/h2&gt;
-&lt;p&gt;计数：{{count}}&lt;/p&gt;
+      <h2>指令总表</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>语法</th><th>用途</th><th>示例</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>文本插值，仅限元素文本内容</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>渲染 HTML 内容</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>单向属性绑定</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>双向属性绑定</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>HTML attribute 绑定</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>条件类名</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>内联样式绑定</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>事件绑定</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>只触发一次的事件</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>事件对象</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
 
-&lt;script&gt;
-  export default async () =&gt; ({
-    data: { name: "ofa.js", count: 0 },
-  });
-&lt;/script&gt;</code></pre>
-        <p>
-          <code>{{ }}</code> 只用于元素的文本内容，不能写在属性值里。
-          属性值请使用下一节的指令。
-        </p>
+      <h2>文本插值</h2>
+      <pre><code>&lt;p&gt;你好，{{name}}&lt;/p&gt;
+&lt;p&gt;计数：{{count}}，双倍：{{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> 只在元素文本内容中生效。属性值、事件参数和样式值
+        一律使用指令表达式。需要渲染 HTML 时使用 <code>:html</code>，
+        并确保内容可信。
+      </p>
 
-        <h2>2. 事件与双向绑定</h2>
-        <p>
-          事件用 <code>on:</code>，双向绑定用 <code>sync:</code>：
-        </p>
-        <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
-&lt;input sync:value="name" /&gt;
-&lt;input type="checkbox" sync:checked="done" /&gt;</code></pre>
-        <p>
-          普通属性用 <code>attr:</code>，条件类名用 <code>class:</code>，
-          内联样式用 <code>:style.*</code>：
-        </p>
-        <pre><code>&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;
-&lt;li class:done="item.done"&gt;...&lt;/li&gt;
-&lt;a attr:href="url"&gt;链接&lt;/a&gt;
-&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;...&lt;/p&gt;</code></pre>
-        <p>
-          布尔属性（<code>disabled</code>、<code>checked</code>、
-          <code>hidden</code> 等）一定要用 <code>attr:</code>；
-          用 <code>:prop</code> 会把 <code>false</code> 渲染成字符串属性。
-        </p>
+      <h2>属性与双向绑定</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;链接&lt;/a&gt;
+&lt;!-- 布尔属性一律用 attr: --&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> 是单向绑定，<code>sync:</code> 是双向绑定。
+        <code>attr:</code> 对 <code>true</code> 设置空属性、对
+        <code>false</code> 移除属性，因此布尔属性必须用它。
+      </p>
 
-        <h2>3. 条件渲染</h2>
-        <p>
-          <code>o-if</code> 系列按条件保留或移除内容，三个标签必须连续书写：
-        </p>
-        <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+      <h2>类名与样式</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> 根据布尔表达式加/减类名；
+        <code>:style.prop</code> 使用驼峰属性名。详细规则见
+        <a olink href="./binding.html">绑定与样式</a>。
+      </p>
+
+      <h2>事件</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        纯方法名会自动绑定 <code>this</code>，也可以直接写表达式。
+        自定义事件的数据通过 <code>event.data</code> 读取。详见
+        <a olink href="./events.html">事件与表单</a>。
+      </p>
+
+      <h2>条件与列表</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
   &lt;p&gt;大于 10&lt;/p&gt;
 &lt;/o-if&gt;
 &lt;o-else-if :value="count &gt; 5"&gt;
@@ -122,90 +143,55 @@
 &lt;/o-else-if&gt;
 &lt;o-else&gt;
   &lt;p&gt;小于等于 5&lt;/p&gt;
-&lt;/o-else&gt;</code></pre>
-        <p>
-          频繁切换显隐的 UI 用 <code>class:</code> 更轻量；
-          条件确实会销毁/重建内容时再用 <code>o-if</code>。
-        </p>
+&lt;/o-else&gt;
 
-        <h2>4. 列表渲染</h2>
-        <p>
-          列表用 <code>o-fill</code>。列表项内有唯一字段时始终写上
-          <code>fill-key</code>，增删和排序才能正确复用节点：
-        </p>
-        <pre><code>&lt;ul&gt;
+&lt;ul&gt;
   &lt;o-fill :value="todos" fill-key="id"&gt;
     &lt;li class:done="$data.done"&gt;
-      &lt;span&gt;{{$data.text}}&lt;/span&gt;
-      &lt;button on:click="$host.removeTodo($data.id)"&gt;×&lt;/button&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
     &lt;/li&gt;
   &lt;/o-fill&gt;
 &lt;/ul&gt;</code></pre>
-        <p>
-          <code>o-fill</code> 内部只能用 <code>$data</code>、
-          <code>$index</code>、<code>$host</code>、<code>$parent</code>、
-          <code>$ele</code> 这些作用域变量，不能直接写 <code>item.text</code>。
-          数组的 <code>push</code> / <code>splice</code> 会自动更新视图。
-        </p>
+      <p>
+        条件标签必须连续书写；<code>o-fill</code> 内只能使用
+        <code>$data</code>、<code>$index</code>、<code>$host</code>、
+        <code>$parent</code>、<code>$ele</code>。详见
+        <a olink href="./render.html">条件与列表</a>。
+      </p>
 
-        <h2>5. 完整示例：待办清单</h2>
-        <p>把上面的语法组合起来，就是一份可以直接运行的待办页面：</p>
-        <pre><code>&lt;template page&gt;
-  &lt;h2&gt;待办（{{todos.length}}）&lt;/h2&gt;
+      <h2>数据来源</h2>
+      <p>
+        模板中的每个变量都必须先在 <code>data</code> 或 <code>attrs</code>
+        中声明。未声明不是 <code>undefined</code>，而是直接抛
+        <code>ReferenceError</code> 并中断整页渲染。
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
 
-  &lt;input
-    sync:value="draft"
-    on:keydown="addOnEnter($event)"
-    placeholder="输入待办，回车添加"
-  /&gt;
-
-  &lt;ul&gt;
-    &lt;o-fill :value="todos" fill-key="id"&gt;
-      &lt;li class:done="$data.done"&gt;
-        &lt;input type="checkbox" sync:checked="$data.done" /&gt;
-        &lt;span&gt;{{$data.text}}&lt;/span&gt;
-        &lt;button on:click="$host.removeTodo($data.id)"&gt;×&lt;/button&gt;
-      &lt;/li&gt;
-    &lt;/o-fill&gt;
-  &lt;/ul&gt;
-
-  &lt;script&gt;
-    let uid = 1;
-
-    export default async () =&gt; ({
-      data: {
-        draft: "",
-        todos: [{ id: 1, text: "学习 ofa.js", done: false }],
-      },
-      proto: {
-        addOnEnter(event) {
-          if (event.key !== "Enter") return;
-          const text = this.draft.trim();
-          if (!text) return;
-          this.todos.push({ id: ++uid, text, done: false });
-          this.draft = "";
-        },
-        removeTodo(id) {
-          const index = this.todos.findIndex((item) =&gt; item.id === id);
-          if (index &gt; -1) this.todos.splice(index, 1);
-        },
-      },
-    });
-  &lt;/script&gt;
-&lt;/template&gt;</code></pre>
-
-        <h2>小结</h2>
-        <p>
-          <code>{{ }}</code> 管文本，<code>on:</code> 管事件，
-          <code>sync:</code> 管双向绑定，<code>class:</code> /
-          <code>attr:</code> 管属性，<code>o-if</code> 管条件，
-          <code>o-fill</code> 管列表。掌握这六件事，就能写出大部分界面。
-        </p>
-        <p class="doc-end">
-          上一篇：<a olink href="./usage.html">如何使用 ofa.js →</a>
-        </p>
-      </article>
-    </docs-layout>
+      <p class="doc-end">
+        上一篇：<a olink href="./lifecycle.html">生命周期 →</a>
+        　·　下一篇：<a olink href="./binding.html">绑定与样式 →</a>
+      </p>
+    </article>
+  </docs-layout>
 
   <script>
     import { createDocsPage } from "../../content/page-runtime.mjs";

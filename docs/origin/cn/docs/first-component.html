@@ -1,0 +1,159 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Getting started</p>
+      <h1>第一个组件</h1>
+      <p class="doc-lead">
+        一个 <code>.html</code> 文件就是一个组件。浏览器直接加载它，
+        不需要编译，也不需要注册到某个打包入口。
+      </p>
+
+      <h2>1. 组件文件</h2>
+      <p>
+        新建 <code>my-counter.html</code>。组件模块使用
+        <code>&lt;template component&gt;</code>，并通过
+        <code>tag</code> 声明标签名：
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{count}}&lt;/strong&gt;
+  &lt;button on:click="decrease"&gt;-&lt;/button&gt;
+  &lt;button on:click="increase"&gt;+&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initial: 0,
+      },
+      data: {
+        count: 0,
+      },
+      watch: {
+        initial(value) {
+          this.count = value;
+        },
+      },
+      ready() {
+        this.count = this.initial;
+      },
+      proto: {
+        increase() {
+          this.count += 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+        decrease() {
+          this.count -= 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <div class="doc-note">
+        <strong>script 必须在 template 内。</strong>
+        ofa.js 只提取 <code>template[component]</code> 或
+        <code>template[page]</code> 内部的脚本，写在模板外会被忽略。
+      </div>
+
+      <h2>2. 在页面里使用</h2>
+      <p>
+        用 <code>&lt;l-m&gt;</code> 引入组件文件，然后像普通 HTML 标签一样使用。
+        标签名必须与 <code>tag</code> 一致：
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter initial="5" on:change="onCountChange"&gt;
+    当前计数
+  &lt;/my-counter&gt;
+
+  &lt;p&gt;最近一次变化：{{lastChange}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { lastChange: "还没有变化" },
+      proto: {
+        onCountChange(event) {
+          this.lastChange = event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>3. 三件事要分清</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>位置</th><th>用途</th><th>例子</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tag</code></td>
+            <td>组件的 HTML 标签名，必须声明</td>
+            <td><code>tag: "my-counter"</code></td>
+          </tr>
+          <tr>
+            <td><code>attrs</code></td>
+            <td>从外部传入的标量属性</td>
+            <td><code>initial="5"</code></td>
+          </tr>
+          <tr>
+            <td><code>data</code></td>
+            <td>组件内部响应式状态</td>
+            <td><code>count: 0</code></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        <code>attrs</code> 与 <code>data</code> 的 key 不能重复。数组、对象等
+        复杂数据放 <code>data</code>，通过 <code>:prop</code> 传入；
+        <code>attrs</code> 只放字符串、数字等标量。
+      </p>
+
+      <h2>4. 插槽与事件</h2>
+      <p>
+        组件内的 <code>&lt;slot&gt;</code> 会接收使用方写在标签里的内容。
+        上面的 <code>&lt;slot&gt;&lt;/slot&gt;</code> 就渲染了「当前计数」。
+      </p>
+      <p>
+        组件用 <code>this.emit("change", { data })</code> 向外抛事件，
+        使用方用 <code>on:change</code> 监听，通过 <code>event.data</code>
+        读取数据。事件默认冒泡，但不会穿出 Shadow DOM；需要跨 shadow
+        边界时加 <code>composed: true</code>。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./getting-started.html">安装与引入 →</a>
+        　·　下一篇：<a olink href="./first-page.html">第一个页面 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,99 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>跨组件上下文</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> 把数据放进一棵子树，
+        <code>o-consumer</code> 就近消费。它适合跨多层组件传递用户信息、
+        主题和业务上下文，避免逐层传 props。
+      </p>
+
+      <h2>提供者与消费者</h2>
+      <pre><code>&lt;!-- 提供者：name 是上下文标识，其余属性是共享数据 --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="张三"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- 消费者：把上下文属性同步到自己的 data 字段 --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        consumer 会沿 DOM 向上找<strong>最近的</strong>同名 provider。
+        provider 必须是 consumer 的祖先，兄弟节点找不到。
+      </p>
+
+      <h2>运行时更新</h2>
+      <p>
+        provider 的 HTML attribute 只在初始化时读取一次。运行时更新必须
+        直接改它的数据属性，不能靠 <code>setAttribute</code>：
+      </p>
+      <pre><code>// 正确：修改 provider 的数据
+const provider = $("#userProvider");
+provider.userName = "李四";
+
+// 错误：setAttribute 不会广播给 consumer
+provider.ele.setAttribute("user-name", "李四");</code></pre>
+
+      <h2>默认值：o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        没有同名 provider 时，consumer 会回退到文档级的 root-provider。
+        两者同时存在时，离 consumer 更近的 provider 优先。
+      </p>
+
+      <h2>主动查找 provider</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "王五"; // consumer 自动更新
+
+// 任意元素也可以查找
+$(".profile").getProvider("userInfo");
+
+// 全局根 provider
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>provider 向 consumer 派发事件</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "你好" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>什么时候不用它</h2>
+      <ul>
+        <li>只在父子之间传值：用 <code>:prop</code> / <code>sync:</code>；</li>
+        <li>跨页面共享业务状态：用 <code>$.stanz()</code>；</li>
+        <li>只是主题色、尺寸等纯样式上下文：优先 CSS 变量或 <code>match-var</code>。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./state.html">全局状态 →</a>
+        　·　下一篇：<a olink href="./app.html">o-app 应用 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

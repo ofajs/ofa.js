@@ -1,0 +1,177 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>$.fn 与包装对象</h1>
+      <p class="doc-lead">
+        <code>$</code> 既是选择器也是元素工厂。它返回的是 ofa.js 包装对象，
+        大部分框架能力都在这个对象上；浏览器原生能力通过 <code>.ele</code>
+        访问。
+      </p>
+
+      <h2>获取元素</h2>
+      <pre><code>$("#target");                       // 第一个匹配
+$("#target").$("h3");               // 子元素
+$("my-component").shadow.$("#x");   // Shadow DOM 内查询
+$.all("li");                        // 所有匹配的包装实例数组
+
+$(document.createElement("div"));   // 原生元素 → 包装对象
+$(`&lt;div&gt;new&lt;/div&gt;`);               // HTML 字符串 → 包装对象
+$({ tag: "div", text: "hi" });      // 对象描述 → 包装对象</code></pre>
+
+      <h2>包装对象与原生元素</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>场景</th><th>写法</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ofa.js 属性/方法</td><td><code>el.src</code>、<code>el.text</code>、<code>el.on()</code>、<code>el.app</code></td></tr>
+          <tr><td>浏览器原生属性</td><td><code>el.ele.scrollTop</code>、<code>el.ele.shadowRoot</code></td></tr>
+          <tr><td>组件 data 字段</td><td><code>el.count</code>（直接访问字段）</td></tr>
+          <tr><td>dataset</td><td><code>el.data.role</code></td></tr>
+          <tr><td>Shadow 查询</td><td><code>this.shadow.$("#id")</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        口诀：ofa.js 加的属性直接用，浏览器原生的走 <code>.ele</code>。
+      </p>
+
+      <h2>树导航</h2>
+      <pre><code>el.prev;      el.prevs;
+el.next;      el.nexts;
+el.siblings;
+el.parent;    el.parents;
+el.host;      // 宿主组件实例
+el.app;       // 所在 o-app
+el.root;      // document 实例
+el.shadow;    // shadow root 实例
+el.tag;       // 小写标签名
+el.index;     // 在父级中的位置
+el.PATH;      // 组件注册文件地址
+el.is("li");  // 是否匹配选择器</code></pre>
+
+      <h2>子元素增删</h2>
+      <pre><code>$("ul").push("&lt;li&gt;new&lt;/li&gt;");
+$("ul").unshift("&lt;li&gt;first&lt;/li&gt;");
+$("ul").pop();
+$("ul").shift();
+$("ul").splice(1, 2, "&lt;li&gt;replacement&lt;/li&gt;");
+
+el.before("&lt;p&gt;before&lt;/p&gt;");
+el.after("&lt;p&gt;after&lt;/p&gt;");
+el.remove();
+el.wrap("&lt;div class='wrapper'&gt;&lt;/div&gt;");
+el.unwrap();</code></pre>
+
+      <h2>内容与属性</h2>
+      <pre><code>el.text = "new text";
+el.html = "&lt;b&gt;hi&lt;/b&gt;";
+
+el.attr("data-id");          // 读取 attribute
+el.attr("data-id", "42");    // 写入 attribute
+
+el.css.color = "red";
+el.css = { color: "blue", lineHeight: "1.5" };
+el.css = { ...el.css, color: "red" };
+
+el.classList.add("active");
+el.classList.remove("done");
+el.data.role = "admin";
+el.refresh();                // 手动刷新非响应式渲染</code></pre>
+      <p>
+        模板里对应 <code>:text</code>、<code>:html</code>、
+        <code>attr:data-id</code>、<code>:style.color</code>、
+        <code>class:active</code>。
+      </p>
+
+      <h2>事件</h2>
+      <pre><code>el.on("click", handler);
+el.one("load", init);
+el.off("click", handler);
+
+el.emit("save", {
+  data: { id: 1 },
+  bubbles: true,
+  composed: true,
+});</code></pre>
+
+      <h2>o-app 与 o-page</h2>
+      <pre><code>const app = $("o-app");
+app.src;
+app.current;
+app.routers;
+app.goto("./page.html");
+app.replace("./page.html");
+app.back();
+app.forward();
+
+const page = app.current;
+page.src;
+page.goto("./next.html");
+page.pageIsReady;</code></pre>
+
+      <h2>stanz 能力</h2>
+      <pre><code>const tid = target.watch(() =&gt; {
+  // 深度监听
+});
+target.watchTick(() =&gt; {}); // 节流监听
+target.unwatch(tid);
+
+const data = $.stanz({ count: 0 });
+data._internal = "不会被监听"; // 下划线前缀跳过响应式</code></pre>
+
+      <h2>扩展实例</h2>
+      <pre><code>// 单个实例
+el.extend({
+  say() {
+    return "hello";
+  },
+});
+
+// 所有实例
+$.fn.extend({
+  get good() {
+    return "ofa.js is good";
+  },
+});
+
+// 新指令：:red="count % 3 === 0"
+$.fn.extend({
+  set red(value) {
+    this.css.color = value ? "red" : "";
+  },
+});</code></pre>
+
+      <h2>formData 插件</h2>
+      <p>
+        <code>formData()</code> 不在框架默认构建里。先引入
+        <code>packages/plugins/formdata/formdata.mjs</code>（或 dist 脚本），
+        再调用：
+      </p>
+      <pre><code>const data = this.shadow.formData();
+data.username = "Yao";
+console.log(data.username);
+data.revoke(); // 释放绑定</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./scsr.html">真实路径 scsr →</a>
+        　·　下一篇：<a olink href="./plugins.html">插件与扩展 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

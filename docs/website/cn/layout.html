@@ -114,33 +114,197 @@
         <st-list-item
           button
           class:active="current === 'index'"
-          on:click="navigateDocs('docs')"
+          on:click="navigateDocs('index')"
         >
           <span class="side-label">{{site.docs.overview}}</span>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.docs.groups.start}}</span>
+          <span class="side-label">{{site.docs.nav.start.label}}</span>
           <st-list slot="sublist">
             <st-list-item
               button
-              class:active="current === 'usage'"
-              on:click="navigateDocs('usage')"
+              class:active="current === 'getting-started'"
+              on:click="navigateDocs('getting-started')"
             >
-              <span class="side-label">{{site.docs.articles.usageShort}}</span>
+              <span class="side-label">{{site.docs.nav.start.items.gettingStarted}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'first-component'"
+              on:click="navigateDocs('first-component')"
+            >
+              <span class="side-label">{{site.docs.nav.start.items.firstComponent}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'first-page'"
+              on:click="navigateDocs('first-page')"
+            >
+              <span class="side-label">{{site.docs.nav.start.items.firstPage}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.docs.groups.template}}</span>
+          <span class="side-label">{{site.docs.nav.basics.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'component'"
+              on:click="navigateDocs('component')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.component}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'page'"
+              on:click="navigateDocs('page')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.page}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lifecycle'"
+              on:click="navigateDocs('lifecycle')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.lifecycle}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.template.label}}</span>
           <st-list slot="sublist">
             <st-list-item
               button
               class:active="current === 'template'"
               on:click="navigateDocs('template')"
             >
-              <span class="side-label">{{site.docs.articles.templateShort}}</span>
+              <span class="side-label">{{site.docs.nav.template.items.template}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'binding'"
+              on:click="navigateDocs('binding')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.binding}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'events'"
+              on:click="navigateDocs('events')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.events}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'render'"
+              on:click="navigateDocs('render')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.render}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.data.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'data'"
+              on:click="navigateDocs('data')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.data}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'state'"
+              on:click="navigateDocs('state')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.state}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'context'"
+              on:click="navigateDocs('context')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.context}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.app.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'app'"
+              on:click="navigateDocs('app')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.app}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'routing'"
+              on:click="navigateDocs('routing')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.routing}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'nested-routing'"
+              on:click="navigateDocs('nested-routing')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.nestedRouting}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'scsr'"
+              on:click="navigateDocs('scsr')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.scsr}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.reference.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'api'"
+              on:click="navigateDocs('api')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.api}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'plugins'"
+              on:click="navigateDocs('plugins')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.plugins}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'pitfalls'"
+              on:click="navigateDocs('pitfalls')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.pitfalls}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'examples'"
+              on:click="navigateDocs('examples')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.examples}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'deployment'"
+              on:click="navigateDocs('deployment')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.deployment}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>

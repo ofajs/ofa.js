@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>条件与列表 — ofa.js 文档</title>
+    <meta name="description" content="o-if/o-else-if/o-else 条件渲染，o-fill 列表与 $data 作用域。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="条件与列表 — ofa.js 文档" />
+    <meta property="og:description" content="o-if/o-else-if/o-else 条件渲染，o-fill 列表与 $data 作用域。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>条件与列表</h1>
+      <p class="doc-lead">
+        <code>o-if</code> 控制内容是否存在，<code>o-fill</code> 按数组渲染列表。
+        两者都是元素驻留实现，理解作用域和 DOM 结构很重要。
+      </p>
+
+      <h2>条件渲染</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;大于 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;大于 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;小于等于 5&lt;/p&gt;
+&lt;/o-else&gt;</code></pre>
+      <ul>
+        <li>三个标签必须<strong>连续书写</strong>，中间不能插入其他元素；</li>
+        <li><code>o-else</code> 不带 <code>value</code>；</li>
+        <li>条件为假时内容被移除，为真时重新创建；</li>
+        <li>频繁显隐且需要保留 DOM 状态时，用 <code>class:</code> 切换更合适。</li>
+      </ul>
+
+      <h2>o-fill 基础</h2>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+      &lt;span&gt;{{$data.text}}&lt;/span&gt;
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        <code>fill-key</code> 指向列表项的唯一字段。加上它，增删和排序时
+        节点会按 key 复用，项内的输入状态不会丢失；没有唯一字段时才省略。
+      </p>
+
+      <h2>列表项作用域</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>变量</th><th>含义</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$data</code></td><td>当前项数据</td></tr>
+          <tr><td><code>$index</code></td><td>当前项索引，从 0 开始</td></tr>
+          <tr><td><code>$host</code></td><td>宿主页面/组件实例，用来调用 proto 方法</td></tr>
+          <tr><td><code>$parent</code></td><td>嵌套 o-fill 时外层项的数据</td></tr>
+          <tr><td><code>$ele</code></td><td>当前项元素</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>o-fill 内不能写自定义项名。</strong>
+        列表项里只能用 <code>$data.text</code>，不能写 <code>item.text</code>
+        或 <code>row.text</code>。根级（o-fill 外）没有这些变量，
+        直接用 data 字段和 proto 方法名。
+      </div>
+
+      <h2>嵌套列表</h2>
+      <pre><code>&lt;o-fill :value="groups" fill-key="id"&gt;
+  &lt;section&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;o-fill :value="$data.items" fill-key="id"&gt;
+      &lt;p&gt;{{$parent.name}} / {{$data.name}}&lt;/p&gt;
+    &lt;/o-fill&gt;
+  &lt;/section&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        内层 <code>$data</code> 是子项，<code>$parent</code> 是外层分组。
+      </p>
+
+      <h2>命名模板</h2>
+      <p>
+        结构复杂或需要复用时，把列表项写进顶层
+        <code>&lt;template name&gt;</code>，再用 <code>o-fill name</code> 引用：
+      </p>
+      <pre><code>&lt;o-fill :value="products" name="product-card" fill-key="id"&gt;&lt;/o-fill&gt;
+
+&lt;template name="product-card"&gt;
+  &lt;article class="card"&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;p&gt;¥{{$data.price}}&lt;/p&gt;
+    &lt;button on:click="$host.addToCart($data.id)"&gt;加入购物车&lt;/button&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+      <p>命名模板必须放在 <code>o-fill</code> 外部，通常放在页面模板的顶层。</p>
+
+      <h2>select 与 table 的 replace-temp</h2>
+      <p>
+        浏览器解析器会把 <code>&lt;select&gt;</code>、<code>&lt;table&gt;</code>
+        内不符合白名单的元素修正掉。直接在里面写 <code>o-fill</code>
+        会渲染失败，需要 <code>&lt;template is="replace-temp"&gt;</code>：
+      </p>
+      <pre><code>&lt;select&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="cities"&gt;
+      &lt;option&gt;{{$data}}&lt;/option&gt;
+    &lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/select&gt;</code></pre>
+      <p>表格行必须配合命名模板：</p>
+      <pre><code>&lt;tbody&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="rows" name="table-row"&gt;&lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/tbody&gt;
+
+&lt;template name="table-row"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;{{$data.name}}&lt;/td&gt;
+    &lt;td&gt;{{$data.desc}}&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>DOM 结构提醒</h2>
+      <p>
+        <code>o-if</code> 与 <code>o-fill</code> 使用
+        <code>display: contents</code>，元素本体仍然留在 DOM 中。
+        因此 CSS 子选择器会隔着它们：<code>.container &gt; .item</code>
+        匹配不到 <code>o-if</code> 里的 item；<code>table.rows</code>
+        也不会统计 <code>o-fill</code> 生成的行。遇到选择器失效时，
+        改用后代选择器或调整结构。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./events.html">事件与表单 →</a>
+        　·　下一篇：<a olink href="./data.html">数据与侦听 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

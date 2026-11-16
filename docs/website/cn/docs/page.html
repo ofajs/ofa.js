@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>页面 — ofa.js 文档</title>
+    <meta name="description" content="页面模块、query 参数、o-page 内嵌子页面与页面拆分。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="页面 — ofa.js 文档" />
+    <meta property="og:description" content="页面模块、query 参数、o-page 内嵌子页面与页面拆分。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>页面</h1>
+      <p class="doc-lead">
+        页面模块是应用路由中的一屏内容。它没有 <code>tag</code>，
+        由 <code>o-page</code> 或 <code>o-app</code> 加载，
+        并通过模块函数接收 URL 查询参数。
+      </p>
+
+      <h2>页面模块结构</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "未命名页面",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> 是解析后的查询参数对象。访问
+        <code>./detail.html?id=42&amp;tab=info</code> 时，
+        <code>query.id</code> 为 <code>"42"</code>。
+      </p>
+
+      <h2>在页面里跳转</h2>
+      <p>
+        页面实例自带 <code>goto</code>、<code>replace</code>、<code>back</code>：
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;去详情&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;返回&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> 压入新页面，<code>replace</code> 替换当前页，
+        <code>back</code> 返回上一页。完整的页面栈与 hash 路由见
+        <a olink href="./routing.html">路由与导航</a>。
+      </p>
+
+      <h2>内嵌子页面</h2>
+      <p>
+        一个页面同时装下列表、表单和弹窗时，可以把独立业务单元拆成子页面，
+        用常驻的 <code>&lt;o-page&gt;</code> 内嵌：
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;新增&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        子页面暴露方法供宿主调用，完成后再用事件把结果抛回宿主：
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong><code>o-page</code> 的 src 初始化后不可变。</strong>
+        运行时改 <code>src</code>（包括 <code>:src</code> 绑定）会直接抛错。
+        传参请调用子页面方法；确实需要全新实例时，用 <code>o-if</code>
+        包住 <code>o-page</code> 销毁重建。
+      </div>
+
+      <h2>页面拆分原则</h2>
+      <ul>
+        <li>子页面负责自己的表单状态与交互完整性；</li>
+        <li>数据归一化、持久化、跨模块协调放在宿主页面；</li>
+        <li>向上抛结果时 <code>bubbles: true, composed: true</code> 必须同时设置；</li>
+        <li>能常驻就常驻，用方法重置状态，避免频繁销毁重建。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./component.html">组件 →</a>
+        　·　下一篇：<a olink href="./lifecycle.html">生命周期 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -116,6 +116,8 @@
   </div>
 
   <script>
+    import { highlightCodeBlocks } from "../content/highlight.mjs";
+
     export default {
       tag: "docs-layout",
       attrs: {
@@ -125,6 +127,8 @@
         noHeadings: false,
       },
       ready() {
+        requestAnimationFrame(() => highlightCodeBlocks(this.ele));
+
         const root = this.ele.shadowRoot;
         const toc = root?.querySelector(".toc");
         const nav = root?.querySelector(".toc-nav");

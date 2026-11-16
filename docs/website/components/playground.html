@@ -141,8 +141,41 @@
 
     .body {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: 50% 6px minmax(0, 1fr);
       min-height: 0;
+    }
+
+    .splitter {
+      position: relative;
+      cursor: col-resize;
+      background: #252526;
+      border-left: 1px solid #1b1b1b;
+      border-right: 1px solid #1b1b1b;
+      touch-action: none;
+    }
+
+    .splitter::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1px;
+      height: 34px;
+      background: #4a4a4a;
+      content: "";
+      transform: translate(-50%, -50%);
+    }
+
+    .splitter:hover {
+      background: #007acc;
+    }
+
+    .body.resizing {
+      cursor: col-resize;
+      user-select: none;
+    }
+
+    .body.resizing iframe {
+      pointer-events: none;
     }
 
     .editor {
@@ -332,6 +365,14 @@
         height: 340px;
       }
 
+      .body {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      .splitter {
+        display: none;
+      }
+
       .editor {
         border-right: 0;
         border-bottom: 1px solid #2b2b2b;
@@ -357,7 +398,11 @@
       <span class="tab-status">{{status}}</span>
     </div>
 
-    <div class="body">
+    <div
+      class="body"
+      class:resizing="resizing"
+      attr:style="'grid-template-columns:' + editorWidth + '% 6px minmax(0, 1fr)'"
+    >
       <section class="editor" aria-label="ofa.js 代码编辑器">
         <pre class="gutter" aria-hidden="true">{{lineNumbers}}</pre>
         <div class="code-pane">
@@ -376,6 +421,14 @@
           ></textarea>
         </div>
       </section>
+
+      <div
+        class="splitter"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="调整编辑器和预览宽度"
+        on:pointerdown="startResize"
+      ></div>
 
       <section class="preview" aria-label="案例预览">
         <div class="preview-bar">
@@ -431,6 +484,8 @@
         dirty: false,
         cursorLine: 1,
         cursorColumn: 1,
+        editorWidth: 50,
+        resizing: false,
       },
 
       watch: {
@@ -442,6 +497,10 @@
           this.refreshEditor(value);
           this.dirty = true;
         },
+      },
+
+      detached() {
+        if (this._stopResize) this._stopResize();
       },
 
       attached() {
@@ -535,6 +594,31 @@
           } finally {
             this.busy = false;
           }
+        },
+
+        startResize(event) {
+          if (event.button !== undefined && event.button !== 0) return;
+          event.preventDefault();
+
+          const body = this.shadow.$(".body").ele;
+          this.resizing = true;
+          const onMove = (moveEvent) => {
+            const rect = body.getBoundingClientRect();
+            const percent = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+            this.editorWidth = Math.min(78, Math.max(25, percent));
+          };
+          const onUp = () => {
+            window.removeEventListener("pointermove", onMove);
+            window.removeEventListener("pointerup", onUp);
+            this._stopResize = null;
+            this.resizing = false;
+            document.body.style.cursor = "";
+          };
+
+          this._stopResize = onUp;
+          window.addEventListener("pointermove", onMove);
+          window.addEventListener("pointerup", onUp, { once: true });
+          document.body.style.cursor = "col-resize";
         },
 
         openPreview() {

@@ -295,6 +295,8 @@ npm 安装命令，CDN 地址是主要使用方式。
   `/tutorial/` 切换出教程侧栏；
 - 课程页复用 `docs-playground`，通过 `lesson` 属性选择默认代码，
   并分别用 `localStorage` 保存每一课的修改；
+- 教程页使用 `docs-layout layout="wide"`：隐藏右侧「本页内容」，
+  把正文与 playground 撑满内容列；编辑器和预览之间可拖动分隔条调整宽度；
 - 教程内容：总览 + 5 节课（第一个页面、数据与事件、条件与列表、
   表单与待办、样式与挑战）。
 
@@ -312,8 +314,9 @@ npm 安装命令，CDN 地址是主要使用方式。
 5. 页面代码保存在 `localStorage`，刷新后保留。
 
 编辑器是 VSCode 风格的单文件工作台：标签页、行号、语法高亮、状态栏、
-`Tab` 缩进、回车自动缩进、`Ctrl/Cmd + Enter` 运行。它用 textarea +
-高亮层叠加实现，不引入第三方编辑器依赖。预览栏的「新标签打开」会直接
+`Tab` 缩进、回车自动缩进、`Ctrl/Cmd + Enter` 运行；编辑器和预览之间的
+分隔条可拖动调整宽度。它用 textarea + 高亮层叠加实现，不引入第三方
+编辑器依赖。预览栏的「新标签打开」会直接
 打开当前虚拟页面 `/$ofa-docs-playground/index.html?v=...`，由 Service
 Worker 继续提供 OPFS 文件。
 

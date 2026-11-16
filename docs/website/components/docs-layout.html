@@ -26,6 +26,11 @@
       max-width: 800px;
     }
 
+    .wide-layout {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: none;
+    }
+
     .doc-slot {
       min-width: 0;
     }
@@ -83,7 +88,7 @@
 
     @media (max-width: 1180px) {
       .doc-wrap {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) !important;
         max-width: 800px;
       }
 
@@ -106,7 +111,11 @@
     }
   </style>
 
-  <div class="doc-wrap" class:no-toc="noHeadings">
+  <div
+    class="doc-wrap"
+    class:no-toc="noHeadings"
+    class:wide-layout="layout === 'wide'"
+  >
     <div class="doc-slot"><slot></slot></div>
 
     <aside class="toc" hidden>
@@ -122,6 +131,7 @@
       tag: "docs-layout",
       attrs: {
         labelOnThisPage: "On this page",
+        layout: "doc",
       },
       data: {
         noHeadings: false,
@@ -133,6 +143,11 @@
         const toc = root?.querySelector(".toc");
         const nav = root?.querySelector(".toc-nav");
         if (!toc || !nav) return;
+
+        if (this.layout === "wide") {
+          toc.hidden = true;
+          return;
+        }
 
         const headings = [...this.ele.querySelectorAll("article.doc > h2")];
         if (!headings.length) {

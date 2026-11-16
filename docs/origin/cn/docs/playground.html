@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>案例预览</h1>
+      <p class="doc-lead">
+        这里用 NoneOS Core 在浏览器里挂载一个虚拟文件系统。
+        左侧编辑 ofa.js 页面模块，右侧在虚拟容器中运行，不需要后端。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground></docs-playground>
+
+      <h2>它是怎么运行的</h2>
+      <ol>
+        <li>首次打开时安装并注册 NoneOS Core 的 <code>sw.js</code>；</li>
+        <li>Service Worker 把 <code>/$ofa-docs-playground/...</code> 映射到浏览器
+          OPFS 虚拟文件系统；</li>
+        <li>编辑器把页面模块写入虚拟文件 <code>page.html</code>，并生成一个
+          固定的 <code>index.html</code> 入口；</li>
+        <li>右侧 iframe 直接访问虚拟容器里的
+          <code>/$ofa-docs-playground/index.html</code>，由 ofa.js 渲染页面。</li>
+      </ol>
+
+      <div class="doc-note">
+        <strong>部署要求：</strong>
+        Service Worker 注册在站点根路径 <code>/sw.js</code>，因此该功能要求
+        docs 部署在域名根路径（或本地用
+        <code>npm run server:website</code> 以 <code>docs/website</code>
+        为根目录预览）。放在子目录下时 Service Worker 无法接管
+        <code>/$</code> 路径。
+      </div>
+
+      <h2>可以改什么</h2>
+      <ul>
+        <li>修改模板、样式、<code>data</code> 和 <code>proto</code> 方法，点「运行代码」立即生效；</li>
+        <li>用 <code>&lt;l-m&gt;</code> 引用 CDN 上的其他 ofa.js 组件；</li>
+        <li>代码会保存在浏览器 <code>localStorage</code>，刷新后仍保留；</li>
+        <li>清空编辑器后重新写入页面模块，即可从空白开始实验。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./examples.html">完整示例 →</a>
+        　·　下一篇：<a olink href="./deployment.html">部署 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

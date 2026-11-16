@@ -31,7 +31,7 @@ docs/
 │   └── cn/
 │       ├── index.html               首页页面模块（结构 + 文案）
 │       ├── site.json                文案、导航/页脚/文档标签、页面元信息
-│       └── docs/                    文档（23 页）
+│       └── docs/                    文档（24 页）
 │           ├── index.html           文档总览
 │           ├── getting-started.html 安装与引入
 │           ├── component.html       组件与页面
@@ -43,15 +43,18 @@ docs/
     ├── index.html                   构建生成的根语言选择页
     ├── boot.js                      共享启动器：ofa.js → scsr
     ├── app.mjs                      共享 o-app 配置（不声明 home）
+    ├── sw.js                        NoneOS Core Service Worker（/$ 虚拟容器）
     ├── assets/favicon.svg
     ├── assets/logo.svg
     ├── components/
     │   ├── site-shell.html            顶部/底部/背景外壳
     │   ├── docs-layout.html           文章正文 + 右侧本页目录
+    │   ├── playground.html            案例预览编辑器 + 虚拟容器 iframe
     │   └── demo-counter.html          首页响应式计数器组件
     ├── content/
     │   ├── page-runtime.mjs           首页/文档页共享运行时
-    │   └── highlight.mjs              文档代码高亮（零依赖 tokenizer）
+    │   ├── highlight.mjs              文档代码高亮（零依赖 tokenizer）
+    │   └── playground-runtime.mjs     案例预览默认代码与虚拟页面入口
     ├── styles/
     │   ├── site.css                   首页与通用设计系统
     │   ├── shell.css                  导航/页脚/背景样式
@@ -64,7 +67,7 @@ docs/
         ├── layout.html              嵌套路由 layout（header/footer + 文档目录）
         ├── index.html
         ├── site.json
-        └── docs/                    构建产物（23 页）
+        └── docs/                    构建产物（24 页）
             ├── index.html
             ├── getting-started.html
             ├── component.html
@@ -211,7 +214,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 + 文档 23 页，共 24 份内容页 HTML，另有共享的
+- 当前站点有首页 + 文档 24 页，共 25 份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -278,6 +281,26 @@ https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs
 
 Quick Start 第一步展示完整的 `<script type="module">` 引用。页面不再提供
 npm 安装命令，CDN 地址是主要使用方式。
+
+## 案例预览（NoneOS 虚拟容器）
+
+`/cn/docs/playground.html` 提供一个在线演练场，完全运行在浏览器本地：
+
+1. 首次打开时由 `nos-version` 安装 NoneOS Core，并注册站点根路径的
+   `sw.js`（内容只有一行 `importScripts("https://core.noneos.com/sw/dist.js")`）；
+2. `components/playground.html` 通过 `/nos/fs/main.js` 在 OPFS 里初始化
+   `ofa-docs-playground` 空间；
+3. 编辑器内容写入虚拟文件 `page.html`，同时生成入口 `index.html`；
+4. iframe 加载 `/$ofa-docs-playground/index.html`，Service Worker 把
+   `/$...` 路径映射到 OPFS 文件；
+5. 页面代码保存在 `localStorage`，刷新后保留。
+
+注意：
+
+- Service Worker 必须注册在站点根路径，**docs 需要部署在域名根路径**；
+  本地请用 `npm run server:website`（以 `docs/website` 为根）预览；
+- 预览 iframe 通过 CDN 加载 ofa.js，离线时只有演练场不可用，不影响文档正文；
+- 没有后端参与，文件只存在于当前浏览器的 OPFS 中。
 
 ## 共享外壳与内容的关系
 

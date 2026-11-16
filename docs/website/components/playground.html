@@ -1,0 +1,202 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+      margin: 24px 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .toolbar strong {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .status {
+      flex: 1;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+    }
+
+    .run {
+      padding: 7px 14px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .run[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .panes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    textarea,
+    iframe {
+      display: block;
+      width: 100%;
+      height: 420px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-lg);
+      background: var(--md-sys-color-surface-container-lowest);
+    }
+
+    textarea {
+      padding: 16px;
+      resize: vertical;
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+      font-size: 12.5px;
+      line-height: 1.6;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--md-sys-color-primary);
+    }
+
+    iframe {
+      background: #fff;
+    }
+
+    nos-version {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    @media (max-width: 900px) {
+      .panes {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      textarea,
+      iframe {
+        height: 320px;
+      }
+    }
+  </style>
+
+  <l-m src="https://core.noneos.com/nos-lib/nos-version/nos-version.html"></l-m>
+
+  <div class="toolbar">
+    <strong>案例预览</strong>
+    <span class="status">{{status}}</span>
+    <button class="run" on:click="run" attr:disabled="!coreReady || busy">
+      运行代码
+    </button>
+  </div>
+
+  <div class="panes">
+    <textarea spellcheck="false" sync:value="code" aria-label="ofa.js 页面代码"></textarea>
+    <iframe attr:src="frameSrc" title="ofa.js 案例预览"></iframe>
+  </div>
+
+  <nos-version auto-install on:installed="onCoreInstalled" on:error="onCoreError"></nos-version>
+
+  <script>
+    import {
+      SPACE,
+      STORAGE_KEY,
+      DEFAULT_CODE,
+      buildIndex,
+    } from "../content/playground-runtime.mjs";
+
+    export default {
+      tag: "docs-playground",
+      data: {
+        code: DEFAULT_CODE,
+        frameSrc: "",
+        status: "正在准备虚拟容器…",
+        coreReady: false,
+        busy: false,
+      },
+
+      watch: {
+        code(value) {
+          try {
+            localStorage.setItem(STORAGE_KEY, value);
+          } catch {}
+        },
+      },
+
+      attached() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) this.code = saved;
+        } catch {}
+      },
+
+      proto: {
+        async onCoreInstalled() {
+          if (this.coreReady) return;
+          this.status = "正在挂载虚拟文件系统…";
+
+          try {
+            const fsUrl = new URL("/nos/fs/main.js", location.origin).href;
+            const { init, get } = await import(fsUrl);
+            await init(SPACE);
+            this._fs = { get };
+            this.coreReady = true;
+            this.status = "虚拟容器已就绪";
+            await this.run();
+          } catch (error) {
+            console.error("[docs-playground] init failed", error);
+            this.status = "虚拟容器初始化失败：" + error.message;
+          }
+        },
+
+        onCoreError(event) {
+          this.status = "NoneOS Core 安装失败：" + event.data.message;
+        },
+
+        async writeFile(path, content) {
+          const file = await this._fs.get(`${SPACE}/${path}`, {
+            create: "file",
+          });
+          await file.write(content);
+        },
+
+        async run() {
+          if (!this.coreReady || this.busy) return;
+
+          this.busy = true;
+          this.status = "正在写入虚拟文件…";
+
+          try {
+            const version = Date.now();
+            await this.writeFile("page.html", this.code);
+            await this.writeFile("index.html", buildIndex(version));
+            this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
+            this.status = "已运行，可继续编辑后重新运行";
+          } catch (error) {
+            console.error("[docs-playground] run failed", error);
+            this.status = "运行失败：" + error.message;
+          } finally {
+            this.busy = false;
+          }
+        },
+      },
+    };
+  </script>
+</template>

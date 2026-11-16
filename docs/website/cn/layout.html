@@ -301,6 +301,13 @@
             </st-list-item>
             <st-list-item
               button
+              class:active="current === 'playground'"
+              on:click="navigateDocs('playground')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.playground}}</span>
+            </st-list-item>
+            <st-list-item
+              button
               class:active="current === 'deployment'"
               on:click="navigateDocs('deployment')"
             >

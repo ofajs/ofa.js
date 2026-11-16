@@ -106,6 +106,7 @@
           "plugins": "插件与扩展",
           "pitfalls": "常见错误",
           "examples": "完整示例",
+          "playground": "案例预览",
           "deployment": "部署"
         }
       }
@@ -199,6 +200,10 @@
     "docs/examples.html": {
       "title": "完整示例 — ofa.js 文档",
       "description": "最小应用、自定义组件、待办清单与路由应用四个完整示例。"
+    },
+    "docs/playground.html": {
+      "title": "案例预览 — ofa.js 文档",
+      "description": "在 NoneOS Core 虚拟容器中在线编辑并运行 ofa.js 页面模块。"
     },
     "docs/deployment.html": {
       "title": "部署 — ofa.js 文档",

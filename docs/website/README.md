@@ -227,6 +227,8 @@ npm run server:website
 - 切换文档文章时 layout 不销毁，只有文章子页参与过渡；首页与文档之间
   切换也不重建 layout；
 - 站点 layout 通过 `routerChange` 更新 `docsMode`、文档高亮和滚动位置；
+  布局模式在 `data` 初始化时就按 `location.pathname` 推导一次（不能只等
+  `attached`），否则首帧会以 `no-nav` 整行铺开、随后才跳进左侧目录列；
   `site-shell` 监听 `router-change` 同步「文档」高亮与移动菜单状态。
 
 ## 文档模式

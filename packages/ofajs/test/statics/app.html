@@ -408,6 +408,58 @@
         await waitFor(() => pageTitle() === "home:home");
       });
 
+      test("离场旧页位置保持（容器重排不跳位）/ leaving page keeps its position", async () => {
+        // 离场页转 absolute 后若只锁尺寸、不锁位置，布局容器在切换过程中
+        // 改变位置时，旧页会跟着 static position 跳到新位置（文档站
+        // docs/home 模式切换时表现为旧页闪到左上角）。
+        const base = location.href.replace(/[^/]+$/, "") + "fixtures/";
+
+        $app.goto(base + "frame-a.html");
+        await waitFor(() => $app.current?.src?.endsWith("frame-a.html"));
+        await waitFor(() => $app.current?.pageIsReady);
+
+        const oldPage = $app.current;
+        const before = oldPage.ele.getBoundingClientRect();
+
+        const willRemove = new Promise((resolve) => {
+          const tick = () => {
+            if (!oldPage.ele.isConnected) {
+              return;
+            }
+            if (oldPage.data.willRemoved) {
+              resolve();
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+
+        $app.goto(base + "frame-b.html");
+        await willRemove;
+
+        // 旧页已冻结后再移动 slot 容器
+        ofa(oldPage.ele.parentElement).shifted = true;
+        await new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve)),
+        );
+
+        const after = oldPage.ele.getBoundingClientRect();
+        assert(
+          Math.abs(after.left - before.left) <= 1,
+          `离场页 left 应保持 ${before.left}，actual=${after.left}`,
+        );
+        assert(
+          Math.abs(after.top - before.top) <= 1,
+          `离场页 top 应保持 ${before.top}，actual=${after.top}`,
+        );
+
+        await waitFor(() => $app.current?.src?.endsWith("frame-b.html"));
+
+        $app.goto(base + "page-home.html");
+        await waitFor(() => pageTitle() === "home:home");
+      });
+
       run();
     </script>
   </body>

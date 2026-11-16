@@ -146,7 +146,7 @@ packages/ofajs/
 |---|---|
 | comp.html | 组件文件加载注册（tag 推断）、temp 数据绑定、proto 方法、loaded 钩子、PATH 相对资源解析、同名 tag 重复注册报错；**old cases 移植**：模块加载暴露全局 \$、import 与注释/字符串/正则混排转译、压缩单行组件、副作用 import、仅注释空模板（不挂 shadow）、第三方覆盖 window.\$ 后组件仍工作 |
 | if-fill.html | o-if/o-else-if/o-else 链切换；o-fill 初建（\$data/\$index/\$host）、项内 o-if、push/splice 增删、fill-key 对账复用、清空；**old cases 移植**：空构造与深克隆零崩溃（#258）、o-if 嵌套链（else 包 if）、o-fill 在 o-if 内、o-fill 嵌套 o-fill、\`_\$parent\`/\$parent/\$host、递归命名模板、空对象/数组文本渲染（{} 与 []） |
-| app.html | 配置加载 + home 自动挂载（appIsReady）、goto、back、router-change 事件、olink 点击路由、forward（allowForward）、页面继承（parent 包裹）；**old cases 移植**：watchUntil 等 appIsReady、.mjs 页面模块（PAGE 类型 + 外置 temp）、页面相对 img 改写（直写/条件/命名模板三处）、动态 attr:href 的 olink 读实时地址（fix-link）、离场旧页尺寸锁定（resetOldPage） |
+| app.html | 配置加载 + home 自动挂载（appIsReady）、goto、back、router-change 事件、olink 点击路由、forward（allowForward）、页面继承（parent 包裹）；**old cases 移植**：watchUntil 等 appIsReady、.mjs 页面模块（PAGE 类型 + 外置 temp）、页面相对 img 改写（直写/条件/命名模板三处）、动态 attr:href 的 olink 读实时地址（fix-link）、离场旧页尺寸与位置锁定（resetOldPage，含 slot 容器重排不跳位） |
 | context.html | provider 数据广播（attributes → 数据）、更新广播、dispatch 定向事件、作用域隔离、root provider 应用级提供 |
 | misc.html | inject-host 收编（光 DOM 生效 + head 去重）、match-var 样式收集；**old cases 移植**：style 内 data() 响应式（含 @media 同式多处替换）、条件注入样式的 data() |
 | dist-host.html | dist 构建产物冒烟：经典 script 引 UMD 包、全局 \$/ofa 暴露与版本号、经典脚本注册组件渲染、包内 drill 完整加载组件（l-m → drawUrl → 注册） |
@@ -259,3 +259,18 @@ consumer 元素的 `:attr` 绑定）。
 **正确姿势**：父页模板样式里加 `::slotted(o-page){display:block}`（配合
 overflow:hidden 可把子页位移裁剪在容器内）。参考 router-demo 的
 pages/parent.html。
+
+### 离场旧页在布局变化时跳位（闪到左上角）
+
+**症状**：路由切换时旧页（离场页）突然跳到容器左上角/左侧边缘再淡出；
+常见于嵌套路由父页的 slot 容器在切换过程中重排，或文档站这类在
+docs/home 模式间切换 `display`/内边距的布局。
+
+**根因**：`resetOldPage` 只锁定旧页尺寸并设为 `position:absolute`，位置
+仍取 CSS static position。若这期间 slot 容器或布局模式变化，旧页的
+static position 随之改变，表现为离场页跳位。
+
+**正确姿势**：`resetOldPage` 同时锁定位置（按扁平树找最近的定位祖先
+作为包含块，换算 `left/top`），离场页就固定在切换前的位置。跨 shadow
+的 slot 不要用 `offsetParent` 推导包含块（它不等于 absolute 的包含块）。
+回归用例：app.html「离场旧页位置保持」+ fixtures/layout-frame.html。

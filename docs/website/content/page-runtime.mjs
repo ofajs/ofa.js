@@ -267,6 +267,20 @@ export const createTutorialPage = async ({ url, sitePath }) => {
   };
 };
 
+// 从当前地址推导布局模式。必须在首帧渲染前就得到正确值：若等 attached
+// 再同步，文档页会先以 no-nav（整行、左上角）渲染一帧再跳到左侧目录旁。
+const readRoute = () => {
+  const path = location.pathname;
+  const file = path.replace(/\/+$/, "").split("/").pop();
+
+  return {
+    docsMode: /\/docs(?:\/|$)/.test(path),
+    tutorialMode: /\/tutorial(?:\/|$)/.test(path),
+    current:
+      !file || file === "index.html" ? "index" : file.replace(/\.html$/, ""),
+  };
+};
+
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const navUrls = getNavUrls(url);
@@ -275,9 +289,7 @@ export const createLayoutPage = async ({ url, sitePath }) => {
     data: {
       site,
       navUrls,
-      docsMode: false,
-      tutorialMode: false,
-      current: "index",
+      ...readRoute(),
     },
     watch: {
       current() {
@@ -295,15 +307,10 @@ export const createLayoutPage = async ({ url, sitePath }) => {
     },
     proto: {
       syncRoute() {
-        const path = location.pathname;
-        this.docsMode = /\/docs(?:\/|$)/.test(path);
-        this.tutorialMode = /\/tutorial(?:\/|$)/.test(path);
-
-        const file = path.replace(/\/+$/, "").split("/").pop();
-        this.current =
-          !file || file === "index.html"
-            ? "index"
-            : file.replace(/\.html$/, "");
+        const { docsMode, tutorialMode, current } = readRoute();
+        this.docsMode = docsMode;
+        this.tutorialMode = tutorialMode;
+        this.current = current;
       },
       scrollActiveDocIntoView() {
         const nav = [...(this.ele.shadowRoot?.querySelectorAll(".docs-nav") || [])].find(

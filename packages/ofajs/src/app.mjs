@@ -531,11 +531,65 @@ const nextAnimeFrame = (func) =>
     setTimeout(func, 5);
   });
 
+// 找离场页转 absolute 后的包含块（最近的定位祖先）；必须沿扁平树
+// （assignedSlot / ShadowRoot.host）查找，offsetParent 在跨 shadow 的
+// slot 场景下不可靠。
+const getContainingBlock = (ele) => {
+  let node = ele.assignedSlot || ele.parentNode;
+
+  while (node) {
+    if (node.nodeType === 1) {
+      if (getComputedStyle(node).position !== "static") {
+        return node;
+      }
+      node = node.assignedSlot || node.parentNode || node.host;
+    } else {
+      node = node.host || node.parentNode;
+    }
+  }
+
+  return null;
+};
+
 const resetOldPage = (needRemovePage) => {
   // Measure while the page is still in flow, before applying position:absolute
-  const { offsetWidth, offsetHeight } = needRemovePage.ele;
+  const ele = needRemovePage.ele;
+  const { offsetWidth, offsetHeight } = ele;
+  const rect = ele.getBoundingClientRect();
+  const eleStyle = getComputedStyle(ele);
+  const marginLeft = parseFloat(eleStyle.marginLeft) || 0;
+  const marginTop = parseFloat(eleStyle.marginTop) || 0;
+
+  // 同时锁定位置：动画期间布局可能变化（如文档站切换 docs/home 模式、
+  // 嵌套路由的 slot 容器重排），只锁尺寸会让离场页跟着 static position
+  // 跳到新位置（表现为旧页闪到左上角）。
+  const containingBlock = getContainingBlock(ele);
+
+  let left;
+  let top;
+
+  if (containingBlock) {
+    const cbStyle = getComputedStyle(containingBlock);
+    const cbRect = containingBlock.getBoundingClientRect();
+    left =
+      rect.left -
+      cbRect.left -
+      (parseFloat(cbStyle.borderLeftWidth) || 0) -
+      marginLeft;
+    top =
+      rect.top -
+      cbRect.top -
+      (parseFloat(cbStyle.borderTopWidth) || 0) -
+      marginTop;
+  } else {
+    left = rect.left + window.scrollX - marginLeft;
+    top = rect.top + window.scrollY - marginTop;
+  }
+
   needRemovePage.css = {
     position: "absolute",
+    left: `${left}px`,
+    top: `${top}px`,
     width: `${offsetWidth}px`,
     height: `${offsetHeight}px`,
   };

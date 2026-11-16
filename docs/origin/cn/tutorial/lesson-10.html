@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 10</p>
+      <h1>行内编辑列表</h1>
+      <p class="doc-lead">列表不仅能展示，也能直接编辑。把输入框绑到列表项的字段上即可。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>sync:value="$data.name"</code> 直接双向绑定当前列表项。</li>
+        <li><code>fill-key="id"</code> 保证增删时正确复用列表项。</li>
+        <li>删除通过 <code>$host.removeItem($data.id)</code> 调回页面方法。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>给每一项增加一个「完成」复选框，并用 <code>class:done</code> 加删除线。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-9.html">09 · 使用组件 →</a>
+        　·　下一篇：<a olink href="./lesson-11.html">11 · 全局状态 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

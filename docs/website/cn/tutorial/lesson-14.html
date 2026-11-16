@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>14 · 综合项目：个人主页 — ofa.js 教程</title>
+    <meta name="description" content="把输入、列表、样式和状态组合成一个个人主页。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="14 · 综合项目：个人主页 — ofa.js 教程" />
+    <meta property="og:description" content="把输入、列表、样式和状态组合成一个个人主页。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 14</p>
+      <h1>综合项目：个人主页</h1>
+      <p class="doc-lead">把输入、列表、条件、样式和状态组合起来，做一个可以继续扩展的个人主页。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li>名字和简介通过 <code>sync:value</code> 实时修改卡片。</li>
+        <li>技能标签用 <code>o-fill</code> 渲染，按钮可以继续添加。</li>
+        <li>选中状态通过 <code>class:active</code> 和 <code>:style</code> 改变外观。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>把技能改成可删除；再加一个「深色模式」按钮，用 class 切换整张卡片的配色。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-13.html">13 · 异步与加载态 →</a>
+        　·　回到：<a olink href="./">教程总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

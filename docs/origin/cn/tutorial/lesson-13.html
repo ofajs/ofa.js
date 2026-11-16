@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 13</p>
+      <h1>异步与加载态</h1>
+      <p class="doc-lead">真实数据通常来自接口。请求过程中要显示加载中，失败时要能提示错误。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-13"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>loading</code>、<code>error</code>、<code>user</code> 三个 data 表示三种状态。</li>
+        <li><code>o-if</code> / <code>o-else-if</code> / <code>o-else</code> 连续书写，根据状态切换。</li>
+        <li><code>try / catch / finally</code> 里更新数据，视图自动响应。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>把 setTimeout 换成 fetch 请求一个公开接口，并处理网络失败。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-12.html">12 · 本地持久化 →</a>
+        　·　下一篇：<a olink href="./lesson-14.html">14 · 综合项目 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>08 · 计算属性与侦听 — ofa.js 教程</title>
+    <meta name="description" content="用 getter 算总价，用 watch 记录数据变化。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="08 · 计算属性与侦听 — ofa.js 教程" />
+    <meta property="og:description" content="用 getter 算总价，用 watch 记录数据变化。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 08</p>
+      <h1>计算属性与侦听</h1>
+      <p class="doc-lead">有些值不需要存起来，可以由其它数据算出来；有些变化则需要记录或触发额外逻辑。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>get total()</code> 由单价和数量算出总价，模板里直接使用 <code>{{total}}</code>。</li>
+        <li><code>watch.qty</code> 在数量变化后记录变化前后值。</li>
+        <li>watch 初始化时会先执行一次，此时 <code>watchers</code> 为空。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>增加一个折扣输入框（0–0.9），让总价按折扣计算，并记录折扣变化。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-7.html">07 · 表单校验 →</a>
+        　·　下一篇：<a olink href="./lesson-9.html">09 · 使用组件 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

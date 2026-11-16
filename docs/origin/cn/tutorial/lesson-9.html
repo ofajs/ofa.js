@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 09</p>
+      <h1>使用组件</h1>
+      <p class="doc-lead">ofa.js 的组件就是 HTML 文件。用 l-m 引入后，像普通标签一样使用。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>&lt;l-m src="/components/demo-counter.html"&gt;</code> 异步注册组件。</li>
+        <li><code>start="5"</code> 与 <code>reset-label="归零"</code> 是组件的 attrs。</li>
+        <li>组件内部有独立 data；外部只通过 attrs、slot 和事件与它交互。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>再放一个 <code>demo-counter</code>，给它不同的 start 值，观察两个实例互不影响。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-8.html">08 · 计算属性与侦听 →</a>
+        　·　下一篇：<a olink href="./lesson-10.html">10 · 行内编辑列表 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

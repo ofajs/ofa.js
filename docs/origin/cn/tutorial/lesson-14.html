@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 14</p>
+      <h1>综合项目：个人主页</h1>
+      <p class="doc-lead">把输入、列表、条件、样式和状态组合起来，做一个可以继续扩展的个人主页。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li>名字和简介通过 <code>sync:value</code> 实时修改卡片。</li>
+        <li>技能标签用 <code>o-fill</code> 渲染，按钮可以继续添加。</li>
+        <li>选中状态通过 <code>class:active</code> 和 <code>:style</code> 改变外观。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>把技能改成可删除；再加一个「深色模式」按钮，用 class 切换整张卡片的配色。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-13.html">13 · 异步与加载态 →</a>
+        　·　回到：<a olink href="./">教程总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

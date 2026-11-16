@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 07</p>
+      <h1>表单校验</h1>
+      <p class="doc-lead">表单提交前先检查数据。错误提示、按钮禁用和成功消息都可以由计算属性驱动。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-7"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>nameError</code> / <code>emailError</code> 是 getter，返回空字符串表示通过。</li>
+        <li><code>attr:disabled="!valid"</code> 用 attribute 绑定控制按钮是否可点。</li>
+        <li><code>on:submit</code> 里先 <code>preventDefault()</code>，再处理提交。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>增加一个密码字段，要求至少 6 位，并显示对应的错误提示。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-6.html">06 · 搜索与过滤 →</a>
+        　·　下一篇：<a olink href="./lesson-8.html">08 · 计算属性与侦听 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

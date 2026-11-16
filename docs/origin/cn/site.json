@@ -231,19 +231,84 @@
       "description": "把表单、事件和列表组合成一个待办应用。"
     },
     "tutorial/lesson-5.html": {
-      "title": "05 · 样式与挑战 — ofa.js 教程",
-      "description": "用 class:、:style 和计算属性完成一个综合练习。"
+      "title": "05 · 样式与状态 — ofa.js 教程",
+      "description": "用 class:、:style 和计算属性完成有状态的卡片。"
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · 搜索与过滤 — ofa.js 教程",
+      "description": "用计算属性和 o-fill 做实时搜索过滤。"
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · 表单校验 — ofa.js 教程",
+      "description": "实现必填、邮箱格式校验与提交状态。"
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · 计算属性与侦听 — ofa.js 教程",
+      "description": "用 getter 算总价，用 watch 记录数据变化。"
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · 使用组件 — ofa.js 教程",
+      "description": "通过 l-m 引入组件，传 attrs 并监听事件。"
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · 行内编辑列表 — ofa.js 教程",
+      "description": "在 o-fill 列表里直接编辑每一项数据。"
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · 全局状态 — ofa.js 教程",
+      "description": "用 $.stanz 创建共享响应式状态。"
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · 本地持久化 — ofa.js 教程",
+      "description": "把编辑内容保存到 localStorage，刷新后恢复。"
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · 异步与加载态 — ofa.js 教程",
+      "description": "用异步数据和 o-if 展示加载中、成功、失败状态。"
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · 综合项目：个人主页 — ofa.js 教程",
+      "description": "把输入、列表、样式和状态组合成一个个人主页。"
     }
   },
   "tutorial": {
     "label": "教程",
     "overview": "教程总览",
-    "lessons": {
-      "lesson1": "01 · 第一个页面",
-      "lesson2": "02 · 数据与事件",
-      "lesson3": "03 · 条件与列表",
-      "lesson4": "04 · 表单与待办",
-      "lesson5": "05 · 样式与挑战"
+    "groups": {
+      "start": {
+        "label": "入门",
+        "lessons": {
+          "lesson1": "01 · 第一个页面",
+          "lesson2": "02 · 数据与事件",
+          "lesson3": "03 · 条件与列表",
+          "lesson4": "04 · 表单与待办"
+        }
+      },
+      "interact": {
+        "label": "交互与数据",
+        "lessons": {
+          "lesson5": "05 · 样式与状态",
+          "lesson6": "06 · 搜索与过滤",
+          "lesson7": "07 · 表单校验",
+          "lesson8": "08 · 计算属性与侦听"
+        }
+      },
+      "component": {
+        "label": "组件与状态",
+        "lessons": {
+          "lesson9": "09 · 使用组件",
+          "lesson10": "10 · 行内编辑列表",
+          "lesson11": "11 · 全局状态",
+          "lesson12": "12 · 本地持久化"
+        }
+      },
+      "advanced": {
+        "label": "综合实践",
+        "lessons": {
+          "lesson13": "13 · 异步与加载态",
+          "lesson14": "14 · 综合项目：个人主页"
+        }
+      }
     }
   }
 }

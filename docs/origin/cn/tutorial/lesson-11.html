@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 11</p>
+      <h1>全局状态</h1>
+      <p class="doc-lead">当多个区域需要共享同一份数据时，用 $.stanz 创建响应式状态。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-11"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li>模块级 <code>$.stanz({ count: 0 })</code> 可以被多个区域引用。</li>
+        <li><code>store.watch()</code> 返回监听 id，用 <code>store.unwatch(id)</code> 清理。</li>
+        <li>面板 A 和 B 显示同一个 <code>count</code>，点按钮会同时更新。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>再加一个「-1」按钮，并让两个面板显示不同的标题。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-10.html">10 · 行内编辑列表 →</a>
+        　·　下一篇：<a olink href="./lesson-12.html">12 · 本地持久化 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

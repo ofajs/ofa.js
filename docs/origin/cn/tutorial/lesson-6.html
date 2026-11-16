@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 06</p>
+      <h1>搜索与过滤</h1>
+      <p class="doc-lead">列表变长之后，用户需要快速找到某一项。用输入框绑定关键字，再用计算属性过滤列表。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-6"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>filtered</code> 是一个 getter：关键字变化时自动重新计算。</li>
+        <li><code>o-if</code> 根据 <code>filtered.length</code> 显示空状态。</li>
+        <li><code>o-fill</code> 直接遍历过滤后的数组，不需要手动隐藏列表项。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>增加一个「只看某个标签」的下拉框，把标签条件和关键字条件组合起来。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-5.html">05 · 样式与状态 →</a>
+        　·　下一篇：<a olink href="./lesson-7.html">07 · 表单校验 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

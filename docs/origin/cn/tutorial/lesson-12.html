@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>本地持久化</h1>
+      <p class="doc-lead">刷新页面后数据通常会丢失。把内容写入 localStorage，就能在下次打开时恢复。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>ready()</code> 里读取 localStorage 初始化数据。</li>
+        <li><code>watch.note</code> 在内容变化时写回 localStorage。</li>
+        <li>写入和读取都要包在 try/catch 里，处理隐私模式等异常。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>把待办列表存进 localStorage，刷新预览后仍能看到之前的待办。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-11.html">11 · 全局状态 →</a>
+        　·　下一篇：<a olink href="./lesson-13.html">13 · 异步与加载态 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

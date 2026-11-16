@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
 <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
 <l-m src="{{SITE}}/components/site-shell.html"></l-m>
-<l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
+<l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/list/list.html"></l-m>
 
 <style>
   :host {
@@ -271,40 +271,126 @@
           <span class="side-label">{{site.tutorial.overview}}</span>
         </st-list-item>
 
-        <st-list-item
-          button
-          class:active="current === 'lesson-1'"
-          on:click="navigateTutorial('lesson-1')"
-        >
-          <span class="side-label">{{site.tutorial.lessons.lesson1}}</span>
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.start.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'lesson-1'"
+              on:click="navigateTutorial('lesson-1')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson1}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-2'"
+              on:click="navigateTutorial('lesson-2')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson2}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-3'"
+              on:click="navigateTutorial('lesson-3')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson3}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-4'"
+              on:click="navigateTutorial('lesson-4')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson4}}</span>
+            </st-list-item>
+          </st-list>
         </st-list-item>
-        <st-list-item
-          button
-          class:active="current === 'lesson-2'"
-          on:click="navigateTutorial('lesson-2')"
-        >
-          <span class="side-label">{{site.tutorial.lessons.lesson2}}</span>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.interact.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'lesson-5'"
+              on:click="navigateTutorial('lesson-5')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson5}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-6'"
+              on:click="navigateTutorial('lesson-6')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson6}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-7'"
+              on:click="navigateTutorial('lesson-7')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson7}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-8'"
+              on:click="navigateTutorial('lesson-8')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson8}}</span>
+            </st-list-item>
+          </st-list>
         </st-list-item>
-        <st-list-item
-          button
-          class:active="current === 'lesson-3'"
-          on:click="navigateTutorial('lesson-3')"
-        >
-          <span class="side-label">{{site.tutorial.lessons.lesson3}}</span>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.component.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'lesson-9'"
+              on:click="navigateTutorial('lesson-9')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson9}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-10'"
+              on:click="navigateTutorial('lesson-10')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson10}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-11'"
+              on:click="navigateTutorial('lesson-11')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson11}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-12'"
+              on:click="navigateTutorial('lesson-12')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson12}}</span>
+            </st-list-item>
+          </st-list>
         </st-list-item>
-        <st-list-item
-          button
-          class:active="current === 'lesson-4'"
-          on:click="navigateTutorial('lesson-4')"
-        >
-          <span class="side-label">{{site.tutorial.lessons.lesson4}}</span>
-        </st-list-item>
-        <st-list-item
-          button
-          class:active="current === 'lesson-5'"
-          on:click="navigateTutorial('lesson-5')"
-        >
-          <span class="side-label">{{site.tutorial.lessons.lesson5}}</span>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.advanced.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'lesson-13'"
+              on:click="navigateTutorial('lesson-13')"
+            >
+              <span class="side-label">{{site.tutorial.groups.advanced.lessons.lesson13}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lesson-14'"
+              on:click="navigateTutorial('lesson-14')"
+            >
+              <span class="side-label">{{site.tutorial.groups.advanced.lessons.lesson14}}</span>
+            </st-list-item>
+          </st-list>
         </st-list-item>
       </st-list>
     </aside>

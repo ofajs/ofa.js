@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>12 · 本地持久化 — ofa.js 教程</title>
+    <meta name="description" content="把编辑内容保存到 localStorage，刷新后恢复。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="12 · 本地持久化 — ofa.js 教程" />
+    <meta property="og:description" content="把编辑内容保存到 localStorage，刷新后恢复。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>本地持久化</h1>
+      <p class="doc-lead">刷新页面后数据通常会丢失。把内容写入 localStorage，就能在下次打开时恢复。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>ready()</code> 里读取 localStorage 初始化数据。</li>
+        <li><code>watch.note</code> 在内容变化时写回 localStorage。</li>
+        <li>写入和读取都要包在 try/catch 里，处理隐私模式等异常。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>把待办列表存进 localStorage，刷新预览后仍能看到之前的待办。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-11.html">11 · 全局状态 →</a>
+        　·　下一篇：<a olink href="./lesson-13.html">13 · 异步与加载态 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

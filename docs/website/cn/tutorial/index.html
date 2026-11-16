@@ -18,7 +18,7 @@
           localStorage.setItem("st-theme-mode", "dark");
       } catch {}
     </script>
-    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
     <style>
       html,
       body {
@@ -67,10 +67,11 @@
       <p class="doc-kicker">Tutorial</p>
       <h1>从零开始用 ofa.js</h1>
       <p class="doc-lead">
-        五节短课，每节都能直接改代码、点运行、看效果。
-        不需要安装 Node.js，也不需要构建工具。
+        14 节短课，按「入门 → 交互与数据 → 组件与状态 → 综合实践」组织。
+        每节课都能直接改代码、点运行、看效果。
       </p>
 
+      <h2>入门</h2>
       <div class="docs-list">
         <a class="docs-row" olink href="./lesson-1.html">
           <span class="num">01</span>
@@ -78,32 +79,94 @@
           <p>认识页面模块、data 和 {{ }}，改一行文字并立即看到结果。</p>
           <span class="more">开始学习 →</span>
         </a>
-
         <a class="docs-row" olink href="./lesson-2.html">
           <span class="num">02</span>
           <h2>数据与事件</h2>
           <p>用 on: 点击按钮、用 sync: 绑定输入框，做一个计数器。</p>
           <span class="more">开始学习 →</span>
         </a>
-
         <a class="docs-row" olink href="./lesson-3.html">
           <span class="num">03</span>
           <h2>条件与列表</h2>
           <p>用 o-if 显示空状态，用 o-fill 渲染可增删的列表。</p>
           <span class="more">开始学习 →</span>
         </a>
-
         <a class="docs-row" olink href="./lesson-4.html">
           <span class="num">04</span>
           <h2>表单与待办</h2>
           <p>把输入、复选框、列表和计算属性组合成待办应用。</p>
           <span class="more">开始学习 →</span>
         </a>
+      </div>
 
+      <h2>交互与数据</h2>
+      <div class="docs-list">
         <a class="docs-row" olink href="./lesson-5.html">
           <span class="num">05</span>
-          <h2>样式与挑战</h2>
+          <h2>样式与状态</h2>
           <p>用 class:、:style 和 getter 做出有状态的个人卡片。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>搜索与过滤</h2>
+          <p>输入关键字，用计算属性实时过滤列表。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>表单校验</h2>
+          <p>必填、邮箱格式、按钮禁用和成功提示。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>计算属性与侦听</h2>
+          <p>用 getter 算总价，用 watch 记录数据变化。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+      </div>
+
+      <h2>组件与状态</h2>
+      <div class="docs-list">
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>使用组件</h2>
+          <p>通过 l-m 引入组件，传 attrs 并观察独立状态。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>行内编辑列表</h2>
+          <p>在 o-fill 列表里直接编辑每一项数据。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>全局状态</h2>
+          <p>用 $.stanz 创建两个面板共享的响应式状态。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>本地持久化</h2>
+          <p>把编辑内容写入 localStorage，刷新后恢复。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+      </div>
+
+      <h2>综合实践</h2>
+      <div class="docs-list">
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>异步与加载态</h2>
+          <p>用 loading / error / success 三种状态处理异步数据。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>综合项目：个人主页</h2>
+          <p>把输入、列表、样式和状态组合成一个可扩展的主页。</p>
           <span class="more">开始挑战 →</span>
         </a>
       </div>

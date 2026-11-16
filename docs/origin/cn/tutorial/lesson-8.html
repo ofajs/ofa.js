@@ -1,0 +1,44 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 08</p>
+      <h1>计算属性与侦听</h1>
+      <p class="doc-lead">有些值不需要存起来，可以由其它数据算出来；有些变化则需要记录或触发额外逻辑。</p>
+
+      <h2>试一试</h2>
+      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8"></docs-playground>
+
+      <h2>关键点</h2>
+      <ul>
+        <li><code>get total()</code> 由单价和数量算出总价，模板里直接使用 <code>{{total}}</code>。</li>
+        <li><code>watch.qty</code> 在数量变化后记录变化前后值。</li>
+        <li>watch 初始化时会先执行一次，此时 <code>watchers</code> 为空。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>增加一个折扣输入框（0–0.9），让总价按折扣计算，并记录折扣变化。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-7.html">07 · 表单校验 →</a>
+        　·　下一篇：<a olink href="./lesson-9.html">09 · 使用组件 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

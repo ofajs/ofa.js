@@ -311,6 +311,12 @@ npm 安装命令，CDN 地址是主要使用方式。
    `/$...` 路径映射到 OPFS 文件；
 5. 页面代码保存在 `localStorage`，刷新后保留。
 
+编辑器是 VSCode 风格的单文件工作台：标签页、行号、语法高亮、状态栏、
+`Tab` 缩进、回车自动缩进、`Ctrl/Cmd + Enter` 运行。它用 textarea +
+高亮层叠加实现，不引入第三方编辑器依赖。预览栏的「新标签打开」会直接
+打开当前虚拟页面 `/$ofa-docs-playground/index.html?v=...`，由 Service
+Worker 继续提供 OPFS 文件。
+
 注意：
 
 - Service Worker 必须注册在站点根路径，**docs 需要部署在域名根路径**；

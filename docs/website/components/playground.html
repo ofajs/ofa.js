@@ -235,10 +235,34 @@
     }
 
     .preview-url {
+      flex: 1;
       overflow: hidden;
       color: #6f9ec9;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .open-preview {
+      flex: none;
+      height: 22px;
+      padding: 0 8px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      background: transparent;
+      color: #cccccc;
+      font-family: system-ui, sans-serif;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .open-preview:hover {
+      border-color: #007acc;
+      color: #ffffff;
+    }
+
+    .open-preview[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     iframe {
@@ -357,6 +381,14 @@
         <div class="preview-bar">
           <span>预览</span>
           <span class="preview-url">/$ofa-docs-playground/</span>
+          <button
+            class="open-preview"
+            on:click="openPreview"
+            attr:disabled="!frameSrc"
+            title="在新标签页打开预览"
+          >
+            新标签打开 ↗
+          </button>
         </div>
         <iframe attr:src="frameSrc" title="ofa.js 案例预览"></iframe>
       </section>
@@ -503,6 +535,11 @@
           } finally {
             this.busy = false;
           }
+        },
+
+        openPreview() {
+          if (!this.frameSrc) return;
+          window.open(this.frameSrc, "_blank", "noopener");
         },
 
         syncScroll(event) {

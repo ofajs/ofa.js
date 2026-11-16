@@ -9,6 +9,7 @@
   },
   "shell": {
     "nav": {
+      "tutorial": "教程",
       "docs": "文档"
     },
     "actions": {
@@ -208,6 +209,41 @@
     "docs/deployment.html": {
       "title": "部署 — ofa.js 文档",
       "description": "把 ofa.js 应用部署到任意静态服务器、CDN 与子目录的注意事项。"
+    },
+    "tutorial/index.html": {
+      "title": "ofa.js 教程",
+      "description": "面向新人的 ofa.js 交互式教程：每一课都能直接改代码看效果。"
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · 第一个页面 — ofa.js 教程",
+      "description": "从零写一个 ofa.js 页面，修改文本并实时预览。"
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · 数据与事件 — ofa.js 教程",
+      "description": "用 data、{{}}、on: 和 sync: 做一个小计数器。"
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · 条件与列表 — ofa.js 教程",
+      "description": "用 o-if 和 o-fill 渲染条件内容与列表。"
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · 表单与待办 — ofa.js 教程",
+      "description": "把表单、事件和列表组合成一个待办应用。"
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · 样式与挑战 — ofa.js 教程",
+      "description": "用 class:、:style 和计算属性完成一个综合练习。"
+    }
+  },
+  "tutorial": {
+    "label": "教程",
+    "overview": "教程总览",
+    "lessons": {
+      "lesson1": "01 · 第一个页面",
+      "lesson2": "02 · 数据与事件",
+      "lesson3": "03 · 条件与列表",
+      "lesson4": "04 · 表单与待办",
+      "lesson5": "05 · 样式与挑战"
     }
   }
 }

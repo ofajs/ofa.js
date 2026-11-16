@@ -31,14 +31,17 @@ docs/
 │   └── cn/
 │       ├── index.html               首页页面模块（结构 + 文案）
 │       ├── site.json                文案、导航/页脚/文档标签、页面元信息
-│       └── docs/                    文档（24 页）
-│           ├── index.html           文档总览
-│           ├── getting-started.html 安装与引入
-│           ├── component.html       组件与页面
-│           ├── template.html        模板语法
-│           ├── routing.html         应用与路由
-│           ├── api.html             API 参考
-│           └── ...                  其余章节见 site.json 的 docs.nav
+│       ├── docs/                    文档（24 页）
+│       │   ├── index.html           文档总览
+│       │   ├── getting-started.html 安装与引入
+│       │   ├── component.html       组件与页面
+│       │   ├── template.html        模板语法
+│       │   ├── routing.html         应用与路由
+│       │   ├── api.html             API 参考
+│       │   └── ...                  其余章节见 site.json 的 docs.nav
+│       └── tutorial/                交互式教程（6 页）
+│           ├── index.html           教程总览
+│           └── lesson-1..5.html     五节可编辑示例课
 └── website/                         共享资源 + 构建产物
     ├── index.html                   构建生成的根语言选择页
     ├── boot.js                      共享启动器：ofa.js → scsr
@@ -67,12 +70,15 @@ docs/
         ├── layout.html              嵌套路由 layout（header/footer + 文档目录）
         ├── index.html
         ├── site.json
-        └── docs/                    构建产物（24 页）
+        ├── docs/                    构建产物（24 页）
+        │   ├── index.html
+        │   ├── getting-started.html
+        │   ├── component.html
+        │   ├── template.html
+        │   └── ...
+        └── tutorial/                构建产物（6 页）
             ├── index.html
-            ├── getting-started.html
-            ├── component.html
-            ├── template.html
-            └── ...
+            └── lesson-1.html ... lesson-5.html
 ```
 
 > 注意：`docs/origin/<locale>/*.html` 是页面模块源文件（`template[page]`），
@@ -214,7 +220,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 + 文档 24 页，共 25 份内容页 HTML，另有共享的
+- 当前站点有首页 1 页 + 文档 24 页 + 教程 6 页，共 31 份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -282,13 +288,23 @@ https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs
 Quick Start 第一步展示完整的 `<script type="module">` 引用。页面不再提供
 npm 安装命令，CDN 地址是主要使用方式。
 
+## 教程模式
+
+- 顶部导航「教程」指向 `/cn/tutorial/`，与「文档」并列；
+- 教程页同样挂到 `layout.html`，layout 通过路径里的
+  `/tutorial/` 切换出教程侧栏；
+- 课程页复用 `docs-playground`，通过 `lesson` 属性选择默认代码，
+  并分别用 `localStorage` 保存每一课的修改；
+- 教程内容：总览 + 5 节课（第一个页面、数据与事件、条件与列表、
+  表单与待办、样式与挑战）。
+
 ## 案例预览（NoneOS 虚拟容器）
 
 `/cn/docs/playground.html` 提供一个在线演练场，完全运行在浏览器本地：
 
-1. 首次打开时由 `nos-version` 安装 NoneOS Core，并注册站点根路径的
-   `sw.js`（内容只有一行 `importScripts("https://core.noneos.com/sw/dist.js")`）；
-2. `components/playground.html` 通过 `/nos/fs/main.js` 在 OPFS 里初始化
+1. `components/playground.html` 首次打开时注册站点根路径的 `sw.js`
+   （内容只有一行 `importScripts("https://core.noneos.com/sw/dist.js")`）；
+2. 编辑器直接通过 `navigator.storage.getDirectory()` 打开 OPFS 的
    `ofa-docs-playground` 空间；
 3. 编辑器内容写入虚拟文件 `page.html`，同时生成入口 `index.html`；
 4. iframe 加载 `/$ofa-docs-playground/index.html`，Service Worker 把

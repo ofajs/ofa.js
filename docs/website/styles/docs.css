@@ -374,6 +374,10 @@
   scrollbar-width: thin;
 }
 
+.docs-nav.is-hidden {
+  display: none;
+}
+
 .docs-content {
   min-width: 0;
 }

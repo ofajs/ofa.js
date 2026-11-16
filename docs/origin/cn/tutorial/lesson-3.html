@@ -1,0 +1,68 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 03</p>
+      <h1>条件与列表</h1>
+      <p class="doc-lead">
+        空列表需要提示，有数据时需要循环渲染。
+        <code>o-if</code> 负责条件，<code>o-fill</code> 负责列表。
+      </p>
+
+      <h2>添加和删除</h2>
+      <p>
+        输入一条待办，点「添加」。列表为空时会显示提示；
+        每一条都能单独删除。试着连续添加几条，再逐条删掉。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3"></docs-playground>
+
+      <h2>o-if</h2>
+      <pre><code>&lt;o-if :value="items.length === 0"&gt;
+  &lt;p&gt;还没有待办&lt;/p&gt;
+&lt;/o-if&gt;</code></pre>
+      <p>
+        条件为假时内容被移除，为真时重新创建。
+        <code>o-else-if</code> / <code>o-else</code> 要和
+        <code>o-if</code> 连续书写。
+      </p>
+
+      <h2>o-fill</h2>
+      <pre><code>&lt;o-fill :value="items" fill-key="id"&gt;
+  &lt;li&gt;
+    {{$data.text}}
+    &lt;button on:click="$host.remove($data.id)"&gt;删除&lt;/button&gt;
+  &lt;/li&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        列表项内只能用 <code>$data</code>、<code>$index</code>、
+        <code>$host</code> 这些作用域变量；不能写 <code>item.text</code>。
+        <code>fill-key="id"</code> 让增删时正确复用它。
+      </p>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>
+        给每条待办加一个「完成」按钮，点击后切换
+        <code>$data.done</code>，并用 <code>class:done</code> 添加删除线。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-2.html">02 · 数据与事件 →</a>
+        　·　下一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

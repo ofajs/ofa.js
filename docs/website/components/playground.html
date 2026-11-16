@@ -9,34 +9,73 @@
       box-sizing: border-box;
     }
 
-    .toolbar {
+    .workbench {
+      overflow: hidden;
+      border: 1px solid #3c3c3c;
+      border-radius: 10px;
+      background: #1e1e1e;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      color: #d4d4d4;
+      font-family: "SF Mono", "Cascadia Code", Consolas, "Liberation Mono",
+        monospace;
+      font-size: 12.5px;
+    }
+
+    .titlebar {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 10px;
+      height: 34px;
+      padding: 0 12px;
+      background: #181818;
+      border-bottom: 1px solid #2b2b2b;
     }
 
-    .toolbar strong {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--md-sys-color-on-surface);
+    .traffic {
+      display: inline-flex;
+      gap: 6px;
+      flex: none;
     }
 
-    .status {
+    .traffic i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #3d3d3d;
+    }
+
+    .traffic i:nth-child(1) { background: #ff5f57; }
+    .traffic i:nth-child(2) { background: #febc2e; }
+    .traffic i:nth-child(3) { background: #28c840; }
+
+    .title {
       flex: 1;
-      color: var(--md-sys-color-on-surface-variant);
+      overflow: hidden;
+      color: #9d9d9d;
+      font-family: system-ui, sans-serif;
       font-size: 12px;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .run {
-      padding: 7px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 12px;
       border: 0;
-      border-radius: 999px;
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-      font: inherit;
-      font-size: 13px;
+      border-radius: 4px;
+      background: #0e639c;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
       cursor: pointer;
+    }
+
+    .run:hover {
+      background: #1177bb;
     }
 
     .run[disabled] {
@@ -44,137 +83,405 @@
       cursor: not-allowed;
     }
 
-    .panes {
+    .tabbar {
+      display: flex;
+      align-items: stretch;
+      height: 34px;
+      background: #252526;
+      border-bottom: 1px solid #1b1b1b;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 128px;
+      padding: 0 14px;
+      border-right: 1px solid #1b1b1b;
+      border-top: 1px solid transparent;
+      background: #1e1e1e;
+      color: #ffffff;
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+    }
+
+    .tab.active {
+      border-top-color: #007acc;
+    }
+
+    .file-type {
+      color: #e44d26;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .dirty {
+      display: none;
+      margin-left: 2px;
+      color: #c586c0;
+      font-size: 11px;
+    }
+
+    .dirty.visible {
+      display: inline;
+    }
+
+    .tab-status {
+      flex: 1;
+      align-self: center;
+      overflow: hidden;
+      padding: 0 14px;
+      color: #8e8e8e;
+      font-family: system-ui, sans-serif;
+      font-size: 11.5px;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .body {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 12px;
+      min-height: 0;
     }
 
-    textarea,
-    iframe {
-      display: block;
-      width: 100%;
-      height: 420px;
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: var(--md-sys-shape-corner-lg);
-      background: var(--md-sys-color-surface-container-lowest);
+    .editor {
+      display: flex;
+      min-width: 0;
+      height: 440px;
+      background: #1e1e1e;
+      border-right: 1px solid #2b2b2b;
     }
 
-    textarea {
-      padding: 16px;
-      resize: vertical;
-      color: var(--md-sys-color-on-surface-variant);
-      font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-      font-size: 12.5px;
+    .gutter {
+      flex: none;
+      width: 48px;
+      margin: 0;
+      padding: 16px 10px 16px 0;
+      overflow: hidden;
+      color: #858585;
+      font: inherit;
       line-height: 1.6;
-      outline: none;
+      text-align: right;
+      white-space: pre;
+      user-select: none;
     }
 
-    textarea:focus {
-      border-color: var(--md-sys-color-primary);
+    .code-pane {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .highlight,
+    .code-pane textarea {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 16px 18px;
+      border: 0;
+      font: inherit;
+      line-height: 1.6;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    .highlight {
+      overflow: hidden;
+      color: #d4d4d4;
+      pointer-events: none;
+    }
+
+    .highlight code {
+      display: block;
+      font: inherit;
+    }
+
+    .code-pane textarea {
+      overflow: auto;
+      resize: none;
+      outline: none;
+      background: transparent;
+      color: transparent;
+      caret-color: #ffffff;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .code-pane textarea::selection {
+      background: rgba(38, 79, 120, 0.8);
+    }
+
+    .preview {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 440px;
+      background: #ffffff;
+    }
+
+    .preview-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 30px;
+      padding: 0 12px;
+      background: #252526;
+      border-bottom: 1px solid #1b1b1b;
+      color: #cccccc;
+      font-family: system-ui, sans-serif;
+      font-size: 11.5px;
+    }
+
+    .preview-url {
+      overflow: hidden;
+      color: #6f9ec9;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     iframe {
-      background: #fff;
+      flex: 1;
+      width: 100%;
+      border: 0;
+      background: #ffffff;
     }
 
-    nos-version {
-      display: block;
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 23px;
+      padding: 0 12px;
+      background: #007acc;
+      color: #ffffff;
+      font-family: system-ui, sans-serif;
+      font-size: 11px;
+    }
+
+    .statusbar .spacer {
+      flex: 1;
+    }
+
+    /* VSCode Dark+ token colors */
+    .highlight .tok-comment {
+      color: #6a9955;
+      font-style: italic;
+    }
+
+    .highlight .tok-str {
+      color: #ce9178;
+    }
+
+    .highlight .tok-kw {
+      color: #c586c0;
+    }
+
+    .highlight .tok-tag {
+      color: #569cd6;
+    }
+
+    .highlight .tok-attr {
+      color: #9cdcfe;
+    }
+
+    .highlight .tok-num {
+      color: #b5cea8;
+    }
+
+    .highlight .tok-expr {
+      color: #dcdcaa;
+    }
+
+    .highlight .tok-punct {
+      color: #808080;
     }
 
     @media (max-width: 900px) {
-      .panes {
+      .body {
         grid-template-columns: minmax(0, 1fr);
       }
 
-      textarea,
-      iframe {
-        height: 320px;
+      .editor,
+      .preview {
+        height: 340px;
+      }
+
+      .editor {
+        border-right: 0;
+        border-bottom: 1px solid #2b2b2b;
       }
     }
   </style>
 
-  <l-m src="https://core.noneos.com/nos-lib/nos-version/nos-version.html"></l-m>
+  <div class="workbench">
+    <div class="titlebar">
+      <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="title">page.html — ofa.js playground</span>
+      <button class="run" on:click="run" attr:disabled="!coreReady || busy">
+        ▶ 运行代码
+      </button>
+    </div>
 
-  <div class="toolbar">
-    <strong>案例预览</strong>
-    <span class="status">{{status}}</span>
-    <button class="run" on:click="run" attr:disabled="!coreReady || busy">
-      运行代码
-    </button>
+    <div class="tabbar">
+      <div class="tab active">
+        <span class="file-type">HTML</span>
+        page.html
+        <span class="dirty" class:visible="dirty">●</span>
+      </div>
+      <span class="tab-status">{{status}}</span>
+    </div>
+
+    <div class="body">
+      <section class="editor" aria-label="ofa.js 代码编辑器">
+        <pre class="gutter" aria-hidden="true">{{lineNumbers}}</pre>
+        <div class="code-pane">
+          <pre class="highlight" aria-hidden="true"><code :html="codeHtml"></code></pre>
+          <textarea
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            wrap="off"
+            sync:value="code"
+            on:scroll="syncScroll($event)"
+            on:keydown="onEditorKeydown($event)"
+            on:keyup="updateCursor($event)"
+            on:click="updateCursor($event)"
+            aria-label="ofa.js 页面代码"
+          ></textarea>
+        </div>
+      </section>
+
+      <section class="preview" aria-label="案例预览">
+        <div class="preview-bar">
+          <span>预览</span>
+          <span class="preview-url">/$ofa-docs-playground/</span>
+        </div>
+        <iframe attr:src="frameSrc" title="ofa.js 案例预览"></iframe>
+      </section>
+    </div>
+
+    <div class="statusbar">
+      <span>ofa.js</span>
+      <span>NoneOS Virtual FS</span>
+      <span class="spacer"></span>
+      <span>Ln {{cursorLine}}, Col {{cursorColumn}}</span>
+      <span>Spaces: 2</span>
+      <span>UTF-8</span>
+      <span>HTML</span>
+    </div>
   </div>
-
-  <div class="panes">
-    <textarea spellcheck="false" sync:value="code" aria-label="ofa.js 页面代码"></textarea>
-    <iframe attr:src="frameSrc" title="ofa.js 案例预览"></iframe>
-  </div>
-
-  <nos-version auto-install on:installed="onCoreInstalled" on:error="onCoreError"></nos-version>
 
   <script>
+    import { highlightCode } from "../content/highlight.mjs";
     import {
       SPACE,
       STORAGE_KEY,
       DEFAULT_CODE,
+      LESSONS,
       buildIndex,
     } from "../content/playground-runtime.mjs";
 
     export default {
       tag: "docs-playground",
+      attrs: {
+        lesson: "",
+      },
       data: {
         code: DEFAULT_CODE,
+        codeHtml: "",
+        lineNumbers: "1",
         frameSrc: "",
-        status: "正在准备虚拟容器…",
+        status: "正在启动虚拟容器…",
         coreReady: false,
         busy: false,
+        dirty: false,
+        cursorLine: 1,
+        cursorColumn: 1,
       },
 
       watch: {
         code(value) {
+          if (!this._storageKey) return;
           try {
-            localStorage.setItem(STORAGE_KEY, value);
+            localStorage.setItem(this._storageKey, value);
           } catch {}
+          this.refreshEditor(value);
+          this.dirty = true;
         },
       },
 
       attached() {
+        this._storageKey = this.lesson
+          ? `${STORAGE_KEY}:${this.lesson}`
+          : STORAGE_KEY;
+
         try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) this.code = saved;
-        } catch {}
+          const saved = localStorage.getItem(this._storageKey);
+          this.code = saved || LESSONS[this.lesson] || DEFAULT_CODE;
+        } catch {
+          this.code = LESSONS[this.lesson] || DEFAULT_CODE;
+        }
+
+        this.refreshEditor(this.code);
+        this.dirty = false;
+        this.initContainer();
       },
 
       proto: {
-        async onCoreInstalled() {
-          if (this.coreReady) return;
-          this.status = "正在挂载虚拟文件系统…";
+        refreshEditor(value) {
+          this.codeHtml = highlightCode(value);
+          const count = value.split("\n").length;
+          this.lineNumbers = Array.from({ length: count }, (_, i) => i + 1).join(
+            "\n",
+          );
+        },
+
+        async initContainer() {
+          if (this.coreReady || this._initializing) return;
+          this._initializing = true;
 
           try {
-            const fsUrl = new URL("/nos/fs/main.js", location.origin).href;
-            const { init, get } = await import(fsUrl);
-            await init(SPACE);
-            this._fs = { get };
+            if (!("serviceWorker" in navigator)) {
+              throw new Error("当前浏览器不支持 Service Worker");
+            }
+
+            await navigator.serviceWorker.register("/sw.js");
+            await navigator.serviceWorker.ready;
+
+            const root = await navigator.storage.getDirectory();
+            this._space = await root.getDirectoryHandle(SPACE, {
+              create: true,
+            });
+
             this.coreReady = true;
             this.status = "虚拟容器已就绪";
+            await new Promise((resolve) => {
+              requestAnimationFrame(() => requestAnimationFrame(resolve));
+            });
             await this.run();
           } catch (error) {
             console.error("[docs-playground] init failed", error);
             this.status = "虚拟容器初始化失败：" + error.message;
+          } finally {
+            this._initializing = false;
           }
         },
 
-        onCoreError(event) {
-          this.status = "NoneOS Core 安装失败：" + event.data.message;
-        },
-
         async writeFile(path, content) {
-          const file = await this._fs.get(`${SPACE}/${path}`, {
-            create: "file",
-          });
-          await file.write(content);
+          const parts = path.split("/");
+          const fileName = parts.pop();
+          let dir = this._space;
+
+          for (const part of parts) {
+            dir = await dir.getDirectoryHandle(part, { create: true });
+          }
+
+          const file = await dir.getFileHandle(fileName, { create: true });
+          const writable = await file.createWritable();
+          await writable.write(content);
+          await writable.close();
         },
 
         async run() {
@@ -189,11 +496,67 @@
             await this.writeFile("index.html", buildIndex(version));
             this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
             this.status = "已运行，可继续编辑后重新运行";
+            this.dirty = false;
           } catch (error) {
             console.error("[docs-playground] run failed", error);
             this.status = "运行失败：" + error.message;
           } finally {
             this.busy = false;
+          }
+        },
+
+        syncScroll(event) {
+          const area = event.target;
+          const pre = this.shadow.$(".highlight").ele;
+          const gutter = this.shadow.$(".gutter").ele;
+
+          pre.scrollTop = area.scrollTop;
+          pre.scrollLeft = area.scrollLeft;
+          gutter.scrollTop = area.scrollTop;
+        },
+
+        updateCursor(event) {
+          const area = event.target;
+          const before = area.value.slice(0, area.selectionStart);
+          const lines = before.split("\n");
+          this.cursorLine = lines.length;
+          this.cursorColumn = lines[lines.length - 1].length + 1;
+        },
+
+        onEditorKeydown(event) {
+          const area = event.target;
+
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            event.preventDefault();
+            this.run();
+            return;
+          }
+
+          if (event.key === "Tab") {
+            event.preventDefault();
+            const start = area.selectionStart;
+            const end = area.selectionEnd;
+            const next = `${area.value.slice(0, start)}  ${area.value.slice(end)}`;
+            this.code = next;
+            requestAnimationFrame(() => {
+              area.selectionStart = area.selectionEnd = start + 2;
+            });
+            return;
+          }
+
+          if (event.key === "Enter") {
+            const start = area.selectionStart;
+            const before = area.value.slice(0, start);
+            const line = before.slice(before.lastIndexOf("\n") + 1);
+            const indent = line.match(/^[ \t]*/)?.[0] || "";
+            if (!indent) return;
+
+            event.preventDefault();
+            const next = `${before}\n${indent}${area.value.slice(area.selectionEnd)}`;
+            this.code = next;
+            requestAnimationFrame(() => {
+              area.selectionStart = area.selectionEnd = start + 1 + indent.length;
+            });
           }
         },
       },

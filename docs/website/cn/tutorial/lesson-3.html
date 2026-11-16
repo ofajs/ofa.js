@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>03 · 条件与列表 — ofa.js 教程</title>
+    <meta name="description" content="用 o-if 和 o-fill 渲染条件内容与列表。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="03 · 条件与列表 — ofa.js 教程" />
+    <meta property="og:description" content="用 o-if 和 o-fill 渲染条件内容与列表。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 03</p>
+      <h1>条件与列表</h1>
+      <p class="doc-lead">
+        空列表需要提示，有数据时需要循环渲染。
+        <code>o-if</code> 负责条件，<code>o-fill</code> 负责列表。
+      </p>
+
+      <h2>添加和删除</h2>
+      <p>
+        输入一条待办，点「添加」。列表为空时会显示提示；
+        每一条都能单独删除。试着连续添加几条，再逐条删掉。
+      </p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3"></docs-playground>
+
+      <h2>o-if</h2>
+      <pre><code>&lt;o-if :value="items.length === 0"&gt;
+  &lt;p&gt;还没有待办&lt;/p&gt;
+&lt;/o-if&gt;</code></pre>
+      <p>
+        条件为假时内容被移除，为真时重新创建。
+        <code>o-else-if</code> / <code>o-else</code> 要和
+        <code>o-if</code> 连续书写。
+      </p>
+
+      <h2>o-fill</h2>
+      <pre><code>&lt;o-fill :value="items" fill-key="id"&gt;
+  &lt;li&gt;
+    {{$data.text}}
+    &lt;button on:click="$host.remove($data.id)"&gt;删除&lt;/button&gt;
+  &lt;/li&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        列表项内只能用 <code>$data</code>、<code>$index</code>、
+        <code>$host</code> 这些作用域变量；不能写 <code>item.text</code>。
+        <code>fill-key="id"</code> 让增删时正确复用它。
+      </p>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>
+        给每条待办加一个「完成」按钮，点击后切换
+        <code>$data.done</code>，并用 <code>class:done</code> 添加删除线。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-2.html">02 · 数据与事件 →</a>
+        　·　下一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

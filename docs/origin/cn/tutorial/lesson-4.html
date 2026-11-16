@@ -1,0 +1,70 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 04</p>
+      <h1>表单与待办</h1>
+      <p class="doc-lead">
+        把前面学的输入、事件、条件、列表组合起来，
+        就是一个真正能用的小应用。
+      </p>
+
+      <h2>完整待办</h2>
+      <p>
+        在输入框里按回车或点「添加」；勾选复选框会切换完成状态；
+        底部显示剩余未完成数量。这些状态全部来自 data。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+
+      <h2>代码拆解</h2>
+      <ul>
+        <li>
+          <code>sync:value="draft"</code> 保存输入框内容；
+        </li>
+        <li>
+          <code>on:keydown="addOnEnter($event)"</code> 处理回车；
+        </li>
+        <li>
+          <code>sync:checked="$data.done"</code> 直接修改列表项字段；
+        </li>
+        <li>
+          <code>get remaining()</code> 是计算属性，模板里当普通字段用。
+        </li>
+      </ul>
+
+      <h2>数据结构</h2>
+      <pre><code>items: [
+  { id: 1, text: "阅读文档", done: true },
+  { id: 2, text: "写一个组件", done: false },
+]</code></pre>
+      <p>
+        <code>id</code> 用来给 <code>o-fill</code> 做 <code>fill-key</code>；
+        <code>done</code> 控制复选框和删除线。
+      </p>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>
+        增加「清除已完成」按钮；再显示总条数和完成条数。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-3.html">03 · 条件与列表 →</a>
+        　·　下一篇：<a olink href="./lesson-5.html">05 · 样式与挑战 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

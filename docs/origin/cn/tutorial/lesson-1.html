@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 01</p>
+      <h1>第一个页面</h1>
+      <p class="doc-lead">
+        一个 ofa.js 页面就是一个 HTML 文件。把页面结构写进
+        <code>&lt;template page&gt;</code>，把数据写进 <code>data</code>，
+        用 <code>{{ }}</code> 显示出来。
+      </p>
+
+      <h2>先运行一次</h2>
+      <p>
+        下面的代码已经在虚拟容器里运行了。找到
+        <code>name: "世界"</code>，改成你的名字，再点「运行代码」。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-1"></docs-playground>
+
+      <h2>你刚刚用到了什么</h2>
+      <ul>
+        <li><code>&lt;template page&gt;</code>：声明这是一个页面模块；</li>
+        <li><code>data</code>：页面的响应式数据；</li>
+        <li><code>{{name}}</code>：把数据插入到文本里；</li>
+        <li><code>&lt;style&gt;</code>：只作用于这个页面的样式。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>小挑战：</strong>
+        再加一个 <code>&lt;p&gt;</code>，显示一句自我介绍；
+        在 data 里新增一个字段，用 <code>{{ }}</code> 渲染它。
+      </div>
+
+      <p class="doc-end">
+        下一篇：<a olink href="./lesson-2.html">02 · 数据与事件 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

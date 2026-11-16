@@ -76,9 +76,9 @@
 
       <h2>它是怎么运行的</h2>
       <ol>
-        <li>首次打开时安装并注册 NoneOS Core 的 <code>sw.js</code>；</li>
-        <li>Service Worker 把 <code>/$ofa-docs-playground/...</code> 映射到浏览器
-          OPFS 虚拟文件系统；</li>
+        <li>首次打开时注册 NoneOS Core 的 <code>sw.js</code>；</li>
+        <li>页面直接打开浏览器 OPFS，Service Worker 把
+          <code>/$ofa-docs-playground/...</code> 映射到虚拟文件系统；</li>
         <li>编辑器把页面模块写入虚拟文件 <code>page.html</code>，并生成一个
           固定的 <code>index.html</code> 入口；</li>
         <li>右侧 iframe 直接访问虚拟容器里的

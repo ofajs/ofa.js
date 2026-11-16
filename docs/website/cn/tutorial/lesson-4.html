@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>04 · 表单与待办 — ofa.js 教程</title>
+    <meta name="description" content="把表单、事件和列表组合成一个待办应用。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="04 · 表单与待办 — ofa.js 教程" />
+    <meta property="og:description" content="把表单、事件和列表组合成一个待办应用。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 04</p>
+      <h1>表单与待办</h1>
+      <p class="doc-lead">
+        把前面学的输入、事件、条件、列表组合起来，
+        就是一个真正能用的小应用。
+      </p>
+
+      <h2>完整待办</h2>
+      <p>
+        在输入框里按回车或点「添加」；勾选复选框会切换完成状态；
+        底部显示剩余未完成数量。这些状态全部来自 data。
+      </p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+
+      <h2>代码拆解</h2>
+      <ul>
+        <li>
+          <code>sync:value="draft"</code> 保存输入框内容；
+        </li>
+        <li>
+          <code>on:keydown="addOnEnter($event)"</code> 处理回车；
+        </li>
+        <li>
+          <code>sync:checked="$data.done"</code> 直接修改列表项字段；
+        </li>
+        <li>
+          <code>get remaining()</code> 是计算属性，模板里当普通字段用。
+        </li>
+      </ul>
+
+      <h2>数据结构</h2>
+      <pre><code>items: [
+  { id: 1, text: "阅读文档", done: true },
+  { id: 2, text: "写一个组件", done: false },
+]</code></pre>
+      <p>
+        <code>id</code> 用来给 <code>o-fill</code> 做 <code>fill-key</code>；
+        <code>done</code> 控制复选框和删除线。
+      </p>
+
+      <div class="doc-note">
+        <strong>挑战：</strong>
+        增加「清除已完成」按钮；再显示总条数和完成条数。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-3.html">03 · 条件与列表 →</a>
+        　·　下一篇：<a olink href="./lesson-5.html">05 · 样式与挑战 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

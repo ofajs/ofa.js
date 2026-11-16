@@ -11,6 +11,9 @@
       </a>
 
       <div class="nav-links" class:open="menuOpen">
+        <a class="nav-link" data-nav="tutorial" olink attr:href="tutorialUrl" on:click="closeMenu">
+          {{labelTutorial}}
+        </a>
         <a class="nav-link" data-nav="docs" olink attr:href="docsUrl" on:click="closeMenu">
           {{labelDocs}}
         </a>
@@ -100,6 +103,7 @@
       attrs: {
         labelNav: "Main navigation",
         labelHome: "Home",
+        labelTutorial: "Tutorial",
         labelDocs: "Docs",
         labelGithub: "GitHub",
         labelGithubRepo: "GitHub repository",
@@ -108,6 +112,7 @@
         labelLanguages: "Languages",
         variant: "site",
         homeUrl: "./",
+        tutorialUrl: "./tutorial/",
         languagesUrl: "../",
         docsUrl: "./docs/",
         footerTagline:
@@ -130,6 +135,14 @@
           this.menuOpen = false;
         },
         syncActive() {
+          const tutorialLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="tutorial"]',
+          );
+          tutorialLink?.classList.toggle(
+            "active",
+            /\/tutorial(?:\/|$)/.test(location.pathname),
+          );
+
           const docsLink = this.ele.shadowRoot?.querySelector(
             '[data-nav="docs"]',
           );

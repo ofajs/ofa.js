@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>05 · 样式与挑战 — ofa.js 教程</title>
+    <meta name="description" content="用 class:、:style 和计算属性完成一个综合练习。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="05 · 样式与挑战 — ofa.js 教程" />
+    <meta property="og:description" content="用 class:、:style 和计算属性完成一个综合练习。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 05</p>
+      <h1>样式与挑战</h1>
+      <p class="doc-lead">
+        数据不仅驱动文字，也能驱动类名和样式。
+        最后做一个会随状态变化的个人卡片。
+      </p>
+
+      <h2>让卡片响应状态</h2>
+      <p>
+        点「选中卡片」：边框、阴影、背景色和徽章文字都会变化。
+        这些都不是手动操作 DOM，而是 data 和 class 驱动的。
+      </p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5"></docs-playground>
+
+      <h2>三个新工具</h2>
+      <ul>
+        <li>
+          <code>class:active="active"</code>：条件添加类名；
+        </li>
+        <li>
+          <code>:style.background="active ? ... : ..."</code>：内联样式绑定；
+        </li>
+        <li>
+          <code>get levelText()</code>：计算属性，随 <code>active</code> 自动更新。
+        </li>
+      </ul>
+
+      <pre><code>&lt;div class="card" class:active="active"&gt;
+  &lt;span :style.color="active ? '#fff' : '#0061a4'"&gt;
+    {{levelText}}
+  &lt;/span&gt;
+  &lt;button on:click="active = !active"&gt;切换&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+      <h2>毕业挑战</h2>
+      <p>把这张卡片改造成你自己的：</p>
+      <ul>
+        <li>增加一个「技能标签」数组，用 <code>o-fill</code> 渲染；</li>
+        <li>增加一个输入框，实时修改卡片上的名字；</li>
+        <li>用 <code>:style</code> 根据选中状态改变圆角或字号；</li>
+        <li>把 data 换成你自己的信息，做出一个个人主页。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>接下来读什么？</strong>
+        打开左侧「文档」，从
+        <a olink href="../docs/template.html">模板指令总览</a>
+        继续系统学习；需要完整案例时看
+        <a olink href="../docs/examples.html">完整示例</a>。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
+        　·　回到：<a olink href="./">教程总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

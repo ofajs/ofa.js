@@ -1,0 +1,76 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Tutorial · 05</p>
+      <h1>样式与挑战</h1>
+      <p class="doc-lead">
+        数据不仅驱动文字，也能驱动类名和样式。
+        最后做一个会随状态变化的个人卡片。
+      </p>
+
+      <h2>让卡片响应状态</h2>
+      <p>
+        点「选中卡片」：边框、阴影、背景色和徽章文字都会变化。
+        这些都不是手动操作 DOM，而是 data 和 class 驱动的。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5"></docs-playground>
+
+      <h2>三个新工具</h2>
+      <ul>
+        <li>
+          <code>class:active="active"</code>：条件添加类名；
+        </li>
+        <li>
+          <code>:style.background="active ? ... : ..."</code>：内联样式绑定；
+        </li>
+        <li>
+          <code>get levelText()</code>：计算属性，随 <code>active</code> 自动更新。
+        </li>
+      </ul>
+
+      <pre><code>&lt;div class="card" class:active="active"&gt;
+  &lt;span :style.color="active ? '#fff' : '#0061a4'"&gt;
+    {{levelText}}
+  &lt;/span&gt;
+  &lt;button on:click="active = !active"&gt;切换&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+      <h2>毕业挑战</h2>
+      <p>把这张卡片改造成你自己的：</p>
+      <ul>
+        <li>增加一个「技能标签」数组，用 <code>o-fill</code> 渲染；</li>
+        <li>增加一个输入框，实时修改卡片上的名字；</li>
+        <li>用 <code>:style</code> 根据选中状态改变圆角或字号；</li>
+        <li>把 data 换成你自己的信息，做出一个个人主页。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>接下来读什么？</strong>
+        打开左侧「文档」，从
+        <a olink href="{{LOCALE}}/docs/template.html">模板指令总览</a>
+        继续系统学习；需要完整案例时看
+        <a olink href="{{LOCALE}}/docs/examples.html">完整示例</a>。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
+        　·　回到：<a olink href="./">教程总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

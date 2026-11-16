@@ -1,0 +1,68 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>从零开始用 ofa.js</h1>
+      <p class="doc-lead">
+        五节短课，每节都能直接改代码、点运行、看效果。
+        不需要安装 Node.js，也不需要构建工具。
+      </p>
+
+      <div class="docs-list">
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>第一个页面</h2>
+          <p>认识页面模块、data 和 {{ }}，改一行文字并立即看到结果。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>数据与事件</h2>
+          <p>用 on: 点击按钮、用 sync: 绑定输入框，做一个计数器。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>条件与列表</h2>
+          <p>用 o-if 显示空状态，用 o-fill 渲染可增删的列表。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>表单与待办</h2>
+          <p>把输入、复选框、列表和计算属性组合成待办应用。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>样式与挑战</h2>
+          <p>用 class:、:style 和 getter 做出有状态的个人卡片。</p>
+          <span class="more">开始挑战 →</span>
+        </a>
+      </div>
+
+      <div class="doc-note">
+        <strong>怎么学？</strong>
+        先读一小段说明，然后直接改右侧代码。改坏了也没关系，
+        刷新页面或清空浏览器存储就能回到默认代码。
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

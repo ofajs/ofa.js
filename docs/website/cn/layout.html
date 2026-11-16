@@ -89,6 +89,7 @@
 
 <site-shell
   attr:label-nav="site.shell.actions.nav"
+  attr:label-tutorial="site.shell.nav.tutorial"
   attr:label-docs="site.shell.nav.docs"
   attr:label-home="site.shell.actions.home"
   attr:label-github="site.shell.actions.github"
@@ -96,8 +97,9 @@
   attr:label-cta="site.shell.actions.cta"
   attr:label-menu="site.shell.actions.menu"
   attr:label-languages="site.shell.actions.languages"
-  attr:variant="docsMode ? 'docs' : 'site'"
+  attr:variant="docsMode || tutorialMode ? 'docs' : 'site'"
   attr:home-url="navUrls.home"
+  attr:tutorial-url="navUrls.tutorial"
   attr:docs-url="navUrls.docs"
   attr:languages-url="navUrls.languages"
   attr:footer-tagline="site.shell.footer.tagline"
@@ -108,8 +110,8 @@
   attr:footer-plugins="site.shell.footer.plugins"
   attr:footer-note="site.shell.footer.note"
 >
-  <div class="docs-shell" class:no-nav="!docsMode">
-    <aside class="docs-nav" attr:aria-label="site.docs.label">
+  <div class="docs-shell" class:no-nav="!docsMode && !tutorialMode">
+    <aside class="docs-nav" class:is-hidden="!docsMode" attr:aria-label="site.docs.label">
       <st-list class="side-list">
         <st-list-item
           button
@@ -314,6 +316,54 @@
               <span class="side-label">{{site.docs.nav.reference.items.deployment}}</span>
             </st-list-item>
           </st-list>
+        </st-list-item>
+      </st-list>
+    </aside>
+
+    <aside class="docs-nav is-hidden" class:is-hidden="!tutorialMode" attr:aria-label="site.tutorial.label">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="current === 'index'"
+          on:click="navigateTutorial('index')"
+        >
+          <span class="side-label">{{site.tutorial.overview}}</span>
+        </st-list-item>
+
+        <st-list-item
+          button
+          class:active="current === 'lesson-1'"
+          on:click="navigateTutorial('lesson-1')"
+        >
+          <span class="side-label">{{site.tutorial.lessons.lesson1}}</span>
+        </st-list-item>
+        <st-list-item
+          button
+          class:active="current === 'lesson-2'"
+          on:click="navigateTutorial('lesson-2')"
+        >
+          <span class="side-label">{{site.tutorial.lessons.lesson2}}</span>
+        </st-list-item>
+        <st-list-item
+          button
+          class:active="current === 'lesson-3'"
+          on:click="navigateTutorial('lesson-3')"
+        >
+          <span class="side-label">{{site.tutorial.lessons.lesson3}}</span>
+        </st-list-item>
+        <st-list-item
+          button
+          class:active="current === 'lesson-4'"
+          on:click="navigateTutorial('lesson-4')"
+        >
+          <span class="side-label">{{site.tutorial.lessons.lesson4}}</span>
+        </st-list-item>
+        <st-list-item
+          button
+          class:active="current === 'lesson-5'"
+          on:click="navigateTutorial('lesson-5')"
+        >
+          <span class="side-label">{{site.tutorial.lessons.lesson5}}</span>
         </st-list-item>
       </st-list>
     </aside>

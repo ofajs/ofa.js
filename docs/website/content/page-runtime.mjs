@@ -29,6 +29,7 @@ const getNavUrls = (url, docs = false) => {
     return {
       home: new URL("../", url).href,
       docs: new URL("./", url).href,
+      tutorial: new URL("../tutorial/", url).href,
       languages: new URL("../../", url).href,
     };
   }
@@ -36,6 +37,7 @@ const getNavUrls = (url, docs = false) => {
   return {
     home: new URL("./", url).href,
     docs: new URL("./docs/", url).href,
+    tutorial: new URL("./tutorial/", url).href,
     languages: new URL("../", url).href,
   };
 };
@@ -251,6 +253,20 @@ export const createDocsPage = async ({ url, sitePath }) => {
  * 由所有内容页通过 export const parent 挂入，负责常驻的 header/footer，
  * 以及文档路由下的左侧文档目录。
  */
+export const createTutorialPage = async ({ url, sitePath }) => {
+  const site = await loadSite(url, sitePath);
+
+  return {
+    data: {
+      site,
+      navUrls: getNavUrls(url),
+    },
+    ready() {
+      window.scrollTo(0, 0);
+    },
+  };
+};
+
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const navUrls = getNavUrls(url);
@@ -260,6 +276,7 @@ export const createLayoutPage = async ({ url, sitePath }) => {
       site,
       navUrls,
       docsMode: false,
+      tutorialMode: false,
       current: "index",
     },
     watch: {
@@ -280,6 +297,7 @@ export const createLayoutPage = async ({ url, sitePath }) => {
       syncRoute() {
         const path = location.pathname;
         this.docsMode = /\/docs(?:\/|$)/.test(path);
+        this.tutorialMode = /\/tutorial(?:\/|$)/.test(path);
 
         const file = path.replace(/\/+$/, "").split("/").pop();
         this.current =
@@ -288,7 +306,9 @@ export const createLayoutPage = async ({ url, sitePath }) => {
             : file.replace(/\.html$/, "");
       },
       scrollActiveDocIntoView() {
-        const nav = this.ele.shadowRoot?.querySelector(".docs-nav");
+        const nav = [...(this.ele.shadowRoot?.querySelectorAll(".docs-nav") || [])].find(
+          (item) => !item.classList.contains("is-hidden"),
+        );
         const active = nav?.querySelector("st-list-item.active");
         if (!nav || !active) return;
 
@@ -303,6 +323,20 @@ export const createLayoutPage = async ({ url, sitePath }) => {
           key === "index"
             ? this.navUrls.docs
             : new URL(`${key}.html`, this.navUrls.docs).href;
+        if (!url) return;
+
+        const app = (window.$ ? window.$(this.ele) : this.ele).app;
+        if (app?.goto) {
+          app.goto(url);
+        } else {
+          location.href = url;
+        }
+      },
+      navigateTutorial(key) {
+        const url =
+          key === "index"
+            ? this.navUrls.tutorial
+            : new URL(`${key}.html`, this.navUrls.tutorial).href;
         if (!url) return;
 
         const app = (window.$ ? window.$(this.ele) : this.ele).app;

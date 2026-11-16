@@ -11,11 +11,11 @@ M3 状态层与 Motion easing）。形状、阴影和动效走 `site.css` / `she
 `st-boot.js`（senti-ui 颜色初始化，首帧同步注入 `--md-sys-color-*`，
 默认种子色 `#0061A4`），官网自身不再手写任何颜色 token。官网为纯深色
 设计，首次访问会把 `st-theme-mode` 锁定为 `dark`（尊重用户已有偏好），
-之后全站（含教程页、语言选择页）强制深色。
+之后全站（含文档页、语言选择页）强制深色。
 
 官网采用「共享外壳 + 分语言内容」结构：
 
-- 顶部/底部与教程侧栏通过嵌套路由 layout 常驻（`layout.html`），
+- 顶部/底部与文档侧栏通过嵌套路由 layout 常驻（`layout.html`），
   主题样式、启动器放在 `docs/website/` 的共享目录；
 - 每个语言的页面放在 `docs/origin/<locale>/`，只包含页面结构与文案；
 - `npm run build:website` 把 `docs/origin/<locale>/` 组装到
@@ -30,9 +30,9 @@ docs/
 ├── origin/                          语言源文件（翻译/编辑入口）
 │   └── cn/
 │       ├── index.html               首页页面模块（结构 + 文案）
-│       ├── site.json                文案、导航/页脚/教程标签、页面元信息
-│       └── tutorial/
-│           ├── index.html           教程首页
+│       ├── site.json                文案、导航/页脚/文档标签、页面元信息
+│       └── docs/
+│           ├── index.html           文档首页
 │           ├── usage.html           如何使用 ofa.js（引用 script）
 │           └── template.html        使用模板渲染
 └── website/                         共享资源 + 构建产物
@@ -42,24 +42,24 @@ docs/
     ├── assets/favicon.svg
     ├── assets/logo.svg
     ├── components/
-    │   ├── site-shell.html          顶部/底部/背景外壳
-    │   ├── tutorial-layout.html     文章正文 + 右侧本页目录
-    │   └── demo-counter.html        首页响应式计数器组件
+    │   ├── site-shell.html            顶部/底部/背景外壳
+    │   ├── docs-layout.html           文章正文 + 右侧本页目录
+    │   └── demo-counter.html          首页响应式计数器组件
     ├── content/
-    │   └── page-runtime.mjs         首页/教程页共享运行时
+    │   └── page-runtime.mjs           首页/文档页共享运行时
     ├── styles/
-    │   ├── site.css                 首页与通用设计系统
-    │   ├── shell.css                导航/页脚/背景样式
-    │   └── tutorial.css             教程文章排版
+    │   ├── site.css                   首页与通用设计系统
+    │   ├── shell.css                  导航/页脚/背景样式
+    │   └── docs.css                   文档文章排版
     ├── templates/
     │   ├── locale-page.html         单页 SCSR 文档模板
-    │   ├── layout-page.html         嵌套路由 layout（header/footer + 教程目录 + slot）
+    │   ├── layout-page.html         嵌套路由 layout（header/footer + 文档目录 + slot）
     │   └── root-index.html          根语言选择页模板
     └── cn/                          构建产物，勿手改
-        ├── layout.html              嵌套路由 layout（header/footer + 教程目录）
+        ├── layout.html              嵌套路由 layout（header/footer + 文档目录）
         ├── index.html
         ├── site.json
-        └── tutorial/
+        └── docs/
             ├── index.html
             ├── usage.html
             └── template.html
@@ -97,7 +97,7 @@ npm run build:website
 
 ```text
 docs/origin/cn/index.html              → docs/website/cn/index.html
-docs/origin/cn/tutorial/usage.html     → docs/website/cn/tutorial/usage.html
+docs/origin/cn/docs/usage.html         → docs/website/cn/docs/usage.html
 docs/origin/cn/site.json               → docs/website/cn/site.json
 ```
 
@@ -111,12 +111,12 @@ docs/origin/cn/site.json               → docs/website/cn/site.json
 ```json
 {
   "pages": {
-    "tutorial/index.html": {
-      "title": "ofa.js 教程",
+    "docs/index.html": {
+      "title": "ofa.js 文档",
       "description": "..."
     },
-    "tutorial/usage.html": {
-      "title": "如何使用 ofa.js（引用 script） — ofa.js 教程",
+    "docs/usage.html": {
+      "title": "如何使用 ofa.js（引用 script） — ofa.js 文档",
       "description": "..."
     }
   }
@@ -136,7 +136,7 @@ npm run server
 
 - 根语言选择页：http://localhost:3348/docs/website/
 - 中文首页：http://localhost:3348/docs/website/cn/
-- 教程：http://localhost:3348/docs/website/cn/tutorial/
+- 文档：http://localhost:3348/docs/website/cn/docs/
 
 如果只想预览官网构建产物，可以直接以 `docs/website` 为服务根目录：
 
@@ -146,7 +146,7 @@ npm run server:website
 
 - 根语言选择页：http://localhost:3348/
 - 中文首页：http://localhost:3348/cn/
-- 教程：http://localhost:3348/cn/tutorial/
+- 文档：http://localhost:3348/cn/docs/
 
 两个脚本默认都用 3348 端口，同时只能启动一个；需要并存时用
 `PORT=4000 npm run server:website` 指定其他端口。
@@ -159,9 +159,9 @@ npm run server:website
 以英语为例：
 
 1. 复制 `docs/origin/cn/` 为 `docs/origin/en/`；
-2. 翻译所有 HTML 页面（首页与 `tutorial/` 下的文章），只改文字，保留标签、
+2. 翻译所有 HTML 页面（首页与 `docs/` 下的文章），只改文字，保留标签、
    `id`、`class`、指令与 `{{SITE}}` / `{{LOCALE}}` 占位符；
-3. 翻译 `site.json` 的 `meta`、`shell`、`tutorial`、`pages`、`demo` 与
+3. 翻译 `site.json` 的 `meta`、`shell`、`docs`、`pages`、`demo` 与
    `toast` 文案，并把 `meta.lang` 改为 `en`、`meta.language` 改为 `English`；
 4. 可选的 `meta.order` 控制语言在根选择页中的排序（数字越小越靠前）；
 5. 执行 `npm run build:website`。
@@ -171,12 +171,12 @@ npm run server:website
 
 ### 翻译时不要动的内容
 
-- `<template page>`、`<site-shell>`、`<tutorial-layout>`、`<l-m>`、`<link>`、
+- `<template page>`、`<site-shell>`、`<docs-layout>`、`<l-m>`、`<link>`、
   `<script>` 等结构；
-- 页面底部 `<script>` 里的 `createLandingPage` / `createTutorialPage`
+- 页面底部 `<script>` 里的 `createLandingPage` / `createDocsPage`
   引入、`sitePath` 与 `export default`；
 - `{{SITE}}` / `{{LOCALE}}` 占位符；
-- `site-shell` / `tutorial-layout` 上以 `attr:` 开头的绑定；
+- `site-shell` / `docs-layout` 上以 `attr:` 开头的绑定；
 - 页面里的 `id`（`top`、`features`、`demo`、`start`、`ecosystem`）；
 - `on:click`、`olink`、`sync:`、`class:`、`attr:` 等 ofa.js 指令；
 - 代码示例中的 `<`、`>`（必须保持 `&lt;` / `&gt;` 转义）。
@@ -204,20 +204,20 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 + 教程三页，共四份内容页 HTML，另有共享的
+- 当前站点有首页 + 文档三页，共四份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
-- `layout.html` 常驻 header/footer；进入教程路由时再展开左侧教程目录
-  （同一 layout 的 docs 区域），文章页与教程首页只负责 slot 内容；
-- 切换教程文章时 layout 不销毁，只有文章子页参与过渡；首页与教程之间
+- `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
+  （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
+- 切换文档文章时 layout 不销毁，只有文章子页参与过渡；首页与文档之间
   切换也不重建 layout；
-- 站点 layout 通过 `routerChange` 更新 `docsMode`、教程高亮和滚动位置；
-  `site-shell` 监听 `router-change` 同步「教程」高亮与移动菜单状态。
+- 站点 layout 通过 `routerChange` 更新 `docsMode`、文档高亮和滚动位置；
+  `site-shell` 监听 `router-change` 同步「文档」高亮与移动菜单状态。
 
-## 教程模式
+## 文档模式
 
-- 站点 layout 的教程区域使用 Senti-UI 的 `st-list` /
+- 站点 layout 的文档区域使用 Senti-UI 的 `st-list` /
   `st-list-item` 做左侧目录：分组自带折叠动画，当前文章用蓝色文字 +
-  下划线标记；该目录在教程页之间常驻；
+  下划线标记；该目录在文档页之间常驻；
 - 首页与外壳的按钮类 UI 同样使用 Senti-UI：`st-button` /
   `st-icon-button`（hero CTA、复制按钮、待办演示、CTA 区、
   `site-shell` 导航 CTA、`demo-counter` 计数按钮）。页面与组件各自通过
@@ -232,27 +232,27 @@ npm run server:website
   必须作为字符串放进 `page-runtime.mjs` 并用 `:code` 绑定——写在
   `<textarea>` / 文本节点里会被 ofa 模板引擎当插值编译吞掉
   （`<pre>`/`<code>` 文本节点是例外，ofa 不编译，但 st-code 不走这条路）；
-- `components/tutorial-layout.html` 只负责文章正文 + 右侧「本页内容」；
-- 教程采用 MDN 式三栏：260px 目录 + 800px 正文 + 220px「本页内容」，
+- `components/docs-layout.html` 只负责文章正文 + 右侧「本页内容」；
+- 文档采用 MDN 式三栏：260px 目录 + 800px 正文 + 220px「本页内容」，
   不再用卡片包裹正文；
 - 站点 layout 通过 CDN `l-m` 引入 `senti-ui/packages/list/list.html`，
   不增加构建步骤；
-- `styles/tutorial.css` 提供 MDN 式文章排版：40px h1、32px h2、
-  16px body、M3 代码块与教程首页列表；
-- 教程页切换时由 layout 的 `docsMode` 驱动 `site-shell` 的 `variant`：
+- `styles/docs.css` 提供 MDN 式文章排版：40px h1、32px h2、
+  16px body、M3 代码块与文档首页列表；
+- 文档页切换时由 layout 的 `docsMode` 驱动 `site-shell` 的 `variant`：
   自动隐藏顶部 CTA，保留文档导航；
-- 教程入口 `/cn/tutorial/` 由 `origin/cn/tutorial/index.html` 生成；
+- 文档入口 `/cn/docs/` 由 `origin/cn/docs/index.html` 生成；
 - 两篇文章分别是 `usage.html`（引用 script）与 `template.html`（模板渲染）；
-- 导航栏的「教程」项指向教程入口；侧栏在文章之间用真实路径跳转。
+- 导航栏的「文档」项指向文档入口；侧栏在文章之间用真实路径跳转。
 
 新增文章：
 
-1. 在 `docs/origin/<locale>/tutorial/` 复制一篇文章页面模块，改标题与正文，
+1. 在 `docs/origin/<locale>/docs/` 复制一篇文章页面模块，改标题与正文，
    并保留 `export const parent = "{{LOCALE}}/layout.html";`（挂到站点 layout）；
 2. 在 `site.json` 的 `pages` 里补该路径的 title/description；
-3. 在 `site.json` 的 `tutorial.articles` 加标签；
+3. 在 `site.json` 的 `docs.articles` 加标签；
 4. 在 `templates/layout-page.html` 的左侧目录加一项（以及对应的
-   `navUrls` / 导航方法），并在 `tutorial/index.html` 加一行入口列表；
+   `navUrls` / 导航方法），并在 `docs/index.html` 加一行入口列表；
 5. 重新执行 `npm run build:website`。
 
 ## 首屏展示的接入方式
@@ -273,8 +273,8 @@ npm 安装命令，CDN 地址是主要使用方式。
   导航、页脚、背景只维护一份。
 - 导航与页脚文案通过 `site.json → site.shell` 以 `attr:` 绑定传入。
 - `styles/site.css` 通过页面内 `<link>` 加载到页面 shadow；`styles/shell.css`
-  由外壳组件自己加载；教程页额外加载 `styles/tutorial.css`。
-- 导航的首页、教程、语言入口等 URL 由页面运行时按当前页面地址计算成绝对
+  由外壳组件自己加载；文档页额外加载 `styles/docs.css`。
+- 导航的首页、文档、语言入口等 URL 由页面运行时按当前页面地址计算成绝对
   地址后传入组件，避免组件内相对路径以组件文件为基准解析。
-- 待办演示、复制、滚动渐入等交互由 `content/page-runtime.mjs` 提供；教程页
-  复用其中的 `createTutorialPage`。
+- 待办演示、复制、滚动渐入等交互由 `content/page-runtime.mjs` 提供；文档页
+  复用其中的 `createDocsPage`。

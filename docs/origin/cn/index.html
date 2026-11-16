@@ -446,11 +446,11 @@
         </div>
   
         <div class="start-note" data-reveal>
-          <span>想了解组件、路由、状态管理的完整用法？文档里有从零开始的完整教程。</span>
-          <a attr:href="site.urls.docs" target="_blank" rel="noreferrer">
+          <span>想了解组件、路由、状态管理的完整用法？文档里有从零开始的完整指南。</span>
+          <a olink attr:href="navUrls.docs">
             阅读完整文档
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M7 17 17 7M8 7h9v9"></path>
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
             </svg>
           </a>
         </div>
@@ -592,7 +592,8 @@
           <div class="actions">
             <st-button
               class="btn btn-primary"
-              on:click="openExternal(site.urls.docs)"
+              olink
+              attr:href="navUrls.docs"
             >
               阅读文档
               <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -11,20 +11,8 @@
       </a>
 
       <div class="nav-links" class:open="menuOpen">
-        <a class="nav-link" data-nav="tutorial" olink attr:href="tutorialUrl" on:click="closeMenu">
-          {{labelTutorial}}
-        </a>
-        <a
-          class="nav-link"
-          attr:href="docsUrl"
-          target="_blank"
-          rel="noreferrer"
-          on:click="closeMenu"
-        >
+        <a class="nav-link" data-nav="docs" olink attr:href="docsUrl" on:click="closeMenu">
           {{labelDocs}}
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M7 17 17 7M8 7h9v9"></path>
-          </svg>
         </a>
       </div>
 
@@ -41,7 +29,7 @@
           </svg>
           <span>{{labelGithub}}</span>
         </a>
-        <st-button class="nav-cta" olink attr:href="tutorialUrl" on:click="closeMenu">
+        <st-button class="nav-cta" olink attr:href="docsUrl" on:click="closeMenu">
           {{labelCta}}
           <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6"></path>
@@ -76,7 +64,7 @@
 
       <div class="f-col">
         <h4>{{footerResources}}</h4>
-        <a attr:href="docsUrl" target="_blank" rel="noreferrer">{{footerDocs}}</a>
+        <a attr:href="docsUrl">{{footerDocs}}</a>
         <a href="https://github.com/ofajs/ofa.js" target="_blank" rel="noreferrer">GitHub</a>
         <a href="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs" target="_blank" rel="noreferrer">CDN</a>
       </div>
@@ -112,7 +100,6 @@
       attrs: {
         labelNav: "Main navigation",
         labelHome: "Home",
-        labelTutorial: "Tutorial",
         labelDocs: "Docs",
         labelGithub: "GitHub",
         labelGithubRepo: "GitHub repository",
@@ -121,9 +108,8 @@
         labelLanguages: "Languages",
         variant: "site",
         homeUrl: "./",
-        tutorialUrl: "./tutorial/",
         languagesUrl: "../",
-        docsUrl: "https://ofajs.com/en/index.html",
+        docsUrl: "./docs/",
         footerTagline:
           "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
         footerResources: "Resources",
@@ -144,12 +130,12 @@
           this.menuOpen = false;
         },
         syncActive() {
-          const tutorialLink = this.ele.shadowRoot?.querySelector(
-            '[data-nav="tutorial"]',
+          const docsLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="docs"]',
           );
-          tutorialLink?.classList.toggle(
+          docsLink?.classList.toggle(
             "active",
-            /\/tutorial(?:\/|$)/.test(location.pathname),
+            /\/docs(?:\/|$)/.test(location.pathname),
           );
         },
       },

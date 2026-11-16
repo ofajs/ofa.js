@@ -1,5 +1,5 @@
 /*
- * 教程模式的内容排版（所有语言共用）。
+ * 文档模式的内容排版（所有语言共用）。
  * Material Design 3：headline / body / label 三类文字角色。
  */
 
@@ -9,7 +9,7 @@
   min-width: 0;
 }
 
-.doc.tutorial-intro {
+.doc.docs-intro {
   max-width: 800px;
 }
 
@@ -170,14 +170,14 @@
   color: var(--md-sys-color-primary);
 }
 
-/* 教程首页的文章列表（MDN 式，不使用卡片） */
+/* 文档首页的文章列表（MDN 式，不使用卡片） */
 
-.tutorial-list {
+.docs-list {
   margin: 32px 0 8px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.tutorial-row {
+.docs-row {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) auto;
   grid-template-areas:
@@ -190,27 +190,27 @@
   text-decoration: none;
 }
 
-.doc .tutorial-row {
+.doc .docs-row {
   text-decoration: none;
 }
 
-.tutorial-row .num {
+.docs-row .num {
   grid-area: num;
 }
 
-.tutorial-row h2 {
+.docs-row h2 {
   grid-area: title;
 }
 
-.tutorial-row p {
+.docs-row p {
   grid-area: desc;
 }
 
-.tutorial-row .more {
+.docs-row .more {
   grid-area: more;
 }
 
-.tutorial-row .num {
+.docs-row .num {
   padding-top: 3px;
   color: var(--md-sys-color-primary);
   font-family: var(--mono);
@@ -218,7 +218,7 @@
   letter-spacing: 0.04em;
 }
 
-.doc .tutorial-row h2 {
+.doc .docs-row h2 {
   margin: 0 0 4px;
   color: var(--md-sys-color-on-surface);
   font-size: 20px;
@@ -228,14 +228,14 @@
   transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
-.tutorial-row p {
+.docs-row p {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: 14px;
   line-height: 1.55;
 }
 
-.tutorial-row .more {
+.docs-row .more {
   align-self: center;
   color: var(--md-sys-color-primary);
   font-size: 12px;
@@ -243,7 +243,7 @@
   white-space: nowrap;
 }
 
-.tutorial-row:hover h2 {
+.docs-row:hover h2 {
   color: var(--md-sys-color-primary);
 }
 
@@ -277,9 +277,9 @@
 
 }
 
-/* 教程区嵌套路由：左侧目录在 tutorial/layout.html 中常驻 */
+/* 文档区嵌套路由：左侧目录在 docs/layout.html 中常驻 */
 
-.tutorial-shell {
+.docs-shell {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   align-items: start;
@@ -289,40 +289,40 @@
   padding: 32px;
 }
 
-.tutorial-nav {
+.docs-nav {
   position: sticky;
   top: 96px;
   min-width: 0;
 }
 
-.tutorial-content {
+.docs-content {
   min-width: 0;
 }
 
-.tutorial-nav .side-list {
+.docs-nav .side-list {
   font-size: 13.5px;
 }
 
-.tutorial-nav st-list-item {
+.docs-nav st-list-item {
   color: var(--md-sys-color-on-surface-variant);
   font-size: 13.5px;
 }
 
-.tutorial-nav .side-label {
+.docs-nav .side-label {
   display: block;
   line-height: 1.45;
 }
 
-.tutorial-nav st-list-item[collapsible] .side-label {
+.docs-nav st-list-item[collapsible] .side-label {
   color: var(--md-sys-color-on-surface);
   font-weight: 500;
 }
 
-.tutorial-nav st-list-item.active {
+.docs-nav st-list-item.active {
   color: var(--md-sys-color-primary);
 }
 
-.tutorial-nav st-list-item.active .side-label {
+.docs-nav st-list-item.active .side-label {
   color: var(--md-sys-color-primary);
   font-weight: 500;
   text-decoration: underline;
@@ -331,7 +331,7 @@
 }
 
 @media (max-width: 1180px) {
-  .tutorial-shell {
+  .docs-shell {
     grid-template-columns: 240px minmax(0, 1fr);
     gap: 40px;
     padding: 32px 24px;
@@ -339,25 +339,25 @@
 }
 
 @media (max-width: 900px) {
-  .tutorial-shell {
+  .docs-shell {
     display: block;
     padding: 24px 20px 0;
   }
 
-  .tutorial-nav {
+  .docs-nav {
     display: none;
   }
 }
 
-/* 站点 layout 的站点模式：不显示教程目录，内容占满整行 */
+/* 站点 layout 的站点模式：不显示文档目录，内容占满整行 */
 
-.tutorial-shell.no-nav {
+.docs-shell.no-nav {
   display: block;
   max-width: none;
   margin: 0;
   padding: 0;
 }
 
-.tutorial-shell.no-nav .tutorial-nav {
+.docs-shell.no-nav .docs-nav {
   display: none;
 }

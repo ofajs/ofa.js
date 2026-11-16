@@ -60,10 +60,10 @@
 <!--
   所有内容页的嵌套路由父页（layout）。
   子页通过 `export const parent = "…/layout.html"` 挂到这里，
-  在 slot 中切换；header/footer 与教程左侧目录只创建一次。
+  在 slot 中切换；header/footer 与文档左侧目录只创建一次。
 -->
 <link rel="stylesheet" href="../styles/site.css" />
-<link rel="stylesheet" href="../styles/tutorial.css" />
+<link rel="stylesheet" href="../styles/docs.css" />
 <l-m src="../components/site-shell.html"></l-m>
 <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui/packages/list/list.html"></l-m>
 
@@ -89,7 +89,6 @@
 
 <site-shell
   attr:label-nav="site.shell.actions.nav"
-  attr:label-tutorial="site.shell.nav.tutorial"
   attr:label-docs="site.shell.nav.docs"
   attr:label-home="site.shell.actions.home"
   attr:label-github="site.shell.actions.github"
@@ -99,9 +98,8 @@
   attr:label-languages="site.shell.actions.languages"
   attr:variant="docsMode ? 'docs' : 'site'"
   attr:home-url="navUrls.home"
-  attr:tutorial-url="navUrls.tutorial"
+  attr:docs-url="navUrls.docs"
   attr:languages-url="navUrls.languages"
-  attr:docs-url="site.urls.docs"
   attr:footer-tagline="site.shell.footer.tagline"
   attr:footer-resources="site.shell.footer.resources"
   attr:footer-ecosystem="site.shell.footer.ecosystem"
@@ -110,46 +108,46 @@
   attr:footer-plugins="site.shell.footer.plugins"
   attr:footer-note="site.shell.footer.note"
 >
-  <div class="tutorial-shell" class:no-nav="!docsMode">
-    <aside class="tutorial-nav" attr:aria-label="site.tutorial.label">
+  <div class="docs-shell" class:no-nav="!docsMode">
+    <aside class="docs-nav" attr:aria-label="site.docs.label">
       <st-list class="side-list">
         <st-list-item
           button
           class:active="current === 'index'"
-          on:click="navigateTutorial('tutorial')"
+          on:click="navigateDocs('docs')"
         >
-          <span class="side-label">{{site.tutorial.overview}}</span>
+          <span class="side-label">{{site.docs.overview}}</span>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.start}}</span>
+          <span class="side-label">{{site.docs.groups.start}}</span>
           <st-list slot="sublist">
             <st-list-item
               button
               class:active="current === 'usage'"
-              on:click="navigateTutorial('usage')"
+              on:click="navigateDocs('usage')"
             >
-              <span class="side-label">{{site.tutorial.articles.usageShort}}</span>
+              <span class="side-label">{{site.docs.articles.usageShort}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.template}}</span>
+          <span class="side-label">{{site.docs.groups.template}}</span>
           <st-list slot="sublist">
             <st-list-item
               button
               class:active="current === 'template'"
-              on:click="navigateTutorial('template')"
+              on:click="navigateDocs('template')"
             >
-              <span class="side-label">{{site.tutorial.articles.templateShort}}</span>
+              <span class="side-label">{{site.docs.articles.templateShort}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
       </st-list>
     </aside>
 
-    <div class="tutorial-content">
+    <div class="docs-content">
       <slot></slot>
     </div>
   </div>

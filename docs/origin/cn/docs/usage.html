@@ -1,9 +1,9 @@
 <template page>
   <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
-  <link rel="stylesheet" href="{{SITE}}/styles/tutorial.css" />
-  <l-m src="{{SITE}}/components/tutorial-layout.html"></l-m>
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
 
-    <tutorial-layout attr:label-on-this-page="site.tutorial.onThisPage">
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
       <article class="doc">
         <p class="doc-kicker">Getting started</p>
         <h1>如何使用 ofa.js（引用 script）</h1>
@@ -99,14 +99,14 @@ $ python3 -m http.server</code></pre>
           下一篇：<a olink href="./template.html">使用模板渲染 →</a>
         </p>
       </article>
-    </tutorial-layout>
+    </docs-layout>
 
   <script>
-    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
 
     export const parent = "{{LOCALE}}/layout.html";
 
     export default (args) =>
-      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
   </script>
 </template>

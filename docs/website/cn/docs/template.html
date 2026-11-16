@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>使用模板渲染 — ofa.js 教程</title>
+    <title>使用模板渲染 — ofa.js 文档</title>
     <meta name="description" content="学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="使用模板渲染 — ofa.js 教程" />
+    <meta property="og:title" content="使用模板渲染 — ofa.js 文档" />
     <meta property="og:description" content="学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
@@ -59,10 +59,10 @@
       <template page>
 
   <link rel="stylesheet" href="../../styles/site.css" />
-  <link rel="stylesheet" href="../../styles/tutorial.css" />
-  <l-m src="../../components/tutorial-layout.html"></l-m>
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
 
-    <tutorial-layout attr:label-on-this-page="site.tutorial.onThisPage">
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
       <article class="doc">
         <p class="doc-kicker">Template rendering</p>
         <h1>使用模板渲染</h1>
@@ -205,15 +205,15 @@
           上一篇：<a olink href="./usage.html">如何使用 ofa.js →</a>
         </p>
       </article>
-    </tutorial-layout>
+    </docs-layout>
 
   <script>
-    import { createTutorialPage } from "../../content/page-runtime.mjs";
+    import { createDocsPage } from "../../content/page-runtime.mjs";
 
     export const parent = "../layout.html";
 
     export default (args) =>
-      createTutorialPage({ ...args, sitePath: "../site.json" });
+      createDocsPage({ ...args, sitePath: "../site.json" });
   </script>
 
       </template>

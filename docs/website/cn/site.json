@@ -7,12 +7,8 @@
     "noscript": "此页面需要启用 JavaScript 才能运行 ofa.js。",
     "order": 10
   },
-  "urls": {
-    "docs": "https://ofajs.com/cn/index.html"
-  },
   "shell": {
     "nav": {
-      "tutorial": "教程",
       "docs": "文档"
     },
     "actions": {
@@ -56,9 +52,9 @@
     "copied": "已复制到剪贴板",
     "failed": "复制失败，请手动选择"
   },
-  "tutorial": {
-    "label": "教程",
-    "overview": "教程总览",
+  "docs": {
+    "label": "文档",
+    "overview": "文档总览",
     "groups": {
       "start": "开始使用",
       "template": "模板语法"
@@ -72,16 +68,16 @@
     "onThisPage": "本页内容"
   },
   "pages": {
-    "tutorial/index.html": {
-      "title": "ofa.js 教程",
+    "docs/index.html": {
+      "title": "ofa.js 文档",
       "description": "从引用 script 开始，学习 ofa.js 的组件、页面与模板渲染。"
     },
-    "tutorial/usage.html": {
-      "title": "如何使用 ofa.js（引用 script） — ofa.js 教程",
+    "docs/usage.html": {
+      "title": "如何使用 ofa.js（引用 script） — ofa.js 文档",
       "description": "通过 CDN script 引入 ofa.js，写出第一个页面模块。"
     },
-    "tutorial/template.html": {
-      "title": "使用模板渲染 — ofa.js 教程",
+    "docs/template.html": {
+      "title": "使用模板渲染 — ofa.js 文档",
       "description": "学习 {{}}、on:、sync:、o-if 与 o-fill 等 ofa.js 模板语法。"
     }
   }

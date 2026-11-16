@@ -24,11 +24,11 @@ const loadSite = async (url, sitePath = "./site.json") => {
   return res.json();
 };
 
-const getNavUrls = (url, tutorial = false) => {
-  if (tutorial) {
+const getNavUrls = (url, docs = false) => {
+  if (docs) {
     return {
       home: new URL("../", url).href,
-      tutorial: new URL("./", url).href,
+      docs: new URL("./", url).href,
       languages: new URL("../../", url).href,
       usage: new URL("./usage.html", url).href,
       template: new URL("./template.html", url).href,
@@ -37,7 +37,7 @@ const getNavUrls = (url, tutorial = false) => {
 
   return {
     home: new URL("./", url).href,
-    tutorial: new URL("./tutorial/", url).href,
+    docs: new URL("./docs/", url).href,
     languages: new URL("../", url).href,
   };
 };
@@ -234,7 +234,7 @@ $ python3 -m http.server
   };
 };
 
-export const createTutorialPage = async ({ url, sitePath }) => {
+export const createDocsPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
 
   return {
@@ -251,13 +251,13 @@ export const createTutorialPage = async ({ url, sitePath }) => {
 /**
  * 顶层布局页（layout.html）的页面数据。
  * 由所有内容页通过 export const parent 挂入，负责常驻的 header/footer，
- * 以及教程路由下的左侧教程目录。
+ * 以及文档路由下的左侧文档目录。
  */
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const navUrls = getNavUrls(url);
-  navUrls.usage = new URL("./tutorial/usage.html", url).href;
-  navUrls.template = new URL("./tutorial/template.html", url).href;
+  navUrls.usage = new URL("./docs/usage.html", url).href;
+  navUrls.template = new URL("./docs/template.html", url).href;
 
   return {
     data: {
@@ -276,7 +276,7 @@ export const createLayoutPage = async ({ url, sitePath }) => {
     proto: {
       syncRoute() {
         const path = location.pathname;
-        this.docsMode = /\/tutorial(?:\/|$)/.test(path);
+        this.docsMode = /\/docs(?:\/|$)/.test(path);
 
         const file = path.replace(/\/+$/, "").split("/").pop();
         this.current =
@@ -286,8 +286,8 @@ export const createLayoutPage = async ({ url, sitePath }) => {
               ? "template"
               : "index";
       },
-      navigateTutorial(key) {
-        const url = key === "tutorial" ? this.navUrls.tutorial : this.navUrls[key];
+      navigateDocs(key) {
+        const url = key === "docs" ? this.navUrls.docs : this.navUrls[key];
         if (!url) return;
 
         const app = (window.$ ? window.$(this.ele) : this.ele).app;

@@ -384,7 +384,12 @@
     <div class="titlebar">
       <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="title">page.html — ofa.js playground</span>
-      <button class="run" on:click="run" attr:disabled="!coreReady || busy">
+      <button
+        class="run"
+        on:click="run"
+        attr:disabled="!coreReady || busy"
+        title="运行代码（Ctrl+S / ⌘S）"
+      >
         ▶ 运行代码
       </button>
     </div>
@@ -586,7 +591,7 @@
             await this.writeFile("page.html", this.code);
             await this.writeFile("index.html", buildIndex(version));
             this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
-            this.status = "已运行，可继续编辑后重新运行";
+            this.status = "已运行，可继续编辑后按 Ctrl/⌘+S 重新运行";
             this.dirty = false;
           } catch (error) {
             console.error("[docs-playground] run failed", error);
@@ -646,6 +651,18 @@
 
         onEditorKeydown(event) {
           const area = event.target;
+
+          // Ctrl/⌘+S：取消浏览器“保存网页”，直接写入虚拟容器并运行
+          if (
+            (event.metaKey || event.ctrlKey) &&
+            !event.altKey &&
+            !event.shiftKey &&
+            event.key.toLowerCase() === "s"
+          ) {
+            event.preventDefault();
+            this.run();
+            return;
+          }
 
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
             event.preventDefault();

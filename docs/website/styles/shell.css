@@ -329,48 +329,6 @@ footer {
   z-index: 1;
 }
 
-/* ---------------- 导航右侧 CTA ---------------- */
-
-.nav-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  background: linear-gradient(120deg, #7c5cff, #5b52ff 58%, #0891b2);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  box-shadow:
-    0 8px 20px rgba(91, 82, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.nav-cta:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 12px 24px rgba(91, 82, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-
-.nav-cta .icon {
-  width: 13px;
-  height: 13px;
-}
-
-.nav-cta:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-}
-
 footer {
   border-top: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.18);
@@ -480,10 +438,6 @@ footer {
   background: rgba(6, 7, 13, 0.94);
 }
 
-:host([variant="docs"]) .nav-cta {
-  display: none;
-}
-
 /* ---------------- 响应式 ---------------- */
 
 @media (max-width: 1024px) {
@@ -539,10 +493,6 @@ footer {
   .nav {
     height: 62px;
     padding: 0 18px;
-  }
-
-  .nav-actions .nav-cta {
-    display: none;
   }
 
   .icon-link span {
@@ -697,31 +647,6 @@ footer {
 
 .nav-actions {
   gap: 8px;
-}
-
-.nav-cta {
-  height: 40px;
-  padding: 0 20px;
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  box-shadow: none;
-  transition:
-    box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
-    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-}
-
-.nav-cta:hover {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 90%, var(--md-sys-color-on-primary) 10%);
-  box-shadow: var(--md-sys-elevation-1);
-}
-
-.nav-cta .icon {
-  width: 16px;
-  height: 16px;
 }
 
 .nav-burger {

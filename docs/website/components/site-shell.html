@@ -1,6 +1,5 @@
 <template component>
   <link rel="stylesheet" href="../styles/shell.css" />
-  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/button.html"></l-m>
 
   <div class="nav-wrap">
     <nav class="nav" attr:aria-label="labelNav">
@@ -32,12 +31,6 @@
           </svg>
           <span>{{labelGithub}}</span>
         </a>
-        <st-button class="nav-cta" olink attr:href="docsUrl" on:click="closeMenu">
-          {{labelCta}}
-          <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M5 12h14M13 6l6 6-6 6"></path>
-          </svg>
-        </st-button>
         <button
           class="nav-burger"
           class:open="menuOpen"
@@ -107,7 +100,6 @@
         labelDocs: "Docs",
         labelGithub: "GitHub",
         labelGithubRepo: "GitHub repository",
-        labelCta: "Start learning",
         labelMenu: "Toggle menu",
         labelLanguages: "Languages",
         variant: "site",

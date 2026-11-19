@@ -8,114 +8,168 @@
       <p class="doc-kicker">Tutorial</p>
       <h1>从零开始用 ofa.js</h1>
       <p class="doc-lead">
-        14 节短课，按「入门 → 交互与数据 → 组件与状态 → 综合实践」组织。
-        每节课都能直接改代码、点运行、看效果。
+        19 节短课，按「入门 → 交互与状态 → 组件 → 应用与实战」组织。
+        每节课都从一个小问题开始，改代码、按 Ctrl/⌘+S 立即看结果。
       </p>
 
       <h2>入门</h2>
       <div class="docs-list">
+
         <a class="docs-row" olink href="./lesson-1.html">
           <span class="num">01</span>
           <h2>第一个页面</h2>
-          <p>认识页面模块、data 和 {{ }}，改一行文字并立即看到结果。</p>
+          <p>ofa.js 的页面就是一个 HTML 文件：结构、样式和逻辑都在同一个文件里。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-2.html">
           <span class="num">02</span>
-          <h2>数据与事件</h2>
-          <p>用 on: 点击按钮、用 sync: 绑定输入框，做一个计数器。</p>
+          <h2>数据与插值</h2>
+          <p>data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-3.html">
           <span class="num">03</span>
-          <h2>条件与列表</h2>
-          <p>用 o-if 显示空状态，用 o-fill 渲染可增删的列表。</p>
+          <h2>动态属性</h2>
+          <p>HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-4.html">
           <span class="num">04</span>
-          <h2>表单与待办</h2>
-          <p>把输入、复选框、列表和计算属性组合成待办应用。</p>
+          <h2>样式与 class</h2>
+          <p>页面里的 &lt;style&gt; 只作用于当前页面，class: 和 :style 让样式跟随数据变化。</p>
           <span class="more">开始学习 →</span>
         </a>
+
       </div>
 
-      <h2>交互与数据</h2>
+      <h2>交互与状态</h2>
       <div class="docs-list">
+
         <a class="docs-row" olink href="./lesson-5.html">
           <span class="num">05</span>
-          <h2>样式与状态</h2>
-          <p>用 class:、:style 和 getter 做出有状态的个人卡片。</p>
+          <h2>事件</h2>
+          <p>用 on: 监听事件：简单逻辑写表达式，复杂逻辑写 proto 方法。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-6.html">
           <span class="num">06</span>
-          <h2>搜索与过滤</h2>
-          <p>输入关键字，用计算属性实时过滤列表。</p>
+          <h2>双向绑定</h2>
+          <p>sync: 让表单和 data 双向同步，适合标量值。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-7.html">
           <span class="num">07</span>
-          <h2>表单校验</h2>
-          <p>必填、邮箱格式、按钮禁用和成功提示。</p>
+          <h2>条件渲染</h2>
+          <p>o-if / o-else-if / o-else 控制内容是否存在。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-8.html">
           <span class="num">08</span>
-          <h2>计算属性与侦听</h2>
-          <p>用 getter 算总价，用 watch 记录数据变化。</p>
+          <h2>列表渲染</h2>
+          <p>o-fill 渲染数组；列表项内用 $data、$index、$host。</p>
           <span class="more">开始学习 →</span>
         </a>
-      </div>
 
-      <h2>组件与状态</h2>
-      <div class="docs-list">
         <a class="docs-row" olink href="./lesson-9.html">
           <span class="num">09</span>
-          <h2>使用组件</h2>
-          <p>通过 l-m 引入组件，传 attrs 并观察独立状态。</p>
+          <h2>编辑列表</h2>
+          <p>数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-10.html">
           <span class="num">10</span>
-          <h2>行内编辑列表</h2>
-          <p>在 o-fill 列表里直接编辑每一项数据。</p>
+          <h2>计算属性与侦听</h2>
+          <p>proto 的 getter 做同步计算，watch 观察变化并处理副作用。</p>
           <span class="more">开始学习 →</span>
         </a>
+
         <a class="docs-row" olink href="./lesson-11.html">
           <span class="num">11</span>
-          <h2>全局状态</h2>
-          <p>用 $.stanz 创建两个面板共享的响应式状态。</p>
+          <h2>生命周期</h2>
+          <p>ready → attached → loaded，移除时 detached；定时器和监听要在 detached 清理。</p>
           <span class="more">开始学习 →</span>
         </a>
-        <a class="docs-row" olink href="./lesson-12.html">
-          <span class="num">12</span>
-          <h2>本地持久化</h2>
-          <p>把编辑内容写入 localStorage，刷新后恢复。</p>
-          <span class="more">开始学习 →</span>
-        </a>
+
       </div>
 
-      <h2>综合实践</h2>
+      <h2>组件</h2>
       <div class="docs-list">
-        <a class="docs-row" olink href="./lesson-13.html">
-          <span class="num">13</span>
-          <h2>异步与加载态</h2>
-          <p>用 loading / error / success 三种状态处理异步数据。</p>
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>第一个组件</h2>
+          <p>把可复用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
           <span class="more">开始学习 →</span>
         </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>组件参数</h2>
+          <p>外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
         <a class="docs-row" olink href="./lesson-14.html">
           <span class="num">14</span>
-          <h2>综合项目：个人主页</h2>
-          <p>把输入、列表、样式和状态组合成一个可扩展的主页。</p>
-          <span class="more">开始挑战 →</span>
+          <h2>插槽与事件</h2>
+          <p>slot 让组件接收外部内容，emit 把组件内部发生的事告诉外部。</p>
+          <span class="more">开始学习 →</span>
         </a>
+
+      </div>
+
+      <h2>应用与实战</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>全局状态</h2>
+          <p>多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>页面与路由</h2>
+          <p>o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>嵌套布局</h2>
+          <p>子页声明 parent，父页用 slot 承接；切子页时父页不销毁。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>异步与加载态</h2>
+          <p>异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>综合：待办清单</h2>
+          <p>把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
       </div>
 
       <div class="doc-note">
         <strong>怎么学？</strong>
-        先读一小段说明，然后直接改右侧代码。改坏了也没关系，
-        刷新页面或清空浏览器存储就能回到默认代码。
+        先读说明，再改右侧代码，按 <kbd>Ctrl</kbd>+<kbd>S</kbd>（Mac 为
+        <kbd>⌘</kbd>+<kbd>S</kbd>）运行。改坏了可以点编辑器里的「重置」，
+        恢复本课示例。
       </div>
     </article>
   </docs-layout>

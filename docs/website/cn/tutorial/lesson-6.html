@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>06 · 搜索与过滤 — ofa.js 教程</title>
-    <meta name="description" content="用计算属性和 o-fill 做实时搜索过滤。" />
+    <title>06 · 双向绑定 — ofa.js 教程</title>
+    <meta name="description" content="sync: 让表单和 data 双向同步，适合标量值。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="06 · 搜索与过滤 — ofa.js 教程" />
-    <meta property="og:description" content="用计算属性和 o-fill 做实时搜索过滤。" />
+    <meta property="og:title" content="06 · 双向绑定 — ofa.js 教程" />
+    <meta property="og:description" content="sync: 让表单和 data 双向同步，适合标量值。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,30 +65,33 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 06</p>
-      <h1>搜索与过滤</h1>
-      <p class="doc-lead">列表变长之后，用户需要快速找到某一项。用输入框绑定关键字，再用计算属性过滤列表。</p>
+      <h1>双向绑定</h1>
+      <p class="doc-lead">sync: 让表单和 data 双向同步，适合标量值。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="../../components/playground.html"></l-m>
+      <p>
+  <code>sync:</code> 同时做两件事：数据变化时更新表单，用户输入时写回数据。
+  它适合字符串、数字、布尔这类标量值。
+</p>
+<l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-6"></docs-playground>
+<h2>常用表单</h2>
+<ul>
+  <li><code>sync:value="name"</code>：文本框、textarea、select；</li>
+  <li><code>sync:checked="subscribe"</code>：复选框的选中状态；</li>
+  <li>下方预览会随输入实时更新，说明数据已经写回 <code>data</code>。</li>
+</ul>
+<div class="doc-note">
+  <strong>对象不要 sync：</strong>双向绑定对象会造成引用混乱。
+  对象/数组的编辑用 <code>sync:value="$data.field"</code> 绑定到具体字段，
+  或通过 <code>on:input</code> 调方法处理。
+</div>
+<h2>动手改</h2>
+<p>
+  增加一个「年龄」数字输入框（<code>type="number"</code>），用
+  <code>sync:value</code> 绑定，并在预览里显示明年年龄。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>filtered</code> 是一个 getter：关键字变化时自动重新计算。</li>
-        <li><code>o-if</code> 根据 <code>filtered.length</code> 显示空状态。</li>
-        <li><code>o-fill</code> 直接遍历过滤后的数组，不需要手动隐藏列表项。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>增加一个「只看某个标签」的下拉框，把标签条件和关键字条件组合起来。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-5.html">05 · 样式与状态 →</a>
-        　·　下一篇：<a olink href="./lesson-7.html">07 · 表单校验 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-5.html">05 · 事件 →</a>　·　下一篇：<a olink href="./lesson-7.html">07 · 条件渲染 →</a></p>
     </article>
   </docs-layout>
 

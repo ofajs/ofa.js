@@ -6,54 +6,35 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 03</p>
-      <h1>条件与列表</h1>
-      <p class="doc-lead">
-        空列表需要提示，有数据时需要循环渲染。
-        <code>o-if</code> 负责条件，<code>o-fill</code> 负责列表。
-      </p>
+      <h1>动态属性</h1>
+      <p class="doc-lead">HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。</p>
 
-      <h2>添加和删除</h2>
       <p>
-        输入一条待办，点「添加」。列表为空时会显示提示；
-        每一条都能单独删除。试着连续添加几条，再逐条删掉。
-      </p>
-
-      <l-m src="{{SITE}}/components/playground.html"></l-m>
+  模板里的属性分两类：<code>attr:</code> 绑定 HTML attribute，
+  <code>:prop</code> 绑定元素上的 DOM 属性。动态值不要写成
+  <code>href="{{url}}"</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
       <docs-playground lesson="lesson-3"></docs-playground>
+<h2>为什么区分两种写法</h2>
+<ul>
+  <li><code>attr:href</code>、<code>attr:title</code>：最终写进 HTML attribute；</li>
+  <li><code>:value</code>：写 DOM 的 <code>value</code> 属性，适合表单元素；</li>
+  <li><code>attr:disabled="!ready"</code>：布尔属性用 <code>attr:</code>，
+    条件为 false 时属性会被真正移除。</li>
+</ul>
+<div class="doc-note">
+  <strong>为什么布尔属性不能用 :prop：</strong><code>:disabled="false"</code>
+  会留下 <code>disabled="false"</code>，属性仍然存在，按钮依旧禁用。
+  正确写法是 <code>attr:disabled="false"</code>。
+</div>
+<h2>动手改</h2>
+<p>
+  把 <code>ready</code> 的初始值改成 <code>true</code>，观察按钮一开始就是可用的；
+  再改回来，点一下按钮让它变成可用。
+</p>
 
-      <h2>o-if</h2>
-      <pre><code>&lt;o-if :value="items.length === 0"&gt;
-  &lt;p&gt;还没有待办&lt;/p&gt;
-&lt;/o-if&gt;</code></pre>
-      <p>
-        条件为假时内容被移除，为真时重新创建。
-        <code>o-else-if</code> / <code>o-else</code> 要和
-        <code>o-if</code> 连续书写。
-      </p>
-
-      <h2>o-fill</h2>
-      <pre><code>&lt;o-fill :value="items" fill-key="id"&gt;
-  &lt;li&gt;
-    {{$data.text}}
-    &lt;button on:click="$host.remove($data.id)"&gt;删除&lt;/button&gt;
-  &lt;/li&gt;
-&lt;/o-fill&gt;</code></pre>
-      <p>
-        列表项内只能用 <code>$data</code>、<code>$index</code>、
-        <code>$host</code> 这些作用域变量；不能写 <code>item.text</code>。
-        <code>fill-key="id"</code> 让增删时正确复用它。
-      </p>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>
-        给每条待办加一个「完成」按钮，点击后切换
-        <code>$data.done</code>，并用 <code>class:done</code> 添加删除线。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-2.html">02 · 数据与事件 →</a>
-        　·　下一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-2.html">02 · 数据与插值 →</a>　·　下一篇：<a olink href="./lesson-4.html">04 · 样式与 class →</a></p>
     </article>
   </docs-layout>
 

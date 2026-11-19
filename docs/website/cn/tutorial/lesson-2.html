@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>02 · 数据与事件 — ofa.js 教程</title>
-    <meta name="description" content="用 data、{{}}、on: 和 sync: 做一个小计数器。" />
+    <title>02 · 数据与插值 — ofa.js 教程</title>
+    <meta name="description" content="data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="02 · 数据与事件 — ofa.js 教程" />
-    <meta property="og:description" content="用 data、{{}}、on: 和 sync: 做一个小计数器。" />
+    <meta property="og:title" content="02 · 数据与插值 — ofa.js 教程" />
+    <meta property="og:description" content="data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,52 +65,34 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 02</p>
-      <h1>数据与事件</h1>
-      <p class="doc-lead">
-        ofa.js 不需要手动操作 DOM。改 data，页面自动更新；
-        用户操作通过 <code>on:</code> 和 <code>sync:</code> 回到 data。
-      </p>
+      <h1>数据与插值</h1>
+      <p class="doc-lead">data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。</p>
 
-      <h2>计数器</h2>
       <p>
-        试着多点几次 <code>+1</code>，然后在输入框里写点东西。
-        观察 <code>{{count}}</code> 和 <code>{{note}}</code> 如何同步变化。
-      </p>
-
-      <l-m src="../../components/playground.html"></l-m>
+  <code>data</code> 是一个普通对象，但 ofa.js 会把它变成响应式数据。
+  模板里的 <code>{{ }}</code> 不只能取字段，也能做运算和访问嵌套属性。
+</p>
+<l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-2"></docs-playground>
+<h2>规则</h2>
+<ul>
+  <li><code>{{user.name}}</code>：访问对象的嵌套字段；</li>
+  <li><code>{{user.age + 1}}</code>：{{ }} 里是 JavaScript 表达式；</li>
+  <li><code>:html="note"</code>：把字符串当作 HTML 渲染，只用于可信内容。</li>
+</ul>
+<div class="doc-note">
+  <strong>记住：</strong><code>{{ }}</code> 只能用在元素的文本内容里。
+  属性值要用下一课的 <code>attr:</code> / <code>:prop</code>，写
+  <code>&lt;a href="{{url}}"&gt;</code> 不会生效。
+</div>
+<h2>动手改</h2>
+<p>
+  给 <code>user</code> 增加一个 <code>city</code> 字段，并显示成
+  「城市：xxx」；再试着把 <code>note</code> 改成一段普通文本，观察
+  <code>:html</code> 和 <code>{{ }}</code> 的区别。
+</p>
 
-      <h2>三个关键点</h2>
-      <ul>
-        <li>
-          <code>on:click="count++"</code>：事件绑定的值是一个 JS 表达式；
-        </li>
-        <li>
-          <code>sync:value="note"</code>：输入框和数据双向绑定；
-        </li>
-        <li>
-          <code>proto</code>：放方法。模板里的方法名会自动绑定
-          <code>this</code>，所以 <code>reset()</code> 能直接改 data。
-        </li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>常见坑：</strong>
-        模板里用到的每个字段都要在 <code>data</code> 里先声明。
-        少写一个 <code>note: ""</code>，整页会抛
-        <code>ReferenceError</code>，而不是显示空白。
-      </div>
-
-      <h2>挑战</h2>
-      <p>
-        加一个 <code>-1</code> 按钮；再给计数器加一个「双倍」显示，
-        用 <code>proto</code> 里的 getter 计算。
-      </p>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-1.html">01 · 第一个页面 →</a>
-        　·　下一篇：<a olink href="./lesson-3.html">03 · 条件与列表 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-1.html">01 · 第一个页面 →</a>　·　下一篇：<a olink href="./lesson-3.html">03 · 动态属性 →</a></p>
     </article>
   </docs-layout>
 

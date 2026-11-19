@@ -83,26 +83,48 @@
       cursor: not-allowed;
     }
 
+    .reset {
+      height: 24px;
+      padding: 0 10px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      background: transparent;
+      color: #c8c8c8;
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .reset:hover {
+      background: #2a2d2e;
+    }
+
     .tabbar {
       display: flex;
       align-items: stretch;
       height: 34px;
+      overflow-x: auto;
       background: #252526;
       border-bottom: 1px solid #1b1b1b;
+      scrollbar-width: thin;
     }
 
     .tab {
       display: inline-flex;
       align-items: center;
       gap: 7px;
+      flex: none;
       min-width: 128px;
       padding: 0 14px;
+      border: 0;
       border-right: 1px solid #1b1b1b;
       border-top: 1px solid transparent;
       background: #1e1e1e;
       color: #ffffff;
       font-family: system-ui, sans-serif;
       font-size: 12px;
+      text-align: left;
+      cursor: pointer;
     }
 
     .tab.active {
@@ -383,7 +405,14 @@
   <div class="workbench">
     <div class="titlebar">
       <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="title">page.html — ofa.js playground</span>
+      <span class="title">{{activeFile}} — ofa.js playground</span>
+      <button
+        class="reset"
+        on:click="resetLesson"
+        title="恢复本课示例代码"
+      >
+        ↺ 重置
+      </button>
       <button
         class="run"
         on:click="run"
@@ -395,11 +424,22 @@
     </div>
 
     <div class="tabbar">
-      <div class="tab active">
-        <span class="file-type">HTML</span>
-        page.html
-        <span class="dirty" class:visible="dirty">●</span>
-      </div>
+      <o-fill :value="fileNames">
+        <button
+          type="button"
+          class="tab"
+          class:active="$data === $host.activeFile"
+          on:click="$host.switchFile($data)"
+        >
+          <span class="file-type">{{$host.fileType($data)}}</span>
+          {{$data}}
+          <span
+            class="dirty"
+            class:visible="$host.dirty && $data === $host.activeFile"
+            >●</span
+          >
+        </button>
+      </o-fill>
       <span class="tab-status">{{status}}</span>
     </div>
 
@@ -418,6 +458,7 @@
             autocapitalize="off"
             wrap="off"
             sync:value="code"
+            on:input="onCodeInput($event)"
             on:scroll="syncScroll($event)"
             on:keydown="onEditorKeydown($event)"
             on:keyup="updateCursor($event)"
@@ -469,7 +510,7 @@
       SPACE,
       STORAGE_KEY,
       DEFAULT_CODE,
-      LESSONS,
+      getLesson,
       buildIndex,
     } from "../content/playground-runtime.mjs";
 
@@ -480,6 +521,11 @@
       },
       data: {
         code: DEFAULT_CODE,
+        files: {},
+        fileNames: [],
+        activeFile: "page.html",
+        entry: "page",
+        defaultFiles: {},
         codeHtml: "",
         lineNumbers: "1",
         frameSrc: "",
@@ -493,17 +539,6 @@
         resizing: false,
       },
 
-      watch: {
-        code(value) {
-          if (!this._storageKey) return;
-          try {
-            localStorage.setItem(this._storageKey, value);
-          } catch {}
-          this.refreshEditor(value);
-          this.dirty = true;
-        },
-      },
-
       detached() {
         if (this._stopResize) this._stopResize();
       },
@@ -513,19 +548,76 @@
           ? `${STORAGE_KEY}:${this.lesson}`
           : STORAGE_KEY;
 
+        const lesson = getLesson(this.lesson);
+        this.entry = lesson.entry;
+        this.defaultFiles = { ...lesson.files };
+
+        let files = lesson.files;
+
         try {
           const saved = localStorage.getItem(this._storageKey);
-          this.code = saved || LESSONS[this.lesson] || DEFAULT_CODE;
-        } catch {
-          this.code = LESSONS[this.lesson] || DEFAULT_CODE;
-        }
+          if (saved) files = this.parseFiles(saved);
+        } catch {}
 
-        this.refreshEditor(this.code);
-        this.dirty = false;
+        this.loadFiles(files);
         this.initContainer();
       },
 
       proto: {
+        parseFiles(saved) {
+          try {
+            const data = JSON.parse(saved);
+            if (data && typeof data === "object" && !Array.isArray(data)) {
+              const files = {};
+              for (const [name, content] of Object.entries(data)) {
+                if (typeof content === "string") files[name] = content;
+              }
+              if (Object.keys(files).length) return files;
+            }
+          } catch {}
+
+          // 兼容旧版本：localStorage 里存的是 page.html 的源码字符串
+          return { "page.html": saved };
+        },
+
+        loadFiles(files, activeName) {
+          this.files = { ...files };
+          this.fileNames = Object.keys(this.files);
+          this.activeFile = this.fileNames.includes(activeName)
+            ? activeName
+            : this.fileNames[0] || "page.html";
+          this.code = this.files[this.activeFile] || "";
+          this.refreshEditor(this.code);
+          this.dirty = false;
+        },
+
+        saveFiles() {
+          if (!this._storageKey) return;
+          try {
+            localStorage.setItem(this._storageKey, JSON.stringify(this.files));
+          } catch {}
+        },
+
+        switchFile(name) {
+          if (name === this.activeFile || !(name in this.files)) return;
+          this.files[this.activeFile] = this.code;
+          this.activeFile = name;
+          this.code = this.files[name];
+          this.refreshEditor(this.code);
+        },
+
+        fileType(name) {
+          return name.endsWith(".mjs") || name.endsWith(".js") ? "JS" : "HTML";
+        },
+
+        resetLesson() {
+          try {
+            localStorage.removeItem(this._storageKey);
+          } catch {}
+          this.loadFiles(this.defaultFiles, this.activeFile);
+          this.status = "已恢复本课示例代码，按 Ctrl/⌘+S 运行";
+        },
+
         refreshEditor(value) {
           this.codeHtml = highlightCode(value);
           const count = value.split("\n").length;
@@ -588,8 +680,11 @@
 
           try {
             const version = Date.now();
-            await this.writeFile("page.html", this.code);
-            await this.writeFile("index.html", buildIndex(version));
+            for (const [name, content] of Object.entries(this.files)) {
+              await this.writeFile(name, content);
+            }
+
+            await this.writeFile("index.html", buildIndex(version, this.entry));
             this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
             this.status = "已运行，可继续编辑后按 Ctrl/⌘+S 重新运行";
             this.dirty = false;
@@ -647,6 +742,14 @@
           const lines = before.split("\n");
           this.cursorLine = lines.length;
           this.cursorColumn = lines[lines.length - 1].length + 1;
+        },
+
+        onCodeInput(event) {
+          const value = event.target.value;
+          this.files[this.activeFile] = value;
+          this.refreshEditor(value);
+          this.saveFiles();
+          this.dirty = true;
         },
 
         onEditorKeydown(event) {

@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>13 · 异步与加载态 — ofa.js 教程</title>
-    <meta name="description" content="用异步数据和 o-if 展示加载中、成功、失败状态。" />
+    <title>13 · 组件参数 — ofa.js 教程</title>
+    <meta name="description" content="外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="13 · 异步与加载态 — ofa.js 教程" />
-    <meta property="og:description" content="用异步数据和 o-if 展示加载中、成功、失败状态。" />
+    <meta property="og:title" content="13 · 组件参数 — ofa.js 教程" />
+    <meta property="og:description" content="外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,30 +65,34 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 13</p>
-      <h1>异步与加载态</h1>
-      <p class="doc-lead">真实数据通常来自接口。请求过程中要显示加载中，失败时要能提示错误。</p>
+      <h1>组件参数</h1>
+      <p class="doc-lead">外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="../../components/playground.html"></l-m>
+      <p>
+  组件从外部接收的属性写在 <code>attrs</code> 里，并给默认值；组件内部
+  会变化的状态放在 <code>data</code> 里。两者不能重名。
+</p>
+<l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-13"></docs-playground>
+<h2>attrs vs data</h2>
+<ul>
+  <li><code>attrs</code>：外部传入的标量（名字、角色、初始等级），
+    会反映到 HTML attribute；</li>
+  <li><code>data</code>：组件自己的响应式状态，外部不直接改；</li>
+  <li>示例里的 <code>startLevel</code> 是字符串，组件内用
+    <code>Number()</code> 转成数字。</li>
+</ul>
+<div class="doc-note">
+  <strong>不要直接改 attrs：</strong>子组件把 <code>attrs</code> 当只读输入，
+  需要派生状态就复制到 <code>data</code>。这样数据来源清晰，也避免父子互相覆盖。
+</div>
+<h2>动手改</h2>
+<p>
+  在页面里加一个 <code>level</code> 数据字段和一个输入框，用
+  <code>attr:start-level="level"</code> 动态传给第二个组件。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>loading</code>、<code>error</code>、<code>user</code> 三个 data 表示三种状态。</li>
-        <li><code>o-if</code> / <code>o-else-if</code> / <code>o-else</code> 连续书写，根据状态切换。</li>
-        <li><code>try / catch / finally</code> 里更新数据，视图自动响应。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>把 setTimeout 换成 fetch 请求一个公开接口，并处理网络失败。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-12.html">12 · 本地持久化 →</a>
-        　·　下一篇：<a olink href="./lesson-14.html">14 · 综合项目 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-12.html">12 · 第一个组件 →</a>　·　下一篇：<a olink href="./lesson-14.html">14 · 插槽与事件 →</a></p>
     </article>
   </docs-layout>
 

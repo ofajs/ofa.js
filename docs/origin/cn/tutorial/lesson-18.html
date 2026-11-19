@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 18</p>
+      <h1>异步与加载态</h1>
+      <p class="doc-lead">异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。</p>
+
+      <p>
+  页面初始化时常常要等接口。不要用 getter 包异步逻辑，改成显式的状态字段：
+  <code>loading</code>、<code>error</code>、<code>user</code>，由它们驱动 UI。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-18"></docs-playground>
+<h2>推荐的流程</h2>
+<ol>
+  <li>开始请求：<code>status = "loading"</code>，清空旧错误；</li>
+  <li>成功：把结果写进 data，<code>status = "done"</code>；</li>
+  <li>失败：把错误信息写进 <code>error</code>，<code>status = "error"</code>。</li>
+</ol>
+<p>
+  界面用 <code>o-if</code> / <code>o-else-if</code> / <code>o-else</code>
+  分别显示加载中、错误和内容。
+</p>
+<div class="doc-note">
+  <strong>为什么要显式状态：</strong>只用一个 <code>user</code> 无法区分
+  「还没开始」「正在加载」「加载失败」。状态字段让每种情况都有确定的 UI，
+  也方便加禁用按钮、重试等交互。
+</div>
+<h2>动手改</h2>
+<p>
+  给请求加一个 600ms 延迟（示例已有），并把「重新加载」按钮在 loading 时禁用；
+  再试着把失败提示改成可点击重试。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-17.html">17 · 嵌套布局 →</a>　·　下一篇：<a olink href="./lesson-19.html">19 · 综合：待办清单 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

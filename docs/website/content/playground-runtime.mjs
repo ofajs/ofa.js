@@ -8,7 +8,8 @@ export const SPACE = "ofa-docs-playground";
 export const OFA_CDN =
   "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
 
-export const STORAGE_KEY = "ofa-docs-playground-code";
+// 教程结构改版时递增版本，避免旧的本地代码覆盖新示例
+export const STORAGE_KEY = "ofa-docs-playground-code:v2";
 
 export const DEFAULT_CODE = `<template page>
   <style>
@@ -43,7 +44,13 @@ export const DEFAULT_CODE = `<template page>
   </script>
 </template>`;
 
-export const buildIndex = (version) => `<!doctype html>
+export const buildIndex = (version, entry = "page") => {
+  const body =
+    entry === "app"
+      ? `<o-app src="./app.mjs?v=${version}"></o-app>`
+      : `<o-page src="./page.html?v=${version}"></o-page>`;
+
+  return `<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -53,12 +60,30 @@ export const buildIndex = (version) => `<!doctype html>
     <style>
       html, body { margin: 0; min-height: 100%; }
       o-page { display: block; }
+      o-app { display: block; min-height: 100vh; }
     </style>
   </head>
   <body>
-    <o-page src="./page.html?v=${version}"></o-page>
+    ${body}
   </body>
 </html>`;
+};
+
+// 一课可以是单文件（页面字符串），也可以是
+// { entry: "page" | "app", files: { "page.html": "..." } }。
+// entry="app" 时入口写 app.mjs，用 <o-app> 跑多页面/路由课程。
+export const getLesson = (lesson) => {
+  const raw = LESSONS[lesson] || DEFAULT_CODE;
+
+  if (typeof raw === "string") {
+    return { entry: "page", files: { "page.html": raw } };
+  }
+
+  return {
+    entry: raw.entry || "page",
+    files: { ...raw.files },
+  };
+};
 
 const BASE_STYLE = `  <style>
     :host {
@@ -85,175 +110,154 @@ const BASE_STYLE = `  <style>
   </style>`;
 
 export const LESSONS = {
-  "lesson-1": `<template page>
-${BASE_STYLE}
+  "lesson-1": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+  </style>
 
-  <h1>Hello, {{name}}</h1>
-  <p>把 data 里的 name 改成你的名字，再点「运行代码」。</p>
+  <h1>{{greeting}}</h1>
+  <p>这是 {{name}} 的第一个 ofa.js 页面。</p>
 
   <script>
     export default async () => ({
       data: {
+        greeting: "Hello, ofa.js",
         name: "世界",
       },
     });
   </script>
 </template>`,
-
-  "lesson-2": `<template page>
-${BASE_STYLE}
-
-  <h1>计数器</h1>
-  <p>当前计数：<strong>{{count}}</strong></p>
-  <button on:click="count++">+1</button>
-  <button on:click="reset">归零</button>
-
-  <p>
-    输入内容：<input sync:value="note" placeholder="写点什么" />
-  </p>
-  <p>你输入了：{{note}}</p>
-
-  <script>
-    export default async () => ({
-      data: {
-        count: 0,
-        note: "",
-      },
-      proto: {
-        reset() {
-          this.count = 0;
-        },
-      },
-    });
-  </script>
-</template>`,
-
-  "lesson-3": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-2": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    li {
-      margin: 6px 0;
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
     }
-    .empty {
-      color: #64748b;
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
     }
   </style>
 
-  <h1>今天的待办</h1>
-  <p>
-    <input sync:value="draft" placeholder="输入待办" />
-    <button on:click="add">添加</button>
-  </p>
-
-  <o-if :value="items.length === 0">
-    <p class="empty">还没有待办，先添加一条吧。</p>
-  </o-if>
-
-  <ul>
-    <o-fill :value="items" fill-key="id">
-      <li>
-        {{$data.text}}
-        <button on:click="$host.removeItem($data.id)">删除</button>
-      </li>
-    </o-fill>
-  </ul>
+  <h1>{{user.name}}</h1>
+  <p>{{user.bio}}</p>
+  <p>年龄：{{user.age}}，明年 {{user.age + 1}} 岁。</p>
+  <p :html="note"></p>
 
   <script>
-    let nextId = 1;
-
     export default async () => ({
       data: {
-        draft: "",
-        items: [{ id: nextId++, text: "学习 ofa.js" }],
-      },
-      proto: {
-        add() {
-          const text = this.draft.trim();
-          if (!text) return;
-          this.items.push({ id: nextId++, text });
-          this.draft = "";
+        user: {
+          name: "Yao",
+          bio: "正在学习 ofa.js",
+          age: 28,
         },
-        removeItem(id) {
-          const index = this.items.findIndex((item) => item.id === id);
-          if (index > -1) this.items.splice(index, 1);
-        },
+        note: "<strong>这段 HTML 来自 data.note</strong>",
       },
     });
   </script>
 </template>`,
-
-  "lesson-4": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-3": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    li {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 8px 0;
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
     }
-    .done span {
-      color: #94a3b8;
-      text-decoration: line-through;
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
     }
   </style>
 
-  <h1>待办清单</h1>
-  <p>
-    <input
-      sync:value="draft"
-      on:keydown="addOnEnter($event)"
-      placeholder="输入后按回车"
-    />
-    <button on:click="add">添加</button>
-  </p>
-
-  <o-fill :value="items" fill-key="id">
-    <li class:done="$data.done">
-      <input type="checkbox" sync:checked="$data.done" />
-      <span>{{$data.text}}</span>
-      <button on:click="$host.removeItem($data.id)">删除</button>
-    </li>
-  </o-fill>
-
-  <p>还剩 {{remaining}} 项未完成。</p>
+  <h1>动态属性</h1>
+  <p><a attr:href="url" attr:title="linkTitle">打开 ofa.js 官网</a></p>
+  <p><input :value="name" /></p>
+  <p>按钮状态：{{ready ? "可用" : "禁用"}}</p>
+  <button attr:disabled="!ready" on:click="ready = true">我已阅读</button>
 
   <script>
-    let nextId = 1;
-
     export default async () => ({
       data: {
-        draft: "",
-        items: [
-          { id: nextId++, text: "阅读 ofa.js 文档", done: true },
-          { id: nextId++, text: "写一个组件", done: false },
-        ],
-      },
-      proto: {
-        get remaining() {
-          return this.items.filter((item) => !item.done).length;
-        },
-        addOnEnter(event) {
-          if (event.key !== "Enter") return;
-          this.add();
-        },
-        add() {
-          const text = this.draft.trim();
-          if (!text) return;
-          this.items.push({ id: nextId++, text, done: false });
-          this.draft = "";
-        },
-        removeItem(id) {
-          const index = this.items.findIndex((item) => item.id === id);
-          if (index > -1) this.items.splice(index, 1);
-        },
+        url: "https://ofajs.com",
+        linkTitle: "指向 ofa.js 官网",
+        name: "这是 DOM 的 value 属性",
+        ready: false,
       },
     });
   </script>
 </template>`,
-
-  "lesson-5": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-4": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin-top: 8px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
     .card {
       max-width: 360px;
       padding: 24px;
@@ -266,225 +270,343 @@ ${BASE_STYLE}
       box-shadow: 0 12px 30px rgba(0, 97, 164, 0.18);
       transform: translateY(-3px);
     }
-    .level {
+    .badge {
       display: inline-block;
       padding: 2px 10px;
       border-radius: 999px;
-      background: #e8f1fb;
-      color: #0061a4;
       font-size: 13px;
     }
   </style>
 
-  <h1>个人卡片</h1>
+  <h1>样式与 class</h1>
 
   <div class="card" class:active="active">
-    <span class="level" :style.background="active ? '#0061a4' : '#e8f1fb'" :style.color="active ? '#fff' : '#0061a4'">
-      {{levelText}}
-    </span>
+    <span
+      class="badge"
+      :style.background="active ? '#0061a4' : '#e8f1fb'"
+      :style.color="active ? '#fff' : '#0061a4'"
+    >{{active ? "已启用" : "未启用"}}</span>
     <h2>{{name}}</h2>
-    <p>{{bio}}</p>
-    <button on:click="active = !active">
-      {{active ? '取消选中' : '选中卡片'}}
-    </button>
+    <button on:click="active = !active">切换状态</button>
   </div>
 
   <script>
     export default async () => ({
       data: {
-        name: "Yao",
-        bio: "正在学习 ofa.js。",
+        name: "Yao 的卡片",
         active: false,
       },
+    });
+  </script>
+</template>`,
+    },
+  },
+  "lesson-5": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+
+  <h1>事件</h1>
+  <p>计数：<strong>{{count}}</strong></p>
+  <button on:click="count++">+1（内联表达式）</button>
+  <button on:click="decrement">-1（proto 方法）</button>
+  <button on:click="reset">归零</button>
+
+  <p>
+    <input on:input="onNameInput($event)" placeholder="输入名字" />
+    你好，{{name}}
+  </p>
+
+  <script>
+    export default async () => ({
+      data: {
+        count: 0,
+        name: "",
+      },
       proto: {
-        get levelText() {
-          return this.active ? "已选中" : "普通卡片";
+        decrement() {
+          if (this.count > 0) this.count -= 1;
+        },
+        reset() {
+          this.count = 0;
+        },
+        onNameInput(event) {
+          this.name = event.target.value;
         },
       },
     });
   </script>
 </template>`,
-};
-
-Object.assign(LESSONS, {
-  "lesson-6": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-6": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    .empty { color: #64748b; }
-    li { margin: 6px 0; }
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
   </style>
 
-  <h1>搜索与过滤</h1>
-  <p><input sync:value="keyword" placeholder="输入关键字搜索" /></p>
+  <h1>双向绑定</h1>
+  <p><input sync:value="name" placeholder="名字" /></p>
+  <p>
+    <textarea sync:value="bio" rows="3" placeholder="简介"></textarea>
+  </p>
+  <p>
+    <label>
+      <input type="checkbox" sync:checked="subscribe" />
+      订阅更新
+    </label>
+  </p>
+  <p>
+    <select sync:value="role">
+      <option value="dev">开发者</option>
+      <option value="design">设计师</option>
+      <option value="reader">读者</option>
+    </select>
+  </p>
 
-  <o-if :value="filtered.length === 0">
-    <p class="empty">没有匹配的结果。</p>
-  </o-if>
-
-  <ul>
-    <o-fill :value="filtered" fill-key="id">
-      <li>{{$data.name}} · {{$data.tag}}</li>
-    </o-fill>
-  </ul>
+  <p>预览：{{name}} / {{role}} / {{subscribe ? "已订阅" : "未订阅"}}</p>
+  <p>{{bio}}</p>
 
   <script>
     export default async () => ({
       data: {
-        keyword: "",
+        name: "Yao",
+        bio: "",
+        subscribe: false,
+        role: "dev",
+      },
+    });
+  </script>
+</template>`,
+    },
+  },
+  "lesson-7": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+  <style>
+    .ok { color: #15803d; }
+    .warn { color: #b45309; }
+    .bad { color: #dc2626; }
+  </style>
+
+  <h1>条件渲染</h1>
+  <p>分数：<strong>{{score}}</strong></p>
+  <p>
+    <button on:click="score = 95">95</button>
+    <button on:click="score = 72">72</button>
+    <button on:click="score = 40">40</button>
+  </p>
+
+  <o-if :value="score >= 90">
+    <p class="ok">优秀</p>
+  </o-if>
+  <o-else-if :value="score >= 60">
+    <p class="warn">及格</p>
+  </o-else-if>
+  <o-else>
+    <p class="bad">需要努力</p>
+  </o-else>
+
+  <script>
+    export default async () => ({
+      data: {
+        score: 72,
+      },
+    });
+  </script>
+</template>`,
+    },
+  },
+  "lesson-8": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+  <style>
+    li { margin: 8px 0; }
+  </style>
+
+  <h1>列表渲染</h1>
+  <ul>
+    <o-fill :value="items" fill-key="id">
+      <li>
+        {{$index + 1}}. {{$data.text}}
+        <button on:click="$host.removeItem($data.id)">删除</button>
+      </li>
+    </o-fill>
+  </ul>
+  <p>共 {{items.length}} 项</p>
+
+  <script>
+    let nextId = 1;
+
+    export default async () => ({
+      data: {
         items: [
-          { id: 1, name: "ofa.js", tag: "框架" },
-          { id: 2, name: "drill", tag: "加载器" },
-          { id: 3, name: "stanz", tag: "响应式" },
-          { id: 4, name: "xhear", tag: "Web Components" },
+          { id: nextId++, text: "学习 ofa.js" },
+          { id: nextId++, text: "写一个页面" },
+          { id: nextId++, text: "发布到静态服务器" },
         ],
       },
       proto: {
-        get filtered() {
-          const keyword = this.keyword.trim().toLowerCase();
-          if (!keyword) return this.items;
-          return this.items.filter(
-            (item) =>
-              item.name.toLowerCase().includes(keyword) ||
-              item.tag.toLowerCase().includes(keyword),
-          );
+        removeItem(id) {
+          const index = this.items.findIndex((item) => item.id === id);
+          if (index > -1) this.items.splice(index, 1);
         },
       },
     });
   </script>
 </template>`,
-
-  "lesson-7": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-9": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    .field { margin: 10px 0; }
-    .error { margin: 4px 0 0; color: #dc2626; font-size: 13px; }
-    .ok { color: #15803d; }
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+  <style>
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    li input { flex: 1; }
   </style>
 
-  <h1>表单校验</h1>
-  <form on:submit="onSubmit($event)">
-    <div class="field">
-      <input sync:value="name" placeholder="姓名" />
-      <o-if :value="nameError"><p class="error">{{nameError}}</p></o-if>
-    </div>
-
-    <div class="field">
-      <input sync:value="email" placeholder="邮箱" />
-      <o-if :value="emailError"><p class="error">{{emailError}}</p></o-if>
-    </div>
-
-    <button attr:disabled="!valid">提交</button>
-  </form>
-
-  <p class="ok">{{message}}</p>
-
-  <script>
-    export default async () => ({
-      data: {
-        name: "",
-        email: "",
-        message: "",
-      },
-      proto: {
-        get nameError() {
-          return this.name.trim() ? "" : "请输入姓名";
-        },
-        get emailError() {
-          if (!this.email.trim()) return "请输入邮箱";
-          return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(this.email)
-            ? ""
-            : "邮箱格式不正确";
-        },
-        get valid() {
-          return !this.nameError && !this.emailError;
-        },
-        onSubmit(event) {
-          event.preventDefault();
-          if (!this.valid) return;
-          this.message = "提交成功：" + this.name + " / " + this.email;
-        },
-      },
-    });
-  </script>
-</template>`,
-
-  "lesson-8": `<template page>
-${BASE_STYLE}
-  <style>
-    .row { margin: 10px 0; }
-    .total { font-size: 28px; font-weight: 700; color: #0061a4; }
-    .log { color: #64748b; }
-  </style>
-
-  <h1>计算属性与侦听</h1>
-
-  <p class="row">单价：<strong>{{price}}</strong> 元</p>
-  <p class="row">
-    数量：
-    <button on:click="qty = Math.max(1, qty - 1)">-1</button>
-    <strong>{{qty}}</strong>
-    <button on:click="qty++">+1</button>
-  </p>
-
-  <p>总价：<span class="total">¥{{total}}</span></p>
-  <p class="log">{{log}}</p>
-
-  <script>
-    export default async () => ({
-      data: {
-        price: 99,
-        qty: 1,
-        log: "还没有修改数量",
-      },
-      proto: {
-        get total() {
-          return (this.price * this.qty).toFixed(2);
-        },
-      },
-      watch: {
-        qty(value, { watchers }) {
-          if (!watchers) return;
-          this.log = "数量从 " + watchers[0].oldValue + " 变成 " + value;
-        },
-      },
-    });
-  </script>
-</template>`,
-
-  "lesson-9": `<template page>
-${BASE_STYLE}
-
-  <h1>使用组件</h1>
-  <p>下面的计数器不是本页面写的，而是通过 <code>l-m</code> 引入的组件。</p>
-
-  <l-m src="/components/demo-counter.html"></l-m>
-  <demo-counter start="5" reset-label="归零"></demo-counter>
-
-  <p style="margin-top: 16px; color: #64748b">
-    组件内部有独立的 data，外部通过 <code>start</code> 和
-    <code>reset-label</code> 传入 attrs。
-  </p>
-
-  <script>
-    export default async () => ({ data: {} });
-  </script>
-</template>`,
-
-  "lesson-10": `<template page>
-${BASE_STYLE}
-  <style>
-    li { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
-  </style>
-
-  <h1>行内编辑列表</h1>
-  <p><button on:click="add">添加一行</button></p>
-
-  <o-fill :value="items" fill-key="id">
-    <li>
-      <input sync:value="$data.name" />
-      <button on:click="$host.removeItem($data.id)">删除</button>
-    </li>
-  </o-fill>
+  <h1>编辑列表</h1>
+  <button on:click="add">添加一行</button>
+  <ul>
+    <o-fill :value="items" fill-key="id">
+      <li>
+        <input sync:value="$data.name" />
+        <button on:click="$host.removeItem($data.id)">×</button>
+      </li>
+    </o-fill>
+  </ul>
 
   <script>
     let nextId = 1;
@@ -508,34 +630,450 @@ ${BASE_STYLE}
     });
   </script>
 </template>`,
-
-  "lesson-11": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-10": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    .panel {
-      display: inline-block;
-      margin: 8px 12px 8px 0;
-      padding: 16px 24px;
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+  <style>
+    .total { color: #0061a4; font-size: 24px; font-weight: 700; }
+    .log { color: #64748b; }
+  </style>
+
+  <h1>计算属性与侦听</h1>
+  <p>单价：{{price}} 元</p>
+  <p>
+    数量：
+    <button on:click="qty = Math.max(1, qty - 1)">-</button>
+    <strong>{{qty}}</strong>
+    <button on:click="qty++">+</button>
+  </p>
+  <p>总价：<span class="total">{{total}}</span> 元</p>
+  <p class="log">{{log}}</p>
+
+  <script>
+    export default async () => ({
+      data: {
+        price: 99,
+        qty: 1,
+        log: "还没有修改数量",
+      },
+      proto: {
+        get total() {
+          return (this.price * this.qty).toFixed(2);
+        },
+      },
+      watch: {
+        qty(value, { watchers }) {
+          if (!watchers) return;
+          this.log =
+            "数量从 " + watchers[0].oldValue + " 变成 " + value;
+        },
+      },
+    });
+  </script>
+</template>`,
+    },
+  },
+  "lesson-11": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+
+  <h1>生命周期</h1>
+  <p>页面已运行 <strong>{{seconds}}</strong> 秒</p>
+  <p>状态：{{status}}</p>
+  <p>
+    <button on:click="running = !running">
+      {{running ? "暂停" : "继续"}}
+    </button>
+  </p>
+
+  <script>
+    export default async () => ({
+      data: {
+        seconds: 0,
+        running: true,
+        status: "准备中",
+      },
+      ready() {
+        this.status = "DOM 已就绪";
+      },
+      attached() {
+        this.status = "已挂载，开始计时";
+        this._timer = setInterval(() => {
+          if (this.running) this.seconds += 1;
+        }, 1000);
+      },
+      detached() {
+        clearInterval(this._timer);
+        this.status = "已卸载";
+      },
+    });
+  </script>
+</template>`,
+    },
+  },
+  "lesson-12": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    hello-card { margin: 12px 0; }
+  </style>
+
+  <h1>组件是可以复用的</h1>
+  <p>下面两张卡片来自同一个组件，但各自有独立的计数。</p>
+
+  <l-m src="./hello-card.html"></l-m>
+  <hello-card></hello-card>
+  <hello-card></hello-card>
+
+  <script>
+    export default { data: {} };
+  </script>
+</template>`,
+    "hello-card.html": `<template component>
+  <style>
+    :host {
+      display: block;
+      padding: 16px 18px;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #111827;
+      font-family: system-ui, sans-serif;
+    }
+    h2 { margin: 0 0 6px; font-size: 18px; }
+    p { margin: 0 0 10px; color: #475569; }
+    button {
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+
+  <h2>Hello, 组件</h2>
+  <p>这张卡片被点了 {{count}} 次。</p>
+  <button on:click="count++">+1</button>
+
+  <script>
+    export default {
+      tag: "hello-card",
+      data: { count: 0 },
+    };
+  </script>
+</template>`,
+    },
+  },
+  "lesson-13": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    input {
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+    user-chip { margin: 10px 0; }
+  </style>
+
+  <h1>给组件传参数</h1>
+  <p><input sync:value="name" placeholder="名字" /></p>
+
+  <l-m src="./user-chip.html"></l-m>
+  <user-chip attr:name="name" role="读者" start-level="2"></user-chip>
+  <user-chip name="Yao" role="维护者" start-level="5"></user-chip>
+
+  <script>
+    export default {
+      data: { name: "Ada" },
+    };
+  </script>
+</template>`,
+    "user-chip.html": `<template component>
+  <style>
+    :host {
+      display: block;
+      font-family: system-ui, sans-serif;
+    }
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
       border: 1px solid #dbe3ef;
       border-radius: 12px;
+    }
+    strong { color: #111827; }
+    span { color: #64748b; font-size: 14px; }
+    .level {
+      margin-left: auto;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: #e8f1fb;
+      color: #0061a4;
+    }
+  </style>
+
+  <div class="chip">
+    <strong>{{name}}</strong>
+    <span>{{role}}</span>
+    <span class="level">Lv.{{level}}</span>
+  </div>
+
+  <script>
+    export default {
+      tag: "user-chip",
+      attrs: {
+        name: "访客",
+        role: "读者",
+        startLevel: 1,
+      },
+      data: {
+        level: 1,
+      },
+      watch: {
+        startLevel(value) {
+          this.level = Number(value) || 1;
+        },
+      },
+      attached() {
+        this.level = Number(this.startLevel) || 1;
+      },
+    };
+  </script>
+</template>`,
+    },
+  },
+  "lesson-14": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    p { color: #475569; }
+  </style>
+
+  <h1>插槽与自定义事件</h1>
+
+  <l-m src="./confirm-box.html"></l-m>
+  <confirm-box on:confirm="onConfirm">
+    <strong>保存修改？</strong>
+    <span slot="hint">不会丢失草稿</span>
+  </confirm-box>
+
+  <p>最后确认：{{message}}</p>
+
+  <script>
+    export default {
+      data: { message: "还没有确认" },
+      proto: {
+        onConfirm(event) {
+          this.message = new Date(event.data.time).toLocaleTimeString();
+        },
+      },
+    };
+  </script>
+</template>`,
+    "confirm-box.html": `<template component>
+  <style>
+    :host {
+      display: block;
+      font-family: system-ui, sans-serif;
+    }
+    .box {
+      padding: 16px 18px;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #111827;
+    }
+    strong { display: block; margin-bottom: 4px; }
+    small { display: block; margin-bottom: 12px; color: #64748b; }
+    button {
+      padding: 6px 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+
+  <div class="box">
+    <slot></slot>
+    <small><slot name="hint">默认提示</slot></small>
+    <button on:click="emitConfirm">确认</button>
+  </div>
+
+  <script>
+    export default {
+      tag: "confirm-box",
+      proto: {
+        emitConfirm() {
+          this.emit("confirm", { data: { time: Date.now() } });
+        },
+      },
+    };
+  </script>
+</template>`,
+    },
+  },
+  "lesson-15": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 12px 8px 0 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
     }
   </style>
 
   <h1>全局状态</h1>
-  <p>两个面板读取同一份 <code>$.stanz</code> 状态。</p>
+  <p>两个面板引用的是同一个 store，所以数字始终同步。</p>
 
-  <div class="panel">面板 A：<strong>{{count}}</strong></div>
-  <div class="panel">面板 B：<strong>{{count}}</strong></div>
+  <l-m src="./counter-panel.html"></l-m>
+  <counter-panel label="面板 A"></counter-panel>
+  <counter-panel label="面板 B"></counter-panel>
 
   <p>
-    <button on:click="increase">全局 +1</button>
+    <button on:click="increase">+1</button>
     <button on:click="reset">归零</button>
   </p>
 
   <script>
-    const store = $.stanz({ count: 0 });
+    import { store } from "./store.mjs";
 
-    export default async () => ({
+    export default {
+      data: {},
+      proto: {
+        increase() {
+          store.count += 1;
+        },
+        reset() {
+          store.count = 0;
+        },
+      },
+    };
+  </script>
+</template>`,
+    "counter-panel.html": `<template component>
+  <style>
+    :host { display: inline-block; font-family: system-ui, sans-serif; }
+    .panel {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: 10px;
+      padding: 12px 18px;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+      color: #111827;
+    }
+    .panel strong { color: #0061a4; font-size: 20px; }
+  </style>
+
+  <div class="panel">
+    <span>{{label}}</span>
+    <strong>{{count}}</strong>
+  </div>
+
+  <script>
+    import { store } from "./store.mjs";
+
+    export default {
+      tag: "counter-panel",
+      attrs: { label: "面板" },
       data: { count: 0 },
       attached() {
         this._stop = store.watch(() => {
@@ -546,74 +1084,217 @@ ${BASE_STYLE}
       detached() {
         if (this._stop != null) store.unwatch(this._stop);
       },
-      proto: {
-        increase() {
-          store.count += 1;
-        },
-        reset() {
-          store.count = 0;
-        },
-      },
-    });
+    };
   </script>
 </template>`,
+    "store.mjs": `export const store = $.stanz({ count: 0 });`,
+    },
+  },
+  "lesson-16": {
+    entry: "app",
+    files: {
+    "app.mjs": `export const home = "./home.html";
 
-  "lesson-12": `<template page>
-${BASE_STYLE}
+export const pageAnime = {
+  current: { opacity: 1, transform: "none" },
+  next: { opacity: 0, transform: "translate3d(30px, 0, 0)" },
+  previous: { opacity: 0, transform: "translate3d(-20px, 0, 0)" },
+};`,
+    "home.html": `<template page>
+  <style>
+    :host { display: block; padding: 28px; font-family: system-ui, sans-serif; color: #111827; }
+    h1 { margin-top: 0; }
+    a { color: #0061a4; }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
 
-  <h1>本地持久化</h1>
-  <p>写下内容后刷新右侧预览，内容仍然存在。</p>
-
-  <textarea
-    sync:value="note"
-    rows="6"
-    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px"
-    placeholder="写点什么…"
-  ></textarea>
-
-  <p style="color: #64748b">已保存 {{note.length}} 个字符</p>
+  <h1>首页</h1>
+  <p><a olink href="./about.html?from=home-link">用 olink 去关于页</a></p>
+  <button on:click="goto('./about.html?from=home-button')">
+    用 goto 去关于页
+  </button>
 
   <script>
-    const KEY = "ofa-tutorial-lesson-12-note";
+    export default { data: {} };
+  </script>
+</template>`,
+    "about.html": `<template page>
+  <style>
+    :host { display: block; padding: 28px; font-family: system-ui, sans-serif; color: #111827; }
+    h1 { margin-top: 0; }
+    p { color: #475569; }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
 
-    export default async () => ({
-      data: { note: "" },
-      ready() {
-        try {
-          this.note = localStorage.getItem(KEY) || "";
-        } catch {}
-      },
-      watch: {
-        note(value) {
-          try {
-            localStorage.setItem(KEY, value);
-          } catch {}
-        },
+  <h1>关于页</h1>
+  <p>来源参数：{{from}}</p>
+  <button on:click="back">返回上一页</button>
+
+  <script>
+    export default async ({ query }) => ({
+      data: {
+        from: query.from || "直接访问",
       },
     });
   </script>
 </template>`,
-
-  "lesson-13": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-17": {
+    entry: "app",
+    files: {
+    "app.mjs": `export const home = "./home.html";`,
+    "layout.html": `<template page>
   <style>
+    :host {
+      display: block;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #dbe3ef;
+    }
+    nav a {
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: #475569;
+      text-decoration: none;
+    }
+    nav a.active {
+      background: #e8f1fb;
+      color: #0061a4;
+    }
+    main { padding: 24px; }
+    h1 { margin-top: 0; }
+  </style>
+
+  <nav>
+    <a
+      olink
+      href="./home.html"
+      class:active="current === 'home'"
+    >首页</a>
+    <a
+      olink
+      href="./settings.html"
+      class:active="current === 'settings'"
+    >设置</a>
+  </nav>
+  <main><slot></slot></main>
+
+  <script>
+    export default {
+      data: { current: "home" },
+      attached() {
+        this.syncRoute();
+      },
+      routerChange() {
+        this.syncRoute();
+      },
+      proto: {
+        syncRoute() {
+          const file = (this.app?.current?.src || "")
+            .split("/")
+            .pop()
+            .split("?")[0];
+          this.current = file.replace(".html", "");
+        },
+      },
+    };
+  </script>
+</template>`,
+    "home.html": `<template page>
+  <h1>首页</h1>
+  <p>切换子页时，导航和布局不会重建。</p>
+  <script>
+    export const parent = "./layout.html";
+    export default { data: {} };
+  </script>
+</template>`,
+    "settings.html": `<template page>
+  <h1>设置</h1>
+  <p>这是另一个子页，父页始终保留。</p>
+  <script>
+    export const parent = "./layout.html";
+    export default { data: {} };
+  </script>
+</template>`,
+    },
+  },
+  "lesson-18": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin: 4px 6px 4px 0;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+    }
+  </style>
+  <style>
+    .error { color: #dc2626; }
     .box {
-      max-width: 380px;
+      max-width: 420px;
       padding: 20px;
       border: 1px solid #dbe3ef;
       border-radius: 12px;
     }
-    .muted { color: #64748b; }
   </style>
 
   <h1>异步与加载态</h1>
-  <button on:click="load">重新加载</button>
+  <p>
+    <label>
+      <input type="checkbox" sync:checked="failNext" />
+      模拟请求失败
+    </label>
+  </p>
+  <button on:click="fetchUser" attr:disabled="status === 'loading'">
+    重新加载
+  </button>
 
   <div class="box">
-    <o-if :value="loading">
-      <p class="muted">加载中…</p>
+    <o-if :value="status === 'loading'">
+      <p>加载中…</p>
     </o-if>
-    <o-else-if :value="error">
+    <o-else-if :value="status === 'error'">
       <p class="error">{{error}}</p>
     </o-else-if>
     <o-else>
@@ -625,93 +1306,161 @@ ${BASE_STYLE}
   <script>
     export default async () => ({
       data: {
-        loading: true,
+        status: "idle",
         error: "",
+        failNext: false,
         user: { name: "", role: "" },
       },
       ready() {
-        this.load();
+        this.fetchUser();
       },
       proto: {
-        async load() {
-          this.loading = true;
+        async fetchUser() {
+          this.status = "loading";
           this.error = "";
           try {
-            await new Promise((resolve) => setTimeout(resolve, 700));
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            if (this.failNext) throw new Error("网络抖动，请重试");
             this.user = { name: "Yao", role: "正在学习 ofa.js" };
-          } catch (e) {
-            this.error = "加载失败：" + e.message;
-          } finally {
-            this.loading = false;
+            this.status = "done";
+          } catch (error) {
+            this.error = error.message;
+            this.status = "error";
           }
         },
       },
     });
   </script>
 </template>`,
-
-  "lesson-14": `<template page>
-${BASE_STYLE}
+    },
+  },
+  "lesson-19": {
+    entry: "page",
+    files: {
+    "page.html": `<template page>
   <style>
-    .profile {
-      max-width: 520px;
-      padding: 24px;
-      border: 1px solid #dbe3ef;
-      border-radius: 20px;
-      transition: 0.2s ease;
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
     }
-    .profile.active {
-      border-color: #0061a4;
-      box-shadow: 0 16px 36px rgba(0, 97, 164, 0.16);
-    }
-    .skill {
-      display: inline-block;
+    h1 { margin-top: 0; }
+    button {
       margin: 4px 6px 4px 0;
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: #e8f1fb;
-      color: #0061a4;
-      font-size: 13px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      margin: 4px 6px 4px 0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
     }
   </style>
+  <style>
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    li.done span { color: #94a3b8; text-decoration: line-through; }
+    .filters button.active { background: #0061a4; }
+    .filters button { background: #94a3b8; }
+  </style>
 
-  <h1>个人主页</h1>
-
-  <div class="profile" class:active="active">
-    <h2>{{name}}</h2>
-    <p>{{bio}}</p>
-
-    <p>
-      <o-fill :value="skills">
-        <span class="skill">{{$data}}</span>
-      </o-fill>
-    </p>
-
-    <button on:click="active = !active">
-      {{active ? '取消选中' : '选中主页'}}
-    </button>
-  </div>
-
-  <p style="margin-top: 16px">
-    <input sync:value="name" placeholder="名字" />
-    <input sync:value="bio" placeholder="简介" />
-    <button on:click="addSkill">添加技能</button>
+  <h1>待办清单</h1>
+  <p>
+    <input
+      sync:value="draft"
+      on:keydown="addOnEnter($event)"
+      placeholder="输入后按回车"
+    />
+    <button on:click="add">添加</button>
   </p>
 
+  <p class="filters">
+    <button class:active="filterMode === 'all'" on:click="filterMode = 'all'">全部</button>
+    <button class:active="filterMode === 'active'" on:click="filterMode = 'active'">未完成</button>
+    <button class:active="filterMode === 'done'" on:click="filterMode = 'done'">已完成</button>
+  </p>
+
+  <ul>
+    <o-fill :value="visibleItems" fill-key="id">
+      <li class:done="$data.done">
+        <input type="checkbox" sync:checked="$data.done" />
+        <span>{{$data.text}}</span>
+        <button on:click="$host.removeItem($data.id)">×</button>
+      </li>
+    </o-fill>
+  </ul>
+
+  <p>还剩 {{remaining}} 项；数据已自动保存到浏览器。</p>
+
   <script>
+    const KEY = "ofa-tutorial-todos";
+    let nextId = 1;
+
     export default async () => ({
       data: {
-        name: "Yao",
-        bio: "正在用 ofa.js 写页面。",
-        active: false,
-        skills: ["HTML", "CSS", "ofa.js"],
+        draft: "",
+        filterMode: "all",
+        items: [
+          { id: nextId++, text: "学习 ofa.js", done: true },
+          { id: nextId++, text: "写一个组件", done: false },
+        ],
+      },
+      ready() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+          if (Array.isArray(saved) && saved.length) this.items = saved;
+        } catch {}
+      },
+      watch: {
+        items() {
+          try {
+            localStorage.setItem(KEY, JSON.stringify(this.items));
+          } catch {}
+        },
       },
       proto: {
-        addSkill() {
-          this.skills.push("新技能 " + (this.skills.length + 1));
+        get visibleItems() {
+          if (this.filterMode === "active") {
+            return this.items.filter((item) => !item.done);
+          }
+          if (this.filterMode === "done") {
+            return this.items.filter((item) => item.done);
+          }
+          return this.items;
+        },
+        get remaining() {
+          return this.items.filter((item) => !item.done).length;
+        },
+        addOnEnter(event) {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          this.add();
+        },
+        add() {
+          const text = this.draft.trim();
+          if (!text) return;
+          this.items.push({ id: nextId++, text, done: false });
+          this.draft = "";
+        },
+        removeItem(id) {
+          const index = this.items.findIndex((item) => item.id === id);
+          if (index > -1) this.items.splice(index, 1);
         },
       },
     });
   </script>
 </template>`,
-});
+    },
+  },
+};

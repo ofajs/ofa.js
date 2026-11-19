@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 16</p>
+      <h1>页面与路由</h1>
+      <p class="doc-lead">o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。</p>
+
+      <p>
+  多页面应用用 <code>&lt;o-app src="./app.mjs"&gt;</code> 作为容器。
+  <code>app.mjs</code> 只放应用配置，例如首页地址和切换动画。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16"></docs-playground>
+<h2>三个文件</h2>
+<ul>
+  <li><code>app.mjs</code>：<code>home</code> 指向首页，<code>pageAnime</code> 配置切换动画；</li>
+  <li><code>home.html</code>：用 <code>olink</code> 或 <code>goto()</code> 跳到关于页；</li>
+  <li><code>about.html</code>：从 <code>query</code> 读取参数，用 <code>back()</code> 返回。</li>
+</ul>
+<p>
+  <code>olink</code> 是声明式导航，不会刷新页面；<code>this.goto(url)</code>
+  用于代码里跳转。<code>query</code> 在页面模块函数参数里取，不在
+  <code>this</code> 上。
+</p>
+<div class="doc-note">
+  <strong>o-app 只接受应用配置：</strong>不要把页面模块直接写给
+  <code>o-app src</code>。单页场景用 <code>o-page src</code>，
+  多页应用用 <code>o-app</code> + 页面地址。
+</div>
+<h2>动手改</h2>
+<p>
+  在首页增加一个「关于页（带参数）」按钮，用
+  <code>goto("./about.html?from=home-btn")</code> 跳转；
+  在关于页显示来源。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-15.html">15 · 全局状态 →</a>　·　下一篇：<a olink href="./lesson-17.html">17 · 嵌套布局 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

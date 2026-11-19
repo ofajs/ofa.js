@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>09 · 使用组件 — ofa.js 教程</title>
-    <meta name="description" content="通过 l-m 引入组件，传 attrs 并监听事件。" />
+    <title>09 · 编辑列表 — ofa.js 教程</title>
+    <meta name="description" content="数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="09 · 使用组件 — ofa.js 教程" />
-    <meta property="og:description" content="通过 l-m 引入组件，传 attrs 并监听事件。" />
+    <meta property="og:title" content="09 · 编辑列表 — ofa.js 教程" />
+    <meta property="og:description" content="数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,30 +65,32 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 09</p>
-      <h1>使用组件</h1>
-      <p class="doc-lead">ofa.js 的组件就是 HTML 文件。用 l-m 引入后，像普通标签一样使用。</p>
+      <h1>编辑列表</h1>
+      <p class="doc-lead">数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="../../components/playground.html"></l-m>
+      <p>
+  ofa.js 的数组是响应式的：<code>push</code>、<code>splice</code> 等原地操作
+  都会触发更新，不需要重新赋值整个数组。
+</p>
+<l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-9"></docs-playground>
+<h2>行内编辑</h2>
+<p>
+  每一项的输入框绑定到 <code>$data.name</code>，用户输入会直接改到数组对象上。
+  配合 <code>fill-key="id"</code>，切换顺序或删除其他项时，这一项不会被重建。
+</p>
+<div class="doc-note">
+  <strong>什么时候替换数组：</strong>从接口拿到一份全新列表时，直接
+  <code>this.items = newList</code> 更清晰；页面上增删改某几项时，
+  用 <code>push</code> / <code>splice</code> 即可。
+</div>
+<h2>动手改</h2>
+<p>
+  给每一行加一个「↑」按钮，和上一行交换位置（提示：用
+  <code>items.splice($index - 1, 2, 当前项, 上一项)</code>）。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>&lt;l-m src="/components/demo-counter.html"&gt;</code> 异步注册组件。</li>
-        <li><code>start="5"</code> 与 <code>reset-label="归零"</code> 是组件的 attrs。</li>
-        <li>组件内部有独立 data；外部只通过 attrs、slot 和事件与它交互。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>再放一个 <code>demo-counter</code>，给它不同的 start 值，观察两个实例互不影响。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-8.html">08 · 计算属性与侦听 →</a>
-        　·　下一篇：<a olink href="./lesson-10.html">10 · 行内编辑列表 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-8.html">08 · 列表渲染 →</a>　·　下一篇：<a olink href="./lesson-10.html">10 · 计算属性与侦听 →</a></p>
     </article>
   </docs-layout>
 

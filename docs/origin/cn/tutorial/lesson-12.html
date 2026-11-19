@@ -6,30 +6,39 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 12</p>
-      <h1>本地持久化</h1>
-      <p class="doc-lead">刷新页面后数据通常会丢失。把内容写入 localStorage，就能在下次打开时恢复。</p>
+      <h1>第一个组件</h1>
+      <p class="doc-lead">把可复用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <p>
+  页面负责组织内容，组件负责可复用的一块 UI。组件也是 HTML 文件，
+  根节点换成 <code>&lt;template component&gt;</code>，并声明唯一的
+  <code>tag</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
       <docs-playground lesson="lesson-12"></docs-playground>
+<h2>两个文件，两个标签页</h2>
+<p>
+  编辑器顶部的标签页可以在 <code>page.html</code> 和
+  <code>hello-card.html</code> 之间切换。页面用
+  <code>&lt;l-m src="./hello-card.html"&gt;</code> 加载组件，之后就能像普通
+  HTML 标签一样使用 <code>&lt;hello-card&gt;</code>。
+</p>
+<ul>
+  <li><code>tag</code>：组件的标签名，必须和使用时一致；</li>
+  <li>组件的 <code>data</code> 是独立的，两张卡片各自计数；</li>
+  <li>组件里的 <code>&lt;style&gt;</code> 只作用于该组件。</li>
+</ul>
+<div class="doc-note">
+  <strong>文件名不等于标签名：</strong>标签名以组件里的
+  <code>tag</code> 为准；未声明时才按文件名推断。不要依赖推断，显式写清楚。
+</div>
+<h2>动手改</h2>
+<p>
+  改组件里的标题和按钮文案，再在页面里放第三张卡片；观察三张卡片的计数是否
+  互不影响。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>ready()</code> 里读取 localStorage 初始化数据。</li>
-        <li><code>watch.note</code> 在内容变化时写回 localStorage。</li>
-        <li>写入和读取都要包在 try/catch 里，处理隐私模式等异常。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>把待办列表存进 localStorage，刷新预览后仍能看到之前的待办。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-11.html">11 · 全局状态 →</a>
-        　·　下一篇：<a olink href="./lesson-13.html">13 · 异步与加载态 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-11.html">11 · 生命周期 →</a>　·　下一篇：<a olink href="./lesson-13.html">13 · 组件参数 →</a></p>
     </article>
   </docs-layout>
 

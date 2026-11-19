@@ -330,8 +330,9 @@
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.start.label}}</span>
+          <span class="side-label">入门</span>
           <st-list slot="sublist">
+
             <st-list-item
               button
               class:active="current === 'lesson-1'"
@@ -339,6 +340,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.start.lessons.lesson1}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-2'"
@@ -346,6 +348,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.start.lessons.lesson2}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-3'"
@@ -353,6 +356,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.start.lessons.lesson3}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-4'"
@@ -360,12 +364,14 @@
             >
               <span class="side-label">{{site.tutorial.groups.start.lessons.lesson4}}</span>
             </st-list-item>
+
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.interact.label}}</span>
+          <span class="side-label">交互与状态</span>
           <st-list slot="sublist">
+
             <st-list-item
               button
               class:active="current === 'lesson-5'"
@@ -373,6 +379,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson5}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-6'"
@@ -380,6 +387,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson6}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-7'"
@@ -387,6 +395,7 @@
             >
               <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson7}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-8'"
@@ -394,33 +403,38 @@
             >
               <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson8}}</span>
             </st-list-item>
-          </st-list>
-        </st-list-item>
 
-        <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.component.label}}</span>
-          <st-list slot="sublist">
             <st-list-item
               button
               class:active="current === 'lesson-9'"
               on:click="navigateTutorial('lesson-9')"
             >
-              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson9}}</span>
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson9}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-10'"
               on:click="navigateTutorial('lesson-10')"
             >
-              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson10}}</span>
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson10}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-11'"
               on:click="navigateTutorial('lesson-11')"
             >
-              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson11}}</span>
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson11}}</span>
             </st-list-item>
+
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">组件</span>
+          <st-list slot="sublist">
+
             <st-list-item
               button
               class:active="current === 'lesson-12'"
@@ -428,26 +442,70 @@
             >
               <span class="side-label">{{site.tutorial.groups.component.lessons.lesson12}}</span>
             </st-list-item>
-          </st-list>
-        </st-list-item>
 
-        <st-list-item collapsible expanded>
-          <span class="side-label">{{site.tutorial.groups.advanced.label}}</span>
-          <st-list slot="sublist">
             <st-list-item
               button
               class:active="current === 'lesson-13'"
               on:click="navigateTutorial('lesson-13')"
             >
-              <span class="side-label">{{site.tutorial.groups.advanced.lessons.lesson13}}</span>
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson13}}</span>
             </st-list-item>
+
             <st-list-item
               button
               class:active="current === 'lesson-14'"
               on:click="navigateTutorial('lesson-14')"
             >
-              <span class="side-label">{{site.tutorial.groups.advanced.lessons.lesson14}}</span>
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson14}}</span>
             </st-list-item>
+
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">应用与实战</span>
+          <st-list slot="sublist">
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-15'"
+              on:click="navigateTutorial('lesson-15')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson15}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-16'"
+              on:click="navigateTutorial('lesson-16')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson16}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-17'"
+              on:click="navigateTutorial('lesson-17')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson17}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-18'"
+              on:click="navigateTutorial('lesson-18')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson18}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-19'"
+              on:click="navigateTutorial('lesson-19')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson19}}</span>
+            </st-list-item>
+
           </st-list>
         </st-list-item>
       </st-list>

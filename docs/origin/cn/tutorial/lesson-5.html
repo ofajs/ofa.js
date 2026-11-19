@@ -6,62 +6,34 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 05</p>
-      <h1>样式与状态</h1>
-      <p class="doc-lead">
-        数据不仅驱动文字，也能驱动类名和样式。
-        最后做一个会随状态变化的个人卡片。
-      </p>
+      <h1>事件</h1>
+      <p class="doc-lead">用 on: 监听事件：简单逻辑写表达式，复杂逻辑写 proto 方法。</p>
 
-      <h2>让卡片响应状态</h2>
       <p>
-        点「选中卡片」：边框、阴影、背景色和徽章文字都会变化。
-        这些都不是手动操作 DOM，而是 data 和 class 驱动的。
-      </p>
-
-      <l-m src="{{SITE}}/components/playground.html"></l-m>
+  事件绑定统一写成 <code>on:事件名</code>。值可以是一句表达式，
+  也可以是 <code>proto</code> 里的方法名；方法会自动绑定当前页面实例。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
       <docs-playground lesson="lesson-5"></docs-playground>
+<h2>两种写法</h2>
+<ul>
+  <li><code>on:click="count++"</code>：适合一行就能表达的逻辑；</li>
+  <li><code>on:click="decrement"</code>：适合需要多步操作或复用的情况；</li>
+  <li><code>on:input="onNameInput($event)"</code>：需要原生事件对象时传入
+    <code>$event</code>。</li>
+</ul>
+<div class="doc-note">
+  <strong>不要手动找 DOM：</strong>处理函数里直接改 <code>this.count</code>
+  即可，页面会自动更新。只有测量尺寸、聚焦、第三方库初始化这类操作才需要
+  操作真实 DOM。
+</div>
+<h2>动手改</h2>
+<p>
+  给 <code>decrement</code> 加一个限制：计数小于 0 时不再减少。
+  再添加一个按钮，把计数乘以 2。
+</p>
 
-      <h2>三个新工具</h2>
-      <ul>
-        <li>
-          <code>class:active="active"</code>：条件添加类名；
-        </li>
-        <li>
-          <code>:style.background="active ? ... : ..."</code>：内联样式绑定；
-        </li>
-        <li>
-          <code>get levelText()</code>：计算属性，随 <code>active</code> 自动更新。
-        </li>
-      </ul>
-
-      <pre><code>&lt;div class="card" class:active="active"&gt;
-  &lt;span :style.color="active ? '#fff' : '#0061a4'"&gt;
-    {{levelText}}
-  &lt;/span&gt;
-  &lt;button on:click="active = !active"&gt;切换&lt;/button&gt;
-&lt;/div&gt;</code></pre>
-
-      <h2>毕业挑战</h2>
-      <p>把这张卡片改造成你自己的：</p>
-      <ul>
-        <li>增加一个「技能标签」数组，用 <code>o-fill</code> 渲染；</li>
-        <li>增加一个输入框，实时修改卡片上的名字；</li>
-        <li>用 <code>:style</code> 根据选中状态改变圆角或字号；</li>
-        <li>把 data 换成你自己的信息，做出一个个人主页。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>接下来读什么？</strong>
-        打开左侧「文档」，从
-        <a olink href="{{LOCALE}}/docs/template.html">模板指令总览</a>
-        继续系统学习；需要完整案例时看
-        <a olink href="{{LOCALE}}/docs/examples.html">完整示例</a>。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-4.html">04 · 表单与待办 →</a>
-        　·　下一篇：<a olink href="./lesson-6.html">06 · 搜索与过滤 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-4.html">04 · 样式与 class →</a>　·　下一篇：<a olink href="./lesson-6.html">06 · 双向绑定 →</a></p>
     </article>
   </docs-layout>
 

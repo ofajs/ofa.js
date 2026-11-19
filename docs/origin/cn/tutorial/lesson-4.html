@@ -6,56 +6,33 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 04</p>
-      <h1>表单与待办</h1>
-      <p class="doc-lead">
-        把前面学的输入、事件、条件、列表组合起来，
-        就是一个真正能用的小应用。
-      </p>
+      <h1>样式与 class</h1>
+      <p class="doc-lead">页面里的 &lt;style&gt; 只作用于当前页面，class: 和 :style 让样式跟随数据变化。</p>
 
-      <h2>完整待办</h2>
       <p>
-        在输入框里按回车或点「添加」；勾选复选框会切换完成状态；
-        底部显示剩余未完成数量。这些状态全部来自 data。
-      </p>
-
-      <l-m src="{{SITE}}/components/playground.html"></l-m>
+  页面模板里的 <code>&lt;style&gt;</code> 会被收进页面的 Shadow DOM，
+  不会污染其他组件。<code>:host</code> 选中页面/组件本身。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
       <docs-playground lesson="lesson-4"></docs-playground>
+<h2>三种常用写法</h2>
+<ul>
+  <li><code>:host</code>：设置页面容器的样式，例如 <code>display:block</code>；</li>
+  <li><code>class:active="active"</code>：条件为真时加类名，为假时移除；</li>
+  <li><code>:style.background="..."</code>：内联样式，属性名用驼峰写法。</li>
+</ul>
+<div class="doc-note">
+  <strong>选择建议：</strong>结构性状态（选中、完成）用 <code>class:</code>，
+  颜色、尺寸等单个值用 <code>:style</code>。不要在模板里拼大段
+  <code>style</code> 字符串。
+</div>
+<h2>动手改</h2>
+<p>
+  再加一个 <code>class:highlight="active"</code> 的类名，并在
+  <code>&lt;style&gt;</code> 里给它一个背景色，观察切换状态时的变化。
+</p>
 
-      <h2>代码拆解</h2>
-      <ul>
-        <li>
-          <code>sync:value="draft"</code> 保存输入框内容；
-        </li>
-        <li>
-          <code>on:keydown="addOnEnter($event)"</code> 处理回车；
-        </li>
-        <li>
-          <code>sync:checked="$data.done"</code> 直接修改列表项字段；
-        </li>
-        <li>
-          <code>get remaining()</code> 是计算属性，模板里当普通字段用。
-        </li>
-      </ul>
-
-      <h2>数据结构</h2>
-      <pre><code>items: [
-  { id: 1, text: "阅读文档", done: true },
-  { id: 2, text: "写一个组件", done: false },
-]</code></pre>
-      <p>
-        <code>id</code> 用来给 <code>o-fill</code> 做 <code>fill-key</code>；
-        <code>done</code> 控制复选框和删除线。
-      </p>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>
-        增加「清除已完成」按钮；再显示总条数和完成条数。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-3.html">03 · 条件与列表 →</a>
-        　·　下一篇：<a olink href="./lesson-5.html">05 · 样式与状态 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-3.html">03 · 动态属性 →</a>　·　下一篇：<a olink href="./lesson-5.html">05 · 事件 →</a></p>
     </article>
   </docs-layout>
 

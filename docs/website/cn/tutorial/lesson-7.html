@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>07 · 表单校验 — ofa.js 教程</title>
-    <meta name="description" content="实现必填、邮箱格式校验与提交状态。" />
+    <title>07 · 条件渲染 — ofa.js 教程</title>
+    <meta name="description" content="o-if / o-else-if / o-else 控制内容是否存在。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="07 · 表单校验 — ofa.js 教程" />
-    <meta property="og:description" content="实现必填、邮箱格式校验与提交状态。" />
+    <meta property="og:title" content="07 · 条件渲染 — ofa.js 教程" />
+    <meta property="og:description" content="o-if / o-else-if / o-else 控制内容是否存在。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,30 +65,32 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 07</p>
-      <h1>表单校验</h1>
-      <p class="doc-lead">表单提交前先检查数据。错误提示、按钮禁用和成功消息都可以由计算属性驱动。</p>
+      <h1>条件渲染</h1>
+      <p class="doc-lead">o-if / o-else-if / o-else 控制内容是否存在。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="../../components/playground.html"></l-m>
+      <p>
+  需要根据状态显示不同内容时，用 <code>&lt;o-if :value="条件"&gt;</code>。
+  条件为假时内容会被移除，为真时重新创建。
+</p>
+<l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-7"></docs-playground>
+<h2>三个标签必须连续</h2>
+<ul>
+  <li><code>o-if</code> 必须有 <code>:value</code>；</li>
+  <li><code>o-else-if</code> 继续判断下一个条件；</li>
+  <li><code>o-else</code> 不带 <code>:value</code>，收尾兜底。</li>
+</ul>
+<div class="doc-note">
+  <strong>频繁显隐用 class：</strong>如果只是切换颜色、显示/隐藏，
+  优先用 <code>class:</code> 保留 DOM；<code>o-if</code> 会销毁并重建内容，
+  适合条件不常变化或需要真正移除资源的场景。
+</div>
+<h2>动手改</h2>
+<p>
+  把 60 分以下改成「不及格」，并新增一档 80–89 分的「良好」。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>nameError</code> / <code>emailError</code> 是 getter，返回空字符串表示通过。</li>
-        <li><code>attr:disabled="!valid"</code> 用 attribute 绑定控制按钮是否可点。</li>
-        <li><code>on:submit</code> 里先 <code>preventDefault()</code>，再处理提交。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>增加一个密码字段，要求至少 6 位，并显示对应的错误提示。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-6.html">06 · 搜索与过滤 →</a>
-        　·　下一篇：<a olink href="./lesson-8.html">08 · 计算属性与侦听 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-6.html">06 · 双向绑定 →</a>　·　下一篇：<a olink href="./lesson-8.html">08 · 列表渲染 →</a></p>
     </article>
   </docs-layout>
 

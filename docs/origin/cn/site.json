@@ -211,63 +211,83 @@
     },
     "tutorial/index.html": {
       "title": "ofa.js 教程",
-      "description": "面向新人的 ofa.js 交互式教程：每一课都能直接改代码看效果。"
+      "description": "19 节渐进式 ofa.js 教程：从第一个页面到组件、状态、路由与综合实战。"
     },
     "tutorial/lesson-1.html": {
       "title": "01 · 第一个页面 — ofa.js 教程",
-      "description": "从零写一个 ofa.js 页面，修改文本并实时预览。"
+      "description": "ofa.js 的页面就是一个 HTML 文件：结构、样式和逻辑都在同一个文件里。"
     },
     "tutorial/lesson-2.html": {
-      "title": "02 · 数据与事件 — ofa.js 教程",
-      "description": "用 data、{{}}、on: 和 sync: 做一个小计数器。"
+      "title": "02 · 数据与插值 — ofa.js 教程",
+      "description": "data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。"
     },
     "tutorial/lesson-3.html": {
-      "title": "03 · 条件与列表 — ofa.js 教程",
-      "description": "用 o-if 和 o-fill 渲染条件内容与列表。"
+      "title": "03 · 动态属性 — ofa.js 教程",
+      "description": "HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。"
     },
     "tutorial/lesson-4.html": {
-      "title": "04 · 表单与待办 — ofa.js 教程",
-      "description": "把表单、事件和列表组合成一个待办应用。"
+      "title": "04 · 样式与 class — ofa.js 教程",
+      "description": "页面里的 <style> 只作用于当前页面，class: 和 :style 让样式跟随数据变化。"
     },
     "tutorial/lesson-5.html": {
-      "title": "05 · 样式与状态 — ofa.js 教程",
-      "description": "用 class:、:style 和计算属性完成有状态的卡片。"
+      "title": "05 · 事件 — ofa.js 教程",
+      "description": "用 on: 监听事件：简单逻辑写表达式，复杂逻辑写 proto 方法。"
     },
     "tutorial/lesson-6.html": {
-      "title": "06 · 搜索与过滤 — ofa.js 教程",
-      "description": "用计算属性和 o-fill 做实时搜索过滤。"
+      "title": "06 · 双向绑定 — ofa.js 教程",
+      "description": "sync: 让表单和 data 双向同步，适合标量值。"
     },
     "tutorial/lesson-7.html": {
-      "title": "07 · 表单校验 — ofa.js 教程",
-      "description": "实现必填、邮箱格式校验与提交状态。"
+      "title": "07 · 条件渲染 — ofa.js 教程",
+      "description": "o-if / o-else-if / o-else 控制内容是否存在。"
     },
     "tutorial/lesson-8.html": {
-      "title": "08 · 计算属性与侦听 — ofa.js 教程",
-      "description": "用 getter 算总价，用 watch 记录数据变化。"
+      "title": "08 · 列表渲染 — ofa.js 教程",
+      "description": "o-fill 渲染数组；列表项内用 $data、$index、$host。"
     },
     "tutorial/lesson-9.html": {
-      "title": "09 · 使用组件 — ofa.js 教程",
-      "description": "通过 l-m 引入组件，传 attrs 并监听事件。"
+      "title": "09 · 编辑列表 — ofa.js 教程",
+      "description": "数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。"
     },
     "tutorial/lesson-10.html": {
-      "title": "10 · 行内编辑列表 — ofa.js 教程",
-      "description": "在 o-fill 列表里直接编辑每一项数据。"
+      "title": "10 · 计算属性与侦听 — ofa.js 教程",
+      "description": "proto 的 getter 做同步计算，watch 观察变化并处理副作用。"
     },
     "tutorial/lesson-11.html": {
-      "title": "11 · 全局状态 — ofa.js 教程",
-      "description": "用 $.stanz 创建共享响应式状态。"
+      "title": "11 · 生命周期 — ofa.js 教程",
+      "description": "ready → attached → loaded，移除时 detached；定时器和监听要在 detached 清理。"
     },
     "tutorial/lesson-12.html": {
-      "title": "12 · 本地持久化 — ofa.js 教程",
-      "description": "把编辑内容保存到 localStorage，刷新后恢复。"
+      "title": "12 · 第一个组件 — ofa.js 教程",
+      "description": "把可复用的 UI 拆成 <template component>，用 l-m 引入。"
     },
     "tutorial/lesson-13.html": {
-      "title": "13 · 异步与加载态 — ofa.js 教程",
-      "description": "用异步数据和 o-if 展示加载中、成功、失败状态。"
+      "title": "13 · 组件参数 — ofa.js 教程",
+      "description": "外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。"
     },
     "tutorial/lesson-14.html": {
-      "title": "14 · 综合项目：个人主页 — ofa.js 教程",
-      "description": "把输入、列表、样式和状态组合成一个个人主页。"
+      "title": "14 · 插槽与事件 — ofa.js 教程",
+      "description": "slot 让组件接收外部内容，emit 把组件内部发生的事告诉外部。"
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · 全局状态 — ofa.js 教程",
+      "description": "多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。"
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · 页面与路由 — ofa.js 教程",
+      "description": "o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。"
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · 嵌套布局 — ofa.js 教程",
+      "description": "子页声明 parent，父页用 slot 承接；切子页时父页不销毁。"
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · 异步与加载态 — ofa.js 教程",
+      "description": "异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。"
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · 综合：待办清单 — ofa.js 教程",
+      "description": "把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。"
     }
   },
   "tutorial": {
@@ -278,34 +298,39 @@
         "label": "入门",
         "lessons": {
           "lesson1": "01 · 第一个页面",
-          "lesson2": "02 · 数据与事件",
-          "lesson3": "03 · 条件与列表",
-          "lesson4": "04 · 表单与待办"
+          "lesson2": "02 · 数据与插值",
+          "lesson3": "03 · 动态属性",
+          "lesson4": "04 · 样式与 class"
         }
       },
       "interact": {
-        "label": "交互与数据",
+        "label": "交互与状态",
         "lessons": {
-          "lesson5": "05 · 样式与状态",
-          "lesson6": "06 · 搜索与过滤",
-          "lesson7": "07 · 表单校验",
-          "lesson8": "08 · 计算属性与侦听"
+          "lesson5": "05 · 事件",
+          "lesson6": "06 · 双向绑定",
+          "lesson7": "07 · 条件渲染",
+          "lesson8": "08 · 列表渲染",
+          "lesson9": "09 · 编辑列表",
+          "lesson10": "10 · 计算属性与侦听",
+          "lesson11": "11 · 生命周期"
         }
       },
       "component": {
-        "label": "组件与状态",
+        "label": "组件",
         "lessons": {
-          "lesson9": "09 · 使用组件",
-          "lesson10": "10 · 行内编辑列表",
-          "lesson11": "11 · 全局状态",
-          "lesson12": "12 · 本地持久化"
+          "lesson12": "12 · 第一个组件",
+          "lesson13": "13 · 组件参数",
+          "lesson14": "14 · 插槽与事件"
         }
       },
-      "advanced": {
-        "label": "综合实践",
+      "app": {
+        "label": "应用与实战",
         "lessons": {
-          "lesson13": "13 · 异步与加载态",
-          "lesson14": "14 · 综合项目：个人主页"
+          "lesson15": "15 · 全局状态",
+          "lesson16": "16 · 页面与路由",
+          "lesson17": "17 · 嵌套布局",
+          "lesson18": "18 · 异步与加载态",
+          "lesson19": "19 · 综合：待办清单"
         }
       }
     }

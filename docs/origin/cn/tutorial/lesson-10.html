@@ -6,30 +6,33 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 10</p>
-      <h1>行内编辑列表</h1>
-      <p class="doc-lead">列表不仅能展示，也能直接编辑。把输入框绑到列表项的字段上即可。</p>
+      <h1>计算属性与侦听</h1>
+      <p class="doc-lead">proto 的 getter 做同步计算，watch 观察变化并处理副作用。</p>
 
-      <h2>试一试</h2>
-      <p>修改右侧代码后点「运行代码」，观察结果如何变化。</p>
-
-      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <p>
+  依赖现有 data 算出来的值，用 <code>proto</code> 里的 getter；
+  需要在数据变化后做额外操作（记日志、写入外部存储），用 <code>watch</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
       <docs-playground lesson="lesson-10"></docs-playground>
+<h2>getter 与 watch 的分工</h2>
+<ul>
+  <li><code>get total()</code>：模板里像普通字段一样用，自动随依赖更新；</li>
+  <li><code>watch.qty(value, { watchers })</code>：数据变化后执行；</li>
+  <li>watch 在初始化时会先调用一次，此时 <code>watchers</code> 不存在，
+    可以用 <code>if (!watchers) return</code> 跳过首次调用。</li>
+</ul>
+<div class="doc-note">
+  <strong>getter 的边界：</strong>getter 在模板初始化时就会求值，
+  只能依赖已经存在的同步数据；如果依赖接口返回的异步数据，先用 data 字段
+  存结果，再在异步回调里赋值。
+</div>
+<h2>动手改</h2>
+<p>
+  增加一个「折扣」输入（0–1），让总价按折扣计算；再用 watch 记录折扣变化。
+</p>
 
-      <h2>关键点</h2>
-      <ul>
-        <li><code>sync:value="$data.name"</code> 直接双向绑定当前列表项。</li>
-        <li><code>fill-key="id"</code> 保证增删时正确复用列表项。</li>
-        <li>删除通过 <code>$host.removeItem($data.id)</code> 调回页面方法。</li>
-      </ul>
-
-      <div class="doc-note">
-        <strong>挑战：</strong>给每一项增加一个「完成」复选框，并用 <code>class:done</code> 加删除线。
-      </div>
-
-      <p class="doc-end">
-        上一篇：<a olink href="./lesson-9.html">09 · 使用组件 →</a>
-        　·　下一篇：<a olink href="./lesson-11.html">11 · 全局状态 →</a>
-      </p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-9.html">09 · 编辑列表 →</a>　·　下一篇：<a olink href="./lesson-11.html">11 · 生命周期 →</a></p>
     </article>
   </docs-layout>
 

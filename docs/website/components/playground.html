@@ -459,6 +459,7 @@
       <section class="editor" aria-label="ofa.js 代码编辑器">
         <code-editor
           attr:value="code"
+          attr:fold="foldStyles === 'true' || foldStyles === true ? 'style' : ''"
           on:change="onCodeChange"
           on:cursor="onCursor"
           on:run="run"
@@ -514,6 +515,7 @@
       tag: "docs-playground",
       attrs: {
         lesson: "",
+        foldStyles: false,
       },
       data: {
         code: DEFAULT_CODE,

@@ -328,6 +328,11 @@ npm 安装命令，CDN 地址是主要使用方式。
 开始标签和对应的闭合标签，点击 `▸` 或「展开全部并编辑」恢复。它用 textarea + 高亮层叠加实现，
 不引入第三方编辑器依赖。
 
+`code-editor` 的 `fold` 属性接收逗号分隔的标签名（如 `fold="style"`），
+载入文件时自动折叠这些标签块；`docs-playground` 用 `fold-styles="true"`
+透传该能力。教程默认开启（第 4 课「样式与 class」例外，方便直接看样式），
+折叠后点行号左侧 `▸` 展开单个区块，或点「展开全部并编辑」进入编辑。
+
 预览栏的「新标签打开」会直接打开当前虚拟页面
 `/$ofa-docs-playground/index.html?v=...`，由 Service Worker 继续提供
 OPFS 文件。

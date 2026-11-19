@@ -2059,6 +2059,43 @@ body,
   display: none;
 }
 
+/* 旧版 v4 文档入口：主视觉顶部的小标记 */
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.legacy-docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-sm);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.legacy-docs:hover {
+  border-color: var(--md-sys-color-outline);
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+
+.legacy-docs .arrow {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
 .hero h1 {
   margin-bottom: 24px;
   font-size: clamp(42px, 5.4vw, 64px);

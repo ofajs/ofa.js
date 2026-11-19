@@ -201,11 +201,17 @@
     }
 
     .editor {
-      display: flex;
+      display: block;
       min-width: 0;
       height: 440px;
       background: #1e1e1e;
       border-right: 1px solid #2b2b2b;
+    }
+
+    .editor code-editor {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
     .gutter {
@@ -402,6 +408,8 @@
     }
   </style>
 
+  <l-m src="./code-editor.html"></l-m>
+
   <div class="workbench">
     <div class="titlebar">
       <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -449,23 +457,12 @@
       attr:style="'grid-template-columns:' + editorWidth + '% 6px minmax(0, 1fr)'"
     >
       <section class="editor" aria-label="ofa.js 代码编辑器">
-        <pre class="gutter" aria-hidden="true">{{lineNumbers}}</pre>
-        <div class="code-pane">
-          <pre class="highlight" aria-hidden="true"><code :html="codeHtml"></code></pre>
-          <textarea
-            spellcheck="false"
-            autocomplete="off"
-            autocapitalize="off"
-            wrap="off"
-            sync:value="code"
-            on:input="onCodeInput($event)"
-            on:scroll="syncScroll($event)"
-            on:keydown="onEditorKeydown($event)"
-            on:keyup="updateCursor($event)"
-            on:click="updateCursor($event)"
-            aria-label="ofa.js 页面代码"
-          ></textarea>
-        </div>
+        <code-editor
+          attr:value="code"
+          on:change="onCodeChange"
+          on:cursor="onCursor"
+          on:run="run"
+        ></code-editor>
       </section>
 
       <div
@@ -505,7 +502,6 @@
   </div>
 
   <script>
-    import { highlightCode } from "../content/highlight.mjs";
     import {
       SPACE,
       STORAGE_KEY,
@@ -526,8 +522,6 @@
         activeFile: "page.html",
         entry: "page",
         defaultFiles: {},
-        codeHtml: "",
-        lineNumbers: "1",
         frameSrc: "",
         status: "正在启动虚拟容器…",
         coreReady: false,
@@ -587,7 +581,6 @@
             ? activeName
             : this.fileNames[0] || "page.html";
           this.code = this.files[this.activeFile] || "";
-          this.refreshEditor(this.code);
           this.dirty = false;
         },
 
@@ -603,7 +596,7 @@
           this.files[this.activeFile] = this.code;
           this.activeFile = name;
           this.code = this.files[name];
-          this.refreshEditor(this.code);
+          this.dirty = false;
         },
 
         fileType(name) {
@@ -616,14 +609,6 @@
           } catch {}
           this.loadFiles(this.defaultFiles, this.activeFile);
           this.status = "已恢复本课示例代码，按 Ctrl/⌘+S 运行";
-        },
-
-        refreshEditor(value) {
-          this.codeHtml = highlightCode(value);
-          const count = value.split("\n").length;
-          this.lineNumbers = Array.from({ length: count }, (_, i) => i + 1).join(
-            "\n",
-          );
         },
 
         async initContainer() {
@@ -726,79 +711,17 @@
           window.open(this.frameSrc, "_blank", "noopener");
         },
 
-        syncScroll(event) {
-          const area = event.target;
-          const pre = this.shadow.$(".highlight").ele;
-          const gutter = this.shadow.$(".gutter").ele;
-
-          pre.scrollTop = area.scrollTop;
-          pre.scrollLeft = area.scrollLeft;
-          gutter.scrollTop = area.scrollTop;
-        },
-
-        updateCursor(event) {
-          const area = event.target;
-          const before = area.value.slice(0, area.selectionStart);
-          const lines = before.split("\n");
-          this.cursorLine = lines.length;
-          this.cursorColumn = lines[lines.length - 1].length + 1;
-        },
-
-        onCodeInput(event) {
-          const value = event.target.value;
+        onCodeChange(event) {
+          const value = event.data.value;
+          this.code = value;
           this.files[this.activeFile] = value;
-          this.refreshEditor(value);
           this.saveFiles();
           this.dirty = true;
         },
 
-        onEditorKeydown(event) {
-          const area = event.target;
-
-          // Ctrl/⌘+S：取消浏览器“保存网页”，直接写入虚拟容器并运行
-          if (
-            (event.metaKey || event.ctrlKey) &&
-            !event.altKey &&
-            !event.shiftKey &&
-            event.key.toLowerCase() === "s"
-          ) {
-            event.preventDefault();
-            this.run();
-            return;
-          }
-
-          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-            event.preventDefault();
-            this.run();
-            return;
-          }
-
-          if (event.key === "Tab") {
-            event.preventDefault();
-            const start = area.selectionStart;
-            const end = area.selectionEnd;
-            const next = `${area.value.slice(0, start)}  ${area.value.slice(end)}`;
-            this.code = next;
-            requestAnimationFrame(() => {
-              area.selectionStart = area.selectionEnd = start + 2;
-            });
-            return;
-          }
-
-          if (event.key === "Enter") {
-            const start = area.selectionStart;
-            const before = area.value.slice(0, start);
-            const line = before.slice(before.lastIndexOf("\n") + 1);
-            const indent = line.match(/^[ \t]*/)?.[0] || "";
-            if (!indent) return;
-
-            event.preventDefault();
-            const next = `${before}\n${indent}${area.value.slice(area.selectionEnd)}`;
-            this.code = next;
-            requestAnimationFrame(() => {
-              area.selectionStart = area.selectionEnd = start + 1 + indent.length;
-            });
-          }
+        onCursor(event) {
+          this.cursorLine = event.data.line;
+          this.cursorColumn = event.data.column;
         },
       },
     };

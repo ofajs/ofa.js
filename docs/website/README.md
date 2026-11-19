@@ -52,7 +52,8 @@ docs/
     ├── components/
     │   ├── site-shell.html            顶部/底部/背景外壳
     │   ├── docs-layout.html           文章正文 + 右侧本页目录
-    │   ├── playground.html            案例预览编辑器 + 虚拟容器 iframe
+    │   ├── code-editor.html          通用 VSCode 风格编辑器（行号/高亮/折叠）
+    │   ├── playground.html            案例预览：编辑器 + 虚拟容器 iframe
     │   └── demo-counter.html          首页响应式计数器组件
     ├── content/
     │   ├── page-runtime.mjs           首页/文档页共享运行时
@@ -317,12 +318,19 @@ npm 安装命令，CDN 地址是主要使用方式。
    `/$...` 路径映射到 OPFS 文件；
 5. 每个课程的文件内容保存在 `localStorage`，刷新后保留；「重置」恢复本课示例。
 
-编辑器是 VSCode 风格的多文件工作台：文件标签页、行号、语法高亮、状态栏、
-`Tab` 缩进、回车自动缩进；`Ctrl/Cmd + S` 或 `Ctrl/Cmd + Enter` 运行，
-编辑器和预览之间的分隔条可拖动调整宽度。它用 textarea + 高亮层叠加实现，
-不引入第三方编辑器依赖。预览栏的「新标签打开」会直接
-打开当前虚拟页面 `/$ofa-docs-playground/index.html?v=...`，由 Service
-Worker 继续提供 OPFS 文件。
+编辑器拆成通用组件 `components/code-editor.html`，`docs-playground` 只负责
+多文件标签、虚拟容器和预览。`code-editor` 对外提供 `value` 属性与
+`change` / `cursor` / `run` 事件，可以脱离 playground 单独复用。
+
+编辑器支持文件标签页、行号、HTML/JS/CSS 语法高亮、`Tab` 缩进、回车自动
+缩进；`Ctrl/Cmd + S` 或 `Ctrl/Cmd + Enter` 运行；编辑器和预览之间的分隔条
+可拖动调整宽度。点击行号左侧的三角可折叠 HTML 标签块；折叠状态是只读视图，仍会显示
+开始标签和对应的闭合标签，点击 `▸` 或「展开全部并编辑」恢复。它用 textarea + 高亮层叠加实现，
+不引入第三方编辑器依赖。
+
+预览栏的「新标签打开」会直接打开当前虚拟页面
+`/$ofa-docs-playground/index.html?v=...`，由 Service Worker 继续提供
+OPFS 文件。
 
 注意：
 

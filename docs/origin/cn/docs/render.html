@@ -94,6 +94,21 @@
   &lt;/article&gt;
 &lt;/template&gt;</code></pre>
       <p>命名模板必须放在 <code>o-fill</code> 外部，通常放在页面模板的顶层。</p>
+      <p>
+        命名模板也可以引用自己，用来渲染树形结构：
+      </p>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="tree" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+&lt;/ul&gt;
+
+&lt;template name="tree-node"&gt;
+  &lt;li&gt;
+    {{$data.name}}
+    &lt;ul&gt;
+      &lt;o-fill :value="$data.children" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;</code></pre>
 
       <h2>select 与 table 的 replace-temp</h2>
       <p>

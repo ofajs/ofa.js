@@ -86,6 +86,12 @@
   整体重建；如果项里有输入框或局部状态，就会丢失。用 <code>id</code> 告诉
   框架「这一项还是原来那一项」。
 </div>
+<div class="doc-note">
+  <strong>再进一步：</strong>嵌套列表用 <code>$parent</code> 取外层数据；
+  表格行、<code>&lt;select&gt;</code> 里的 <code>o-fill</code> 需要
+  <code>&lt;template is="replace-temp"&gt;</code>，复杂结构可以放进命名模板。
+  这些写法在 <a olink href="../docs/render.html">条件与列表</a> 里有完整示例。
+</div>
 <h2>动手改</h2>
 <p>
   在每一项后面加上「完成」按钮，点击后切换该项的完成状态（先给数据加

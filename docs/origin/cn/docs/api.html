@@ -125,6 +125,19 @@ target.unwatch(tid);
 
 const data = $.stanz({ count: 0 });
 data._internal = "不会被监听"; // 下划线前缀跳过响应式</code></pre>
+      <p>
+        等某个数据条件成立时，用 <code>watchUntil</code>；它返回一个
+        Promise，条件满足后自动取消监听并兑现：
+      </p>
+      <pre><code>const app = $("o-app");
+await app.watchUntil(() =&gt; app.appIsReady);
+
+// 默认 30 秒超时，可传第二个参数调整
+await app.watchUntil(() =&gt; app.current, 5000);</code></pre>
+      <div class="doc-note">
+        <strong>watchUntil 只在数据变更时判定，不会注册后立即检查。</strong>
+        如果条件可能已经成立，先自己判断一次，再决定是否等待。
+      </div>
 
       <h2>扩展实例</h2>
       <pre><code>// 单个实例

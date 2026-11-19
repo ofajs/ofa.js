@@ -29,6 +29,11 @@
   <strong>约定：</strong>模块级 store 不要直接写进组件的 <code>data</code>；
   在 attached 阶段挂载、detached 阶段清理，才能避免内存泄漏和重复订阅。
 </div>
+<div class="doc-note">
+  <strong>怎么选：</strong>如果数据只属于某棵组件子树，而不是整个应用，
+  用 <code>o-provider</code> / <code>o-consumer</code> 更合适；
+  见 <a olink href="../docs/context.html">跨组件上下文</a>。
+</div>
 <h2>动手改</h2>
 <p>
   在 store 里增加 <code>step</code>，让页面上的「+1」按钮每次加

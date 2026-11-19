@@ -49,6 +49,13 @@ provider.userName = "李四";
 // 错误：setAttribute 不会广播给 consumer
 provider.ele.setAttribute("user-name", "李四");</code></pre>
 
+      <h2>层级与重连</h2>
+      <p>
+        多个同名 provider 嵌套时，按字段合并数据，离 consumer 更近的
+        provider 覆盖远端字段。consumer 的 <code>name</code> 也可以动态修改，
+        修改后会重新查找最近的同名 provider。
+      </p>
+
       <h2>默认值：o-root-provider</h2>
       <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
 

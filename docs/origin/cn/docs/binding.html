@@ -103,6 +103,18 @@
     color: data(titleColor);
   }
 &lt;/style&gt;</code></pre>
+      <p>
+        <code>data()</code> 也可以出现在 <code>@media</code> 条件和
+        <code>o-if</code> 内动态注入的 <code>&lt;style&gt;</code> 里，
+        数据变化时会重写样式文本并立即生效。
+      </p>
+      <pre><code>@media screen and (min-width: data(breakpoint + "px")) {
+  .layout { grid-template-columns: 1fr 1fr; }
+}
+
+&lt;o-if :value="dense"&gt;
+  &lt;style&gt;.row { padding: data(padding + "px"); }&lt;/style&gt;
+&lt;/o-if&gt;</code></pre>
       <p>这种写法只适合组件自己的样式；跨组件主题请使用 CSS 变量或 match-var。</p>
 
       <h2>属性值里没有 {{ }}</h2>

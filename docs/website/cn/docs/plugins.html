@@ -180,7 +180,22 @@ data.revoke();          // 释放绑定</code></pre>
       </p>
       <pre><code>&lt;match-var theme="dark"&gt;
   &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- 多个条件同时匹配 --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
 &lt;/match-var&gt;</code></pre>
+      <p>
+        条件来自 CSS 变量的值。外层用 <code>data()</code> 把数据写进变量：
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox：</strong>改变变量后若样式没有立即切换，
+        手动调用 <code>$.checkMatch()</code> 触发一次重新检测。
+      </div>
 
       <p class="doc-end">
         上一篇：<a olink href="./api.html">$.fn 与包装对象 →</a>

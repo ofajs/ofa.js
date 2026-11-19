@@ -47,6 +47,44 @@
         <a olink href="./routing.html">路由与导航</a>。
       </p>
 
+      <h2>相对资源与相对 import</h2>
+      <p>
+        页面里的相对地址以<strong>页面文件自身</strong>为基准解析，
+        不是入口 HTML 的地址。框架会自动改写页面模板里的
+        <code>img src</code>、<code>style</code> 中的 <code>url()</code>
+        等相对资源；<code>.mjs</code> 页面里的 <code>import</code>
+        则按模块自身地址解析。
+      </p>
+      <pre><code>&lt;!-- page.html 位于 /pages/detail/ --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- detail.mjs 同目录 --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        所以页面可以放在任意子目录，不需要把资源路径改成基于站点根的绝对路径。
+      </p>
+
+      <h2>进阶：.mjs 页面模块</h2>
+      <p>
+        页面通常写成 <code>&lt;template page&gt;</code> 的 HTML 模块；
+        需要把模板与逻辑分开时，也可以用 <code>.mjs</code> 编写，
+        声明 <code>$.PAGE</code> 类型并用 <code>temp</code> 指向外置模板：
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "Hello" };
+export const proto = {};</code></pre>
+      <p>
+        入口仍是 <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code>。
+        大多数场景推荐 HTML 模块，<code>.mjs</code> 适合逻辑较重、
+        需要拆分模板或复用现有模块的项目。
+      </p>
+
       <h2>内嵌子页面</h2>
       <p>
         一个页面同时装下列表、表单和弹窗时，可以把独立业务单元拆成子页面，

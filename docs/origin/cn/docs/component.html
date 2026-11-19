@@ -29,6 +29,12 @@
       </table>
         </div>
 
+      <p>
+        未声明 <code>tag</code> 时，框架会按文件名推断标签名：
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>。
+        建议仍然显式声明，文件改名或移动时不会悄悄改变组件的对外标签。
+      </p>
+
       <h2>attrs 与 data</h2>
       <p>
         <code>attrs</code> 是组件的公开入参，适合字符串、数字、布尔值；
@@ -89,6 +95,12 @@
         事件默认 <code>bubbles: true</code>、<code>composed: false</code>。
         需要让事件穿出 Shadow DOM 时显式设置 <code>composed: true</code>，
         这在页面嵌套 <code>o-page</code> 时尤其常见。
+      </p>
+
+      <p>
+        组件的 <code>PATH</code> 指向注册文件地址；组件模板里的相对
+        <code>img src</code>、<code>style url()</code> 等资源会按
+        <code>PATH</code> 解析，而不是按使用它的页面地址解析。
       </p>
 
       <h2>样式隔离</h2>

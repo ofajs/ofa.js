@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>16 · 页面与路由 — ofa.js 教程</title>
-    <meta name="description" content="o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。" />
+    <title>16 · 全局状态 — ofa.js 教程</title>
+    <meta name="description" content="多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="16 · 页面与路由 — ofa.js 教程" />
-    <meta property="og:description" content="o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。" />
+    <meta property="og:title" content="16 · 全局状态 — ofa.js 教程" />
+    <meta property="og:description" content="多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,39 +65,41 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 16</p>
-      <h1>页面与路由</h1>
-      <p class="doc-lead">o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。</p>
+      <h1>全局状态</h1>
+      <p class="doc-lead">多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。</p>
 
       <p>
-  多页面应用用 <code>&lt;o-app src="./app.mjs"&gt;</code> 作为容器。
-  <code>app.mjs</code> 只放应用配置，例如首页地址和切换动画。
+  组件自己的 <code>data</code> 只属于自己。多个组件要读写同一份数据时，
+  用 <code>$.stanz()</code> 创建一个响应式 store，放在独立模块里共享。
 </p>
 <l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
 <h2>三个文件</h2>
 <ul>
-  <li><code>app.mjs</code>：<code>home</code> 指向首页，<code>pageAnime</code> 配置切换动画；</li>
-  <li><code>home.html</code>：用 <code>olink</code> 或 <code>goto()</code> 跳到关于页；</li>
-  <li><code>about.html</code>：从 <code>query</code> 读取参数，用 <code>back()</code> 返回。</li>
+  <li><code>store.mjs</code>：只导出 <code>$.stanz({ count: 0 })</code>；</li>
+  <li><code>counter-panel.html</code>：两个组件实例都引用同一个 store；</li>
+  <li><code>page.html</code>：放两个面板和加减按钮。</li>
 </ul>
 <p>
-  <code>olink</code> 是声明式导航，不会刷新页面；<code>this.goto(url)</code>
-  用于代码里跳转。<code>query</code> 在页面模块函数参数里取，不在
-  <code>this</code> 上。
+  组件在 <code>attached</code> 里订阅 store、在 <code>detached</code> 里取消订阅。
+  这样面板被移除后不会继续持有旧引用。
 </p>
 <div class="doc-note">
-  <strong>o-app 只接受应用配置：</strong>不要把页面模块直接写给
-  <code>o-app src</code>。单页场景用 <code>o-page src</code>，
-  多页应用用 <code>o-app</code> + 页面地址。
+  <strong>约定：</strong>模块级 store 不要直接写进组件的 <code>data</code>；
+  在 attached 阶段挂载、detached 阶段清理，才能避免内存泄漏和重复订阅。
+</div>
+<div class="doc-note">
+  <strong>怎么选：</strong>如果数据只属于某棵组件子树，而不是整个应用，
+  用上一课的 <code>o-provider</code> / <code>o-consumer</code> 更合适；
+  见 <a olink href="./lesson-15.html">跨层上下文</a>。
 </div>
 <h2>动手改</h2>
 <p>
-  在首页增加一个「关于页（带参数）」按钮，用
-  <code>goto("./about.html?from=home-btn")</code> 跳转；
-  在关于页显示来源。
+  在 store 里增加 <code>step</code>，让页面上的「+1」按钮每次加
+  <code>store.step</code>；再加一个按钮把 step 改成 5。
 </p>
 
-      <p class="doc-end">上一篇：<a olink href="./lesson-15.html">15 · 全局状态 →</a>　·　下一篇：<a olink href="./lesson-17.html">17 · 嵌套布局 →</a></p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-15.html">15 · 跨层上下文 →</a>　·　下一篇：<a olink href="./lesson-17.html">17 · 页面与路由 →</a></p>
     </article>
   </docs-layout>
 

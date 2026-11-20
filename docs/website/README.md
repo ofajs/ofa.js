@@ -39,9 +39,9 @@ docs/
 │       │   ├── routing.html         应用与路由
 │       │   ├── api.html             API 参考
 │       │   └── ...                  其余章节见 site.json 的 docs.nav
-│       └── tutorial/                交互式教程（20 页）
+│       └── tutorial/                交互式教程（21 页）
 │           ├── index.html           教程总览
-│           └── lesson-1..19.html    十九节可编辑示例课
+│           └── lesson-1..20.html    二十节可编辑示例课
 └── website/                         共享资源 + 构建产物
     ├── index.html                   构建生成的根语言选择页
     ├── boot.js                      共享启动器：ofa.js → scsr
@@ -77,9 +77,9 @@ docs/
         │   ├── component.html
         │   ├── template.html
         │   └── ...
-        └── tutorial/                构建产物（20 页）
+        └── tutorial/                构建产物（21 页）
             ├── index.html
-            └── lesson-1.html ... lesson-19.html
+            └── lesson-1.html ... lesson-20.html
 ```
 
 > 注意：`docs/origin/<locale>/*.html` 是页面模块源文件（`template[page]`），
@@ -221,7 +221,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 1 页 + 文档 24 页 + 教程 20 页，共 45 份内容页 HTML，另有共享的
+- 当前站点有首页 1 页 + 文档 24 页 + 教程 21 页，共 46 份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -301,7 +301,7 @@ npm 安装命令，CDN 地址是主要使用方式。
   并分别用 `localStorage` 保存每一课的文件修改；
 - 教程页使用 `docs-layout layout="wide"`：隐藏右侧「本页内容」，
   把正文与 playground 撑满内容列；编辑器和预览之间可拖动分隔条调整宽度；
-- 教程内容：总览 + 19 节课，按「入门 / 交互与状态 / 组件 / 应用与实战」
+- 教程内容：总览 + 20 节课，按「入门 / 交互与状态 / 组件 / 应用与实战」
   四组组织，左侧目录同步分组。
 
 ## 案例预览（NoneOS 虚拟容器）

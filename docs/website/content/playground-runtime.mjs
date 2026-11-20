@@ -999,6 +999,104 @@ export const LESSONS = {
   "lesson-15": {
     entry: "page",
     files: {
+      "page.html": `<template page>
+  <style>
+    :host {
+      display: block;
+      padding: 28px;
+      font-family: system-ui, sans-serif;
+      color: #111827;
+    }
+    h1 { margin-top: 0; }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #0061a4;
+      color: #fff;
+      cursor: pointer;
+    }
+    profile-card { display: block; margin: 10px 0; }
+  </style>
+
+  <h1>跨层上下文</h1>
+  <p>前两张卡片在 provider 内，最后一张回退到 root-provider。</p>
+
+  <l-m src="./profile-card.html"></l-m>
+
+  <o-root-provider
+    name="user"
+    user-name="默认用户"
+    user-role="游客"
+  ></o-root-provider>
+
+  <o-provider
+    id="user-provider"
+    name="user"
+    user-name="Yao"
+    user-role="维护者"
+  >
+    <profile-card></profile-card>
+    <profile-card></profile-card>
+  </o-provider>
+
+  <profile-card></profile-card>
+
+  <button on:click="switchUser">切换 provider 用户</button>
+
+  <script>
+    export default {
+      data: { alternate: false },
+      proto: {
+        switchUser() {
+          const provider = this.shadow.$("#user-provider");
+          this.alternate = !this.alternate;
+          provider.userName = this.alternate ? "Ada" : "Yao";
+          provider.userRole = this.alternate ? "读者" : "维护者";
+        },
+      },
+    };
+  </script>
+</template>`,
+      "profile-card.html": `<template component>
+  <style>
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+    }
+    strong { color: #111827; }
+    span { color: #64748b; font-size: 14px; }
+  </style>
+
+  <div class="card">
+    <strong>{{name}}</strong>
+    <span>{{role}}</span>
+  </div>
+
+  <o-consumer
+    name="user"
+    watch:user-name="name"
+    watch:user-role="role"
+  ></o-consumer>
+
+  <script>
+    export default {
+      tag: "profile-card",
+      data: { name: "访客", role: "读者" },
+    };
+  </script>
+</template>`,
+    },
+  },
+  "lesson-16": {
+    entry: "page",
+    files: {
     "page.html": `<template page>
   <style>
     :host {
@@ -1090,7 +1188,7 @@ export const LESSONS = {
     "store.mjs": `export const store = $.stanz({ count: 0 });`,
     },
   },
-  "lesson-16": {
+  "lesson-17": {
     entry: "app",
     files: {
     "app.mjs": `export const home = "./home.html";
@@ -1156,7 +1254,7 @@ export const pageAnime = {
 </template>`,
     },
   },
-  "lesson-17": {
+  "lesson-18": {
     entry: "app",
     files: {
     "app.mjs": `export const home = "./home.html";`,
@@ -1240,7 +1338,7 @@ export const pageAnime = {
 </template>`,
     },
   },
-  "lesson-18": {
+  "lesson-19": {
     entry: "page",
     files: {
     "page.html": `<template page>
@@ -1334,7 +1432,7 @@ export const pageAnime = {
 </template>`,
     },
   },
-  "lesson-19": {
+  "lesson-20": {
     entry: "page",
     files: {
     "page.html": `<template page>

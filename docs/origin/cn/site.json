@@ -211,7 +211,7 @@
     },
     "tutorial/index.html": {
       "title": "ofa.js 教程",
-      "description": "19 节渐进式 ofa.js 教程：从第一个页面到组件、状态、路由与综合实战。"
+      "description": "20 节渐进式 ofa.js 教程：从第一个页面到组件、上下文、状态、路由与综合实战。"
     },
     "tutorial/lesson-1.html": {
       "title": "01 · 第一个页面 — ofa.js 教程",
@@ -270,23 +270,27 @@
       "description": "slot 让组件接收外部内容，emit 把组件内部发生的事告诉外部。"
     },
     "tutorial/lesson-15.html": {
-      "title": "15 · 全局状态 — ofa.js 教程",
-      "description": "多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。"
+      "title": "15 · 跨层上下文 — ofa.js 教程",
+      "description": "用 o-provider / o-consumer 在组件子树里共享数据。"
     },
     "tutorial/lesson-16.html": {
-      "title": "16 · 页面与路由 — ofa.js 教程",
-      "description": "o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。"
+      "title": "16 · 全局状态 — ofa.js 教程",
+      "description": "多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。"
     },
     "tutorial/lesson-17.html": {
-      "title": "17 · 嵌套布局 — ofa.js 教程",
-      "description": "子页声明 parent，父页用 slot 承接；切子页时父页不销毁。"
+      "title": "17 · 页面与路由 — ofa.js 教程",
+      "description": "o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。"
     },
     "tutorial/lesson-18.html": {
-      "title": "18 · 异步与加载态 — ofa.js 教程",
-      "description": "异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。"
+      "title": "18 · 嵌套布局 — ofa.js 教程",
+      "description": "子页声明 parent，父页用 slot 承接；切子页时父页不销毁。"
     },
     "tutorial/lesson-19.html": {
-      "title": "19 · 综合：待办清单 — ofa.js 教程",
+      "title": "19 · 异步与加载态 — ofa.js 教程",
+      "description": "异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。"
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · 综合：待办清单 — ofa.js 教程",
       "description": "把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。"
     }
   },
@@ -326,11 +330,12 @@
       "app": {
         "label": "应用与实战",
         "lessons": {
-          "lesson15": "15 · 全局状态",
-          "lesson16": "16 · 页面与路由",
-          "lesson17": "17 · 嵌套布局",
-          "lesson18": "18 · 异步与加载态",
-          "lesson19": "19 · 综合：待办清单"
+          "lesson15": "15 · 跨层上下文",
+          "lesson16": "16 · 全局状态",
+          "lesson17": "17 · 页面与路由",
+          "lesson18": "18 · 嵌套布局",
+          "lesson19": "19 · 异步与加载态",
+          "lesson20": "20 · 综合：待办清单"
         }
       }
     }

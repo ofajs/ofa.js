@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>17 · 嵌套布局 — ofa.js 教程</title>
-    <meta name="description" content="子页声明 parent，父页用 slot 承接；切子页时父页不销毁。" />
+    <title>17 · 页面与路由 — ofa.js 教程</title>
+    <meta name="description" content="o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。" />
     <meta name="theme-color" content="#1a1c1e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="17 · 嵌套布局 — ofa.js 教程" />
-    <meta property="og:description" content="子页声明 parent，父页用 slot 承接；切子页时父页不销毁。" />
+    <meta property="og:title" content="17 · 页面与路由 — ofa.js 教程" />
+    <meta property="og:description" content="o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script>
@@ -65,35 +65,39 @@
   <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
     <article class="doc doc-wide">
       <p class="doc-kicker">Tutorial · 17</p>
-      <h1>嵌套布局</h1>
-      <p class="doc-lead">子页声明 parent，父页用 slot 承接；切子页时父页不销毁。</p>
+      <h1>页面与路由</h1>
+      <p class="doc-lead">o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。</p>
 
       <p>
-  导航栏、侧边栏这类公共结构放在父页里，子页只写内容，通过
-  <code>parent</code> 挂到父页的 <code>&lt;slot&gt;</code> 下。
+  多页面应用用 <code>&lt;o-app src="./app.mjs"&gt;</code> 作为容器。
+  <code>app.mjs</code> 只放应用配置，例如首页地址和切换动画。
 </p>
 <l-m src="../../components/playground.html"></l-m>
       <docs-playground lesson="lesson-17" fold-styles="true"></docs-playground>
-<h2>布局如何工作</h2>
+<h2>三个文件</h2>
 <ul>
-  <li><code>layout.html</code>：导航 + <code>&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;</code>；</li>
-  <li><code>home.html</code> / <code>settings.html</code>：
-    <code>export const parent = "./layout.html"</code>；</li>
-  <li>父页的 <code>routerChange</code> 在子页切换时触发，用来更新导航高亮。</li>
+  <li><code>app.mjs</code>：<code>home</code> 指向首页，<code>pageAnime</code> 配置切换动画；</li>
+  <li><code>home.html</code>：用 <code>olink</code> 或 <code>goto()</code> 跳到关于页；</li>
+  <li><code>about.html</code>：从 <code>query</code> 读取参数，用 <code>back()</code> 返回。</li>
 </ul>
 <p>
-  两个子页互相切换时，父页实例不会重建，导航状态和布局都保留。
+  <code>olink</code> 是声明式导航，不会刷新页面；<code>this.goto(url)</code>
+  用于代码里跳转。<code>query</code> 在页面模块函数参数里取，不在
+  <code>this</code> 上。
 </p>
 <div class="doc-note">
-  <strong>别在子页里重复布局：</strong>导航和页脚只写一次，放在父页；
-  子页只关心自己的内容。需要多级嵌套时，父页也可以再声明 parent。
+  <strong>o-app 只接受应用配置：</strong>不要把页面模块直接写给
+  <code>o-app src</code>。单页场景用 <code>o-page src</code>，
+  多页应用用 <code>o-app</code> + 页面地址。
 </div>
 <h2>动手改</h2>
 <p>
-  再加一个 <code>profile.html</code> 子页和对应导航项，确认切换时布局不会闪动。
+  在首页增加一个「关于页（带参数）」按钮，用
+  <code>goto("./about.html?from=home-btn")</code> 跳转；
+  在关于页显示来源。
 </p>
 
-      <p class="doc-end">上一篇：<a olink href="./lesson-16.html">16 · 页面与路由 →</a>　·　下一篇：<a olink href="./lesson-18.html">18 · 异步与加载态 →</a></p>
+      <p class="doc-end">上一篇：<a olink href="./lesson-16.html">16 · 全局状态 →</a>　·　下一篇：<a olink href="./lesson-18.html">18 · 嵌套布局 →</a></p>
     </article>
   </docs-layout>
 

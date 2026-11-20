@@ -93,6 +93,7 @@ docs/
         ├── api/                     构建产物（11 页）
         │   ├── index.html
         │   └── instance.html ... app.html
+        ├── search-index.json        构建生成的站内搜索索引
         └── tutorial/                构建产物（21 页）
             ├── index.html
             └── lesson-1.html ... lesson-20.html
@@ -296,6 +297,17 @@ npm run server:website
    `templates/layout-page.html` 的左侧目录加一项；
 4. 在 `docs/index.html` 视需要加入口；
 5. 重新执行 `npm run build:website`。
+
+## 站内搜索
+
+- `scripts/build-website.mjs` 在构建每个语言时，会把所有页面的标题、描述、
+  `h2/h3` 标题和正文提取成 `docs/website/<locale>/search-index.json`；
+- 顶部导航的搜索框（`site-shell`）在首次聚焦/输入时加载该索引，
+  在本地做模糊匹配，结果按标题、标题层级、描述、正文依次加权；
+- 结果显示页面标题、类型（文档 / 教程 / API / 首页）和匹配片段，
+  点击用应用路由跳转；支持方向键和 Enter，移动端点击搜索图标展开；
+- 搜索完全静态，不需要后端；新增页面重新执行 `npm run build:website`
+  即可刷新索引。搜索文案在 `site.json` 的 `shell.search` 中维护。
 
 ## API 模式
 

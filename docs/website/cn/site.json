@@ -29,6 +29,12 @@
       "docs": "官方文档",
       "plugins": "插件",
       "note": "这个页面本身，也是用 ofa.js 写的。"
+    },
+    "search": {
+      "label": "搜索站点内容",
+      "placeholder": "搜索文档、教程、API…",
+      "empty": "没有匹配内容",
+      "loading": "正在加载搜索索引…"
     }
   },
   "demo": {

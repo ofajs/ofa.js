@@ -28,6 +28,32 @@ const RESERVED = new Set([
   "app.mjs",
 ]);
 
+const decodeEntities = (value) =>
+  value
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&amp;", "&");
+
+const htmlToText = (html) =>
+  decodeEntities(
+    html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<[^>]+>/g, " "),
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+const extractHeadings = (html) =>
+  [...html.matchAll(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/gi)]
+    .map((match) => htmlToText(match[1]))
+    .filter(Boolean)
+    .slice(0, 30);
+
 const fail = (message) => {
   console.error(`\n[build:website] ${message}\n`);
   process.exit(1);
@@ -169,6 +195,7 @@ for (const locale of locales) {
   fs.cpSync(dir, outDir, { recursive: true });
 
   const pages = site.pages || {};
+  const searchEntries = [];
   let pageCount = 0;
 
   for (const rel of walkFiles(dir)) {
@@ -233,11 +260,24 @@ for (const locale of locales) {
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, output);
     pageCount += 1;
+
+    searchEntries.push({
+      title,
+      description,
+      url: rel.split(path.sep).join("/"),
+      headings: extractHeadings(pageContent),
+      text: htmlToText(pageContent).slice(0, 8000),
+    });
   }
 
   if (!pageCount) {
     fail(`docs/origin/${name} 没有可构建的页面`);
   }
+
+  fs.writeFileSync(
+    path.join(outDir, "search-index.json"),
+    JSON.stringify({ entries: searchEntries }),
+  );
 
   // 每个语言生成一份嵌套路由 layout：子页通过 export const parent 挂入，
   // header/footer 只创建一次并跨页面保留。

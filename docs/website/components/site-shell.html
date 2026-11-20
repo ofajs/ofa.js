@@ -22,6 +22,56 @@
       </div>
 
       <div class="nav-actions">
+        <div class="nav-search" class:open="searchOpen">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+          <input
+            class="search-input"
+            type="search"
+            autocomplete="off"
+            attr:placeholder="searchPlaceholder"
+            attr:aria-label="searchLabel"
+            on:focus="openSearch"
+            on:input="onSearchInput"
+            on:keydown="onSearchKeydown"
+          />
+          <div class="search-panel" class:visible="searchOpen && searchQuery.trim()">
+            <o-if :value="searchIndexLoading">
+              <div class="search-state">{{searchLoading}}</div>
+            </o-if>
+            <o-fill :value="searchResults">
+              <button
+                type="button"
+                class="search-result"
+                class:active="$index === $host.searchActive"
+                on:click="$host.openResult($data)"
+              >
+                <span class="search-result-head">
+                  <span class="search-result-title">{{$data.title}}</span>
+                  <span class="search-result-kind">{{$data.kind}}</span>
+                </span>
+                <span class="search-result-snippet">{{$data.snippet}}</span>
+              </button>
+            </o-fill>
+            <o-if :value="!searchIndexLoading && searchQuery.trim() && searchResults.length === 0">
+              <div class="search-state">{{searchEmpty}}</div>
+            </o-if>
+          </div>
+        </div>
+        <button
+          class="search-toggle"
+          type="button"
+          on:click="toggleSearch"
+          attr:aria-label="searchLabel"
+          attr:aria-expanded="searchOpen"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+        </button>
         <a
           class="icon-link"
           href="https://github.com/ofajs/ofa.js"
@@ -94,6 +144,80 @@
   </footer>
 
   <script>
+    const normalizeSearch = (value) =>
+      String(value || "")
+        .normalize("NFKC")
+        .toLowerCase();
+
+    const fuzzyMatch = (needle, haystack) => {
+      if (needle.length < 2) return false;
+      let index = 0;
+      for (const char of haystack) {
+        if (char === needle[index]) index += 1;
+        if (index === needle.length) return true;
+      }
+      return false;
+    };
+
+    const scoreEntry = (entry, query, terms) => {
+      const title = normalizeSearch(entry.title);
+      const description = normalizeSearch(entry.description);
+      const headings = normalizeSearch((entry.headings || []).join(" "));
+      const text = normalizeSearch(entry.text);
+      let score = 0;
+
+      for (const term of terms) {
+        let hit = false;
+        if (title.includes(term)) {
+          score += 90;
+          hit = true;
+        }
+        if (headings.includes(term)) {
+          score += 45;
+          hit = true;
+        }
+        if (description.includes(term)) {
+          score += 25;
+          hit = true;
+        }
+        if (text.includes(term)) {
+          score += 20 + Math.min(4, text.split(term).length - 1) * 5;
+          hit = true;
+        }
+        if (!hit && fuzzyMatch(term, text)) score += 6;
+      }
+
+      if (title.includes(query)) score += 60;
+
+      // 总览页通常聚合了所有分组标题，避免它压过具体内容页
+      if (entry.url === "index.html" || entry.url.endsWith("/index.html")) {
+        score *= 0.4;
+      }
+
+      return score;
+    };
+
+    const makeSnippet = (entry, terms) => {
+      const text = entry.text || entry.description || "";
+      const lower = normalizeSearch(text);
+      let index = -1;
+      for (const term of terms) {
+        index = lower.indexOf(term);
+        if (index > -1) break;
+      }
+      if (index < 0) return text.slice(0, 140);
+      const start = Math.max(0, index - 48);
+      const end = Math.min(text.length, index + 140);
+      return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+    };
+
+    const resultKind = (url) => {
+      if (url.startsWith("api/")) return "API";
+      if (url.startsWith("tutorial/")) return "教程";
+      if (url.startsWith("docs/")) return "文档";
+      return "首页";
+    };
+
     export default {
       tag: "site-shell",
       attrs: {
@@ -112,6 +236,11 @@
         languagesUrl: "../",
         docsUrl: "./docs/",
         apiUrl: "./api/",
+        searchUrl: "./search-index.json",
+        searchPlaceholder: "搜索文档、教程、API…",
+        searchEmpty: "没有匹配内容",
+        searchLoading: "正在加载搜索索引…",
+        searchLabel: "搜索站点内容",
         footerTagline:
           "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
         footerResources: "Resources",
@@ -123,14 +252,160 @@
       },
       data: {
         menuOpen: false,
+        searchOpen: false,
+        searchQuery: "",
+        searchResults: [],
+        searchActive: 0,
+        searchIndexLoading: false,
       },
       proto: {
         toggleMenu() {
           this.menuOpen = !this.menuOpen;
+          if (this.menuOpen) this.searchOpen = false;
         },
         closeMenu() {
           this.menuOpen = false;
         },
+        ensureSearchIndex() {
+          if (this._searchEntries) return Promise.resolve(this._searchEntries);
+
+          if (!this._searchPromise) {
+            this.searchIndexLoading = true;
+            const indexUrl = new URL(
+              this.searchUrl || "./search-index.json",
+              location.href,
+            );
+            this._searchBase = new URL("./", indexUrl);
+
+            this._searchPromise = fetch(indexUrl)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("search index HTTP " + response.status);
+                }
+                return response.json();
+              })
+              .then((data) => {
+                this._searchEntries = Array.isArray(data.entries)
+                  ? data.entries
+                  : [];
+                return this._searchEntries;
+              })
+              .catch((error) => {
+                console.warn("[site-shell] failed to load search index", error);
+                this._searchEntries = [];
+                return this._searchEntries;
+              })
+              .finally(() => {
+                this.searchIndexLoading = false;
+              });
+          }
+
+          return this._searchPromise;
+        },
+
+        openSearch() {
+          this.searchOpen = true;
+          this.menuOpen = false;
+          this.ensureSearchIndex();
+          requestAnimationFrame(() => {
+            this.shadow?.$(".search-input")?.ele?.focus();
+          });
+        },
+
+        closeSearch() {
+          this.searchOpen = false;
+        },
+
+        toggleSearch() {
+          if (this.searchOpen) {
+            this.closeSearch();
+          } else {
+            this.openSearch();
+          }
+        },
+
+        onSearchInput(event) {
+          this.searchQuery = event.target.value;
+          this.searchOpen = true;
+          this.ensureSearchIndex();
+          clearTimeout(this._searchTimer);
+          this._searchTimer = setTimeout(() => this.performSearch(), 80);
+        },
+
+        onSearchKeydown(event) {
+          if (event.key === "Escape") {
+            this.closeSearch();
+            event.target.blur();
+            return;
+          }
+
+          if (!this.searchResults.length) return;
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            this.searchActive =
+              (this.searchActive + 1) % this.searchResults.length;
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            this.searchActive =
+              (this.searchActive - 1 + this.searchResults.length) %
+              this.searchResults.length;
+          } else if (event.key === "Enter") {
+            event.preventDefault();
+            const result = this.searchResults[this.searchActive];
+            if (result) this.openResult(result);
+          }
+        },
+
+        async performSearch() {
+          const query = this.searchQuery.trim();
+
+          if (!query) {
+            this.searchResults = [];
+            this.searchActive = 0;
+            return;
+          }
+
+          const entries = await this.ensureSearchIndex();
+          if (this.searchQuery.trim() !== query) return;
+
+          const normalized = normalizeSearch(query);
+          const terms = normalized.split(/\s+/).filter(Boolean);
+          const results = entries
+            .map((entry) => ({
+              entry,
+              score: scoreEntry(entry, normalized, terms),
+            }))
+            .filter((item) => item.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 8)
+            .map(({ entry }) => ({
+              ...entry,
+              kind: resultKind(entry.url),
+              snippet: makeSnippet(entry, terms),
+            }));
+
+          this.searchResults = results;
+          this.searchActive = 0;
+        },
+
+        openResult(entry) {
+          if (!entry || !entry.url) return;
+
+          const base =
+            this._searchBase ||
+            new URL("./", new URL(this.searchUrl || "./", location.href));
+          const href = new URL(entry.url, base).href;
+
+          this.closeSearch();
+
+          if (this._app?.goto) {
+            this._app.goto(href);
+          } else {
+            location.href = href;
+          }
+        },
+
         syncActive() {
           const tutorialLink = this.ele.shadowRoot?.querySelector(
             '[data-nav="tutorial"]',
@@ -164,9 +439,17 @@
         this._onRoute = () => {
           this.syncActive();
           this.closeMenu();
+          this.closeSearch();
         };
         this._app?.on?.("router-change", this._onRoute);
         this.syncActive();
+
+        this._onDocClick = (event) => {
+          if (!this.searchOpen) return;
+          const path = event.composedPath?.() || [];
+          if (!path.includes(this.ele)) this.closeSearch();
+        };
+        document.addEventListener("click", this._onDocClick);
         this._onScroll = () => {
           this._navWrap?.classList.toggle("scrolled", window.scrollY > 8);
         };
@@ -176,6 +459,8 @@
       detached() {
         this._app?.off?.("router-change", this._onRoute);
         window.removeEventListener("scroll", this._onScroll);
+        document.removeEventListener("click", this._onDocClick);
+        clearTimeout(this._searchTimer);
       },
     };
   </script>

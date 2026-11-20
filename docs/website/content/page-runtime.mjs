@@ -31,6 +31,7 @@ const getNavUrls = (url, docs = false) => {
       docs: new URL("./", url).href,
       tutorial: new URL("../tutorial/", url).href,
       api: new URL("../api/", url).href,
+      searchIndex: new URL("../search-index.json", url).href,
       languages: new URL("../../", url).href,
     };
   }
@@ -40,6 +41,7 @@ const getNavUrls = (url, docs = false) => {
     docs: new URL("./docs/", url).href,
     tutorial: new URL("./tutorial/", url).href,
     api: new URL("./api/", url).href,
+    searchIndex: new URL("./search-index.json", url).href,
     languages: new URL("../", url).href,
   };
 };

@@ -37,8 +37,20 @@ docs/
 │       │   ├── component.html       组件与页面
 │       │   ├── template.html        模板语法
 │       │   ├── routing.html         应用与路由
-│       │   ├── api.html             API 参考
+│       │   ├── api.html             $.fn 与包装对象
 │       │   └── ...                  其余章节见 site.json 的 docs.nav
+│       ├── api/                     API 参考（11 页）
+│       │   ├── index.html           分组总览
+│       │   ├── instance.html        实例基础
+│       │   ├── traverse.html        选择与遍历
+│       │   ├── structure.html       结构操作
+│       │   ├── props.html           内容、属性与样式
+│       │   ├── events.html          事件
+│       │   ├── reactive.html        数据与侦听
+│       │   ├── context.html         上下文通信
+│       │   ├── global.html          全局 $ 静态成员
+│       │   ├── extend.html          扩展实例
+│       │   └── app.html             o-app 与 o-page
 │       └── tutorial/                交互式教程（21 页）
 │           ├── index.html           教程总览
 │           └── lesson-1..20.html    二十节可编辑示例课
@@ -56,9 +68,10 @@ docs/
     │   ├── playground.html            案例预览：编辑器 + 虚拟容器 iframe
     │   └── demo-counter.html          首页响应式计数器组件
     ├── content/
-    │   ├── page-runtime.mjs           首页/文档页共享运行时
+    │   ├── page-runtime.mjs           首页/文档/API 共享运行时
     │   ├── highlight.mjs              文档代码高亮（零依赖 tokenizer）
-    │   └── playground-runtime.mjs     案例预览默认代码与虚拟页面入口
+    │   ├── playground-runtime.mjs     教程案例默认代码与虚拟页面入口
+    │   └── api-examples.mjs           API 各页的可运行示例
     ├── styles/
     │   ├── site.css                   首页与通用设计系统
     │   ├── shell.css                  导航/页脚/背景样式
@@ -77,6 +90,9 @@ docs/
         │   ├── component.html
         │   ├── template.html
         │   └── ...
+        ├── api/                     构建产物（11 页）
+        │   ├── index.html
+        │   └── instance.html ... app.html
         └── tutorial/                构建产物（21 页）
             ├── index.html
             └── lesson-1.html ... lesson-20.html
@@ -221,7 +237,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 1 页 + 文档 24 页 + 教程 21 页，共 46 份内容页 HTML，另有共享的
+- 当前站点有首页 1 页 + 文档 24 页 + API 11 页 + 教程 21 页，共 57 份内容页 HTML，另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -268,6 +284,8 @@ npm run server:website
 - 文档按「开始使用 / 组件与页面 / 模板语法 / 数据与状态 / 应用与路由 / 参考」
   六组组织，完整清单在 `site.json` 的 `docs.nav`；
 - 导航栏的「文档」项指向文档入口；侧栏在文档页之间用真实路径跳转。
+- 顶部导航还有「API」，进入 `/cn/api/`；API 页面同样挂到 `layout.html`，
+  通过路径里的 `/api/` 切换 API 侧栏。
 
 新增文章：
 
@@ -278,6 +296,22 @@ npm run server:website
    `templates/layout-page.html` 的左侧目录加一项；
 4. 在 `docs/index.html` 视需要加入口；
 5. 重新执行 `npm run build:website`。
+
+## API 模式
+
+- 顶部导航「API」指向 `/cn/api/`，与「教程」「文档」并列；
+- API 页挂到 `layout.html`，`apiMode` 控制左侧 API 分组目录；
+- 每个 API 页顶部都有 `docs-playground`，示例来自
+  `content/api-examples.mjs`（按 `example` 名索引），改代码后
+  Ctrl/⌘+S 或「运行代码」即可看效果；
+- API 总览第一个示例使用 `entry: "raw"`：直接编辑一份普通
+  `index.html`（body 里的目标元素 + `script type="module"`），
+  不经过 page 模块，专门演示非模板方式下像 jQuery 一样用全局 `$` 操作 body；
+- API 页使用 `docs-layout layout="wide"`，不显示右侧「本页内容」，
+  内容与编辑器撑满内容列；
+- 新增 API 页：在 `origin/<locale>/api/` 加页面模块、在
+  `site.json.pages` 补元信息、在 `layout-page.html` 的 API 侧栏加项，
+  再在 `api-examples.mjs` 里补 `example` 示例。
 
 ## 首屏展示的接入方式
 

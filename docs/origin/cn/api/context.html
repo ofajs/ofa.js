@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 上下文通信</p>
+      <h1>上下文通信</h1>
+      <p class="doc-lead">o-provider 把数据放进一棵子树，o-consumer 就近消费；实例方法可以主动查找 provider。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="context"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.getProvider(name)</code></td><td>沿 shadow 边界向上查找同名 o-provider，找不到时回落到 o-root-provider，都没有返回 null</td></tr>
+          <tr><td><code>provider.dispatch(name, { data })</code></td><td>向该 provider 的 consumer 派发自定义事件</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>取应用级 root provider 实例</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>provider 的 HTML attribute 只在初始化时读取一次；运行时更新要直接改 provider 的数据属性。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

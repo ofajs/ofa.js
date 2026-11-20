@@ -22,12 +22,15 @@
   <li><code>page.html</code>：放两个面板和加减按钮。</li>
 </ul>
 <p>
-  组件在 <code>attached</code> 里订阅 store、在 <code>detached</code> 里取消订阅。
-  这样面板被移除后不会继续持有旧引用。
+  组件在 <code>attached</code> 里直接执行 <code>this.sharedState = store</code>，
+  在 <code>detached</code> 里执行 <code>this.sharedState = {}</code> 清除引用。
+  模板里直接读 <code>sharedState.label</code> 和 <code>sharedState.count</code>；
+  store 发生变化时，两个面板会自动同步。
 </p>
 <div class="doc-note">
-  <strong>约定：</strong>模块级 store 不要直接写进组件的 <code>data</code>；
-  在 attached 阶段挂载、detached 阶段清理，才能避免内存泄漏和重复订阅。
+  <strong>约定：</strong>先在 <code>data</code> 里声明 <code>sharedState: {}</code> 占位，
+  再在 <code>attached</code> 阶段挂载 store、<code>detached</code> 阶段置空，
+  才能避免内存泄漏和组件销毁后继续持有旧引用。
 </div>
 <div class="doc-note">
   <strong>怎么选：</strong>如果数据只属于某棵组件子树，而不是整个应用，

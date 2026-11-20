@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 结构操作</p>
+      <h1>结构操作</h1>
+      <p class="doc-lead">子元素按数组语义操作；可变方法会真实搬动 DOM 并触发更新。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="structure"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>push(...items)</code></td><td>末尾追加子元素，返回新的子元素数量</td></tr>
+          <tr><td><code>unshift(...items)</code></td><td>开头插入子元素，返回新的子元素数量</td></tr>
+          <tr><td><code>pop() / shift()</code></td><td>移除末尾 / 开头子元素并返回它的实例</td></tr>
+          <tr><td><code>splice(start, count, ...items)</code></td><td>删除并插入，返回被移除的实例数组</td></tr>
+          <tr><td><code>reverse() / sort(fn)</code></td><td>就地反转 / 排序子元素</td></tr>
+          <tr><td><code>map / filter / slice / forEach</code></td><td>非可变数组方法：先物化为实例数组再执行</td></tr>
+          <tr><td><code>el.before(content) / el.after(content)</code></td><td>在自身前 / 后插入内容</td></tr>
+          <tr><td><code>el.remove()</code></td><td>从父级移除自身（走 splice，事件语义完整）</td></tr>
+          <tr><td><code>el.wrap(content)</code></td><td>用 content 包裹自身；无父级时报错</td></tr>
+          <tr><td><code>el.unwrap()</code></td><td>拆掉自身这层包装；兄弟节点多于一个时报错</td></tr>
+          <tr><td><code>el.clone(bool = true)</code></td><td>克隆元素，默认连同子元素</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>直接操作子元素不会同步修改 data 里的数组；模板列表请用 o-fill。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

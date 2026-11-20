@@ -16,6 +16,9 @@
         <a class="nav-link" data-nav="docs" olink attr:href="docsUrl" on:click="closeMenu">
           {{labelDocs}}
         </a>
+        <a class="nav-link" data-nav="api" olink attr:href="apiUrl" on:click="closeMenu">
+          {{labelApi}}
+        </a>
       </div>
 
       <div class="nav-actions">
@@ -98,6 +101,7 @@
         labelHome: "Home",
         labelTutorial: "Tutorial",
         labelDocs: "Docs",
+        labelApi: "API",
         labelGithub: "GitHub",
         labelGithubRepo: "GitHub repository",
         labelMenu: "Toggle menu",
@@ -107,6 +111,7 @@
         tutorialUrl: "./tutorial/",
         languagesUrl: "../",
         docsUrl: "./docs/",
+        apiUrl: "./api/",
         footerTagline:
           "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
         footerResources: "Resources",
@@ -141,6 +146,14 @@
           docsLink?.classList.toggle(
             "active",
             /\/docs(?:\/|$)/.test(location.pathname),
+          );
+
+          const apiLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="api"]',
+          );
+          apiLink?.classList.toggle(
+            "active",
+            /\/api(?:\/|$)/.test(location.pathname),
           );
         },
       },

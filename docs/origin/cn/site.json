@@ -10,7 +10,8 @@
   "shell": {
     "nav": {
       "tutorial": "教程",
-      "docs": "文档"
+      "docs": "文档",
+      "api": "API"
     },
     "actions": {
       "nav": "主导航",
@@ -292,6 +293,50 @@
     "tutorial/lesson-20.html": {
       "title": "20 · 综合：待办清单 — ofa.js 教程",
       "description": "把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。"
+    },
+    "api/index.html": {
+      "title": "API 参考 — ofa.js API",
+      "description": "所有实例成员、全局静态成员与运行示例。"
+    },
+    "api/instance.html": {
+      "title": "实例基础 — ofa.js API",
+      "description": "实例对象同时是 DOM 包装器、响应式数据和子元素集合。先认识它的基础属性。"
+    },
+    "api/traverse.html": {
+      "title": "选择与遍历 — ofa.js API",
+      "description": "在实例内部查找元素，并沿 DOM / shadow 边界前后移动。"
+    },
+    "api/structure.html": {
+      "title": "结构操作 — ofa.js API",
+      "description": "子元素按数组语义操作；可变方法会真实搬动 DOM 并触发更新。"
+    },
+    "api/props.html": {
+      "title": "内容、属性与样式 — ofa.js API",
+      "description": "读写文本、HTML、attribute、class 与内联样式。"
+    },
+    "api/events.html": {
+      "title": "事件 — ofa.js API",
+      "description": "用实例方法绑定、解绑和派发事件；事件可以带业务数据并跨 shadow。"
+    },
+    "api/reactive.html": {
+      "title": "数据与侦听 — ofa.js API",
+      "description": "实例数据来自 stanz：读写字段就是响应式更新，监听与清理都有对应方法。"
+    },
+    "api/context.html": {
+      "title": "上下文通信 — ofa.js API",
+      "description": "o-provider 把数据放进一棵子树，o-consumer 就近消费；实例方法可以主动查找 provider。"
+    },
+    "api/global.html": {
+      "title": "全局 $ 静态成员 — ofa.js API",
+      "description": "挂在全局 $ 上的选择器、注册、响应式、渲染与版本信息。"
+    },
+    "api/extend.html": {
+      "title": "扩展实例 — ofa.js API",
+      "description": "在单个实例或全部实例上增加方法、getter 和新指令。"
+    },
+    "api/app.html": {
+      "title": "o-app 与 o-page — ofa.js API",
+      "description": "应用容器负责页面栈和导航；页面实例负责自己的一屏内容。"
     }
   },
   "tutorial": {

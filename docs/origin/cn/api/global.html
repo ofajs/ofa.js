@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 全局 $ 静态成员</p>
+      <h1>全局 $ 静态成员</h1>
+      <p class="doc-lead">挂在全局 $ 上的选择器、注册、响应式、渲染与版本信息。</p>
+      <p>
+        想先看 <code>$</code> 如何选中 body 上的元素，见
+        <a olink href="./index.html">API 总览</a>顶部的可运行示例。
+      </p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="global"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>$(expr)</code></td><td>选择器 / 元素工厂，返回实例或 null</td></tr>
+          <tr><td><code>$.all(expr)</code></td><td>全局查询全部匹配，返回实例数组</td></tr>
+          <tr><td><code>$.register(opts)</code></td><td>注册组件（tag/temp/data/attrs/proto/生命周期）</td></tr>
+          <tr><td><code>$.stanz(data)</code></td><td>创建独立响应式数据对象</td></tr>
+          <tr><td><code>$.Stanz</code></td><td>stanz 构造类，用于 instanceof 判断</td></tr>
+          <tr><td><code>$.fn</code></td><td>实例原型，$.fn.extend() 的挂载点</td></tr>
+          <tr><td><code>$.nextTick(cb)</code></td><td>下一微任务执行</td></tr>
+          <tr><td><code>$.frag()</code></td><td>创建 DocumentFragment 实例</td></tr>
+          <tr><td><code>$.render / $.convert</code></td><td>模板渲染 / 编译底层入口</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>取应用级 root provider</td></tr>
+          <tr><td><code>$.version</code></td><td>框架版本号（只读）</td></tr>
+          <tr><td><code>$.debugMode</code></td><td>是否带 #debug 加载（只读）</td></tr>
+          <tr><td><code>$.showlog</code></td><td>内部诊断日志开关，运行时可读写</td></tr>
+          <tr><td><code>$.COMP / $.PAGE</code></td><td>组件 / 页面模块的 type 标记</td></tr>
+          <tr><td><code>$.extensions</code></td><td>生命周期钩子扩展容器（afterAttached/afterDetached）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>大多数页面代码只需要 $、$.all 与 $.stanz；其余静态成员用于框架扩展或诊断。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

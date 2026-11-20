@@ -510,11 +510,13 @@
       getLesson,
       buildIndex,
     } from "../content/playground-runtime.mjs";
+    import { API_EXAMPLES } from "../content/api-examples.mjs";
 
     export default {
       tag: "docs-playground",
       attrs: {
         lesson: "",
+        example: "",
         foldStyles: false,
       },
       data: {
@@ -540,11 +542,17 @@
       },
 
       attached() {
-        this._storageKey = this.lesson
-          ? `${STORAGE_KEY}:${this.lesson}`
-          : STORAGE_KEY;
+        const example = this.example && API_EXAMPLES[this.example];
 
-        const lesson = getLesson(this.lesson);
+        this._storageKey = example
+          ? `${STORAGE_KEY}:api:${this.example}`
+          : this.lesson
+            ? `${STORAGE_KEY}:${this.lesson}`
+            : STORAGE_KEY;
+
+        const lesson = example
+          ? { entry: example.entry || "page", files: example.files }
+          : getLesson(this.lesson);
         this.entry = lesson.entry;
         this.defaultFiles = { ...lesson.files };
 
@@ -671,7 +679,11 @@
               await this.writeFile(name, content);
             }
 
-            await this.writeFile("index.html", buildIndex(version, this.entry));
+            // entry="raw" 直接使用示例自带的 index.html（普通 body + script），
+            // 不生成页面模块入口，方便演示 jQuery 式的全局 $ 操作。
+            if (this.entry !== "raw") {
+              await this.writeFile("index.html", buildIndex(version, this.entry));
+            }
             this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
             this.status = "已运行，可继续编辑后按 Ctrl/⌘+S 重新运行";
             this.dirty = false;

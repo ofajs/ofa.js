@@ -1121,8 +1121,8 @@ export const LESSONS = {
   <p>两个面板引用的是同一个 store，所以数字始终同步。</p>
 
   <l-m src="./counter-panel.html"></l-m>
-  <counter-panel label="面板 A"></counter-panel>
-  <counter-panel label="面板 B"></counter-panel>
+  <counter-panel></counter-panel>
+  <counter-panel></counter-panel>
 
   <p>
     <button on:click="increase">+1</button>
@@ -1162,8 +1162,8 @@ export const LESSONS = {
   </style>
 
   <div class="panel">
-    <span>{{label}}</span>
-    <strong>{{count}}</strong>
+    <span>{{sharedState.label}}</span>
+    <strong>{{sharedState.count}}</strong>
   </div>
 
   <script>
@@ -1171,21 +1171,17 @@ export const LESSONS = {
 
     export default {
       tag: "counter-panel",
-      attrs: { label: "面板" },
-      data: { count: 0 },
+      data: { sharedState: {} },
       attached() {
-        this._stop = store.watch(() => {
-          this.count = store.count;
-        });
-        this.count = store.count;
+        this.sharedState = store;
       },
       detached() {
-        if (this._stop != null) store.unwatch(this._stop);
+        this.sharedState = {};
       },
     };
   </script>
 </template>`,
-    "store.mjs": `export const store = $.stanz({ count: 0 });`,
+    "store.mjs": `export const store = $.stanz({ label: "共享面板", count: 0 });`,
     },
   },
   "lesson-17": {

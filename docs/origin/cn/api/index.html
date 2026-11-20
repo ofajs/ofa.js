@@ -1,0 +1,139 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · API 参考</p>
+      <h1>API 参考</h1>
+      <p class="doc-lead">所有实例成员、全局静态成员与运行示例。</p>
+
+      <h2>先试一个：用全局 $ 操作 body 元素</h2>
+      <p>
+        这个示例不是 page 模块：<code>body</code> 里直接写
+        <code>&lt;div id="target"&gt;</code>，下面的 <code>&lt;script type="module"&gt;</code>
+        用全局 <code>$("#target")</code> 取到元素并绑定点击事件，像 jQuery 一样直接操作 DOM。
+        改代码后按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 或「运行代码」看效果。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="globalBody"></docs-playground>
+
+      <div class="doc-note">
+        <strong>API 适合非模板方式的语法：</strong>
+        这里的实例方法与全局 <code>$</code> 用于在 JS 里动态查找/创建节点、读写数据、
+        绑定事件、控制页面栈等。模板里能用 <code>on:</code>、<code>o-if</code>、
+        <code>o-fill</code>、<code>attr:</code> 表达的逻辑，优先留在模板里。
+      </div>
+
+      <p>
+        API 按用途分组，每个成员都给出签名和说明；页面顶部的编辑器可以直接改代码，
+        在右侧预览里看效果。
+      </p>
+
+      <h2>实例相关</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./instance.html">
+          <span class="num">API</span>
+          <h2>实例基础</h2>
+          <p>ele / tag / PATH 等基础属性</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./traverse.html">
+          <span class="num">API</span>
+          <h2>选择与遍历</h2>
+          <p>$ / all / parent / siblings</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./structure.html">
+          <span class="num">API</span>
+          <h2>结构操作</h2>
+          <p>push / splice / before / remove</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>属性与事件</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./props.html">
+          <span class="num">API</span>
+          <h2>内容、属性与样式</h2>
+          <p>text / html / attr / css</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./events.html">
+          <span class="num">API</span>
+          <h2>事件</h2>
+          <p>on / one / off / emit</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>数据与扩展</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./reactive.html">
+          <span class="num">API</span>
+          <h2>数据与侦听</h2>
+          <p>watch / watchUntil / refresh</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./context.html">
+          <span class="num">API</span>
+          <h2>上下文通信</h2>
+          <p>getProvider / dispatch</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./global.html">
+          <span class="num">API</span>
+          <h2>全局 $ 静态成员</h2>
+          <p>$.all / $.stanz / $.version</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./extend.html">
+          <span class="num">API</span>
+          <h2>扩展实例</h2>
+          <p>el.extend / $.fn.extend</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>应用与页面</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./app.html">
+          <span class="num">API</span>
+          <h2>o-app 与 o-page</h2>
+          <p>页面栈、goto、pageIsReady</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

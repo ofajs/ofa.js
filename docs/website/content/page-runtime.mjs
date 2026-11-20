@@ -30,6 +30,7 @@ const getNavUrls = (url, docs = false) => {
       home: new URL("../", url).href,
       docs: new URL("./", url).href,
       tutorial: new URL("../tutorial/", url).href,
+      api: new URL("../api/", url).href,
       languages: new URL("../../", url).href,
     };
   }
@@ -38,6 +39,7 @@ const getNavUrls = (url, docs = false) => {
     home: new URL("./", url).href,
     docs: new URL("./docs/", url).href,
     tutorial: new URL("./tutorial/", url).href,
+    api: new URL("./api/", url).href,
     languages: new URL("../", url).href,
   };
 };
@@ -272,10 +274,17 @@ export const createTutorialPage = async ({ url, sitePath }) => {
 const readRoute = () => {
   const path = location.pathname;
   const file = path.replace(/\/+$/, "").split("/").pop();
+  const apiMode = /\/api(?:\/|$)/.test(path);
 
   return {
     docsMode: /\/docs(?:\/|$)/.test(path),
     tutorialMode: /\/tutorial(?:\/|$)/.test(path),
+    apiMode,
+    apiKey: apiMode
+      ? path.endsWith("/") || path.endsWith("/api")
+        ? "index"
+        : file.replace(/\.html$/, "")
+      : "",
     current:
       !file || file === "index.html" ? "index" : file.replace(/\.html$/, ""),
   };
@@ -307,9 +316,12 @@ export const createLayoutPage = async ({ url, sitePath }) => {
     },
     proto: {
       syncRoute() {
-        const { docsMode, tutorialMode, current } = readRoute();
+        const { docsMode, tutorialMode, apiMode, apiKey, current } =
+          readRoute();
         this.docsMode = docsMode;
         this.tutorialMode = tutorialMode;
+        this.apiMode = apiMode;
+        this.apiKey = apiKey;
         this.current = current;
       },
       scrollActiveDocIntoView() {
@@ -330,6 +342,20 @@ export const createLayoutPage = async ({ url, sitePath }) => {
           key === "index"
             ? this.navUrls.docs
             : new URL(`${key}.html`, this.navUrls.docs).href;
+        if (!url) return;
+
+        const app = (window.$ ? window.$(this.ele) : this.ele).app;
+        if (app?.goto) {
+          app.goto(url);
+        } else {
+          location.href = url;
+        }
+      },
+      navigateApi(key) {
+        const url =
+          key === "index"
+            ? this.navUrls.api
+            : new URL(`${key}.html`, this.navUrls.api).href;
         if (!url) return;
 
         const app = (window.$ ? window.$(this.ele) : this.ele).app;

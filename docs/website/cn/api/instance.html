@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN" class="st-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>实例基础 — ofa.js API</title>
+    <meta name="description" content="实例对象同时是 DOM 包装器、响应式数据和子元素集合。先认识它的基础属性。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="实例基础 — ofa.js API" />
+    <meta property="og:description" content="实例对象同时是 DOM 包装器、响应式数据和子元素集合。先认识它的基础属性。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script>
+      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 实例基础</p>
+      <h1>实例基础</h1>
+      <p class="doc-lead">实例对象同时是 DOM 包装器、响应式数据和子元素集合。先认识它的基础属性。</p>
+
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground example="instance"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.ele</code></td><td>原生 DOM 元素，浏览器 API 都从这里取</td></tr>
+          <tr><td><code>el.tag</code></td><td>小写标签名（只读）</td></tr>
+          <tr><td><code>el.owner</code></td><td>数据归属链（Set），响应式更新沿它向上冒泡（只读）</td></tr>
+          <tr><td><code>el.length</code></td><td>子元素数量，与 ele.children.length 一致（只读）</td></tr>
+          <tr><td><code>el[0]、el[1]</code></td><td>按下标读取子元素实例（只读）</td></tr>
+          <tr><td><code>el.index</code></td><td>在父级中的位置；没有父级时为 null（只读）</td></tr>
+          <tr><td><code>el.PATH</code></td><td>组件 / 页面文件地址，相对资源以它为基准（只读）</td></tr>
+          <tr><td><code>el.app</code></td><td>最近的 o-app 实例；不在应用内时为 undefined（只读）</td></tr>
+          <tr><td><code>el.shadow</code></td><td>自身的 shadow root 实例（只读）</td></tr>
+          <tr><td><code>el.root</code></td><td>所在根节点：document 或某个 shadow root（只读）</td></tr>
+          <tr><td><code>el.host</code></td><td>最近的 shadow 宿主组件实例（只读）</td></tr>
+          <tr><td><code>el.xid</code></td><td>实例唯一标识，用于区分同 tag 的不同实例（只读）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>标记为「只读」的成员由实例内部维护，赋值不会改变结构。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -11,6 +11,14 @@
     <meta property="og:description" content="o-if/o-else-if/o-else 条件渲染，o-fill 列表与 $data 作用域。" />
     <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
     <script>
       // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
       try {
@@ -19,6 +27,7 @@
       } catch {}
     </script>
     <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
     <style>
       html,
       body {
@@ -47,9 +56,120 @@
         text-align: center;
         color: #c3c7cf;
       }
+
+      /* 首屏加载遮罩：网络较慢时先显示，应用就绪后由 boot.js 淡出移除 */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 50% 42%, #161a24 0%, #111318 62%);
+        color: #c3c7cf;
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #e2e2e9;
+        line-height: 1;
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+        flex: none;
+      }
+
+      .site-loading-wordmark {
+        color: #f3f5fa;
+        font-family:
+          "Space Grotesk", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .site-loading-wordmark span {
+        color: #8f9bb3;
+        font-weight: 450;
+      }
+
+      .site-loading-bar {
+        width: 100%;
+        height: 4px;
+        border-radius: 99px;
+        background: linear-gradient(
+          90deg,
+          #252d3d 0%,
+          #252d3d 34%,
+          #7c9cff 50%,
+          #c3d2ff 56%,
+          #252d3d 72%,
+          #252d3d 100%
+        );
+        background-size: 220% 100%;
+        box-shadow: 0 0 14px rgba(124, 156, 255, 0.25);
+        animation: site-loading-bar 1.1s linear infinite;
+      }
+
+      .site-loading-label {
+        color: #8f9bb3;
+        font-family:
+          "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 12.5px;
+        font-weight: 400;
+        letter-spacing: 0.03em;
+      }
+
+      @keyframes site-loading-bar {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -100% 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .site-loading-bar {
+          animation-duration: 2s;
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">正在加载页面…</div>
+      </div>
+    </div>
+
     <!--
       SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
       页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL

@@ -328,6 +328,17 @@ npm run server:website
   `site.json.pages` 补元信息、在 `layout-page.html` 的 API 侧栏加项，
   再在 `api-examples.mjs` 里补 `example` 示例。
 
+## 首屏加载
+
+`templates/locale-page.html` 在 body 最前面输出 `#site-loading` 遮罩：
+慢网络下先显示居中的旋转指示器和「正在加载页面…」，避免直接看到空白。
+`boot.js` 加载完 ofa.js / scsr 后等待 `o-app.appIsReady`，首个页面渲染完成才
+淡出并移除遮罩；30 秒兜底。JS 禁用时通过 `<noscript>` 隐藏遮罩。
+
+站内路由切换时，`app.mjs` 的 `loading` 也返回一个居中的 loading 遮罩；
+它延迟 200ms 才显现，快网络下不会闪烁，慢网络下会盖住旧页面直到新页面
+数据加载完成。
+
 ## 首屏展示的接入方式
 
 首页 Hero 与结尾 CTA 以「CDN · v5 / ESM」卡片展示 v5 的 mjs 地址，点击复制

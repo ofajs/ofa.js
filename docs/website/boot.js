@@ -28,10 +28,18 @@ const loadFirst = async (sources, name) => {
   return false;
 };
 
+const hideLoading = () => {
+  const loading = document.getElementById("site-loading");
+  if (!loading) return;
+  loading.classList.add("is-hidden");
+  setTimeout(() => loading.remove(), 260);
+};
+
 const ofaLoaded = await loadFirst(ofaSources, "ofa.js");
 const scsrLoaded = ofaLoaded ? await loadFirst(scsrSources, "scsr") : false;
 
 if (!ofaLoaded || !scsrLoaded) {
+  hideLoading();
   const zh = document.documentElement.lang.startsWith("zh");
   const panel = document.createElement("div");
   panel.setAttribute("role", "alert");
@@ -69,3 +77,78 @@ if (!ofaLoaded || !scsrLoaded) {
 
   document.body.appendChild(panel);
 }
+
+// 首个页面渲染完成后再移除首屏 loading，避免慢网络下看到空白骨架
+const waitForAppReady = () => {
+  const appEle = document.querySelector("o-app");
+  if (!appEle || !window.$) {
+    hideLoading();
+    return;
+  }
+
+  const app = window.$(appEle);
+  if (app.appIsReady) {
+    hideLoading();
+    return;
+  }
+
+  const timer = setTimeout(finishLoading, 30000);
+  const check = () => {
+    if (app.appIsReady) {
+      clearTimeout(timer);
+      finishLoading();
+    } else {
+      requestAnimationFrame(check);
+    }
+  };
+  requestAnimationFrame(check);
+};
+
+const collectStyleLinks = (root, out = []) => {
+  for (const link of root.querySelectorAll('link[rel="stylesheet"], link[rel~="stylesheet"]')) {
+    try {
+      // 只看同源样式表；CDN 字体/组件样式失败不应阻塞首屏
+      if (new URL(link.href).origin === location.origin) out.push(link);
+    } catch {}
+  }
+  for (const el of root.querySelectorAll("*")) {
+    if (el.shadowRoot) collectStyleLinks(el.shadowRoot, out);
+  }
+  return out;
+};
+
+const findInTree = (root, selector) => {
+  const direct = root.querySelector(selector);
+  if (direct) return direct;
+  for (const el of root.querySelectorAll("*")) {
+    if (el.shadowRoot) {
+      const found = findInTree(el.shadowRoot, selector);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+const pageStylesReady = () => {
+  const shell = findInTree(document, "site-shell");
+  if (!shell?.shadowRoot) return false;
+  return collectStyleLinks(document).every((link) => !!link.sheet);
+};
+
+// appIsReady 只代表页面结构渲染完成，CSS 链接可能仍在加载；
+// 等 site-shell 与页面 shadow 内的样式表就绪后再撤掉遮罩，
+// 避免先露出未样式化的巨大 logo / 导航图标。
+const finishLoading = () => {
+  const started = performance.now();
+  const check = () => {
+    const elapsed = performance.now() - started;
+    if ((pageStylesReady() && elapsed >= 100) || elapsed >= 5000) {
+      requestAnimationFrame(() => requestAnimationFrame(hideLoading));
+      return;
+    }
+    setTimeout(check, 50);
+  };
+  check();
+};
+
+if (ofaLoaded && scsrLoaded) waitForAppReady();

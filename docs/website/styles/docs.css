@@ -448,3 +448,16 @@
 .docs-shell.no-nav .docs-nav {
   display: none;
 }
+
+/* 站内搜索跳转后的匹配高亮 */
+mark.site-search-hit {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+::highlight(site-search) {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}

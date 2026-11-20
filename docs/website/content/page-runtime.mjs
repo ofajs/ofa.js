@@ -292,6 +292,129 @@ const readRoute = () => {
   };
 };
 
+const SEARCH_HIGHLIGHT = "site-search";
+const SEARCH_MARK_CLASS = "site-search-hit";
+
+const escapeRegExp = (value) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const getSearchTerms = (query) => {
+  const terms = [query.trim()];
+  for (const part of query.trim().split(/\s+/)) {
+    if (part && !terms.includes(part)) terms.push(part);
+  }
+  return terms.filter(Boolean).sort((a, b) => b.length - a.length);
+};
+
+const getSearchTextNodes = (root) => {
+  const nodes = [];
+  const walk = (node) => {
+    for (const child of node.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (child.nodeValue.trim()) nodes.push(child);
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+      if (["SCRIPT", "STYLE", "TEXTAREA", "CODE-EDITOR"].includes(child.tagName)) {
+        continue;
+      }
+      walk(child);
+    }
+  };
+  walk(root);
+  return nodes;
+};
+
+const clearSearchMarks = (pageEl) => {
+  const root = pageEl?.shadowRoot;
+  if (!root) return;
+  for (const mark of [...root.querySelectorAll("mark." + SEARCH_MARK_CLASS)]) {
+    mark.replaceWith(document.createTextNode(mark.textContent));
+  }
+  if (window.CSS?.highlights) CSS.highlights.delete(SEARCH_HIGHLIGHT);
+};
+
+const scrollFirstRangeIntoView = (range) => {
+  requestAnimationFrame(() => {
+    const rect = range.getBoundingClientRect();
+    if (!rect || (!rect.width && !rect.height)) return;
+    // 已经出现在可视区中部时不强行滚动，避免把标题滚出屏幕
+    if (rect.top >= 80 && rect.top <= window.innerHeight - 160) return;
+    const top = rect.top + window.scrollY - 120;
+    window.scrollTo({ top, behavior: "smooth" });
+  });
+};
+
+const highlightSearchPage = (pageEl, query) => {
+  const root = pageEl?.shadowRoot;
+  if (!root) return false;
+
+  clearSearchMarks(pageEl);
+
+  const terms = getSearchTerms(query);
+  if (!terms.length) return false;
+
+  const regex = new RegExp("(" + terms.map(escapeRegExp).join("|") + ")", "gi");
+  const nodes = getSearchTextNodes(root);
+
+  if (window.CSS?.highlights && typeof Highlight === "function") {
+    const ranges = [];
+    for (const node of nodes) {
+      regex.lastIndex = 0;
+      let match;
+      while ((match = regex.exec(node.nodeValue))) {
+        if (!match[0]) {
+          regex.lastIndex += 1;
+          continue;
+        }
+        const range = document.createRange();
+        range.setStart(node, match.index);
+        range.setEnd(node, match.index + match[0].length);
+        ranges.push(range);
+      }
+    }
+
+    if (!ranges.length) return false;
+    CSS.highlights.set(SEARCH_HIGHLIGHT, new Highlight(...ranges));
+    scrollFirstRangeIntoView(ranges[0]);
+    return true;
+  }
+
+  let firstMark = null;
+  for (const node of nodes) {
+    regex.lastIndex = 0;
+    if (!regex.test(node.nodeValue)) continue;
+
+    const text = node.nodeValue;
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+    regex.lastIndex = 0;
+    let match;
+    while ((match = regex.exec(text))) {
+      if (!match[0]) {
+        regex.lastIndex += 1;
+        continue;
+      }
+      fragment.append(text.slice(lastIndex, match.index));
+      const mark = document.createElement("mark");
+      mark.className = SEARCH_MARK_CLASS;
+      mark.textContent = match[0];
+      fragment.append(mark);
+      if (!firstMark) firstMark = mark;
+      lastIndex = match.index + match[0].length;
+    }
+    fragment.append(text.slice(lastIndex));
+    node.replaceWith(fragment);
+  }
+
+  if (firstMark) {
+    requestAnimationFrame(() => {
+      firstMark.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+  return !!firstMark;
+};
+
 export const createLayoutPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const navUrls = getNavUrls(url);
@@ -311,10 +434,12 @@ export const createLayoutPage = async ({ url, sitePath }) => {
     },
     attached() {
       this.syncRoute();
+      this.applySearchHighlight();
     },
     routerChange() {
       this.syncRoute();
       window.scrollTo(0, 0);
+      this.applySearchHighlight();
     },
     proto: {
       syncRoute() {
@@ -352,6 +477,31 @@ export const createLayoutPage = async ({ url, sitePath }) => {
         } else {
           location.href = url;
         }
+      },
+      applySearchHighlight() {
+        const query =
+          new URL(location.href).searchParams.get("search") || "";
+
+        clearSearchMarks(this.app?.current?.ele);
+
+        const token = (this._searchHighlightToken || 0) + 1;
+        this._searchHighlightToken = token;
+
+        if (!query) return;
+
+        const tryHighlight = (attempt = 0) => {
+          if (token !== this._searchHighlightToken) return;
+          const current = this.app?.current;
+          if (!current?.ele?.shadowRoot || !current.ele.isConnected) {
+            if (attempt < 60) {
+              requestAnimationFrame(() => tryHighlight(attempt + 1));
+            }
+            return;
+          }
+          highlightSearchPage(current.ele, query);
+        };
+
+        requestAnimationFrame(() => tryHighlight());
       },
       navigateApi(key) {
         const url =

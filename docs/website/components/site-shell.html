@@ -31,6 +31,7 @@
             class="search-input"
             type="search"
             autocomplete="off"
+            :value="searchQuery"
             attr:placeholder="searchPlaceholder"
             attr:aria-label="searchLabel"
             on:focus="openSearch"
@@ -395,7 +396,10 @@
           const base =
             this._searchBase ||
             new URL("./", new URL(this.searchUrl || "./", location.href));
-          const href = new URL(entry.url, base).href;
+          const target = new URL(entry.url, base);
+          const query = this.searchQuery.trim();
+          if (query) target.searchParams.set("search", query);
+          const href = target.href;
 
           this.closeSearch();
 
@@ -443,6 +447,9 @@
         };
         this._app?.on?.("router-change", this._onRoute);
         this.syncActive();
+
+        const searchParam = new URL(location.href).searchParams.get("search");
+        if (searchParam) this.searchQuery = searchParam;
 
         this._onDocClick = (event) => {
           if (!this.searchOpen) return;

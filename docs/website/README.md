@@ -306,6 +306,9 @@ npm run server:website
   在本地做模糊匹配，结果按标题、标题层级、描述、正文依次加权；
 - 结果显示页面标题、类型（文档 / 教程 / API / 首页）和匹配片段，
   点击用应用路由跳转；支持方向键和 Enter，移动端点击搜索图标展开；
+- 跳转 URL 带 `?search=...`，目标页由 `createLayoutPage` 在内容渲染后
+  高亮所有匹配文本（优先 CSS Custom Highlight，降级为 `mark`），
+  必要时滚动到第一个匹配处；
 - 搜索完全静态，不需要后端；新增页面重新执行 `npm run build:website`
   即可刷新索引。搜索文案在 `site.json` 的 `shell.search` 中维护。
 

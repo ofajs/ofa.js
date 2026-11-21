@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="mul" class="st-dark">
+<html lang="mul">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#1a1c1e" />
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
     <script>
-      // 官网为纯深色设计：首次访问锁定 senti-ui 深色主题（尊重用户已有偏好）
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
       try {
         if (!localStorage.getItem("st-theme-mode"))
           localStorage.setItem("st-theme-mode", "dark");
@@ -31,8 +31,7 @@
         color: var(--md-sys-color-on-surface);
         overflow-x: hidden;
         overflow-x: clip;
-        color-scheme: dark;
-      }
+          }
 
       body {
         display: grid;

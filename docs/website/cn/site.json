@@ -35,6 +35,12 @@
       "placeholder": "搜索文档、教程、API…",
       "empty": "没有匹配内容",
       "loading": "正在加载搜索索引…"
+    },
+    "theme": {
+      "label": "切换主题",
+      "light": "白天模式",
+      "dark": "黑夜模式",
+      "system": "跟随系统"
     }
   },
   "demo": {

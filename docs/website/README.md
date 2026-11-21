@@ -312,6 +312,19 @@ npm run server:website
 - 搜索完全静态，不需要后端；新增页面重新执行 `npm run build:website`
   即可刷新索引。搜索文案在 `site.json` 的 `shell.search` 中维护。
 
+## 主题模式
+
+顶部导航右侧的主题按钮提供「白天模式 / 黑夜模式 / 跟随系统」三项，
+状态写入 `localStorage["st-theme-mode"]`（`light` / `dark` / `auto`）：
+
+- `light` / `dark` 在 `<html>` 上挂 `st-light` / `st-dark`；
+- `auto` 不挂类，交给 senti-ui 的 `prefers-color-scheme` 媒体查询；
+- 首次访问仍默认深色，用户选择后会持久化；
+- `st-boot.js` 在首帧前同步恢复模式，避免刷新时闪色；
+- 首屏与路由 loading 的颜色、进度条、字标都使用主题 token，
+  白天模式下不会出现深色遮罩；
+- 文案在 `site.json` 的 `shell.theme` 中维护。
+
 ## API 模式
 
 - 顶部导航「API」指向 `/cn/api/`，与「教程」「文档」并列；

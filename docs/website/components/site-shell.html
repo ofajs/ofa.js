@@ -73,6 +73,77 @@
             <path d="m16 16 4 4"></path>
           </svg>
         </button>
+        <div class="theme-switch">
+          <button
+            class="theme-toggle"
+            type="button"
+            on:click="toggleThemeMenu"
+            attr:aria-label="themeLabel"
+            attr:aria-haspopup="'menu'"
+            attr:aria-expanded="themeMenuOpen ? 'true' : 'false'"
+          >
+            <o-if :value="themeMode === 'light'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+              </svg>
+            </o-if>
+            <o-if :value="themeMode === 'dark'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.1 13.5A8.1 8.1 0 0 1 10.5 3.9 8.1 8.1 0 1 0 20.1 13.5Z"></path>
+              </svg>
+            </o-if>
+            <o-if :value="themeMode === 'system'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                <path d="M8 20h8M12 16v4"></path>
+              </svg>
+            </o-if>
+          </button>
+          <div class="theme-menu" class:open="themeMenuOpen" role="menu" attr:aria-label="themeLabel">
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'light' ? 'true' : 'false'"
+              on:click="setTheme('light')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+              </svg>
+              <span>{{themeLight}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'dark' ? 'true' : 'false'"
+              on:click="setTheme('dark')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.1 13.5A8.1 8.1 0 0 1 10.5 3.9 8.1 8.1 0 1 0 20.1 13.5Z"></path>
+              </svg>
+              <span>{{themeDark}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'system' ? 'true' : 'false'"
+              on:click="setTheme('system')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                <path d="M8 20h8M12 16v4"></path>
+              </svg>
+              <span>{{themeSystem}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
         <a
           class="icon-link"
           href="https://github.com/ofajs/ofa.js"
@@ -242,6 +313,10 @@
         searchEmpty: "没有匹配内容",
         searchLoading: "正在加载搜索索引…",
         searchLabel: "搜索站点内容",
+        themeLabel: "切换主题",
+        themeLight: "白天模式",
+        themeDark: "黑夜模式",
+        themeSystem: "跟随系统",
         footerTagline:
           "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
         footerResources: "Resources",
@@ -258,11 +333,16 @@
         searchResults: [],
         searchActive: 0,
         searchIndexLoading: false,
+        themeMode: "dark",
+        themeMenuOpen: false,
       },
       proto: {
         toggleMenu() {
           this.menuOpen = !this.menuOpen;
-          if (this.menuOpen) this.searchOpen = false;
+          if (this.menuOpen) {
+            this.searchOpen = false;
+            this.themeMenuOpen = false;
+          }
         },
         closeMenu() {
           this.menuOpen = false;
@@ -307,6 +387,7 @@
         openSearch() {
           this.searchOpen = true;
           this.menuOpen = false;
+          this.themeMenuOpen = false;
           this.ensureSearchIndex();
           requestAnimationFrame(() => {
             this.shadow?.$(".search-input")?.ele?.focus();
@@ -410,6 +491,38 @@
           }
         },
 
+        syncTheme() {
+          let mode = "dark";
+          try {
+            mode = localStorage.getItem("st-theme-mode") || "dark";
+          } catch {}
+          this.themeMode =
+            mode === "auto" ? "system" : mode === "light" ? "light" : "dark";
+        },
+
+        setTheme(mode) {
+          const stored = mode === "system" ? "auto" : mode;
+          try {
+            localStorage.setItem("st-theme-mode", stored);
+          } catch {}
+
+          const classes = document.documentElement.classList;
+          classes.remove("st-light", "st-dark");
+          if (mode === "light") classes.add("st-light");
+          else if (mode === "dark") classes.add("st-dark");
+
+          this.themeMode = mode;
+          this.themeMenuOpen = false;
+        },
+
+        toggleThemeMenu() {
+          this.themeMenuOpen = !this.themeMenuOpen;
+          if (this.themeMenuOpen) {
+            this.searchOpen = false;
+            this.menuOpen = false;
+          }
+        },
+
         syncActive() {
           const tutorialLink = this.ele.shadowRoot?.querySelector(
             '[data-nav="tutorial"]',
@@ -444,6 +557,7 @@
           this.syncActive();
           this.closeMenu();
           this.closeSearch();
+          this.themeMenuOpen = false;
         };
         this._app?.on?.("router-change", this._onRoute);
         this.syncActive();
@@ -451,10 +565,21 @@
         const searchParam = new URL(location.href).searchParams.get("search");
         if (searchParam) this.searchQuery = searchParam;
 
+        this.syncTheme();
+        this._onThemeStorage = (event) => {
+          if (event.key === "st-theme-mode") this.syncTheme();
+        };
+        window.addEventListener("storage", this._onThemeStorage);
+
         this._onDocClick = (event) => {
-          if (!this.searchOpen) return;
           const path = event.composedPath?.() || [];
-          if (!path.includes(this.ele)) this.closeSearch();
+          if (this.searchOpen && !path.includes(this.ele)) this.closeSearch();
+          if (this.themeMenuOpen) {
+            const themeSwitch = this.shadow?.$(".theme-switch")?.ele;
+            if (themeSwitch && !path.includes(themeSwitch)) {
+              this.themeMenuOpen = false;
+            }
+          }
         };
         document.addEventListener("click", this._onDocClick);
         this._onScroll = () => {
@@ -467,6 +592,7 @@
         this._app?.off?.("router-change", this._onRoute);
         window.removeEventListener("scroll", this._onScroll);
         document.removeEventListener("click", this._onDocClick);
+        window.removeEventListener("storage", this._onThemeStorage);
         clearTimeout(this._searchTimer);
       },
     };

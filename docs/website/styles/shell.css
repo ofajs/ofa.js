@@ -42,7 +42,6 @@
     "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -988,4 +987,96 @@ footer {
   .search-toggle {
     display: inline-flex;
   }
+}
+
+/* ---------- 主题切换（白天 / 黑夜 / 跟随系统） ---------- */
+
+.theme-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  transition:
+    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.theme-toggle:hover,
+.theme-toggle[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+
+.theme-toggle .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 90;
+  display: none;
+  min-width: 168px;
+  padding: 6px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-md);
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+.theme-menu.open {
+  display: block;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-sm);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-option:hover,
+.theme-option[aria-checked="true"] {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+
+.theme-option .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.theme-check {
+  margin-left: auto;
+  color: var(--md-sys-color-primary);
+  font-size: 13px;
+  opacity: 0;
+}
+
+.theme-option[aria-checked="true"] .theme-check {
+  opacity: 1;
 }

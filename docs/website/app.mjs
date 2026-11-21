@@ -29,7 +29,7 @@ export const loading = () => `
     class="site-route-loading"
     role="status"
     aria-live="polite"
-    style="position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%, #161a24 0%, #111318 62%);color:#8f9bb3;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;opacity:0;animation:site-route-loading-in .15s ease .2s forwards"
+    style="position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:var(--md-sys-color-surface, #111318);color:var(--md-sys-color-on-surface-variant, #8f9bb3);font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;opacity:0;animation:site-route-loading-in .15s ease .2s forwards"
   >
     <style>
       .site-route-loading-inner {
@@ -43,7 +43,7 @@ export const loading = () => `
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #e2e2e9;
+        color: var(--md-sys-color-on-surface, #e2e2e9);
         line-height: 1;
       }
       .site-route-loading-logo {
@@ -53,27 +53,27 @@ export const loading = () => `
         flex: none;
       }
       .site-route-loading-wordmark {
-        color: #f3f5fa;
+        color: var(--md-sys-color-on-surface, #f3f5fa);
         font-family: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-size: 20px;
         font-weight: 600;
         letter-spacing: -0.02em;
       }
       .site-route-loading-wordmark span {
-        color: #8f9bb3;
+        color: var(--md-sys-color-on-surface-variant, #8f9bb3);
         font-weight: 450;
       }
       .site-route-loading-bar {
         width: 100%;
         height: 4px;
         border-radius: 99px;
-        background: linear-gradient(90deg, #252d3d 0%, #252d3d 34%, #7c9cff 50%, #c3d2ff 56%, #252d3d 72%, #252d3d 100%);
+        background: linear-gradient(90deg, var(--md-sys-color-surface-container-high, #252d3d) 0%, var(--md-sys-color-surface-container-high, #252d3d) 34%, var(--md-sys-color-primary, #7c9cff) 50%, color-mix(in srgb, var(--md-sys-color-primary) 45%, white) 56%, var(--md-sys-color-surface-container-high, #252d3d) 72%, var(--md-sys-color-surface-container-high, #252d3d) 100%);
         background-size: 220% 100%;
-        box-shadow: 0 0 14px rgba(124, 156, 255, 0.25);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent);
         animation: site-route-loading-bar 1.1s linear infinite;
       }
       .site-route-loading-label {
-        color: #8f9bb3;
+        color: var(--md-sys-color-on-surface-variant, #8f9bb3);
         font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-size: 12.5px;
         font-weight: 400;

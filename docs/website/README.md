@@ -4,14 +4,14 @@
 打包或任何第三方运行时；多语言、多页面内容由 `npm run build:website` 做
 纯文件组装。
 
-官网基础 UI 采用 **Material Design 3**（深色配色、蓝色主色、24px 大圆角、
-M3 状态层与 Motion easing）。形状、阴影和动效走 `site.css` / `shell.css`
+官网基础 UI 采用 **Material Design 3**（蓝色主色、24px 大圆角、
+M3 状态层与 Motion easing），默认深色，顶部可切换白天 / 黑夜 / 跟随系统。形状、阴影和动效走 `site.css` / `shell.css`
 里的 `--md-sys-shape-*` / `--md-sys-elevation-*` / `--md-sys-motion-*` 变量；
 **颜色全部来自 Senti-UI 的颜色体系**：`templates/*.html` 在 `<head>` 引入
 `st-boot.js`（senti-ui 颜色初始化，首帧同步注入 `--md-sys-color-*`，
-默认种子色 `#0061A4`），官网自身不再手写任何颜色 token。官网为纯深色
-设计，首次访问会把 `st-theme-mode` 锁定为 `dark`（尊重用户已有偏好），
-之后全站（含文档页、语言选择页）强制深色。
+默认种子色 `#0061A4`），官网自身不再手写任何颜色 token。首次访问默认
+`st-theme-mode=dark`，用户可在顶部切换为白天、黑夜或跟随系统；切换结果
+持久化到 `localStorage`。
 
 官网采用「共享外壳 + 分语言内容」结构：
 
@@ -75,7 +75,8 @@ docs/
     ├── styles/
     │   ├── site.css                   首页与通用设计系统
     │   ├── shell.css                  导航/页脚/背景样式
-    │   └── docs.css                   文档文章排版
+    │   ├── docs.css                   文档文章排版
+    │   └── loading.css                首屏/路由 loading 共享样式
     ├── templates/
     │   ├── locale-page.html         单页 SCSR 文档模板
     │   ├── layout-page.html         嵌套路由 layout（header/footer + 文档目录 + slot）
@@ -135,7 +136,9 @@ docs/origin/cn/docs/getting-started.html → docs/website/cn/docs/getting-starte
 docs/origin/cn/site.json               → docs/website/cn/site.json
 ```
 
-构建是幂等的，可重复执行。`docs/website/cn/` 全部是生成物，不要直接修改。
+构建是幂等的，可重复执行。`docs/website/cn/` 全部是生成物，不要直接修改；
+公共的 loading 外观、导航、主题、搜索都放在 `styles/`、`components/`、
+`templates/` 中，改一处后重新构建即可，不要逐个编辑生成页。
 
 ## 页面元信息
 

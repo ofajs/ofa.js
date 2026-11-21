@@ -1,0 +1,90 @@
+/*
+ * 首屏 loading 的公共样式。
+ * 结构由 templates/locale-page.html 输出，样式集中在这里，
+ * 以后调整 loading 外观只需改这一份，不用重新内联到每个页面。
+ *
+ * 关键定位/尺寸仍保留在模板的极简 critical CSS 中，
+ * 防止外部样式还没下载时出现巨大的 logo 或透明遮罩。
+ */
+
+.site-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(260px, 70vw);
+}
+
+.site-loading-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--md-sys-color-on-surface, #e2e2e9);
+  line-height: 1;
+}
+
+.site-loading-logo {
+  display: block;
+  width: auto;
+  height: 30px;
+  flex: none;
+}
+
+.site-loading-wordmark {
+  color: var(--md-sys-color-on-surface, #f3f5fa);
+  font-family:
+    "Space Grotesk", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.site-loading-wordmark span {
+  color: var(--md-sys-color-on-surface-variant, #8f9bb3);
+  font-weight: 450;
+}
+
+.site-loading-bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 99px;
+  background: linear-gradient(
+    90deg,
+    var(--md-sys-color-surface-container-high, #252d3d) 0%,
+    var(--md-sys-color-surface-container-high, #252d3d) 34%,
+    var(--md-sys-color-primary, #7c9cff) 50%,
+    color-mix(in srgb, var(--md-sys-color-primary) 45%, white) 56%,
+    var(--md-sys-color-surface-container-high, #252d3d) 72%,
+    var(--md-sys-color-surface-container-high, #252d3d) 100%
+  );
+  background-size: 220% 100%;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent);
+  animation: site-loading-bar 1.1s linear infinite;
+}
+
+.site-loading-label {
+  color: var(--md-sys-color-on-surface-variant, #8f9bb3);
+  font-family:
+    "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+@keyframes site-loading-bar {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-loading-bar {
+    animation-duration: 2s;
+  }
+}

@@ -88,3 +88,48 @@
     animation-duration: 2s;
   }
 }
+
+/* 站内路由切换：顶部细进度条，不遮挡当前页面 */
+.route-progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 10000;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent),
+    var(--md-sys-color-primary, #7c9cff) 50%,
+    color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent)
+  );
+  background-size: 200% 100%;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--md-sys-color-primary) 45%, transparent);
+  opacity: 0;
+  animation:
+    route-progress-in 0.15s ease 0.12s forwards,
+    route-progress-flow 1.1s linear infinite;
+}
+
+@keyframes route-progress-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes route-progress-flow {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-progress {
+    animation-duration: 0.15s, 2s;
+  }
+}

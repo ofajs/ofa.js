@@ -20,36 +20,18 @@ export const pageAnime = reducedMotion
       previous: { opacity: 0, transform: "translate3d(-20px, 0, 0)" },
     };
 
-// 站内路由切换时的居中 loading，页面数据加载完成后由 o-app 移除。
-// 装饰样式复用 styles/loading.css，这里只保留遮罩定位、延迟出现和关键帧。
-const loadingLogo = new URL("./assets/logo.svg", import.meta.url).href;
+// 站内路由切换：顶部细进度条，不遮挡当前页面。
+// 延迟 120ms 显现，快网络下不闪烁；加载完成后由 o-app 移除。
+// 装饰样式复用 styles/loading.css。
 const loadingCss = new URL("./styles/loading.css", import.meta.url).href;
 
 export const loading = () => `
-  <div
-    class="site-route-loading"
-    role="status"
-    aria-live="polite"
-    style="position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:var(--md-sys-color-surface, #111318);opacity:0;animation:site-route-loading-in .15s ease .2s forwards"
-  >
-    <style>
-      @keyframes site-route-loading-in {
-        to { opacity: 1; }
-      }
-    </style>
+  <div class="route-progress" role="progressbar" aria-label="页面加载中">
     <link
       rel="stylesheet"
       href="${loadingCss}"
       media="print"
       onload="this.media='all'"
     />
-    <div class="site-loading-inner">
-      <div class="site-loading-brand" aria-hidden="true">
-        <img class="site-loading-logo" src="${loadingLogo}" width="28" height="30" alt="" />
-        <span class="site-loading-wordmark">ofa<span>.js</span></span>
-      </div>
-      <div class="site-loading-bar" aria-hidden="true"></div>
-      <div class="site-loading-label">正在加载页面…</div>
-    </div>
   </div>
 `;

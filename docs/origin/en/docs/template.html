@@ -1,0 +1,146 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>Template Directives Overview</h1>
+      <p class="doc-lead">
+        ofa.js template syntax lives directly in HTML: directives bind data, events, and
+        rendering logic. There is no JSX and no template file that needs compiling.
+      </p>
+
+      <h2>Directive reference</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Syntax</th><th>Purpose</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>Text interpolation, limited to element text content</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>Render HTML content</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>One-way property binding</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>Two-way property binding</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>HTML attribute binding</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>Conditional class name</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>Inline style binding</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>Event binding</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>An event that fires only once</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>Event object</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Text interpolation</h2>
+      <pre><code>&lt;p&gt;Hello, {{name}}&lt;/p&gt;
+&lt;p&gt;Count: {{count}}, double: {{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> only works in element text content. Attribute values, event
+        arguments, and style values always use directive expressions. To render HTML,
+        use <code>:html</code> and make sure the content is trusted.
+      </p>
+
+      <h2>Properties and two-way binding</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;Link&lt;/a&gt;
+&lt;!-- Boolean attributes always use attr: --&gt;
+&lt;button attr:disabled="loading"&gt;Submit&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> is one-way binding and <code>sync:</code> is two-way.
+        For <code>true</code>, <code>attr:</code> sets an empty attribute; for
+        <code>false</code>, it removes the attribute. That is why boolean attributes
+        must use it.
+      </p>
+
+      <h2>Class names and styles</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> adds or removes a class based on a boolean expression;
+        <code>:style.prop</code> uses camelCase property names. For the full rules, see
+        <a olink href="./binding.html">Bindings &amp; Styles</a>.
+      </p>
+
+      <h2>Events</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;Save&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        A bare method name is automatically bound to <code>this</code>, and you can also
+        write expressions directly. Data from custom events is read through
+        <code>event.data</code>. See <a olink href="./events.html">Events &amp; Forms</a>.
+      </p>
+
+      <h2>Conditions and lists</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;Greater than 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;Greater than 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 or less&lt;/p&gt;
+&lt;/o-else&gt;
+
+&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        Conditional tags must be written consecutively; inside <code>o-fill</code> only
+        <code>$data</code>, <code>$index</code>, <code>$host</code>,
+        <code>$parent</code>, and <code>$ele</code> are available. See
+        <a olink href="./render.html">Conditions &amp; Lists</a>.
+      </p>
+
+      <h2>Where data comes from</h2>
+      <p>
+        Every variable used in a template must first be declared in <code>data</code> or
+        <code>attrs</code>. An undeclared variable is not <code>undefined</code>: it
+        throws a <code>ReferenceError</code> and aborts rendering of the whole page.
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./lifecycle.html">Lifecycle →</a>
+         · Next: <a olink href="./binding.html">Bindings &amp; Styles →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

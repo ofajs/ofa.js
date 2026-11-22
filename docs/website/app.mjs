@@ -24,9 +24,12 @@ export const pageAnime = reducedMotion
 // 延迟 120ms 显现，快网络下不闪烁；加载完成后由 o-app 移除。
 // 装饰样式复用 styles/loading.css。
 const loadingCss = new URL("./styles/loading.css", import.meta.url).href;
+const loadingLabel = document.documentElement.lang.startsWith("en")
+  ? "Loading page"
+  : "页面加载中";
 
 export const loading = () => `
-  <div class="route-progress" role="progressbar" aria-label="页面加载中">
+  <div class="route-progress" role="progressbar" aria-label="${loadingLabel}">
     <link
       rel="stylesheet"
       href="${loadingCss}"

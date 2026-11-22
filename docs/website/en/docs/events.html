@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Events &amp; Forms — ofa.js Docs</title>
+    <meta name="description" content="on:, one:, $event, two-way form binding, custom events, and event bubbling." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Events &amp; Forms — ofa.js Docs" />
+    <meta property="og:description" content="on:, one:, $event, two-way form binding, custom events, and event bubbling." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>Events &amp; Forms</h1>
+      <p class="doc-lead">
+        Bind events with <code>on:</code> and one-time events with <code>one:</code>.
+        Form control values stay in two-way sync with data through <code>sync:</code>.
+      </p>
+
+      <h2>Binding methods</h2>
+      <pre><code>&lt;button on:click="save"&gt;Save&lt;/button&gt;
+&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="add(5)"&gt;Add 5&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;</code></pre>
+      <p>
+        A bare identifier (<code>save</code>) is resolved as a <code>proto</code> method and
+        automatically bound to <code>this</code>. Complex expressions run directly. String
+        literals inside expressions must be quoted, otherwise they are treated as variable names.
+      </p>
+
+      <h2>Event object</h2>
+      <pre><code>&lt;input on:keydown="onKeydown($event)" /&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { draft: "" },
+    proto: {
+      onKeydown(event) {
+        if (event.key !== "Enter") return;
+        this.submit();
+      },
+      submit() {
+        console.log(this.draft);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        <code>$event</code> is the native event object. Data from custom events lives in
+        <code>event.data</code>, while the original DOM event fields remain available.
+      </p>
+
+      <h2>One-time events</h2>
+      <pre><code>&lt;img one:load="onImageReady" src="./cover.jpg" /&gt;
+&lt;div one:click="dismiss"&gt;Click to unbind&lt;/div&gt;</code></pre>
+      <p>
+        <code>one:</code> unbinds automatically after the first trigger, which suits
+        initialization, dismissing notices, and similar cases.
+      </p>
+
+      <h2>Two-way form binding</h2>
+      <pre><code>&lt;input type="text" sync:value="form.name" placeholder="Name" /&gt;
+&lt;input type="checkbox" sync:checked="form.agree" /&gt;
+&lt;select sync:value="form.city"&gt;
+  &lt;option value="shanghai"&gt;Shanghai&lt;/option&gt;
+  &lt;option value="beijing"&gt;Beijing&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      <p>
+        <code>sync:</code> is only for scalars. A form object can live in <code>data</code>
+        as a whole, but each field binding must still target a specific scalar.
+      </p>
+
+      <h2>Submitting a form</h2>
+      <pre><code>&lt;form on:submit="onSubmit($event)"&gt;
+  &lt;input sync:value="form.name" required /&gt;
+  &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { form: { name: "" } },
+    proto: {
+      onSubmit(event) {
+        event.preventDefault();
+        if (!this.form.name.trim()) return;
+        console.log("submit", this.form.name);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+
+      <h2>Custom events</h2>
+      <p>A component or page emits an event on its own:</p>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "John Doe" },
+  bubbles: true,   // true by default
+  composed: true,  // set when the event must cross the Shadow DOM boundary
+});</code></pre>
+      <p>Consumers listen for it and read <code>event.data</code>:</p>
+      <pre><code>&lt;user-form on:save="onSaved"&gt;&lt;/user-form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { savedName: "" },
+    proto: {
+      onSaved(event) {
+        this.savedName = event.data.name;
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        When an <code>o-page</code> embedded in the host's Shadow DOM emits an event
+        upward, <code>bubbles: true</code> and <code>composed: true</code> must both be
+        present, otherwise the host never receives it.
+      </p>
+
+      <h2>Naming suggestions</h2>
+      <ul>
+        <li>Use lowercase kebab-case for event names: <code>data-changed</code>, <code>form-save</code>;</li>
+        <li>Reuse native event names such as <code>click</code>, <code>input</code>, and <code>submit</code>;</li>
+        <li>Don't prefix event names with <code>on</code>; the template's <code>on:</code> already expresses that.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./binding.html">Bindings &amp; Styles →</a>
+         · Next: <a olink href="./render.html">Conditions &amp; Lists →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

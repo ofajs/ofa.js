@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">Getting started</p>
+        <h1>Installation</h1>
+        <p class="doc-lead">
+          ofa.js requires no dependencies and no build step. Reference the ESM file on a CDN
+          with a single script tag, and you can start writing components and pages.
+        </p>
+
+        <h2>1. Load ofa.js</h2>
+        <p>
+          We recommend the v5 ESM build. Put the following URL in the
+          <code>src</code> of a <code>&lt;script type="module"&gt;</code>:
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          If your environment is better suited to classic scripts, you can use the UMD build
+          instead (it exposes a global <code>$</code>):
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>Version note:</strong> CDN URLs for the v5 branch must be written as
+          <code>@refs/heads/v5</code>, not shortened to <code>@v5</code>;
+          otherwise jsDelivr parses it as a version tag and returns a 404.
+        </div>
+
+        <h2>2. Write an entry point</h2>
+        <p>
+          The entry HTML only loads ofa.js and includes an <code>o-page</code> to load the page module:
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;My first ofa.js page&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. Write a page module</h2>
+        <p>
+          An <code>.html</code> file is a page module. The template, styles, and logic all live inside
+          <code>&lt;template page&gt;</code>:
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;Clicked {{count}} times&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>Note:</strong> the page and component <code>&lt;script&gt;</code>
+          must be inside <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code>. ofa.js only extracts scripts inside the template;
+          scripts placed outside are ignored.
+        </div>
+
+        <h2>4. Open the page</h2>
+        <p>
+          Pages must be served over HTTP; you cannot open the HTML file directly
+          (<code>file://</code> is blocked by the CORS policy for module loading). Any static server works:
+        </p>
+        <pre><code>$ npx serve .
+
+# or
+$ python3 -m http.server</code></pre>
+        <p>
+          Open http://localhost:3000 and you'll see the page. Run
+          <code>$.version</code> in the console to confirm the framework has loaded.
+        </p>
+
+        <h2>Next Steps</h2>
+        <p>
+          Now that the page runs, the next step is learning how data drives the template:
+          text interpolation, events, two-way binding, conditionals, and lists.
+        </p>
+        <p class="doc-end">
+          Next: <a olink href="./first-component.html">Your First Component →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

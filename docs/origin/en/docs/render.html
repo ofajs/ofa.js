@@ -1,0 +1,166 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>Conditionals and Lists</h1>
+      <p class="doc-lead">
+        <code>o-if</code> controls whether content exists, while <code>o-fill</code> renders a list from an array.
+        Both are element-resident implementations, so understanding scope and DOM structure matters.
+      </p>
+
+      <h2>Conditional rendering</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;Greater than 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;Greater than 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 or less&lt;/p&gt;
+&lt;/o-else&gt;</code></pre>
+      <ul>
+        <li>The three tags must be written <strong>consecutively</strong>, with no other elements in between;</li>
+        <li><code>o-else</code> takes no <code>value</code>;</li>
+        <li>When the condition is false the content is removed; when it is true the content is recreated;</li>
+        <li>If you toggle visibility frequently and need to preserve DOM state, switching with <code>class:</code> is a better fit.</li>
+      </ul>
+
+      <h2>o-fill basics</h2>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+      &lt;span&gt;{{$data.text}}&lt;/span&gt;
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        <code>fill-key</code> points to the unique field of a list item. With it,
+        nodes are reused by key when items are added, removed, or reordered,
+        so input state inside an item is not lost; omit it only when there is no unique field.
+      </p>
+
+      <h2>List item scope</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Variable</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$data</code></td><td>Data of the current item</td></tr>
+          <tr><td><code>$index</code></td><td>Index of the current item, starting at 0</td></tr>
+          <tr><td><code>$host</code></td><td>Host page/component instance, used to call proto methods</td></tr>
+          <tr><td><code>$parent</code></td><td>Data of the outer item in a nested o-fill</td></tr>
+          <tr><td><code>$ele</code></td><td>Element of the current item</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>You cannot use custom item names inside o-fill.</strong>
+        Inside a list item you can only use <code>$data.text</code>; you cannot write <code>item.text</code>
+        or <code>row.text</code>. At the root level (outside o-fill) these variables do not exist;
+        use data fields and proto method names directly.
+      </div>
+
+      <h2>Nested lists</h2>
+      <pre><code>&lt;o-fill :value="groups" fill-key="id"&gt;
+  &lt;section&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;o-fill :value="$data.items" fill-key="id"&gt;
+      &lt;p&gt;{{$parent.name}} / {{$data.name}}&lt;/p&gt;
+    &lt;/o-fill&gt;
+  &lt;/section&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        The inner <code>$data</code> is the child item, and <code>$parent</code> is the outer group.
+      </p>
+
+      <h2>Named templates</h2>
+      <p>
+        When the structure is complex or needs to be reused, put the list item in a top-level
+        <code>&lt;template name&gt;</code> and reference it with <code>o-fill name</code>:
+      </p>
+      <pre><code>&lt;o-fill :value="products" name="product-card" fill-key="id"&gt;&lt;/o-fill&gt;
+
+&lt;template name="product-card"&gt;
+  &lt;article class="card"&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;p&gt;¥{{$data.price}}&lt;/p&gt;
+    &lt;button on:click="$host.addToCart($data.id)"&gt;Add to cart&lt;/button&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+      <p>Named templates must be placed outside <code>o-fill</code>, usually at the top level of the page template.</p>
+      <p>
+        A named template can also reference itself, which is useful for rendering tree structures:
+      </p>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="tree" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+&lt;/ul&gt;
+
+&lt;template name="tree-node"&gt;
+  &lt;li&gt;
+    {{$data.name}}
+    &lt;ul&gt;
+      &lt;o-fill :value="$data.children" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>replace-temp for select and table</h2>
+      <p>
+        The browser parser corrects elements inside <code>&lt;select&gt;</code> and <code>&lt;table&gt;</code>
+        that are not on its whitelist. Writing <code>o-fill</code> directly inside them
+        fails to render; you need <code>&lt;template is="replace-temp"&gt;</code>:
+      </p>
+      <pre><code>&lt;select&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="cities"&gt;
+      &lt;option&gt;{{$data}}&lt;/option&gt;
+    &lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/select&gt;</code></pre>
+      <p>Table rows must be combined with a named template:</p>
+      <pre><code>&lt;tbody&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="rows" name="table-row"&gt;&lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/tbody&gt;
+
+&lt;template name="table-row"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;{{$data.name}}&lt;/td&gt;
+    &lt;td&gt;{{$data.desc}}&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>DOM structure caveat</h2>
+      <p>
+        <code>o-if</code> and <code>o-fill</code> use
+        <code>display: contents</code>, so the elements themselves remain in the DOM.
+        As a result, CSS child selectors see through them: <code>.container &gt; .item</code>
+        will not match an item inside <code>o-if</code>, and <code>table.rows</code>
+        will not count the rows produced by <code>o-fill</code>. When a selector stops working,
+        switch to a descendant selector or adjust the structure.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./events.html">Events and Forms →</a>
+         · Next: <a olink href="./data.html">Data and Watchers →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

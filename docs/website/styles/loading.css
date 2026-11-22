@@ -133,3 +133,16 @@
     animation-duration: 0.15s, 2s;
   }
 }
+
+
+.site-loading-label-en {
+  display: none;
+}
+
+html[lang^="en"] .site-loading-label-zh {
+  display: none;
+}
+
+html[lang^="en"] .site-loading-label-en {
+  display: inline;
+}

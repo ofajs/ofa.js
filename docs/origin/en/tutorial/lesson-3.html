@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 03</p>
+      <h1>Dynamic attributes</h1>
+      <p class="doc-lead">Use attr: for HTML attributes and :prop for DOM properties; boolean attributes must use attr:.</p>
+
+      <p>
+  Attributes in a template come in two kinds: <code>attr:</code> binds an HTML attribute,
+  <code>:prop</code> binds a DOM property on the element. Do not write dynamic values as
+  <code>href="{{url}}"</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3" fold-styles="true"></docs-playground>
+<h2>Why two kinds of syntax</h2>
+<ul>
+  <li><code>attr:href</code>, <code>attr:title</code>: end up as HTML attributes;</li>
+  <li><code>:value</code>: sets the DOM <code>value</code> property, suited to form elements;</li>
+  <li><code>attr:disabled="!ready"</code>: use <code>attr:</code> for boolean attributes;
+    when the condition is false the attribute is actually removed.</li>
+</ul>
+<div class="doc-note">
+  <strong>Why boolean attributes cannot use :prop:</strong> <code>:disabled="false"</code>
+  leaves <code>disabled="false"</code> behind, so the attribute still exists and the button stays disabled.
+  The correct form is <code>attr:disabled="false"</code>.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Change the initial value of <code>ready</code> to <code>true</code> and see that the button starts out
+  enabled; then change it back and click the button to enable it.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-2.html">02 · Data and interpolation →</a> · Next: <a olink href="./lesson-4.html">04 · Styles and class →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

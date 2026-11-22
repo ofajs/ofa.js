@@ -1,0 +1,128 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>Global State</h1>
+      <p class="doc-lead">
+        When several pages or components need to share the same data, create reactive state
+        with <code>$.stanz()</code>. It does not rely on global variables, and it does not
+        persist automatically.
+      </p>
+
+      <h2>Creating shared state</h2>
+      <pre><code>// store.js
+export const cart = $.stanz({
+  items: [],
+  total: 0,
+});
+
+export const session = $.stanz({
+  user: null,
+  theme: "dark",
+});</code></pre>
+      <p>
+        <code>$.stanz()</code> returns a deeply reactive proxy. Assigning to nested objects
+        and array <code>push</code>/<code>splice</code> notifies every consumer.
+      </p>
+
+      <h2>Using it in a page</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;ul&gt;
+    &lt;o-fill :value="items" fill-key="id"&gt;
+      &lt;li&gt;{{$data.name}} × {{$data.count}}&lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    export default async ({ load }) =&gt; {
+      const { cart } = await load("./store.js");
+
+      return {
+        data: { items: [] },
+        attached() {
+          this.items = cart.items;
+        },
+        detached() {
+          this.items = [];
+        },
+      };
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Mount/unmount convention:</strong>
+        attach the shared state to your own data in <code>attached</code>, and clear the
+        reference in <code>detached</code>, so the state does not keep referencing a
+        destroyed component.
+      </div>
+
+      <h2>Reading and writing shared state</h2>
+      <pre><code>cart.items.push({
+  id: Date.now(),
+  name: "ofa.js merchandise",
+  count: 1,
+});
+
+cart.total = cart.items.reduce(
+  (sum, item) =&gt; sum + item.count,
+  0,
+);</code></pre>
+      <p>
+        When several pages read the same <code>cart</code>, a change made in any one of them
+        propagates to the other pages and components.
+      </p>
+
+      <h2>Watching state directly</h2>
+      <pre><code>const tid = cart.watch(() =&gt; {
+  console.log("cart changed", cart.total);
+});
+
+// when it is no longer needed
+cart.unwatch(tid);</code></pre>
+      <p>
+        <code>watch</code> watches deeply, so changes in child objects and arrays also fire.
+        Inside components it is better to attach the state to data and let the template update
+        automatically rather than manipulating the DOM by hand.
+      </p>
+
+      <h2>Local state vs. shared state</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Scenario</th><th>Approach</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Used only in the current component</td><td><code>data</code></td></tr>
+          <tr><td>Passing values between parent and child components</td><td><code>:prop</code> / <code>sync:</code></td></tr>
+          <tr><td>Business data across levels</td><td><code>o-provider</code> / <code>o-consumer</code></td></tr>
+          <tr><td>Cross-page, globally shared</td><td><code>$.stanz()</code></td></tr>
+          <tr><td>Pure styling themes</td><td>CSS variables / <code>match-var</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        For a more structured way to share data across levels, see
+        <a olink href="./context.html">Cross-Component Context</a>.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./data.html">Data and Watchers →</a>
+         · Next: <a olink href="./context.html">Cross-Component Context →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

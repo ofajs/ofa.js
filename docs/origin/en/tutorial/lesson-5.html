@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 05</p>
+      <h1>Events</h1>
+      <p class="doc-lead">Listen for events with the on: prefix: use an expression for simple logic and a proto method for anything more involved.</p>
+
+      <p>
+  Event bindings are always written as <code>on:event-name</code>. The value can be
+  a single expression or the name of a method on <code>proto</code>; methods are
+  automatically bound to the current page instance.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5" fold-styles="true"></docs-playground>
+<h2>Two styles</h2>
+<ul>
+  <li><code>on:click="count++"</code>: best for logic that fits on one line;</li>
+  <li><code>on:click="decrement"</code>: best for multi-step or reusable logic;</li>
+  <li><code>on:input="onNameInput($event)"</code>: pass <code>$event</code> when you
+    need the native event object.</li>
+</ul>
+<div class="doc-note">
+  <strong>Don't reach for the DOM:</strong> in a handler, just change
+  <code>this.count</code> and the page updates automatically. You only need real DOM
+  access for things like measuring size, focusing an element, or initializing a
+  third-party library.
+</div>
+<h2>Try it</h2>
+<p>
+  Add a limit to <code>decrement</code>: don't let the count go below 0.
+  Then add a button that multiplies the count by 2.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-4.html">04 · Styles and class →</a> · Next: <a olink href="./lesson-6.html">06 · Two-way binding →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

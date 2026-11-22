@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 02</p>
+      <h1>Data and interpolation</h1>
+      <p class="doc-lead">data can hold strings, numbers, booleans, objects, and arrays, and {{ }} can evaluate simple expressions.</p>
+
+      <p>
+  <code>data</code> is a plain object, but ofa.js turns it into reactive data.
+  Inside the template, <code>{{ }}</code> can do more than read fields: it can evaluate
+  expressions and reach nested properties.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-2" fold-styles="true"></docs-playground>
+<h2>Rules</h2>
+<ul>
+  <li><code>{{user.name}}</code>: access a nested field of an object;</li>
+  <li><code>{{user.age + 1}}</code>: the contents of {{ }} are JavaScript expressions;</li>
+  <li><code>:html="note"</code>: renders a string as HTML; use it only for trusted content.</li>
+</ul>
+<div class="doc-note">
+  <strong>Remember:</strong> <code>{{ }}</code> works only in an element's text content.
+  For attribute values use <code>attr:</code> / <code>:prop</code> from the next lesson; writing
+  <code>&lt;a href="{{url}}"&gt;</code> has no effect.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a <code>city</code> field to <code>user</code> and display it as
+  "City: xxx"; then try changing <code>note</code> to plain text and observe the
+  difference between <code>:html</code> and <code>{{ }}</code>.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-1.html">01 · Your first page →</a> · Next: <a olink href="./lesson-3.html">03 · Dynamic attributes →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

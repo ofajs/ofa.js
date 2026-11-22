@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plugins &amp; Extensions — ofa.js Docs</title>
+    <meta name="description" content="How to load the optional ofa.js plugins — formData, inject-host, body-ghost, and global-link — and when to use them." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Plugins &amp; Extensions — ofa.js Docs" />
+    <meta property="og:description" content="How to load the optional ofa.js plugins — formData, inject-host, body-ghost, and global-link — and when to use them." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>Plugins and Extensions</h1>
+      <p class="doc-lead">
+        Plugins are optional capabilities that only take effect when referenced;
+        they are not part of the default ofa.js build. They attach to the global
+        <code>$</code> already loaded by the page and never pull in a second
+        framework instance.
+      </p>
+
+      <h2>Available plugins</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Plugin</th><th>Capability</th><th>Usage</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>Two-way binding between container form values and stanz objects</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>Hoists style/link tags from the shadow to the host, reaching deep through slots</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>Teleports template content to the end of body for rendering (dialogs / overlays)</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>Injects a global stylesheet into components mounted after it</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Importing</h2>
+      <p>Import the source form directly, or use the classic script or ESM dist form:</p>
+      <pre><code>// monorepo / npm source
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist classic script (with dist ofa.js)
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        Plugins must load after ofa.js because they attach to the global <code>$</code>;
+        if it is missing they throw immediately.
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // read
+data.username = "Yao";  // write back to the form
+data.revoke();          // release the binding</code></pre>
+      <p>
+        Checkboxes are aggregated into an array, and multi-select, radio, and file
+        inputs each have their own handling. A custom form component only needs to
+        expose a <code>value</code> property and set <code>name</code> to participate.
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> can only reach the first level of slotted content.
+        To style elements deep inside a slot, use <code>&lt;inject-host&gt;</code>
+        to hoist the styles to the host:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        Write the full component path in selectors to avoid leaking styles into other
+        components; use this sparingly in cases that update styles frequently.
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        When dialogs, toasts, or overlays need to escape a parent's <code>overflow</code>
+        or <code>transform</code> constraints, teleport the content to body:
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        Framework bindings follow the element as it moves, and native events bubble
+        from its real DOM position.
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        The stylesheet is injected only into the shadow of components mounted
+        <strong>after</strong> it; once <code>o-global-link</code> is removed, new
+        components no longer receive the styles. It leaks into global scope, so use
+        it carefully.
+      </p>
+
+      <h2>match-var (core style query)</h2>
+      <p>
+        To switch a component's internal styles based on CSS variables, use the core
+        <code>&lt;match-var&gt;</code>; it requires no extra plugin:
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- multiple conditions must all match --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+      <p>
+        Conditions come from the values of CSS variables. On the outside, use
+        <code>data()</code> to write data into the variables:
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox:</strong> if styles do not switch immediately after a variable
+        changes, call <code>$.checkMatch()</code> manually to trigger a re-check.
+      </div>
+
+      <p class="doc-end">
+        Previous: <a olink href="./api.html">$.fn and wrapper objects →</a>
+         · Next: <a olink href="./pitfalls.html">Common Pitfalls →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

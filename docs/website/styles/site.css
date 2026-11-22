@@ -3074,3 +3074,13 @@ mark.site-search-hit {
   background-color: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
 }
+
+/* English site: override the copy label inside senti-ui st-code (shadow part) */
+:host-context(html[lang^="en"]) st-code::part(copy) {
+  font-size: 0;
+}
+
+:host-context(html[lang^="en"]) st-code::part(copy)::after {
+  content: "Copy";
+  font-size: 12px;
+}

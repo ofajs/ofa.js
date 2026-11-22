@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Selection and traversal</p>
+      <h1>Selection and traversal</h1>
+      <p class="doc-lead">Find elements inside an instance and move back and forth across DOM and shadow boundaries.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="traverse"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.$(expr)</code></td><td>Find the first match inside the instance; inside a component, use this.shadow.$()</td></tr>
+          <tr><td><code>el.all(expr)</code></td><td>Find every match inside the instance and return an array of instances</td></tr>
+          <tr><td><code>el.parent</code></td><td>The parent element instance; null when the parent is document</td></tr>
+          <tr><td><code>el.parents</code></td><td>Array of all ancestor instances</td></tr>
+          <tr><td><code>el.parentsUntil(expr)</code></td><td>Collect ancestors upward until expr is matched (that node excluded)</td></tr>
+          <tr><td><code>el.hosts</code></td><td>The chain of shadow hosts, level by level</td></tr>
+          <tr><td><code>el.next / el.nexts</code></td><td>The next sibling / all following sibling elements</td></tr>
+          <tr><td><code>el.prev / el.prevs</code></td><td>The previous sibling / all preceding sibling elements</td></tr>
+          <tr><td><code>el.siblings</code></td><td>All sibling elements except the element itself</td></tr>
+          <tr><td><code>el.is(expr)</code></td><td>Whether it matches a selector, or equals an instance or native element</td></tr>
+          <tr><td><code>el.contains(expr)</code></td><td>Whether it contains a given selector, instance, or native element</td></tr>
+          <tr><td><code>el.composedPath()</code></td><td>The event system's full path (across shadow boundaries), returned as an array of native nodes</td></tr>
+          <tr><td><code>el.get("a.b.c")</code></td><td>Read a value by dot path; a single key is the same as direct access</td></tr>
+          <tr><td><code>el.set("a.b.c", value)</code></td><td>Assign a value by dot path; a single key is the same as direct assignment</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> In the example, second.prev / second.next are sibling instances; class() toggles class names on and off.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · o-app and o-page</p>
+      <h1>o-app and o-page</h1>
+      <p class="doc-lead">The app container manages the page stack and navigation; a page instance manages its own screen of content.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="app"></docs-playground>
+
+      <h2>o-app instance</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>app.src</code></td><td>URL of the app config module</td></tr>
+          <tr><td><code>app.current</code></td><td>Current page instance (read-only)</td></tr>
+          <tr><td><code>app.routers</code></td><td>Route history array, both readable and writable</td></tr>
+          <tr><td><code>app.goto(src)</code></td><td>Navigates and pushes onto the stack</td></tr>
+          <tr><td><code>app.replace(src)</code></td><td>Replaces the current page without pushing onto the stack</td></tr>
+          <tr><td><code>app.back(delta = 1)</code></td><td>Goes back</td></tr>
+          <tr><td><code>app.forward(delta = 1)</code></td><td>Goes forward (requires allowForward)</td></tr>
+          <tr><td><code>app.appIsReady</code></td><td>The first page has finished rendering (read-only)</td></tr>
+          <tr><td><code>app._module</code></td><td>App config: home, loading, fail, access, allowForward, pageAnime</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <h2>o-page instance</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>page.src</code></td><td>URL of the page module, immutable after initialization</td></tr>
+          <tr><td><code>page.pageIsReady</code></td><td>Flag indicating the page has finished rendering (read-only)</td></tr>
+          <tr><td><code>page.goto(src) / page.replace(src)</code></td><td>Resolves the URL against the current page, then navigates</td></tr>
+          <tr><td><code>page.back()</code></td><td>Goes back</td></tr>
+          <tr><td><code>page.pageAnime</code></td><td>Animation config for this page, readable and writable</td></tr>
+          <tr><td><code>page._rendered</code></td><td>Promise that resolves when the page finishes rendering</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

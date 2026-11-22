@@ -2,6 +2,8 @@
  * API 文档各页的默认可运行示例。
  * 结构与 playground-runtime 的 LESSONS 一致：{ entry, files }。
  */
+import { API_EXAMPLES_EN } from "./api-examples-en.mjs";
+
 export const API_EXAMPLES = {
   globalBody: {
     entry: "raw",
@@ -469,3 +471,5 @@ export const API_EXAMPLES = {
     },
   },
 };
+
+export const getApiExample = (key, english = document.documentElement.lang.startsWith("en")) => (english ? API_EXAMPLES_EN : API_EXAMPLES)[key];

@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Data & Watchers</p>
+      <h1>Data & Watchers</h1>
+      <p class="doc-lead">Instance data comes from stanz: reading and writing fields is a reactive update, and watching and cleanup each have dedicated methods.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="reactive"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.watch(cb)</code></td><td>Watch changes on the instance and its children; returns a watcher id</td></tr>
+          <tr><td><code>el.watchTick(cb)</code></td><td>Same as watch, but a batch of changes in one tick fires only once</td></tr>
+          <tr><td><code>el.unwatch(id)</code></td><td>Unregister a watcher</td></tr>
+          <tr><td><code>el.watchUntil(fn, timeout = 30000)</code></td><td>A Promise that resolves once the condition holds and unbinds itself; the timeout defaults to 30 seconds</td></tr>
+          <tr><td><code>el.refresh(opts)</code></td><td>Manually dispatch a refresh event without changing data</td></tr>
+          <tr><td><code>el.sync(prop, path, options)</code></td><td>Two-way sync action; for template sync: only, and calling it directly throws</td></tr>
+          <tr><td><code>el.toJSON() / el.toString()</code></td><td>Export a plain object (recursive) / a JSON string</td></tr>
+          <tr><td><code>el.revoke()</code></td><td>Revoke the instance: clears watchers and drops data references</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> watchUntil only evaluates on data changes and does not check immediately after registration; if the condition may already hold, check it yourself once first.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

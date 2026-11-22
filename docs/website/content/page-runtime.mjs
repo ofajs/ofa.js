@@ -32,6 +32,7 @@ const getNavUrls = (url, docs = false) => {
       tutorial: new URL("../tutorial/", url).href,
       firstLesson: new URL("../tutorial/lesson-1.html", url).href,
       api: new URL("../api/", url).href,
+      blog: new URL("../blog/", url).href,
       searchIndex: new URL("../search-index.json", url).href,
       languages: new URL("../../", url).href,
     };
@@ -43,6 +44,7 @@ const getNavUrls = (url, docs = false) => {
     tutorial: new URL("./tutorial/", url).href,
     firstLesson: new URL("./tutorial/lesson-1.html", url).href,
     api: new URL("./api/", url).href,
+    blog: new URL("./blog/", url).href,
     searchIndex: new URL("./search-index.json", url).href,
     languages: new URL("../", url).href,
   };
@@ -50,6 +52,117 @@ const getNavUrls = (url, docs = false) => {
 
 export const createLandingPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
+  const isEnglish = document.documentElement.lang.startsWith("en");
+
+  const codeZh = {
+    hero: `<template component>
+  <style>
+    :host { display: grid; }
+  </style>
+
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: {
+        name: "ofa.js",
+        count: 0,
+      },
+    };
+  <\/script>
+</template>`,
+    mini: `<template component>
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: { name: "ofa.js", count: 0 },
+    };
+  <\/script>
+</template>`,
+    page: `<template page>
+  <h1>Hello, {{name}}</h1>
+  <button on:click="count++">
+    点了 {{count}} 次
+  </button>
+
+  <script>
+    export default async () => ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  <\/script>
+</template>`,
+    terminal: `$ npx serve .
+
+# 或任意静态服务器
+$ python3 -m http.server
+
+# 打开 http://localhost:3000`,
+  };
+
+  const codeEn = {
+    hero: `<template component>
+  <style>
+    :host { display: grid; }
+  </style>
+
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    Clicked {{count}} times
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: {
+        name: "ofa.js",
+        count: 0,
+      },
+    };
+  <\/script>
+</template>`,
+    mini: `<template component>
+  <h3>Hello, {{name}}</h3>
+  <button on:click="count++">
+    Clicked {{count}} times
+  </button>
+
+  <script>
+    export default {
+      tag: "hello-ofa",
+      data: { name: "ofa.js", count: 0 },
+    };
+  <\/script>
+</template>`,
+    page: `<template page>
+  <h1>Hello, {{name}}</h1>
+  <button on:click="count++">
+    Clicked {{count}} times
+  </button>
+
+  <script>
+    export default async () => ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  <\/script>
+</template>`,
+    terminal: `$ npx serve .
+
+# or any static server
+$ python3 -m http.server
+
+# open http://localhost:3000`,
+  };
+
+  const LANDING_CODE = isEnglish ? codeEn : codeZh;
 
   const todos = site.demo.todos.map((text, index) => ({
     id: index + 1,
@@ -72,57 +185,10 @@ export const createLandingPage = async ({ url, sitePath }) => {
       githubUrl: "https://github.com/ofajs/ofa.js",
 
       // st-code 展示用的代码样例（字符串绑定 :code，绕开 ofa 对 {{...}} 的插值编译）
-      codeHero: `<template component>
-  <style>
-    :host { display: grid; }
-  </style>
-
-  <h3>Hello, {{name}}</h3>
-  <button on:click="count++">
-    点了 {{count}} 次
-  </button>
-
-  <script>
-    export default {
-      tag: "hello-ofa",
-      data: {
-        name: "ofa.js",
-        count: 0,
-      },
-    };
-  <\/script>
-</template>`,
-      codeMini: `<template component>
-  <h3>Hello, {{name}}</h3>
-  <button on:click="count++">
-    点了 {{count}} 次
-  </button>
-
-  <script>
-    export default {
-      tag: "hello-ofa",
-      data: { name: "ofa.js", count: 0 },
-    };
-  <\/script>
-</template>`,
-      codePage: `<template page>
-  <h1>Hello, {{name}}</h1>
-  <button on:click="count++">
-    点了 {{count}} 次
-  </button>
-
-  <script>
-    export default async () => ({
-      data: { name: "ofa.js", count: 0 },
-    });
-  <\/script>
-</template>`,
-      codeTerminal: `$ npx serve .
-
-# 或任意静态服务器
-$ python3 -m http.server
-
-# 打开 http://localhost:3000`,
+      codeHero: LANDING_CODE.hero,
+      codeMini: LANDING_CODE.mini,
+      codePage: LANDING_CODE.page,
+      codeTerminal: LANDING_CODE.terminal,
     },
 
     watch: {

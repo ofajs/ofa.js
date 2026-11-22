@@ -1,0 +1,116 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Getting started</p>
+      <h1>Your First Page</h1>
+      <p class="doc-lead">
+        A page module owns the content at one routing location. It can be loaded directly
+        by <code>o-page</code>, or managed in the page stack by <code>o-app</code>.
+      </p>
+
+      <h2>1. The Page Module</h2>
+      <p>
+        Create <code>page.html</code>. Pages use
+        <code>&lt;template page&gt;</code> and do not need a <code>tag</code>:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host {
+      display: block;
+      padding: 24px;
+    }
+  &lt;/style&gt;
+
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;p&gt;Current count: {{count}}&lt;/p&gt;
+  &lt;button on:click="count++"&gt;Click me +1&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async ({ query }) =&gt; ({
+      data: {
+        name: query.name || "ofa.js",
+        count: 0,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>2. Load It Directly with o-page</h2>
+      <p>
+        The simplest approach is to put an <code>o-page</code> in the entry HTML and
+        point <code>src</code> at the page module:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;First page&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html?name=Yao"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      <p>
+        <code>?name=Yao</code> is passed to the page module function as the <code>query</code>
+        argument. Methods like <code>this.goto()</code> and <code>this.back()</code> only have
+        full routing semantics inside an <code>o-app</code>.
+      </p>
+
+      <h2>3. Manage Pages with o-app</h2>
+      <p>
+        When you need multi-page navigation, a page stack, and transition animations,
+        load an app config with <code>o-app</code>:
+      </p>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./page.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};</code></pre>
+
+      <p>
+        <code>home</code> is the first page loaded when the app starts. Navigate within a page
+        with <code>this.goto("./detail.html")</code> or
+        <code>&lt;a olink href="./detail.html"&gt;</code>.
+        See <a olink href="./app.html">the o-app application page</a> for the full configuration.
+      </p>
+
+      <div class="doc-note">
+        <strong>Pages must be served over HTTP.</strong>
+        When you open the HTML file directly, <code>file://</code> blocks module scripts and page fetches.
+        Run <code>npx serve .</code> or <code>python3 -m http.server</code> in the directory instead.
+      </div>
+
+      <p class="doc-end">
+        Previous: <a olink href="./first-component.html">Your First Component →</a>
+        · Next: <a olink href="./component.html">Components →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -11,7 +11,8 @@
     "nav": {
       "tutorial": "教程",
       "docs": "文档",
-      "api": "API"
+      "api": "API",
+      "blog": "博客"
     },
     "actions": {
       "nav": "主导航",
@@ -349,6 +350,14 @@
     "api/app.html": {
       "title": "o-app 与 o-page — ofa.js API",
       "description": "应用容器负责页面栈和导航；页面实例负责自己的一屏内容。"
+    },
+    "blog/index.html": {
+      "title": "博客 — ofa.js",
+      "description": "ofa.js 的工程博客：版本演进、性能、架构与实战经验。"
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "ofa.js v5 比 v4 进步了多少？ — ofa.js",
+      "description": "从架构、模板渲染、列表性能、路由和工程体验，拆解 ofa.js v5 相对 v4 的真实进步。"
     }
   },
   "tutorial": {
@@ -393,6 +402,42 @@
           "lesson18": "18 · 嵌套布局",
           "lesson19": "19 · 异步与加载态",
           "lesson20": "20 · 综合：待办清单"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "API 参考",
+    "overview": "API 总览",
+    "groups": {
+      "instance": {
+        "label": "实例相关",
+        "items": {
+          "instance": "实例基础",
+          "traverse": "选择与遍历",
+          "structure": "结构操作"
+        }
+      },
+      "props": {
+        "label": "属性与事件",
+        "items": {
+          "props": "内容、属性与样式",
+          "events": "事件"
+        }
+      },
+      "data": {
+        "label": "数据与扩展",
+        "items": {
+          "reactive": "数据与侦听",
+          "context": "上下文通信",
+          "global": "全局 $ 静态成员",
+          "extend": "扩展实例"
+        }
+      },
+      "app": {
+        "label": "应用与页面",
+        "items": {
+          "app": "o-app 与 o-page"
         }
       }
     }

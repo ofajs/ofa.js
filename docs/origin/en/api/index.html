@@ -1,0 +1,142 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · API Reference</p>
+      <h1>API Reference</h1>
+      <p class="doc-lead">Every instance member, global static member, and runnable example.</p>
+
+      <h2>Try it first: operating on the body element with the global $</h2>
+      <p>
+        This example is not a page module: <code>body</code> contains a plain
+        <code>&lt;div id="target"&gt;</code>, and the <code>&lt;script type="module"&gt;</code>
+        below uses the global <code>$("#target")</code> to grab that element and bind a click
+        event, manipulating the DOM directly just like jQuery.
+        After editing the code, press <kbd>Ctrl</kbd>+<kbd>S</kbd> or click “Run code” to see the result.
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="globalBody"></docs-playground>
+
+      <div class="doc-note">
+        <strong>The API is for non-template syntax:</strong>
+        The instance methods and the global <code>$</code> here are for dynamically finding or
+        creating nodes, reading and writing data, binding events, and controlling the page stack
+        from JavaScript. Logic that <code>on:</code>, <code>o-if</code>, <code>o-fill</code>, or
+        <code>attr:</code> can express in a template is better left in the template.
+      </div>
+
+      <p>
+        The API is grouped by purpose, and every member lists its signature and description.
+        The editor at the top of the page lets you change the code and watch the result in the
+        preview on the right.
+      </p>
+
+      <h2>Instance</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./instance.html">
+          <span class="num">API</span>
+          <h2>Instance basics</h2>
+          <p>Basic properties such as ele / tag / PATH</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./traverse.html">
+          <span class="num">API</span>
+          <h2>Selection and traversal</h2>
+          <p>$ / all / parent / siblings</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./structure.html">
+          <span class="num">API</span>
+          <h2>Structure operations</h2>
+          <p>push / splice / before / remove</p>
+          <span class="more">View →</span>
+        </a>
+
+      </div>
+
+      <h2>Attributes and events</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./props.html">
+          <span class="num">API</span>
+          <h2>Content, attributes, and styles</h2>
+          <p>text / html / attr / css</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./events.html">
+          <span class="num">API</span>
+          <h2>Events</h2>
+          <p>on / one / off / emit</p>
+          <span class="more">View →</span>
+        </a>
+
+      </div>
+
+      <h2>Data and extensions</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./reactive.html">
+          <span class="num">API</span>
+          <h2>Data and watching</h2>
+          <p>watch / watchUntil / refresh</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./context.html">
+          <span class="num">API</span>
+          <h2>Context communication</h2>
+          <p>getProvider / dispatch</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./global.html">
+          <span class="num">API</span>
+          <h2>Global $ static members</h2>
+          <p>$.all / $.stanz / $.version</p>
+          <span class="more">View →</span>
+        </a>
+
+        <a class="docs-row" olink href="./extend.html">
+          <span class="num">API</span>
+          <h2>Extending instances</h2>
+          <p>el.extend / $.fn.extend</p>
+          <span class="more">View →</span>
+        </a>
+
+      </div>
+
+      <h2>Apps and pages</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./app.html">
+          <span class="num">API</span>
+          <h2>o-app and o-page</h2>
+          <p>Page stack, goto, pageIsReady</p>
+          <span class="more">View →</span>
+        </a>
+
+      </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

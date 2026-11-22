@@ -1,0 +1,114 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>Nested routing</h1>
+      <p class="doc-lead">
+        When several pages share the same navigation and sidebar, put the common
+        structure in a parent page and mount child pages under the parent's
+        <code>&lt;slot&gt;</code> through <code>export const parent</code>.
+      </p>
+
+      <h2>Parent page: the layout</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;Home&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;Docs&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Child page: declare parent</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;Main content&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> resolves relative to the child page's own address.
+        The child page is responsible only for the content inside
+        <code>slot</code>; the shared header/footer and sidebar stay in the
+        parent.
+      </p>
+
+      <h2>Behavior when switching</h2>
+      <ul>
+        <li>When child pages under the same parent switch, the parent is <strong>not destroyed</strong> — only the slot content is replaced;</li>
+        <li>the parent's data, scroll position, and loaded components are preserved;</li>
+        <li>entering or leaving a child page through the parent fires the parent's <code>routerChange</code>;</li>
+        <li>a parent can declare <code>parent</code> too, forming multiple levels of nesting.</li>
+      </ul>
+
+      <h2>The structure this site uses</h2>
+      <p>
+        This site itself is an instance of the pattern:
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← site layout (nav, footer, docs sidebar)
+docs/origin/cn/index.html         ← home page, mounted on the layout
+docs/origin/cn/docs/*.html        ← docs pages, mounted on the same layout</code></pre>
+      <p>
+        Every docs page ends with:
+      </p>
+      <pre><code>export const parent = "{{LOCALE}}/layout.html";</code></pre>
+      <p>
+        As a result, switching docs articles does not rebuild the header/footer
+        or the left-hand table of contents — only the body area updates.
+      </p>
+
+      <h2>Common pitfalls</h2>
+      <ul>
+        <li>Forgetting <code>&lt;slot&gt;&lt;/slot&gt;</code> in the parent, so the child page's content does not show;</li>
+        <li>a wrong <code>parent</code> path, which loads the page standalone and drops the layout;</li>
+        <li>putting <code>routerChange</code> on the child page — it only fires on the parent;</li>
+        <li>using reserved names such as <code>back</code>, <code>goto</code>, or <code>src</code> in the parent's data, which makes registration fail.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./routing.html">Routing and navigation →</a>
+         · Next: <a olink href="./scsr.html">Real-path scsr →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

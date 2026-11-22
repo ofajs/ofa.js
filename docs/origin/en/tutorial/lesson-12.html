@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>Your First Component</h1>
+      <p class="doc-lead">Split reusable UI into &lt;template component&gt; and load it with l-m.</p>
+
+      <p>
+  Pages organize content; components own a reusable piece of UI. A component is also an HTML file,
+  but its root node is <code>&lt;template component&gt;</code> and it declares a unique
+  <code>tag</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12" fold-styles="true"></docs-playground>
+<h2>Two files, two tabs</h2>
+<p>
+  The tabs at the top of the editor switch between <code>page.html</code> and
+  <code>hello-card.html</code>. The page loads the component with
+  <code>&lt;l-m src="./hello-card.html"&gt;</code>, and after that you can use
+  <code>&lt;hello-card&gt;</code> like a normal HTML tag.
+</p>
+<ul>
+  <li><code>tag</code>: the component's tag name; it must match the name used where it is called;</li>
+  <li>a component's <code>data</code> is isolated, so each of the two cards keeps its own count;</li>
+  <li>a component's <code>&lt;style&gt;</code> only applies to that component.</li>
+</ul>
+<div class="doc-note">
+  <strong>The file name is not the tag name:</strong> the tag name comes from the
+  <code>tag</code> declared in the component, and is inferred from the file name only when it is missing.
+  Don't rely on inference — declare it explicitly.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Change the heading and button text in the component, then add a third card to the page and check
+  whether the three cards count independently.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-11.html">11 · Lifecycle →</a> · Next: <a olink href="./lesson-13.html">13 · Component Parameters →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

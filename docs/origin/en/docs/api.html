@@ -1,0 +1,193 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>$.fn and Wrapper Objects</h1>
+      <p class="doc-lead">
+        <code>$</code> is both a selector and an element factory. It returns an ofa.js
+        wrapper object, which carries most framework capabilities; browser-native
+        capabilities are reached through <code>.ele</code>.
+      </p>
+
+      <h2>Getting elements</h2>
+      <pre><code>$("#target");                       // first match
+$("#target").$("h3");               // child element
+$("my-component").shadow.$("#x");   // query inside the Shadow DOM
+$.all("li");                        // array of all matching wrapper instances
+
+$(document.createElement("div"));   // native element → wrapper object
+$(`&lt;div&gt;new&lt;/div&gt;`);               // HTML string → wrapper object
+$({ tag: "div", text: "hi" });      // object description → wrapper object</code></pre>
+
+      <h2>Wrapper objects vs. native elements</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Case</th><th>Syntax</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ofa.js properties/methods</td><td><code>el.src</code>, <code>el.text</code>, <code>el.on()</code>, <code>el.app</code></td></tr>
+          <tr><td>Browser-native properties</td><td><code>el.ele.scrollTop</code>, <code>el.ele.shadowRoot</code></td></tr>
+          <tr><td>Component data fields</td><td><code>el.count</code> (access the field directly)</td></tr>
+          <tr><td>dataset</td><td><code>el.data.role</code></td></tr>
+          <tr><td>Shadow query</td><td><code>this.shadow.$("#id")</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        Rule of thumb: use ofa.js properties directly, and reach browser-native ones
+        through <code>.ele</code>.
+      </p>
+
+      <h2>Tree navigation</h2>
+      <pre><code>el.prev;      el.prevs;
+el.next;      el.nexts;
+el.siblings;
+el.parent;    el.parents;
+el.host;      // host component instance
+el.app;       // the o-app it belongs to
+el.root;      // document instance
+el.shadow;    // shadow root instance
+el.tag;       // lowercased tag name
+el.index;     // position within the parent
+el.PATH;      // component registration file path
+el.is("li");  // whether it matches the selector</code></pre>
+
+      <h2>Adding and removing children</h2>
+      <pre><code>$("ul").push("&lt;li&gt;new&lt;/li&gt;");
+$("ul").unshift("&lt;li&gt;first&lt;/li&gt;");
+$("ul").pop();
+$("ul").shift();
+$("ul").splice(1, 2, "&lt;li&gt;replacement&lt;/li&gt;");
+
+el.before("&lt;p&gt;before&lt;/p&gt;");
+el.after("&lt;p&gt;after&lt;/p&gt;");
+el.remove();
+el.wrap("&lt;div class='wrapper'&gt;&lt;/div&gt;");
+el.unwrap();</code></pre>
+
+      <h2>Content and attributes</h2>
+      <pre><code>el.text = "new text";
+el.html = "&lt;b&gt;hi&lt;/b&gt;";
+
+el.attr("data-id");          // read an attribute
+el.attr("data-id", "42");    // write an attribute
+
+el.css.color = "red";
+el.css = { color: "blue", lineHeight: "1.5" };
+el.css = { ...el.css, color: "red" };
+
+el.classList.add("active");
+el.classList.remove("done");
+el.data.role = "admin";
+el.refresh();                // manually refresh non-reactive rendering</code></pre>
+      <p>
+        The template equivalents are <code>:text</code>, <code>:html</code>,
+        <code>attr:data-id</code>, <code>:style.color</code>, and
+        <code>class:active</code>.
+      </p>
+
+      <h2>Events</h2>
+      <pre><code>el.on("click", handler);
+el.one("load", init);
+el.off("click", handler);
+
+el.emit("save", {
+  data: { id: 1 },
+  bubbles: true,
+  composed: true,
+});</code></pre>
+
+      <h2>o-app and o-page</h2>
+      <pre><code>const app = $("o-app");
+app.src;
+app.current;
+app.routers;
+app.goto("./page.html");
+app.replace("./page.html");
+app.back();
+app.forward();
+
+const page = app.current;
+page.src;
+page.goto("./next.html");
+page.pageIsReady;</code></pre>
+
+      <h2>stanz capabilities</h2>
+      <pre><code>const tid = target.watch(() =&gt; {
+  // deep watch
+});
+target.watchTick(() =&gt; {}); // throttled watch
+target.unwatch(tid);
+
+const data = $.stanz({ count: 0 });
+data._internal = "not watched"; // the underscore prefix skips reactivity</code></pre>
+      <p>
+        To wait until a data condition holds, use <code>watchUntil</code>; it returns a
+        Promise that resolves once the condition is met and automatically cancels the
+        watch:
+      </p>
+      <pre><code>const app = $("o-app");
+await app.watchUntil(() =&gt; app.appIsReady);
+
+// 30-second timeout by default; pass a second argument to change it
+await app.watchUntil(() =&gt; app.current, 5000);</code></pre>
+      <div class="doc-note">
+        <strong>watchUntil only evaluates on data changes; it does not check immediately when registered.</strong>
+        If the condition may already hold, check it once yourself before deciding
+        whether to wait.
+      </div>
+
+      <h2>Extending instances</h2>
+      <pre><code>// A single instance
+el.extend({
+  say() {
+    return "hello";
+  },
+});
+
+// All instances
+$.fn.extend({
+  get good() {
+    return "ofa.js is good";
+  },
+});
+
+// New directive: :red="count % 3 === 0"
+$.fn.extend({
+  set red(value) {
+    this.css.color = value ? "red" : "";
+  },
+});</code></pre>
+
+      <h2>formData plugin</h2>
+      <p>
+        <code>formData()</code> is not in the default framework build. First import
+        <code>packages/plugins/formdata/formdata.mjs</code> (or the dist script), then
+        call it:
+      </p>
+      <pre><code>const data = this.shadow.formData();
+data.username = "Yao";
+console.log(data.username);
+data.revoke(); // release the binding</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./scsr.html">Real-path scsr →</a>
+         · Next: <a olink href="./plugins.html">Plugins and Extensions →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

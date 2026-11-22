@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 06</p>
+      <h1>Two-way binding</h1>
+      <p class="doc-lead">sync: keeps a form field and data in sync in both directions. Best for scalar values.</p>
+
+      <p>
+  <code>sync:</code> does two things at once: it updates the form when data changes,
+  and writes user input back into data. It works well for scalar values such as
+  strings, numbers, and booleans.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-6" fold-styles="true"></docs-playground>
+<h2>Common form fields</h2>
+<ul>
+  <li><code>sync:value="name"</code>: text inputs, textarea, select;</li>
+  <li><code>sync:checked="subscribe"</code>: the checked state of a checkbox;</li>
+  <li>The preview below updates as you type, which shows the value has been written
+    back to <code>data</code>.</li>
+</ul>
+<div class="doc-note">
+  <strong>Don't sync objects:</strong> two-way binding an object leads to confusing
+  references. To edit an object or array, bind to a specific field with
+  <code>sync:value="$data.field"</code>, or handle the input in an
+  <code>on:input</code> method.
+</div>
+<h2>Try it</h2>
+<p>
+  Add an "Age" number input (<code>type="number"</code>), bind it with
+  <code>sync:value</code>, and show next year's age in the preview.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-5.html">05 · Events →</a> · Next: <a olink href="./lesson-7.html">07 · Conditional rendering →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

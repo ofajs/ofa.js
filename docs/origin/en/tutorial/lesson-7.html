@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 07</p>
+      <h1>Conditional rendering</h1>
+      <p class="doc-lead">o-if / o-else-if / o-else control whether content is present.</p>
+
+      <p>
+  To show different content based on state, use <code>&lt;o-if :value="condition"&gt;</code>.
+  When the condition is false the content is removed; when it is true the content is
+  created again.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-7" fold-styles="true"></docs-playground>
+<h2>The three tags must be consecutive</h2>
+<ul>
+  <li><code>o-if</code> must have a <code>:value</code>;</li>
+  <li><code>o-else-if</code> tests the next condition;</li>
+  <li><code>o-else</code> takes no <code>:value</code> and acts as the final fallback.</li>
+</ul>
+<div class="doc-note">
+  <strong>Use class for frequent toggling:</strong> if you are only switching a color
+  or showing/hiding something, prefer <code>class:</code> so the DOM is kept;
+  <code>o-if</code> destroys and recreates content, so it suits conditions that
+  rarely change or cases where resources really need to be released.
+</div>
+<h2>Try it</h2>
+<p>
+  Change scores below 60 to "Fail", and add an 80–89 "Good" tier.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-6.html">06 · Two-way binding →</a> · Next: <a olink href="./lesson-8.html">08 · List rendering →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

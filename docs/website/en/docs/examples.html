@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complete Examples — ofa.js Docs</title>
+    <meta name="description" content="Four complete examples: a minimal app, a custom component, a todo list, and a routing app." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Complete Examples — ofa.js Docs" />
+    <meta property="og:description" content="Four complete examples: a minimal app, a custom component, a todo list, and a routing app." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>Complete Examples</h1>
+      <p class="doc-lead">
+        Four complete examples, from the smallest page to a routed app. Save them as
+        files and serve them from a static server to run them.
+      </p>
+
+      <h2>Example 1: Minimal page</h2>
+      <p><strong>index.html</strong></p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;ofa.js minimal app&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <p><strong>page.html</strong></p>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host { display: block; padding: 20px; font-family: sans-serif; }
+    button { padding: 6px 16px; cursor: pointer; }
+  &lt;/style&gt;
+
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+  &lt;p&gt;Count: {{count}}, double: {{doubleCount}}&lt;/p&gt;
+  &lt;button on:click="count++"&gt;+1&lt;/button&gt;
+  &lt;button on:click="reset"&gt;Reset&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { title: "Hello ofa.js", count: 0 },
+      proto: {
+        get doubleCount() {
+          return this.count * 2;
+        },
+        reset() {
+          this.count = 0;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Example 2: Custom component</h2>
+      <p><strong>my-counter.html</strong></p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid #4caf50;
+      border-radius: 8px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{currentValue}}&lt;/strong&gt;
+  &lt;button on:click="increment"&gt;+&lt;/button&gt;
+  &lt;button on:click="decrement"&gt;-&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: { initialValue: 0 },
+      data: { currentValue: 0 },
+      watch: {
+        initialValue(value) {
+          this.currentValue = value;
+        },
+      },
+      ready() {
+        this.currentValue = this.initialValue;
+      },
+      proto: {
+        increment() {
+          this.currentValue += 1;
+          this.emit("change", { data: { value: this.currentValue } });
+        },
+        decrement() {
+          this.currentValue -= 1;
+          this.emit("change", { data: { value: this.currentValue } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <p><strong>Using the component</strong></p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter :initial-value="5" on:change="onChange"&gt;
+    Current count
+  &lt;/my-counter&gt;
+  &lt;p&gt;{{log}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { log: "" },
+      proto: {
+        onChange(event) {
+          this.log = "change -> " + event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Example 3: Todo list</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host { display: block; padding: 20px; }
+    .done { text-decoration: line-through; opacity: 0.6; }
+    li { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+  &lt;/style&gt;
+
+  &lt;h2&gt;Todos ({{todos.length}})&lt;/h2&gt;
+
+  &lt;input
+    sync:value="draft"
+    on:keydown="addOnEnter($event)"
+    placeholder="Enter a todo, then press Enter"
+  /&gt;
+
+  &lt;ul&gt;
+    &lt;o-fill :value="todos" fill-key="id"&gt;
+      &lt;li class:done="$data.done"&gt;
+        &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+        &lt;span&gt;{{$data.text}}&lt;/span&gt;
+        &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+      &lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    let uid = 1;
+
+    export default async () =&gt; ({
+      data: {
+        draft: "",
+        todos: [{ id: 1, text: "Learn ofa.js", done: false }],
+      },
+      proto: {
+        addOnEnter(event) {
+          if (event.key !== "Enter") return;
+          const text = this.draft.trim();
+          if (!text) return;
+          this.todos.push({ id: ++uid, text, done: false });
+          this.draft = "";
+        },
+        remove(id) {
+          const index = this.todos.findIndex((item) =&gt; item.id === id);
+          if (index &gt; -1) this.todos.splice(index, 1);
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Example 4: Routed app</h2>
+      <p><strong>index.html</strong></p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;ofa.js routed app&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;style&gt;
+      html, body { margin: 0; padding: 0; height: 100%; }
+      o-app { display: block; height: 100%; }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-router fix-body&gt;
+      &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+    &lt;/o-router&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <p><strong>app-config.js</strong></p>
+      <pre><code>export const home = "./pages/home.html";
+export const allowForward = true;
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};</code></pre>
+
+      <p><strong>pages/home.html</strong></p>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Home&lt;/h1&gt;
+  &lt;a olink href="./detail.html?id=42"&gt;Go to detail (with query)&lt;/a&gt;
+  &lt;button on:click="goto('./detail.html?id=42')"&gt;goto detail&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({ data: {} });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <p><strong>pages/detail.html</strong></p>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Detail&lt;/h1&gt;
+  &lt;p&gt;id: &lt;b&gt;{{id}}&lt;/b&gt;&lt;/p&gt;
+  &lt;button on:click="back()"&gt;Back&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async ({ query }) =&gt; ({
+      data: { id: query.id || "(not specified)" },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./pitfalls.html">Common Pitfalls →</a>
+         · Next: <a olink href="./playground.html">Live Examples →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

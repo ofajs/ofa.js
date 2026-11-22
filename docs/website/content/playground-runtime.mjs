@@ -3,6 +3,8 @@
  * 独立成模块，避免把 <template> / <script> 字符串嵌在组件 HTML 里。
  */
 
+import { DEFAULT_CODE_EN, LESSONS_EN } from "./playground-runtime-en.mjs";
+
 export const SPACE = "ofa-docs-playground";
 
 export const OFA_CDN =
@@ -45,17 +47,18 @@ export const DEFAULT_CODE = `<template page>
 </template>`;
 
 export const buildIndex = (version, entry = "page") => {
+  const isEnglish = document.documentElement.lang.startsWith("en");
   const body =
     entry === "app"
       ? `<o-app src="./app.mjs?v=${version}"></o-app>`
       : `<o-page src="./page.html?v=${version}"></o-page>`;
 
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${isEnglish ? "en" : "zh-CN"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ofa.js 案例预览</title>
+    <title>${isEnglish ? "ofa.js Example Preview" : "ofa.js 案例预览"}</title>
     <script type="module" src="${OFA_CDN}"><\/script>
     <style>
       html, body { margin: 0; min-height: 100%; }
@@ -73,7 +76,10 @@ export const buildIndex = (version, entry = "page") => {
 // { entry: "page" | "app", files: { "page.html": "..." } }。
 // entry="app" 时入口写 app.mjs，用 <o-app> 跑多页面/路由课程。
 export const getLesson = (lesson) => {
-  const raw = LESSONS[lesson] || DEFAULT_CODE;
+  const isEnglish = document.documentElement.lang.startsWith("en");
+  const lessons = isEnglish ? LESSONS_EN : LESSONS;
+  const fallback = isEnglish ? DEFAULT_CODE_EN : DEFAULT_CODE;
+  const raw = lessons[lesson] || fallback;
 
   if (typeof raw === "string") {
     return { entry: "page", files: { "page.html": raw } };

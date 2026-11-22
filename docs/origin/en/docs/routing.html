@@ -1,0 +1,111 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>Routing and navigation</h1>
+      <p class="doc-lead">
+        ofa.js pages navigate in one of two modes: hash routing (o-router),
+        which switches only inside the front-end app, and scsr, where every
+        URL is a real document. The page navigation API is the same in both
+        modes.
+      </p>
+
+      <h2>Page navigation API</h2>
+      <pre><code>// Inside a page module, `this` is the page instance
+this.goto("./detail.html?id=42"); // push onto the page stack
+this.replace("./detail.html");    // replace the current page without adding history
+this.back();                      // go back
+this.forward();                   // requires allowForward: true in the app config</code></pre>
+      <p>For declarative navigation, use <code>olink</code>:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;View details&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> only takes effect inside <code>o-app</code>. It goes
+        through in-app routing and transition animations without reloading the
+        whole page. Do not add <code>olink</code> to external links.
+      </p>
+
+      <h2>Passing parameters via query</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query is an argument of the page module function, not
+        <code>this.$route</code>. To react to query changes, read it in the
+        page module function; changing the address of the same page reloads
+        the module.
+      </p>
+
+      <h2>o-router: hash routing</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router is a bridge package and must be loaded after ofa.js;</li>
+        <li><code>fix-body</code> makes html/body full size; removing it reverts the change;</li>
+        <li>the page stack is synced to the hash, for example <code>#/pages/detail.html?id=42</code>;</li>
+        <li>refresh, deep links, sharing, and forward/back all restore the page without server rewrites;</li>
+        <li>a page works with only one o-app.</li>
+      </ul>
+
+      <h2>Hash URL format</h2>
+      <pre><code>// Correct
+location.origin + "/#/pages/detail.html?id=42"
+
+// Wrong: an extra pathname or ./
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>Watching routing changes</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> is <code>goto</code>, <code>replace</code>,
+        <code>back</code>, or <code>forward</code>; <code>src</code> is the
+        target page address. The <code>routerChange</code> hook in a page
+        module fires only on the parent layout page, where it is used to
+        highlight the current article.
+      </p>
+
+      <h2>When you need real paths</h2>
+      <p>
+        Hash routing suits pure front-end apps. If every URL must be crawlable,
+        directly accessible, and shareable, use
+        <a olink href="./scsr.html">scsr real-path routing</a>.
+        The page API, nested layouts, and animation behavior are identical in
+        both.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./app.html">o-app app →</a>
+         · Next: <a olink href="./nested-routing.html">Nested routing →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

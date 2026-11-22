@@ -51,9 +51,13 @@ docs/
 │       │   ├── global.html          全局 $ 静态成员
 │       │   ├── extend.html          扩展实例
 │       │   └── app.html             o-app 与 o-page
-│       └── tutorial/                交互式教程（21 页）
-│           ├── index.html           教程总览
-│           └── lesson-1..20.html    二十节可编辑示例课
+│       ├── tutorial/                交互式教程（21 页）
+│       │   ├── index.html           教程总览
+│       │   └── lesson-1..20.html    二十节可编辑示例课
+│       └── blog/                    博客（2 页）
+│           ├── index.html           博客列表
+│           └── v5-vs-v4.html        首篇：v5 相对 v4 的进步
+│   └── en/                          英文翻译，目录结构与 cn/ 一一对应
 └── website/                         共享资源 + 构建产物
     ├── index.html                   构建生成的根语言选择页
     ├── boot.js                      共享启动器：ofa.js → scsr
@@ -71,11 +75,14 @@ docs/
     │   ├── page-runtime.mjs           首页/文档/API 共享运行时
     │   ├── highlight.mjs              文档代码高亮（零依赖 tokenizer）
     │   ├── playground-runtime.mjs     教程案例默认代码与虚拟页面入口
-    │   └── api-examples.mjs           API 各页的可运行示例
+    │   ├── playground-runtime-en.mjs  英文教程案例
+    │   ├── api-examples.mjs           API 各页的可运行示例
+    │   └── api-examples-en.mjs        英文 API 示例
     ├── styles/
     │   ├── site.css                   首页与通用设计系统
     │   ├── shell.css                  导航/页脚/背景样式
     │   ├── docs.css                   文档文章排版
+    │   ├── blog.css                   博客列表与长文排版
     │   └── loading.css                首屏/路由 loading 共享样式
     ├── templates/
     │   ├── locale-page.html         单页 SCSR 文档模板
@@ -183,6 +190,7 @@ npm run server:website
 
 - 根语言选择页：http://localhost:3348/
 - 中文首页：http://localhost:3348/cn/
+- English home: http://localhost:3348/en/
 - 文档：http://localhost:3348/cn/docs/
 
 两个脚本默认都用 3348 端口，同时只能启动一个；需要并存时用
@@ -191,20 +199,32 @@ npm run server:website
 不要直接双击 `index.html` 打开——SCSR 页面、`o-page` 与 `site.json` 的加载
 需要 HTTP 环境，`file://` 会被浏览器模块 CORS 策略拦截。
 
+## 当前语言
+
+站点当前提供两种语言：
+
+- `docs/origin/cn/` → `docs/website/cn/`（简体中文）
+- `docs/origin/en/` → `docs/website/en/`（English）
+
+顶部导航的语言下拉使用 senti-ui 的 `<st-select>`，切换时保留当前路径，
+例如 `/cn/docs/routing.html` ↔ `/en/docs/routing.html`。`footer` 仍保留
+语言选择入口，根路径 `/` 提供语言选择页。
+
 ## 新增 / 翻译语言
 
-以英语为例：
-
-1. 复制 `docs/origin/cn/` 为 `docs/origin/en/`；
+1. 复制 `docs/origin/cn/` 为 `docs/origin/<locale>/`；
 2. 翻译所有 HTML 页面（首页与 `docs/` 下的文章），只改文字，保留标签、
    `id`、`class`、指令与 `{{SITE}}` / `{{LOCALE}}` 占位符；
-3. 翻译 `site.json` 的 `meta`、`shell`、`docs`、`pages`、`demo` 与
-   `toast` 文案，并把 `meta.lang` 改为 `en`、`meta.language` 改为 `English`；
-4. 可选的 `meta.order` 控制语言在根选择页中的排序（数字越小越靠前）；
+3. 翻译 `site.json` 的 `meta`、`shell`、`api`、`docs`、`pages`、`demo` 与
+   `toast` 文案，并把 `meta.lang`、`meta.language` 改成对应语言；
+4. 可选的 `meta.order` 控制语言在根选择页和顶部下拉中的排序；
 5. 执行 `npm run build:website`。
 
-构建会生成 `docs/website/en/`，并把根语言选择页更新为两种语言。
-删除 `docs/origin/en/` 后重新构建，旧的 `docs/website/en/` 会被清理。
+构建会生成 `docs/website/<locale>/`，并把根语言选择页更新为全部语言。
+删除 `docs/origin/<locale>/` 后重新构建，旧的 `docs/website/<locale>/` 会被清理。
+
+英文站的可运行示例单独维护在 `content/playground-runtime-en.mjs` 与
+`content/api-examples-en.mjs`，通过页面 `<html lang>` 自动选择，中文站不受影响。
 
 ### 翻译时不要动的内容
 
@@ -241,7 +261,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 当前站点有首页 1 页 + 文档 24 页 + API 11 页 + 教程 21 页，共 57 份内容页 HTML，另有共享的
+- 每种语言有首页 1 页 + 文档 24 页 + API 11 页 + 教程 21 页 + 博客 2 页，共 59 份内容页 HTML（当前 cn / en 各一套），另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；
@@ -316,6 +336,9 @@ npm run server:website
   即可刷新索引。搜索文案在 `site.json` 的 `shell.search` 中维护。
 
 ## 主题模式
+
+顶部导航还提供「博客」栏目（`/cn/blog/`、`/en/blog/`），文章使用
+独立的 `styles/blog.css` 排版，不占用文档侧栏。
 
 顶部导航右侧的主题按钮提供「白天模式 / 黑夜模式 / 跟随系统」三项，
 状态写入 `localStorage["st-theme-mode"]`（`light` / `dark` / `auto`）：

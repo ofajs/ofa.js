@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 11</p>
+      <h1>Lifecycle</h1>
+      <p class="doc-lead">ready → attached → loaded, then detached on removal; clean up timers and listeners in detached.</p>
+
+      <p>
+  Pages and components share a fixed set of lifecycle hooks. The most commonly used are
+  <code>ready</code> (the DOM is created), <code>attached</code> (mounted to the page),
+  and <code>detached</code> (removed).
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-11" fold-styles="true"></docs-playground>
+<h2>Timing and responsibilities</h2>
+<ul>
+  <li><code>ready</code>: the template has rendered and you can query the DOM;</li>
+  <li><code>attached</code>: the element has entered the document; a good place to start timers and add global listeners;</li>
+  <li><code>loaded</code>: the element itself and its async resources have finished loading; a good place to remove a loading state;</li>
+  <li><code>detached</code>: the element has left the document; you must clean up timers, listeners, and references to shared state.</li>
+</ul>
+<div class="doc-note">
+  <strong>What happens without cleanup:</strong> timers keep running and keep mutating data after the page
+  is gone, and listeners hold on to references from the old page, causing memory leaks. This is the most
+  common lifecycle mistake.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Change the timer to update every 0.5 seconds and to stop adding seconds while paused (the example already does this).
+  Then try resetting <code>seconds</code> to zero in <code>detached</code> and watch what happens when you navigate
+  away and come back.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-10.html">10 · Computed Properties and Watching →</a> · Next: <a olink href="./lesson-12.html">12 · Your First Component →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

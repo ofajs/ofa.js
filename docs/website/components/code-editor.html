@@ -236,16 +236,16 @@
         on:keydown="onKeydown($event)"
         on:keyup="updateCursor($event)"
         on:click="updateCursor($event)"
-        aria-label="代码编辑器"
+        attr:aria-label="ui.editorAria"
       ></textarea>
 
     </div>
 
     <div class="fold-overlay" class:visible="foldedView">
       <div class="fold-head">
-        <span>已折叠 {{foldedCount}} 个区块</span>
-        <span>点击行号左侧的 ▸ 展开，或</span>
-        <button on:click="clearFolds">展开全部并编辑</button>
+        <span>{{ui.foldedPrefix}}{{foldedCount}}{{ui.foldedSuffix}}</span>
+        <span>{{ui.foldHint}}</span>
+        <button on:click="clearFolds">{{ui.expandAll}}</button>
       </div>
       <div class="fold-content">
         <pre class="gutter folded-gutter" :html="foldedGutterHtml" on:click="onGutterClick"></pre>
@@ -256,6 +256,25 @@
 
   <script>
     import { highlightCode } from "../content/highlight.mjs";
+
+    const IS_EN = document.documentElement.lang.startsWith("en");
+    const UI = IS_EN
+      ? {
+          editorAria: "Code editor",
+          foldedPrefix: "Collapsed regions: ",
+          foldedSuffix: "",
+          foldHint: "Click ▸ left of a line number to expand, or",
+          expandAll: "Expand all and edit",
+          foldToggle: "Collapse or expand",
+        }
+      : {
+          editorAria: "代码编辑器",
+          foldedPrefix: "已折叠 ",
+          foldedSuffix: " 个区块",
+          foldHint: "点击行号左侧的 ▸ 展开，或",
+          expandAll: "展开全部并编辑",
+          foldToggle: "折叠或展开",
+        };
 
     const VOID_TAGS = new Set([
       "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
@@ -309,6 +328,7 @@
         fold: "",
       },
       data: {
+        ui: UI,
         code: "",
         codeHtml: "",
         gutterHtml: "",
@@ -394,7 +414,7 @@
               const foldable = this._folds.has(line);
               const folded = useFoldedState && this._foldedStarts.has(line);
               const button = foldable
-                ? `<button class="fold${folded ? "" : " open"}" data-fold="${line}" aria-label="折叠或展开"></button>`
+                ? `<button class="fold${folded ? "" : " open"}" data-fold="${line}" aria-label="${UI.foldToggle}"></button>`
                 : '<span class="fold-space"></span>';
               return `<div class="ln-row">${button}<span class="ln">${number}</span></div>`;
             })

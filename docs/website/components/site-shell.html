@@ -1,5 +1,6 @@
 <template component>
   <link rel="stylesheet" href="../styles/shell.css" />
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/select/select.html"></l-m>
 
   <div class="nav-wrap">
     <nav class="nav" attr:aria-label="labelNav">
@@ -19,6 +20,21 @@
         <a class="nav-link" data-nav="api" olink attr:href="apiUrl" on:click="closeMenu">
           {{labelApi}}
         </a>
+        <a class="nav-link" data-nav="blog" olink attr:href="blogUrl" on:click="closeMenu">
+          {{labelBlog}}
+        </a>
+        <div class="lang-select">
+          <st-select
+            class="lang-select-input"
+            variant="outlined"
+            attr:default-value="lang"
+            attr:aria-label="labelLanguages"
+            on:change="switchLanguage"
+          >
+            <option value="cn">中文</option>
+            <option value="en">English</option>
+          </st-select>
+        </div>
       </div>
 
       <div class="nav-actions">
@@ -283,11 +299,12 @@
       return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
     };
 
-    const resultKind = (url) => {
+    const resultKind = (url, english = false) => {
       if (url.startsWith("api/")) return "API";
-      if (url.startsWith("tutorial/")) return "教程";
-      if (url.startsWith("docs/")) return "文档";
-      return "首页";
+      if (url.startsWith("blog/")) return english ? "Blog" : "博客";
+      if (url.startsWith("tutorial/")) return english ? "Tutorial" : "教程";
+      if (url.startsWith("docs/")) return english ? "Docs" : "文档";
+      return english ? "Home" : "首页";
     };
 
     export default {
@@ -308,6 +325,8 @@
         languagesUrl: "../",
         docsUrl: "./docs/",
         apiUrl: "./api/",
+        blogUrl: "./blog/",
+        labelBlog: "博客",
         searchUrl: "./search-index.json",
         searchPlaceholder: "搜索文档、教程、API…",
         searchEmpty: "没有匹配内容",
@@ -327,6 +346,8 @@
         footerNote: "This page is built with ofa.js itself.",
       },
       data: {
+        lang: location.pathname.split("/")[1] === "en" ? "en" : "cn",
+        isEnglish: document.documentElement.lang.startsWith("en"),
         menuOpen: false,
         searchOpen: false,
         searchQuery: "",
@@ -337,6 +358,20 @@
         themeMenuOpen: false,
       },
       proto: {
+        switchLanguage(event) {
+          const next = event.target.value;
+          if (next === this.lang) return;
+          const url = new URL(location.href);
+          const parts = url.pathname.split("/");
+          if (parts[1] === "cn" || parts[1] === "en") {
+            parts[1] = next;
+          } else {
+            parts.splice(1, 0, next);
+          }
+          url.pathname = parts.join("/");
+          location.href = url.href;
+        },
+
         toggleMenu() {
           this.menuOpen = !this.menuOpen;
           if (this.menuOpen) {
@@ -463,7 +498,7 @@
             .slice(0, 8)
             .map(({ entry }) => ({
               ...entry,
-              kind: resultKind(entry.url),
+              kind: resultKind(entry.url, this.isEnglish),
               snippet: makeSnippet(entry, terms),
             }));
 
@@ -546,6 +581,14 @@
           apiLink?.classList.toggle(
             "active",
             /\/api(?:\/|$)/.test(location.pathname),
+          );
+
+          const blogLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="blog"]',
+          );
+          blogLink?.classList.toggle(
+            "active",
+            /\/blog(?:\/|$)/.test(location.pathname),
           );
         },
       },

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cross-Component Context — ofa.js Docs</title>
+    <meta name="description" content="o-provider, o-consumer, o-root-provider, getProvider, and dispatch." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cross-Component Context — ofa.js Docs" />
+    <meta property="og:description" content="o-provider, o-consumer, o-root-provider, getProvider, and dispatch." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>Cross-Component Context</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> places data into a subtree, and <code>o-consumer</code> consumes
+        it from the nearest provider. This suits passing user info, themes, and business context
+        across several component layers, avoiding prop drilling.
+      </p>
+
+      <h2>Providers and consumers</h2>
+      <pre><code>&lt;!-- Provider: name identifies the context; the remaining attributes are shared data --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="Alice"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- Consumer: syncs context attributes into its own data fields --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        The consumer walks up the DOM to find the <strong>nearest</strong> provider with the
+        same name. The provider must be an ancestor of the consumer; a sibling will not be found.
+      </p>
+
+      <h2>Runtime updates</h2>
+      <p>
+        A provider's HTML attributes are read only once, during initialization. To update at
+        runtime you must change its data properties directly; <code>setAttribute</code> does
+        not work:
+      </p>
+      <pre><code>// Correct: change the provider's data
+const provider = $("#userProvider");
+provider.userName = "Bob";
+
+// Wrong: setAttribute does not broadcast to consumers
+provider.ele.setAttribute("user-name", "Bob");</code></pre>
+
+      <h2>Nesting and reconnection</h2>
+      <p>
+        When several providers with the same name are nested, their data is merged field by
+        field, and the provider closer to the consumer overrides fields from the farther one.
+        A consumer's <code>name</code> can also be changed dynamically; after the change it
+        looks up the nearest provider with the new name again.
+      </p>
+
+      <h2>Defaults: o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        When no provider with the same name exists, the consumer falls back to the
+        document-level root-provider. When both exist, the provider closer to the consumer wins.
+      </p>
+
+      <h2>Looking up a provider explicitly</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "Carol"; // consumers update automatically
+
+// any element can look up a provider
+$(".profile").getProvider("userInfo");
+
+// global root provider
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>Providers dispatching events to consumers</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "Hello" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>When not to use it</h2>
+      <ul>
+        <li>Passing values only between parent and child: use <code>:prop</code> / <code>sync:</code>;</li>
+        <li>Sharing business state across pages: use <code>$.stanz()</code>;</li>
+        <li>Contexts that are purely styling, such as theme colors or sizes: prefer CSS variables or <code>match-var</code>.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./state.html">Global State →</a>
+         · Next: <a olink href="./app.html">o-app Applications →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

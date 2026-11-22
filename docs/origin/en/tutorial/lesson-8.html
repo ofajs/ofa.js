@@ -1,0 +1,58 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 08</p>
+      <h1>List rendering</h1>
+      <p class="doc-lead">o-fill renders an array; inside each item, use $data, $index, and $host.</p>
+
+      <p>
+  Render an array in a loop with <code>&lt;o-fill :value="items"&gt;</code>. Inside an
+  item you cannot write <code>item.text</code> directly; use the scope variables the
+  framework provides, such as <code>$data</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8" fold-styles="true"></docs-playground>
+<h2>Item scope</h2>
+<ul>
+  <li><code>$data</code>: data for the current item, for example <code>$data.text</code>;</li>
+  <li><code>$index</code>: the current index, starting at 0;</li>
+  <li><code>$host</code>: the page instance; call methods such as <code>$host.removeItem(id)</code>;</li>
+  <li><code>fill-key="id"</code>: always add this when there is a unique field, so items
+    can be reused when entries are added or removed.</li>
+</ul>
+<div class="doc-note">
+  <strong>Why fill-key matters:</strong> without a key, deleting an item in the middle
+  makes all the items after it get rebuilt; if an item contains an input or local
+  state, that state is lost. Use <code>id</code> to tell the framework "this is still
+  the same item."
+</div>
+<div class="doc-note">
+  <strong>Going further:</strong> for nested lists, use <code>$parent</code> to access
+  outer data; <code>o-fill</code> inside table rows or a <code>&lt;select&gt;</code>
+  requires <code>&lt;template is="replace-temp"&gt;</code>, and complex structures can
+  live in a named template. See <a olink href="../docs/render.html">Conditionals and lists</a>
+  for complete examples.
+</div>
+<h2>Try it</h2>
+<p>
+  Add a "Done" button after each item that toggles the item's done state when clicked
+  (first add a <code>done</code> field to the data).
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-7.html">07 · Conditional rendering →</a> · Next: <a olink href="./lesson-9.html">09 · Editing a list →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

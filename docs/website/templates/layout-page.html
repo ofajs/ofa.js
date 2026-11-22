@@ -42,6 +42,8 @@
   attr:docs-url="navUrls.docs"
   attr:label-api="site.shell.nav.api"
   attr:api-url="navUrls.api"
+  attr:blog-url="navUrls.blog"
+  attr:label-blog="site.shell.nav.blog"
   attr:search-url="navUrls.searchIndex"
   attr:search-placeholder="site.shell.search.placeholder"
   attr:search-empty="site.shell.search.empty"
@@ -281,7 +283,7 @@
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">入门</span>
+          <span class="side-label">{{site.tutorial.groups.start.label}}</span>
           <st-list slot="sublist">
 
             <st-list-item
@@ -320,7 +322,7 @@
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">交互与状态</span>
+          <span class="side-label">{{site.tutorial.groups.interact.label}}</span>
           <st-list slot="sublist">
 
             <st-list-item
@@ -383,7 +385,7 @@
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">组件</span>
+          <span class="side-label">{{site.tutorial.groups.component.label}}</span>
           <st-list slot="sublist">
 
             <st-list-item
@@ -414,7 +416,7 @@
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">应用与实战</span>
+          <span class="side-label">{{site.tutorial.groups.app.label}}</span>
           <st-list slot="sublist">
 
             <st-list-item
@@ -470,66 +472,66 @@
       </st-list>
     </aside>
 
-    <aside class="docs-nav is-hidden" class:is-hidden="!apiMode" attr:aria-label="'API 参考'">
+    <aside class="docs-nav is-hidden" class:is-hidden="!apiMode" attr:aria-label="site.api.label">
       <st-list class="side-list">
         <st-list-item
           button
           class:active="apiKey === 'index'"
           on:click="navigateApi('index')"
         >
-          <span class="side-label">API 总览</span>
+          <span class="side-label">{{site.api.overview}}</span>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">实例相关</span>
+          <span class="side-label">{{site.api.groups.instance.label}}</span>
           <st-list slot="sublist">
             <st-list-item button class:active="apiKey === 'instance'" on:click="navigateApi('instance')">
-              <span class="side-label">实例基础</span>
+              <span class="side-label">{{site.api.groups.instance.items.instance}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'traverse'" on:click="navigateApi('traverse')">
-              <span class="side-label">选择与遍历</span>
+              <span class="side-label">{{site.api.groups.instance.items.traverse}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'structure'" on:click="navigateApi('structure')">
-              <span class="side-label">结构操作</span>
+              <span class="side-label">{{site.api.groups.instance.items.structure}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">属性与事件</span>
+          <span class="side-label">{{site.api.groups.props.label}}</span>
           <st-list slot="sublist">
             <st-list-item button class:active="apiKey === 'props'" on:click="navigateApi('props')">
-              <span class="side-label">内容、属性与样式</span>
+              <span class="side-label">{{site.api.groups.props.items.props}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'events'" on:click="navigateApi('events')">
-              <span class="side-label">事件</span>
+              <span class="side-label">{{site.api.groups.props.items.events}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">数据与扩展</span>
+          <span class="side-label">{{site.api.groups.data.label}}</span>
           <st-list slot="sublist">
             <st-list-item button class:active="apiKey === 'reactive'" on:click="navigateApi('reactive')">
-              <span class="side-label">数据与侦听</span>
+              <span class="side-label">{{site.api.groups.data.items.reactive}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'context'" on:click="navigateApi('context')">
-              <span class="side-label">上下文通信</span>
+              <span class="side-label">{{site.api.groups.data.items.context}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'global'" on:click="navigateApi('global')">
-              <span class="side-label">全局 $ 静态成员</span>
+              <span class="side-label">{{site.api.groups.data.items.global}}</span>
             </st-list-item>
             <st-list-item button class:active="apiKey === 'extend'" on:click="navigateApi('extend')">
-              <span class="side-label">扩展实例</span>
+              <span class="side-label">{{site.api.groups.data.items.extend}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>
 
         <st-list-item collapsible expanded>
-          <span class="side-label">应用与页面</span>
+          <span class="side-label">{{site.api.groups.app.label}}</span>
           <st-list slot="sublist">
             <st-list-item button class:active="apiKey === 'app'" on:click="navigateApi('app')">
-              <span class="side-label">o-app 与 o-page</span>
+              <span class="side-label">{{site.api.groups.app.items.app}}</span>
             </st-list-item>
           </st-list>
         </st-list-item>

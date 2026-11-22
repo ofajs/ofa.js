@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 13</p>
+      <h1>Component Parameters</h1>
+      <p class="doc-lead">External data reaches the component through attrs; the component keeps its own state in data.</p>
+
+      <p>
+  Attributes a component receives from outside are declared in <code>attrs</code> with default values;
+  state that changes inside the component lives in <code>data</code>. The two must not share names.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-13" fold-styles="true"></docs-playground>
+<h2>attrs vs data</h2>
+<ul>
+  <li><code>attrs</code>: scalar values passed in from outside (name, role, starting level);
+    they are reflected to HTML attributes;</li>
+  <li><code>data</code>: the component's own reactive state; outside code does not modify it directly;</li>
+  <li>in the example, <code>startLevel</code> is a string, and the component converts it to a number with
+    <code>Number()</code>.</li>
+</ul>
+<div class="doc-note">
+  <strong>Don't modify attrs directly:</strong> a child component treats <code>attrs</code> as read-only input.
+  If you need derived state, copy it into <code>data</code>. That keeps the source of the data clear and
+  prevents parent and child from overwriting each other.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a <code>level</code> data field and an input to the page, then pass it to the second component
+  dynamically with <code>attr:start-level="level"</code>.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-12.html">12 · Your First Component →</a> · Next: <a olink href="./lesson-14.html">14 · Slots and Events →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -417,17 +417,17 @@
       <button
         class="reset"
         on:click="resetLesson"
-        title="恢复本课示例代码"
+        attr:title="ui.resetTitle"
       >
-        ↺ 重置
+        {{ui.reset}}
       </button>
       <button
         class="run"
         on:click="run"
         attr:disabled="!coreReady || busy"
-        title="运行代码（Ctrl+S / ⌘S）"
+        attr:title="ui.runTitle"
       >
-        ▶ 运行代码
+        {{ui.run}}
       </button>
     </div>
 
@@ -456,7 +456,7 @@
       class:resizing="resizing"
       attr:style="'grid-template-columns:' + editorWidth + '% 6px minmax(0, 1fr)'"
     >
-      <section class="editor" aria-label="ofa.js 代码编辑器">
+      <section class="editor" attr:aria-label="ui.editorAria">
         <code-editor
           attr:value="code"
           attr:fold="foldStyles === 'true' || foldStyles === true ? 'style' : ''"
@@ -470,24 +470,24 @@
         class="splitter"
         role="separator"
         aria-orientation="vertical"
-        aria-label="调整编辑器和预览宽度"
+        attr:aria-label="ui.splitterAria"
         on:pointerdown="startResize"
       ></div>
 
-      <section class="preview" aria-label="案例预览">
+      <section class="preview" attr:aria-label="ui.previewAria">
         <div class="preview-bar">
-          <span>预览</span>
+          <span>{{ui.preview}}</span>
           <span class="preview-url">/$ofa-docs-playground/</span>
           <button
             class="open-preview"
             on:click="openPreview"
             attr:disabled="!frameSrc"
-            title="在新标签页打开预览"
+            attr:title="ui.newTabTitle"
           >
-            新标签打开 ↗
+            {{ui.newTab}}
           </button>
         </div>
-        <iframe attr:src="frameSrc" title="ofa.js 案例预览"></iframe>
+        <iframe attr:src="frameSrc" attr:title="ui.iframeTitle"></iframe>
       </section>
     </div>
 
@@ -510,7 +510,52 @@
       getLesson,
       buildIndex,
     } from "../content/playground-runtime.mjs";
-    import { API_EXAMPLES } from "../content/api-examples.mjs";
+    import { getApiExample } from "../content/api-examples.mjs";
+
+    const IS_EN = document.documentElement.lang.startsWith("en");
+    const UI = IS_EN
+      ? {
+          starting: "Starting virtual container…",
+          resetTitle: "Restore this lesson's sample code",
+          reset: "↺ Reset",
+          runTitle: "Run code (Ctrl+S / ⌘S)",
+          run: "▶ Run code",
+          editorAria: "ofa.js code editor",
+          splitterAria: "Resize editor and preview",
+          previewAria: "Example preview",
+          preview: "Preview",
+          newTabTitle: "Open preview in a new tab",
+          newTab: "Open in new tab ↗",
+          iframeTitle: "ofa.js example preview",
+          restored: "Sample code restored. Press Ctrl/⌘+S to run.",
+          ready: "Virtual container ready",
+          initFailed: "Failed to initialize virtual container: ",
+          unsupported: "This browser does not support Service Worker",
+          writing: "Writing virtual files…",
+          ran: "Running. Keep editing and press Ctrl/⌘+S to rerun.",
+          runFailed: "Run failed: ",
+        }
+      : {
+          starting: "正在启动虚拟容器…",
+          resetTitle: "恢复本课示例代码",
+          reset: "↺ 重置",
+          runTitle: "运行代码（Ctrl+S / ⌘S）",
+          run: "▶ 运行代码",
+          editorAria: "ofa.js 代码编辑器",
+          splitterAria: "调整编辑器和预览宽度",
+          previewAria: "案例预览",
+          preview: "预览",
+          newTabTitle: "在新标签页打开预览",
+          newTab: "新标签打开 ↗",
+          iframeTitle: "ofa.js 案例预览",
+          restored: "已恢复本课示例代码，按 Ctrl/⌘+S 运行",
+          ready: "虚拟容器已就绪",
+          initFailed: "虚拟容器初始化失败：",
+          unsupported: "当前浏览器不支持 Service Worker",
+          writing: "正在写入虚拟文件…",
+          ran: "已运行，可继续编辑后按 Ctrl/⌘+S 重新运行",
+          runFailed: "运行失败：",
+        };
 
     export default {
       tag: "docs-playground",
@@ -520,6 +565,7 @@
         foldStyles: false,
       },
       data: {
+        ui: UI,
         code: DEFAULT_CODE,
         files: {},
         fileNames: [],
@@ -527,7 +573,7 @@
         entry: "page",
         defaultFiles: {},
         frameSrc: "",
-        status: "正在启动虚拟容器…",
+        status: UI.starting,
         coreReady: false,
         busy: false,
         dirty: false,
@@ -542,7 +588,7 @@
       },
 
       attached() {
-        const example = this.example && API_EXAMPLES[this.example];
+        const example = this.example && getApiExample(this.example);
 
         this._storageKey = example
           ? `${STORAGE_KEY}:api:${this.example}`
@@ -618,7 +664,7 @@
             localStorage.removeItem(this._storageKey);
           } catch {}
           this.loadFiles(this.defaultFiles, this.activeFile);
-          this.status = "已恢复本课示例代码，按 Ctrl/⌘+S 运行";
+          this.status = this.ui.restored;
         },
 
         async initContainer() {
@@ -627,7 +673,7 @@
 
           try {
             if (!("serviceWorker" in navigator)) {
-              throw new Error("当前浏览器不支持 Service Worker");
+              throw new Error(this.ui.unsupported);
             }
 
             await navigator.serviceWorker.register("/sw.js");
@@ -639,14 +685,14 @@
             });
 
             this.coreReady = true;
-            this.status = "虚拟容器已就绪";
+            this.status = this.ui.ready;
             await new Promise((resolve) => {
               requestAnimationFrame(() => requestAnimationFrame(resolve));
             });
             await this.run();
           } catch (error) {
             console.error("[docs-playground] init failed", error);
-            this.status = "虚拟容器初始化失败：" + error.message;
+            this.status = this.ui.initFailed + error.message;
           } finally {
             this._initializing = false;
           }
@@ -671,7 +717,7 @@
           if (!this.coreReady || this.busy) return;
 
           this.busy = true;
-          this.status = "正在写入虚拟文件…";
+          this.status = this.ui.writing;
 
           try {
             const version = Date.now();
@@ -685,11 +731,11 @@
               await this.writeFile("index.html", buildIndex(version, this.entry));
             }
             this.frameSrc = `/$${SPACE}/index.html?v=${version}`;
-            this.status = "已运行，可继续编辑后按 Ctrl/⌘+S 重新运行";
+            this.status = this.ui.ran;
             this.dirty = false;
           } catch (error) {
             console.error("[docs-playground] run failed", error);
-            this.status = "运行失败：" + error.message;
+            this.status = this.ui.runFailed + error.message;
           } finally {
             this.busy = false;
           }

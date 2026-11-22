@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Routing &amp; Navigation — ofa.js Docs</title>
+    <meta name="description" content="goto/replace/back, olink, query parameters, o-router hash routing, and router-change." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Routing &amp; Navigation — ofa.js Docs" />
+    <meta property="og:description" content="goto/replace/back, olink, query parameters, o-router hash routing, and router-change." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>Routing and navigation</h1>
+      <p class="doc-lead">
+        ofa.js pages navigate in one of two modes: hash routing (o-router),
+        which switches only inside the front-end app, and scsr, where every
+        URL is a real document. The page navigation API is the same in both
+        modes.
+      </p>
+
+      <h2>Page navigation API</h2>
+      <pre><code>// Inside a page module, `this` is the page instance
+this.goto("./detail.html?id=42"); // push onto the page stack
+this.replace("./detail.html");    // replace the current page without adding history
+this.back();                      // go back
+this.forward();                   // requires allowForward: true in the app config</code></pre>
+      <p>For declarative navigation, use <code>olink</code>:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;View details&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> only takes effect inside <code>o-app</code>. It goes
+        through in-app routing and transition animations without reloading the
+        whole page. Do not add <code>olink</code> to external links.
+      </p>
+
+      <h2>Passing parameters via query</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query is an argument of the page module function, not
+        <code>this.$route</code>. To react to query changes, read it in the
+        page module function; changing the address of the same page reloads
+        the module.
+      </p>
+
+      <h2>o-router: hash routing</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router is a bridge package and must be loaded after ofa.js;</li>
+        <li><code>fix-body</code> makes html/body full size; removing it reverts the change;</li>
+        <li>the page stack is synced to the hash, for example <code>#/pages/detail.html?id=42</code>;</li>
+        <li>refresh, deep links, sharing, and forward/back all restore the page without server rewrites;</li>
+        <li>a page works with only one o-app.</li>
+      </ul>
+
+      <h2>Hash URL format</h2>
+      <pre><code>// Correct
+location.origin + "/#/pages/detail.html?id=42"
+
+// Wrong: an extra pathname or ./
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>Watching routing changes</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> is <code>goto</code>, <code>replace</code>,
+        <code>back</code>, or <code>forward</code>; <code>src</code> is the
+        target page address. The <code>routerChange</code> hook in a page
+        module fires only on the parent layout page, where it is used to
+        highlight the current article.
+      </p>
+
+      <h2>When you need real paths</h2>
+      <p>
+        Hash routing suits pure front-end apps. If every URL must be crawlable,
+        directly accessible, and shareable, use
+        <a olink href="./scsr.html">scsr real-path routing</a>.
+        The page API, nested layouts, and animation behavior are identical in
+        both.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./app.html">o-app app →</a>
+         · Next: <a olink href="./nested-routing.html">Nested routing →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

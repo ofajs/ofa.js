@@ -1,0 +1,106 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc docs-intro">
+        <p class="doc-kicker">Documentation</p>
+        <h1>ofa.js Docs</h1>
+        <p class="doc-lead">
+          From a single script tag to components, pages, templates, state, routing, and deployment.
+          The docs are organized in the order you'll use them, or jump straight to the chapter you need from the table of contents on the left.
+        </p>
+
+        <div class="docs-list">
+          <a class="docs-row" olink href="./getting-started.html">
+            <span class="num">01</span>
+            <h2>Installation</h2>
+            <p>Load ofa.js from a CDN or a local dist build and run your first page.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>Your First Component</h2>
+            <p>Create a custom Web Component and understand tag, attrs, data, and slots.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="./template.html">
+            <span class="num">03</span>
+            <h2>Template Directives Overview</h2>
+            <p>Learn interpolation, attributes, events, two-way binding, conditionals, and lists in one go.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>Routing and Navigation</h2>
+            <p>The o-app page stack, goto/replace/back, o-router, and nested layouts.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn and Wrapped Objects</h2>
+            <p>Selection, tree navigation, DOM manipulation, events, stanz, and instance extensions.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="../api/">
+            <span class="num">06</span>
+            <h2>API Reference</h2>
+            <p>Instance members, global static members, and runnable VSCode examples.</p>
+            <span class="more">Go to API →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">07</span>
+            <h2>Complete Examples</h2>
+            <p>A minimal page, custom components, a todo list, and a routing app.</p>
+            <span class="more">Start reading →</span>
+          </a>
+
+          <a class="docs-row" olink href="./playground.html">
+            <span class="num">08</span>
+            <h2>Playground</h2>
+            <p>Edit and run ofa.js page modules inside the NoneOS virtual container.</p>
+            <span class="more">Open playground →</span>
+          </a>
+        </div>
+
+        <h2>What the Docs Cover</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>Chapter</th><th>Contents</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Getting Started</td><td>Installation, your first component, your first page</td></tr>
+            <tr><td>Components and Pages</td><td>Component contract, page modules, lifecycle</td></tr>
+            <tr><td>Template Syntax</td><td>Directive overview, bindings and styles, events and forms, conditionals and lists</td></tr>
+            <tr><td>Data and State</td><td>data, computed properties, watch, $.stanz, provider/consumer</td></tr>
+            <tr><td>Apps and Routing</td><td>o-app, o-router, nested routing, scsr real paths</td></tr>
+            <tr><td>Reference</td><td>$.fn and wrapped objects, instance API, plugins, common pitfalls, complete examples, playground, deployment</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="doc-note">
+          <strong>Where should I start?</strong>
+          If this is your first time, begin with Installation; if you already have a page running,
+          go straight to Template Directives Overview or pick a chapter from the table of contents on the left.
+        </div>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

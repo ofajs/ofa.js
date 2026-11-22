@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 20</p>
+      <h1>Putting It Together: A Todo List</h1>
+      <p class="doc-lead">Wire lists, forms, conditionals, computed properties, watchers, and localStorage into one complete app.</p>
+
+      <p>
+  The final lesson combines the earlier capabilities: add todos from an input, check and delete
+  list items, filter by status, and have the data saved automatically in the browser.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-20" fold-styles="true"></docs-playground>
+<h2>What this lesson uses</h2>
+<ul>
+  <li><code>sync:value</code> / <code>sync:checked</code>: form and list-item editing;</li>
+  <li><code>o-fill</code> + <code>fill-key</code>: list rendering and reuse;</li>
+  <li><code>get visibleItems()</code> / <code>get remaining()</code>: filtering and counts;</li>
+  <li><code>watch.items</code>: writes to localStorage when the data changes.</li>
+</ul>
+<p>
+  Try refreshing the preview on the right: the todos are restored, because <code>watch</code>
+  wrote them to browser storage when the data changed.
+</p>
+<div class="doc-note">
+  <strong>Next steps:</strong> split the todos into components (lessons 12–14), share them across
+  pages with <code>$.stanz</code> (lesson 16), and wrap it all in a layout (lesson 18) —
+  that's a complete app.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a "Clear completed" button; then add an edit button to each todo that switches the text row into an input.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-19.html">19 · Async and Loading States →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

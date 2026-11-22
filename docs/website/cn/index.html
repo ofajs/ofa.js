@@ -714,23 +714,24 @@
           </p>
   
           <div class="actions">
-            <st-button
+            <a
               class="btn btn-primary"
               olink
-              attr:href="navUrls.docs"
+              attr:href="navUrls.firstLesson"
             >
-              阅读文档
-              <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              开始第一课
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6"></path>
               </svg>
-            </st-button>
-            <st-button
+            </a>
+            <a
               class="btn btn-ghost"
-              variant="outlined"
-              on:click="openExternal(githubUrl)"
+              href="https://github.com/ofajs/ofa.js"
+              target="_blank"
+              rel="noreferrer"
             >
               GitHub 仓库
-            </st-button>
+            </a>
           </div>
   
           <div class="cdn-box">

@@ -365,6 +365,8 @@
 }
 
 .docs-nav {
+  grid-column: 1;
+  grid-row: 1;
   --st-list-gap: 1px;
   --st-list-item-height: 32px;
   --st-list-item-padding: 0 8px;
@@ -383,6 +385,8 @@
 }
 
 .docs-content {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
 }
 
@@ -439,10 +443,17 @@
 /* 站点 layout 的站点模式：不显示文档目录，内容占满整行 */
 
 .docs-shell.no-nav {
-  display: block;
+  grid-template-columns: 0 minmax(0, 1fr);
+  gap: 0;
   max-width: none;
   margin: 0;
   padding: 0;
+  /* 只在进入站点模式时做宽度过渡；离开时直接展开，
+     避免侧栏在 0 → 260px 过程中被压成竖排文字。 */
+  transition:
+    grid-template-columns 0.28s cubic-bezier(0.2, 0, 0, 1),
+    gap 0.28s cubic-bezier(0.2, 0, 0, 1),
+    padding 0.28s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .docs-shell.no-nav .docs-nav {

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>组件模块系统 / Component module system</title>
+  </head>
+  <body>
+    <div id="host"></div>
+
+    <script type="module">
+      import lm from "../../../drill/src/main.mjs";
+      import "../../src/main.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      // harness 与 stanz/xhear 共用同款，位于同目录
+      const host = document.querySelector("#host");
+
+      let loadedFired = false;
+      document.addEventListener("comp-card-loaded", () => {
+        loadedFired = true;
+      });
+
+      test("模块方式加载暴露全局 $ 与 ofa / module import exposes global $ and ofa", async () => {
+        // <script type="module"> 引入后 window.$ / globalThis.ofa 必须可用
+        // （页面脚本与 CDN 直引场景依赖这两个全局入口）
+        assert(window.$ === ofa, "window.$ 应指向 ofa / window.$ should be ofa");
+        assert(
+          typeof window.$.register === "function",
+          "window.$ 应具备 register 能力 / window.$ should have register",
+        );
+        assert(globalThis.ofa === ofa, "globalThis.ofa 应可用 / globalThis.ofa should exist");
+      });
+
+      test("加载组件文件并注册（文件名推断 tag）/ load component file and register tag", async () => {
+        // 加载 template[component] 的 HTML 文件，tag 由文件名推断
+        await lm()("./fixtures/comp-card.html");
+
+        await waitFor(() => customElements.get("comp-card"));
+        assert(!!customElements.get("comp-card"), "comp-card 应已注册 / comp-card should be registered");
+      });
+
+      test("组件实例渲染与数据绑定 / component instance rendering", async () => {
+        const card = document.createElement("comp-card");
+        host.appendChild(card);
+
+        const $card = ofa("comp-card");
+        await waitFor(() => $card.shadow.$(".card").text === "card:card");
+
+        // 数据更新驱动重渲染
+        $card.name = "custom";
+        await waitFor(() => $card.shadow.$(".card").text === "card:custom");
+      });
+
+      test("proto 方法可用 / proto methods work", async () => {
+        const $card = ofa("comp-card");
+        assertEqual($card.hello(), "hi-custom");
+      });
+
+      test("loaded 钩子触发 / loaded hook fires", async () => {
+        await waitFor(() => loadedFired);
+      });
+
+      test("PATH 组件地址与相对资源解析 / PATH and relative resource", async () => {
+        const $card = ofa("comp-card");
+        await waitFor(() => !!$card.PATH);
+        assert(
+          $card.PATH.endsWith("fixtures/comp-card.html"),
+          "PATH 应指向组件文件 / PATH should point to the component file",
+        );
+
+        // shadow 内元素的相对 src 基于 PATH 解析为绝对地址
+        $card.shadow.$(".card").attr("src", "./logo.png");
+        const attrVal = $card.shadow.$(".card").ele.getAttribute("src");
+        assert(
+          attrVal.endsWith("fixtures/logo.png"),
+          `相对 src 应基于 PATH 解析，实际 ${attrVal}`,
+        );
+      });
+
+      test("同名 tag 不同地址注册报错 / same tag from another url throws", async () => {
+        // nested/comp-card.html 的文件名同样推断为 comp-card，地址不同
+        let err = null;
+        try {
+          await lm()("./fixtures/nested/comp-card.html");
+        } catch (e) {
+          err = e;
+        }
+        assert(err, "应抛出重复注册错误 / should throw");
+        // html 中间件会把组件注册错误包装为 load_comp_module
+        assertEqual(err.code, "load_comp_module");
+        assertEqual(err.cause && err.cause.code, "comp_registered");
+      });
+
+      // ---- 历史疑难案例（old/test/cases 移植）----
+
+      test("import 与注释/字符串/正则混排可正常转译 / imports mixed with comments, strings and regexes", async () => {
+        await lm()("./fixtures/comp-imports.html");
+        await waitFor(() => customElements.get("comp-imports"));
+
+        const comp = document.createElement("comp-imports");
+        host.appendChild(comp);
+
+        // 五种 import 形式（命名/块注释/行尾注释/namespace/default/副作用）
+        // 全部正确改写，且形似 import 的字符串、模板串、正则未被误改
+        const $comp = ofa(comp);
+        await waitFor(
+          () => $comp.shadow.$("#imports-result").text === "ok1-ok2-ok3-ok4-ok5",
+        );
+        comp.remove();
+      });
+
+      test("压缩单行组件（无空格 import）可正常转译 / minified single-line component", async () => {
+        await lm()("./fixtures/comp-mini.html");
+        await waitFor(() => customElements.get("comp-mini"));
+
+        const comp = document.createElement("comp-mini");
+        host.appendChild(comp);
+
+        // import{mtext}from"./data-mini.js" 无空格形式也要正确改写
+        const $comp = ofa(comp);
+        await waitFor(() => $comp.shadow.$("#mini-content").text === "Data text");
+        comp.remove();
+      });
+
+      test("副作用 import 会被执行 / side-effect import runs", async () => {
+        await lm()("./fixtures/comp-side-effect.html");
+        await waitFor(() => customElements.get("comp-side-effect"));
+
+        const comp = document.createElement("comp-side-effect");
+        host.appendChild(comp);
+
+        // effect.mjs 仅产生副作用（window.__ofaTestEffect），组件启动时读取
+        const $comp = ofa(comp);
+        await waitFor(() => $comp.shadow.$("#side-effect-flag").text === "ok");
+        comp.remove();
+      });
+
+      test("仅注释的空模板不崩溃 / comments-only template does not crash", async () => {
+        await lm()("./fixtures/comp-empty.html");
+        await waitFor(() => customElements.get("comp-empty"));
+
+        // createElement / 实例化都不应抛错（空模板曾使旧版 convert 崩溃）
+        const comp = document.createElement("comp-empty");
+        comp.textContent = "I m text";
+        host.appendChild(comp);
+
+        const $comp = ofa(comp);
+        assertEqual($comp.val, "I am empty temp", "数据应可读 / data should be readable");
+
+        // 空模板（temp === ""）约定不挂 shadow：无 shadowRoot，
+        // 光 DOM 子节点正常可见（与旧版 empty-temp 案例的预期一致）
+        assertEqual(comp.shadowRoot, null, "空模板不应挂 shadow / empty template should not attach shadow");
+        assert(
+          comp.getClientRects().length > 0,
+          "光 DOM 子节点应可见 / light children should be visible",
+        );
+        comp.remove();
+      });
+
+      test("第三方覆盖 window.$ 后组件仍工作 / components survive window.$ takeover", async () => {
+        // 模拟 jQuery 等库接管 window.$：ofa 内部持有模块内引用，
+        // 组件实例化与渲染不得依赖 window.$ 的当下值
+        const saved$ = window.$;
+        try {
+          window.$ = { fn: {} };
+
+          const comp = document.createElement("comp-mini");
+          host.appendChild(comp);
+
+          const $comp = ofa(comp);
+          await waitFor(() => $comp.shadow.$("#mini-content").text === "Data text");
+          comp.remove();
+        } finally {
+          window.$ = saved$;
+        }
+      });
+
+      run();
+    </script>
+  </body>
+</html>

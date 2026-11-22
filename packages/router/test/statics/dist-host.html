@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>o-router dist 冒烟</title>
+  </head>
+  <body>
+    <!-- dist 产物冒烟：经典脚本加载 dist ofa.js + dist router.js，
+        验证桥接包挂全局 $ 的契约（复用页面已加载的框架实例，
+        不出现第二份 xhear/stanz） -->
+    <script src="../../../../dist/ofa.min.js"></script>
+    <script src="../../dist/router.min.js"></script>
+
+    <o-router fix-body>
+      <o-app src="./fixtures/app-r-config.mjs"></o-app>
+    </o-router>
+  </body>
+</html>

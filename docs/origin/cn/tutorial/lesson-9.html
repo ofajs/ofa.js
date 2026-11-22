@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 09</p>
+      <h1>编辑列表</h1>
+      <p class="doc-lead">数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。</p>
+
+      <p>
+  ofa.js 的数组是响应式的：<code>push</code>、<code>splice</code> 等原地操作
+  都会触发更新，不需要重新赋值整个数组。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9" fold-styles="true"></docs-playground>
+<h2>行内编辑</h2>
+<p>
+  每一项的输入框绑定到 <code>$data.name</code>，用户输入会直接改到数组对象上。
+  配合 <code>fill-key="id"</code>，切换顺序或删除其他项时，这一项不会被重建。
+</p>
+<div class="doc-note">
+  <strong>什么时候替换数组：</strong>从接口拿到一份全新列表时，直接
+  <code>this.items = newList</code> 更清晰；页面上增删改某几项时，
+  用 <code>push</code> / <code>splice</code> 即可。
+</div>
+<h2>动手改</h2>
+<p>
+  给每一行加一个「↑」按钮，和上一行交换位置（提示：用
+  <code>items.splice($index - 1, 2, 当前项, 上一项)</code>）。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-8.html">08 · 列表渲染 →</a>　·　下一篇：<a olink href="./lesson-10.html">10 · 计算属性与侦听 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

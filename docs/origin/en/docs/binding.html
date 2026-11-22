@@ -1,0 +1,150 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>Bindings &amp; Styles</h1>
+      <p class="doc-lead">
+        Property binding is the easiest part of ofa.js templates to mix up: knowing when
+        to use <code>:</code>, when to use <code>attr:</code>, and when to use
+        <code>sync:</code> determines whether the page updates correctly.
+      </p>
+
+      <h2>Start with a table</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Syntax</th><th>Direction</th><th>Best for</th><th>Boolean attributes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:prop</code></td><td>Data → property</td><td>Plain values, objects, arrays</td><td>Not suitable</td></tr>
+          <tr><td><code>sync:prop</code></td><td>Two-way</td><td>Scalars such as strings, numbers, and booleans</td><td>Possible, but attr: is preferred</td></tr>
+          <tr><td><code>attr:name</code></td><td>Data → HTML attribute</td><td>href/title/data-*, boolean attributes</td><td>Required</td></tr>
+          <tr><td><code>class:name</code></td><td>Data → class name</td><td>States such as active/done/disabled</td><td>—</td></tr>
+          <tr><td><code>:style.prop</code></td><td>Data → inline style</td><td>Dynamic styles such as colors and sizes</td><td>—</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>One-way binding</h2>
+      <pre><code>&lt;input :value="keyword" /&gt;
+&lt;my-card :user="user"&gt;&lt;/my-card&gt;
+&lt;div :html="articleHtml"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        <code>:</code> only writes data into the property; user interaction never writes
+        back to the data. Objects and arrays passed to components through
+        <code>:prop</code> are not serialized into strings.
+      </p>
+
+      <h2>Two-way binding</h2>
+      <pre><code>&lt;input sync:value="keyword" /&gt;
+&lt;input type="checkbox" sync:checked="done" /&gt;
+&lt;textarea sync:value="content"&gt;&lt;/textarea&gt;</code></pre>
+      <p>
+        Form controls usually use <code>sync:</code>. <strong>Do not use it to bind
+        objects or arrays</strong>: v5 explicitly forbids two-way syncing of objects to
+        avoid reference confusion. Also avoid binding <code>sync:</code> to properties
+        declared in <code>attrs</code>, since string serialization can cause circular updates.
+      </p>
+
+      <h2>attr: HTML attributes and booleans</h2>
+      <pre><code>&lt;a attr:href="detailUrl" attr:title="tip"&gt;Detail&lt;/a&gt;
+&lt;img attr:src="cover" attr:alt="title" /&gt;
+&lt;button attr:disabled="loading"&gt;Submit&lt;/button&gt;
+&lt;input attr:readonly="locked" /&gt;
+&lt;section attr:hidden="collapsed"&gt;&lt;/section&gt;</code></pre>
+      <p>
+        <code>attr:</code> serializes the value into a string; but a
+        <code>false</code> value removes the attribute entirely, while
+        <code>true</code> sets an empty value. That is exactly what boolean attributes need.
+      </p>
+      <div class="doc-note">
+        <strong>Don't use <code>:disabled="false"</code>.</strong>
+        It renders <code>disabled="false"</code>, so the attribute still exists and the
+        button stays disabled. Always write boolean attributes as
+        <code>attr:disabled="loading"</code>.
+      </div>
+
+      <h2>Class names</h2>
+      <pre><code>&lt;li class="todo" class:done="item.done" class:active="item.id === currentId"&gt;
+  {{item.text}}
+&lt;/li&gt;</code></pre>
+      <p>
+        <code>class:name</code> adds the class when its condition is truthy and removes it
+        when falsy. One element can have several. Intrinsic data attributes (type, status,
+        level) are better expressed with <code>attr:</code> plus attribute selectors:
+      </p>
+      <pre><code>&lt;div class="message" attr:type="$data.type"&gt;&lt;/div&gt;
+
+.message[type="sent"] { color: #2563eb; }
+.message[type="failed"] { color: #dc2626; }</code></pre>
+
+      <h2>Inline styles</h2>
+      <pre><code>&lt;p :style.color="active ? '#0f766e' : '#64748b'"&gt;&lt;/p&gt;
+&lt;div :style.width="width + 'px'" :style.height="height + 'px'"&gt;&lt;/div&gt;
+&lt;div :style.backgroundImage="'url(' + cover + ')'"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        Style property names use camelCase (<code>fontSize</code>,
+        <code>borderRadius</code>). Values must be valid CSS strings; add units yourself
+        when needed.
+      </p>
+
+      <h2>data() in stylesheets</h2>
+      <p>
+        Besides inline styles, you can read data inside <code>&lt;style&gt;</code> with
+        <code>data(field)</code>, which is handy for switching styles in bulk based on state:
+      </p>
+      <pre><code>&lt;style&gt;
+  :host {
+    --accent: data(accentColor);
+    border-color: var(--accent);
+  }
+  .title {
+    color: data(titleColor);
+  }
+&lt;/style&gt;</code></pre>
+      <p>
+        <code>data()</code> can also appear in <code>@media</code> conditions and in
+        <code>&lt;style&gt;</code> injected dynamically inside <code>o-if</code>; when the
+        data changes, the style text is rewritten and takes effect immediately.
+      </p>
+      <pre><code>@media screen and (min-width: data(breakpoint + "px")) {
+  .layout { grid-template-columns: 1fr 1fr; }
+}
+
+&lt;o-if :value="dense"&gt;
+  &lt;style&gt;.row { padding: data(padding + "px"); }&lt;/style&gt;
+&lt;/o-if&gt;</code></pre>
+      <p>This approach only applies to a component's own styles; for cross-component theming use CSS variables or match-var.</p>
+
+      <h2>Interpolation does not work in attribute values</h2>
+      <p>
+        <code>{{ }}</code> only parses element text content. Both of the following are wrong:
+      </p>
+      <pre><code>&lt;!-- Wrong: {{ }} inside an attribute is not parsed --&gt;
+&lt;a href="{{url}}"&gt;Link&lt;/a&gt;
+&lt;img title="{{name}}" /&gt;
+
+&lt;!-- Correct --&gt;
+&lt;a attr:href="url"&gt;Link&lt;/a&gt;
+&lt;img attr:title="name" /&gt;</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./template.html">Template Directives →</a>
+         · Next: <a olink href="./events.html">Events &amp; Forms →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

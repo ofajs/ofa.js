@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 03</p>
+      <h1>动态属性</h1>
+      <p class="doc-lead">HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。</p>
+
+      <p>
+  模板里的属性分两类：<code>attr:</code> 绑定 HTML attribute，
+  <code>:prop</code> 绑定元素上的 DOM 属性。动态值不要写成
+  <code>href="{{url}}"</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3" fold-styles="true"></docs-playground>
+<h2>为什么区分两种写法</h2>
+<ul>
+  <li><code>attr:href</code>、<code>attr:title</code>：最终写进 HTML attribute；</li>
+  <li><code>:value</code>：写 DOM 的 <code>value</code> 属性，适合表单元素；</li>
+  <li><code>attr:disabled="!ready"</code>：布尔属性用 <code>attr:</code>，
+    条件为 false 时属性会被真正移除。</li>
+</ul>
+<div class="doc-note">
+  <strong>为什么布尔属性不能用 :prop：</strong><code>:disabled="false"</code>
+  会留下 <code>disabled="false"</code>，属性仍然存在，按钮依旧禁用。
+  正确写法是 <code>attr:disabled="false"</code>。
+</div>
+<h2>动手改</h2>
+<p>
+  把 <code>ready</code> 的初始值改成 <code>true</code>，观察按钮一开始就是可用的；
+  再改回来，点一下按钮让它变成可用。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-2.html">02 · 数据与插值 →</a>　·　下一篇：<a olink href="./lesson-4.html">04 · 样式与 class →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

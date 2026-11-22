@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>Deployment</h1>
+      <p class="doc-lead">
+        ofa.js apps have no build step, so deployment is essentially putting the
+        source directory on any static server. There is no Node.js runtime
+        dependency and no bundler.
+      </p>
+
+      <h2>Minimal deployment</h2>
+      <p>Upload the entry HTML, page modules, components, and assets in their original directory structure:</p>
+      <pre><code>site/
+├── index.html
+├── app-config.js
+├── pages/
+│   ├── home.html
+│   └── detail.html
+├── components/
+│   └── user-card.html
+└── assets/</code></pre>
+      <p>The static server only needs to return correct MIME types. Pay particular attention to:</p>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Extension</th><th>Content-Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.html</code></td><td><code>text/html; charset=utf-8</code></td></tr>
+          <tr><td><code>.mjs</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.js</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.css</code></td><td><code>text/css; charset=utf-8</code></td></tr>
+          <tr><td><code>.json</code></td><td><code>application/json; charset=utf-8</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Loading the framework from a CDN</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+      <p>
+        You can also download the dist file into your own static directory to
+        avoid depending on a third-party CDN. When using router / scsr, remember
+        to deploy them too and keep ofa.js loading first.
+      </p>
+
+      <h2>Deploying in a subdirectory</h2>
+      <p>
+        All asset paths support relative paths. When the app lives at
+        <code>https://example.com/app/</code>, <code>./detail.html</code> in a
+        page module resolves to <code>/app/detail.html</code> with no base path
+        configuration. Avoid hardcoding absolute paths that start with
+        <code>/</code> in your code.
+      </p>
+
+      <h2>Caching strategy</h2>
+      <ul>
+        <li>do not cache the HTML entry, or cache it briefly, so a new version is picked up after release;</li>
+        <li><code>.mjs</code> / <code>.js</code> files can use hashed filenames for long-term caching;</li>
+        <li>disable caching during development so pages do not keep loading old modules after edits (see
+          <a olink href="./pitfalls.html">Common pitfalls</a>).</li>
+      </ul>
+
+      <h2>o-router and scsr</h2>
+      <p>
+        <strong>o-router</strong> uses hash URLs and needs no server rewrite at deployment:
+      </p>
+      <pre><code>&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <p>
+        <strong>scsr</strong> requires every URL to return the corresponding
+        HTML. For static deployment, each path needs a real file; for server
+        deployment, output HTML generated from a template per path. Do not fall
+        back every path to the same empty shell, or first-screen content is
+        lost.
+      </p>
+
+      <h2>CORS and local files</h2>
+      <p>
+        Page modules load via fetch and components load as module scripts, so
+        both must go over HTTP. Opening an HTML file directly
+        (<code>file://</code>) is blocked by the browser's CORS policy. For
+        local preview, use any static server:
+      </p>
+      <pre><code>$ npx serve .
+# or
+$ python3 -m http.server 3000</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./examples.html">Full examples →</a>
+         · Back to: <a olink href="./">Docs overview →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>全局状态 — ofa.js 文档</title>
+    <meta name="description" content="使用 $.stanz() 创建跨页面共享的响应式状态，并正确挂载与清理。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="全局状态 — ofa.js 文档" />
+    <meta property="og:description" content="使用 $.stanz() 创建跨页面共享的响应式状态，并正确挂载与清理。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>全局状态</h1>
+      <p class="doc-lead">
+        多个页面或组件需要共享同一份数据时，用 <code>$.stanz()</code>
+        创建响应式状态。它不依赖全局变量，也不会自动持久化。
+      </p>
+
+      <h2>创建共享状态</h2>
+      <pre><code>// store.js
+export const cart = $.stanz({
+  items: [],
+  total: 0,
+});
+
+export const session = $.stanz({
+  user: null,
+  theme: "dark",
+});</code></pre>
+      <p>
+        <code>$.stanz()</code> 返回深度响应式代理。嵌套对象赋值、数组
+        <code>push</code>/<code>splice</code> 都会通知所有引用方。
+      </p>
+
+      <h2>在页面中使用</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;ul&gt;
+    &lt;o-fill :value="items" fill-key="id"&gt;
+      &lt;li&gt;{{$data.name}} × {{$data.count}}&lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    export default async ({ load }) =&gt; {
+      const { cart } = await load("./store.js");
+
+      return {
+        data: { items: [] },
+        attached() {
+          this.items = cart.items;
+        },
+        detached() {
+          this.items = [];
+        },
+      };
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <div class="doc-note">
+        <strong>挂载/清理约定：</strong>
+        在 <code>attached</code> 阶段把共享状态挂到自身 data，
+        在 <code>detached</code> 阶段清空引用，避免组件销毁后仍被状态引用。
+      </div>
+
+      <h2>读写共享状态</h2>
+      <pre><code>cart.items.push({
+  id: Date.now(),
+  name: "ofa.js 周边",
+  count: 1,
+});
+
+cart.total = cart.items.reduce(
+  (sum, item) =&gt; sum + item.count,
+  0,
+);</code></pre>
+      <p>
+        多个页面读取同一个 <code>cart</code> 时，任何一处的修改都会同步到
+        其他页面和组件。
+      </p>
+
+      <h2>直接监听状态</h2>
+      <pre><code>const tid = cart.watch(() =&gt; {
+  console.log("购物车变化", cart.total);
+});
+
+// 不再需要时
+cart.unwatch(tid);</code></pre>
+      <p>
+        <code>watch</code> 是深度监听，子对象和数组变化也会触发。
+        组件里更推荐把状态挂到 data，让模板自动更新，而不是手动操作 DOM。
+      </p>
+
+      <h2>局部状态 vs 共享状态</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>场景</th><th>方案</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>只在当前组件使用</td><td><code>data</code></td></tr>
+          <tr><td>父子组件传值</td><td><code>:prop</code> / <code>sync:</code></td></tr>
+          <tr><td>跨层级业务数据</td><td><code>o-provider</code> / <code>o-consumer</code></td></tr>
+          <tr><td>跨页面、全局共享</td><td><code>$.stanz()</code></td></tr>
+          <tr><td>纯样式主题</td><td>CSS 变量 / <code>match-var</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        下一种更结构化的跨层级方案见
+        <a olink href="./context.html">跨组件上下文</a>。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./data.html">数据与侦听 →</a>
+        　·　下一篇：<a olink href="./context.html">跨组件上下文 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

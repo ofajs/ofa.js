@@ -1,0 +1,107 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>部署</h1>
+      <p class="doc-lead">
+        ofa.js 应用没有构建步骤，部署本质上就是把源码目录放到任意静态服务器。
+        没有 Node.js 运行时依赖，也不需要打包器。
+      </p>
+
+      <h2>最小部署</h2>
+      <p>把入口 HTML、页面模块、组件和资源按原目录结构上传即可：</p>
+      <pre><code>site/
+├── index.html
+├── app-config.js
+├── pages/
+│   ├── home.html
+│   └── detail.html
+├── components/
+│   └── user-card.html
+└── assets/</code></pre>
+      <p>静态服务器只需要正确返回 MIME 类型，尤其注意：</p>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>扩展名</th><th>Content-Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.html</code></td><td><code>text/html; charset=utf-8</code></td></tr>
+          <tr><td><code>.mjs</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.js</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.css</code></td><td><code>text/css; charset=utf-8</code></td></tr>
+          <tr><td><code>.json</code></td><td><code>application/json; charset=utf-8</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>用 CDN 加载框架</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+      <p>
+        也可以下载 dist 文件放到自己的静态目录，避免依赖第三方 CDN。
+        使用 router / scsr 时记得同时部署它们，并保持 ofa.js 先加载。
+      </p>
+
+      <h2>子目录部署</h2>
+      <p>
+        所有资源路径都支持相对路径。应用放在
+        <code>https://example.com/app/</code> 时，页面模块里的
+        <code>./detail.html</code> 会解析到
+        <code>/app/detail.html</code>，不需要配置 base path。
+        避免在代码里写死以 <code>/</code> 开头的绝对路径。
+      </p>
+
+      <h2>缓存策略</h2>
+      <ul>
+        <li>HTML 入口不缓存或短缓存，确保发布后能拿到新版本；</li>
+        <li><code>.mjs</code> / <code>.js</code> 可以带 hash 文件名做长期缓存；</li>
+        <li>开发阶段关闭缓存，避免改了页面仍加载旧模块（见
+          <a olink href="./pitfalls.html">常见错误</a>）。</li>
+      </ul>
+
+      <h2>o-router 与 scsr</h2>
+      <p>
+        <strong>o-router</strong> 使用 hash 地址，部署时不需要服务器 rewrite：
+      </p>
+      <pre><code>&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <p>
+        <strong>scsr</strong> 要求每个 URL 都返回对应 HTML。静态部署时，
+        每个路径都要有真实文件；服务端部署时，按路径输出模板生成的 HTML。
+        不能把所有路径都 fallback 到同一个空壳，否则首屏内容会丢失。
+      </p>
+
+      <h2>跨域与本地文件</h2>
+      <p>
+        页面模块通过 fetch 加载，组件通过模块脚本加载，都必须走 HTTP。
+        直接双击 HTML 文件（<code>file://</code>）会被浏览器的 CORS 策略拦截。
+        本地预览用任意静态服务器：
+      </p>
+      <pre><code>$ npx serve .
+# 或
+$ python3 -m http.server 3000</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./examples.html">完整示例 →</a>
+        　·　回到：<a olink href="./">文档总览 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

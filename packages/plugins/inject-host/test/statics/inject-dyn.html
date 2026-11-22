@@ -1,0 +1,23 @@
+<template component>
+  <inject-host>
+    <style class="dyn-style">.inj-style-target { color: rgb(0, 128, 0); }</style>
+    <link rel="stylesheet" class="dyn-link" href="./fixtures/inject-link-red.css" />
+  </inject-host>
+  <script>
+    export default {
+      proto: {
+        setStyleText(t) {
+          this.shadow.$(".dyn-style").text = t;
+        },
+        switchLink(href) {
+          this.ele.shadowRoot
+            .querySelector(".dyn-link")
+            .setAttribute("href", href);
+        },
+        removeLink() {
+          this.ele.shadowRoot.querySelector(".dyn-link").remove();
+        },
+      },
+    };
+  </script>
+</template>

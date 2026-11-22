@@ -1,0 +1,36 @@
+{
+  "name": "ofa-formdata",
+  "version": "5.0.0",
+  "description": "ofa.js plugin: two-way binding between a container's form elements and a stanz object (formData)",
+  "type": "module",
+  "main": "formdata.mjs",
+  "exports": {
+    ".": "./formdata.mjs"
+  },
+  "files": [
+    "formdata.mjs",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/plugins/formdata"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "plugin",
+    "formdata",
+    "form",
+    "web components"
+  ]
+}

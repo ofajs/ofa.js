@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 04</p>
+      <h1>Styles and class</h1>
+      <p class="doc-lead">A page's &lt;style&gt; applies only to that page; class: and :style let styles follow data changes.</p>
+
+      <p>
+  A <code>&lt;style&gt;</code> in a page template is collected into the page's Shadow DOM and
+  does not leak into other components. <code>:host</code> selects the page/component itself.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+<h2>Three common forms</h2>
+<ul>
+  <li><code>:host</code>: styles the page container, for example <code>display:block</code>;</li>
+  <li><code>class:active="active"</code>: adds the class when the condition is true and removes it when false;</li>
+  <li><code>:style.background="..."</code>: inline style; use camelCase for the property name.</li>
+</ul>
+<div class="doc-note">
+  <strong>Choosing between them:</strong> use <code>class:</code> for structural states (selected, done)
+  and <code>:style</code> for individual values such as color or size. Do not build long
+  <code>style</code> strings inside the template.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add another class bound with <code>class:highlight="active"</code>, give it a background color in
+  <code>&lt;style&gt;</code>, and watch what changes when you toggle the state.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-3.html">03 · Dynamic attributes →</a> · Next: <a olink href="./lesson-5.html">05 · Events →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

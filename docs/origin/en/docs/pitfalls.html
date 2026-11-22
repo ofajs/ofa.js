@@ -1,0 +1,165 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>Common Pitfalls and Troubleshooting</h1>
+      <p class="doc-lead">
+        Pages that don't render, render only halfway, or ignore code changes — most
+        problems trace back to a handful of fixed causes. Match the error message
+        first, then check the template expressions.
+      </p>
+
+      <h2>ReferenceError: the template references an undeclared key</h2>
+      <p>
+        Every expression in a template is evaluated during initialization, so any key
+        it references must first be declared in <code>data</code> or
+        <code>attrs</code>. An undeclared key throws immediately and aborts rendering
+        of the whole page:
+      </p>
+      <pre><code>Error evaluating element expression: ':value="flag"'
+Caused by: ReferenceError: flag is not defined</code></pre>
+      <p>
+        Fix: add the field to data with a safe default, for example
+        <code>data: { flag: false }</code>.
+      </p>
+
+      <h2>TypeError: a getter depends on data that has not arrived yet</h2>
+      <p>
+        Computed property getters run as soon as the template initializes, before
+        <code>ready</code>. If a getter reaches into a deep field of asynchronous data,
+        it may throw a <code>TypeError</code> and crash the whole page.
+      </p>
+      <pre><code>// Wrong: user is still an empty object
+get roleText() {
+  return ROLE_TEXT[this.user.role];
+}</code></pre>
+      <p>
+        Switch to a data field and assign it in the async callback:
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = ROLE_TEXT[user.role] || "";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+
+      <h2>SyntaxError: a bare literal in a directive value</h2>
+      <p>
+        The values of <code>attr:</code>, <code>:prop</code>, <code>sync:</code>, and
+        <code>class:</code> are all parsed as JavaScript expressions:
+      </p>
+      <pre><code>&lt;!-- Wrong --&gt;
+&lt;button attr:data-type="in"&gt;
+&lt;button attr:title="Click to choose"&gt;
+&lt;button attr:title="Choose one"&gt;
+
+&lt;!-- Right --&gt;
+&lt;button title="Click to choose"&gt;
+&lt;button attr:title="'Click to choose'"&gt;
+&lt;button attr:title="locked ? 'Locked' : ''"&gt;</code></pre>
+      <p>
+        Knock-on symptoms: the template HTML is already in the Shadow DOM, but
+        <code>ready</code> never runs, <code>o-fill</code> never expands, and data
+        stays empty. When you see this combination, grep directive values for bare
+        text first.
+      </p>
+
+      <h2>Reserved-name collisions</h2>
+      <p>
+        <code>data</code> and <code>proto</code> must not use built-in page/app
+        members: <code>back</code>, <code>goto</code>, <code>replace</code>,
+        <code>src</code>, <code>pageAnime</code>, <code>pageIsReady</code>, nor common
+        methods such as <code>on</code>, <code>off</code>, <code>emit</code>,
+        <code>$</code>, <code>text</code>, <code>html</code>, <code>css</code>,
+        <code>data</code>, and so on. A collision causes registration to fail or the
+        whole page to error.
+      </p>
+
+      <h2>$host / $data only exist inside o-fill</h2>
+      <pre><code>&lt;!-- Wrong: there is no $host at the root level --&gt;
+&lt;button on:click="$host.openHelp()"&gt;?&lt;/button&gt;
+
+&lt;!-- Right: call the method name directly at the root level --&gt;
+&lt;button on:click="openHelp()"&gt;?&lt;/button&gt;</code></pre>
+      <p>
+        Referencing <code>$host</code> from a top-level <code>o-if</code> may fail
+        silently; referencing <code>$host</code> from a top-level <code>attr:</code>
+        may not error but never set anything. At the root level, always use data fields
+        and proto methods.
+      </p>
+
+      <h2>Use attr: for boolean attributes</h2>
+      <pre><code>&lt;!-- Wrong: still renders disabled="false" when false --&gt;
+&lt;button :disabled="loading"&gt;Submit&lt;/button&gt;
+
+&lt;!-- Right --&gt;
+&lt;button attr:disabled="loading"&gt;Submit&lt;/button&gt;</code></pre>
+
+      <h2>No {{ }} inside attribute values</h2>
+      <pre><code>&lt;!-- Wrong --&gt;
+&lt;a href="{{url}}"&gt;Link&lt;/a&gt;
+
+&lt;!-- Right --&gt;
+&lt;a attr:href="url"&gt;Link&lt;/a&gt;</code></pre>
+
+      <h2>o-page src is immutable</h2>
+      <pre><code>&lt;!-- throws at runtime --&gt;
+&lt;o-page :src="'./form.html?id=' + editingId"&gt;&lt;/o-page&gt;</code></pre>
+      <p>
+        Keep the o-page mounted and pass parameters through child page methods; when
+        you need a rebuild, wrap it in <code>o-if</code> so it is destroyed and
+        recreated.
+      </p>
+
+      <h2>Hash routing format</h2>
+      <pre><code>// Wrong
+location.origin + location.pathname + "#./pages/set.html"
+
+// Right
+location.origin + "/#/pages/set.html"</code></pre>
+
+      <h2>Changes not taking effect: check the cache first</h2>
+      <p>
+        ofa.js caches loaded page modules, and the static server may cache HTML as
+        well. If hash navigation still shows old content after you edit a file and the
+        console reports no errors:
+      </p>
+      <ul>
+        <li>Make the dev server disable HTTP caching (e.g. <code>http-server -c-1</code>);</li>
+        <li>Do a full-page refresh with a complete URL carrying a new query;</li>
+        <li>In automated tests, load the whole page with <code>page.goto(url)</code> instead of relying on hash navigation.</li>
+      </ul>
+
+      <h2>Wrapper objects and .ele</h2>
+      <pre><code>// Wrong
+$("o-app").current.shadowRoot
+
+// Right
+$("o-app").current.ele.shadowRoot.querySelector(".item")
+$("o-app").current.src</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./plugins.html">Plugins and Extensions →</a>
+         · Next: <a olink href="./examples.html">Complete Examples →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

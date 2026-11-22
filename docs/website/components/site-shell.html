@@ -1,0 +1,643 @@
+<template component>
+  <link rel="stylesheet" href="../styles/shell.css" />
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/select/select.html"></l-m>
+
+  <div class="nav-wrap">
+    <nav class="nav" attr:aria-label="labelNav">
+      <a class="brand" olink attr:href="homeUrl" attr:aria-label="labelHome">
+        <img class="brand-logo" src="../assets/logo.svg" alt="" aria-hidden="true" />
+        <span class="wordmark">ofa<span>.js</span></span>
+        <span class="ver">v5</span>
+      </a>
+
+      <div class="nav-links" class:open="menuOpen">
+        <a class="nav-link" data-nav="tutorial" olink attr:href="tutorialUrl" on:click="closeMenu">
+          {{labelTutorial}}
+        </a>
+        <a class="nav-link" data-nav="docs" olink attr:href="docsUrl" on:click="closeMenu">
+          {{labelDocs}}
+        </a>
+        <a class="nav-link" data-nav="api" olink attr:href="apiUrl" on:click="closeMenu">
+          {{labelApi}}
+        </a>
+        <a class="nav-link" data-nav="blog" olink attr:href="blogUrl" on:click="closeMenu">
+          {{labelBlog}}
+        </a>
+        <div class="lang-select">
+          <st-select
+            class="lang-select-input"
+            variant="outlined"
+            attr:default-value="lang"
+            attr:aria-label="labelLanguages"
+            on:change="switchLanguage"
+          >
+            <option value="cn">中文</option>
+            <option value="en">English</option>
+          </st-select>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="nav-search" class:open="searchOpen">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+          <input
+            class="search-input"
+            type="search"
+            autocomplete="off"
+            :value="searchQuery"
+            attr:placeholder="searchPlaceholder"
+            attr:aria-label="searchLabel"
+            on:focus="openSearch"
+            on:input="onSearchInput"
+            on:keydown="onSearchKeydown"
+          />
+          <div class="search-panel" class:visible="searchOpen && searchQuery.trim()">
+            <o-if :value="searchIndexLoading">
+              <div class="search-state">{{searchLoading}}</div>
+            </o-if>
+            <o-fill :value="searchResults">
+              <button
+                type="button"
+                class="search-result"
+                class:active="$index === $host.searchActive"
+                on:click="$host.openResult($data)"
+              >
+                <span class="search-result-head">
+                  <span class="search-result-title">{{$data.title}}</span>
+                  <span class="search-result-kind">{{$data.kind}}</span>
+                </span>
+                <span class="search-result-snippet">{{$data.snippet}}</span>
+              </button>
+            </o-fill>
+            <o-if :value="!searchIndexLoading && searchQuery.trim() && searchResults.length === 0">
+              <div class="search-state">{{searchEmpty}}</div>
+            </o-if>
+          </div>
+        </div>
+        <button
+          class="search-toggle"
+          type="button"
+          on:click="toggleSearch"
+          attr:aria-label="searchLabel"
+          attr:aria-expanded="searchOpen"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+        </button>
+        <div class="theme-switch">
+          <button
+            class="theme-toggle"
+            type="button"
+            on:click="toggleThemeMenu"
+            attr:aria-label="themeLabel"
+            attr:aria-haspopup="'menu'"
+            attr:aria-expanded="themeMenuOpen ? 'true' : 'false'"
+          >
+            <o-if :value="themeMode === 'light'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+              </svg>
+            </o-if>
+            <o-if :value="themeMode === 'dark'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.1 13.5A8.1 8.1 0 0 1 10.5 3.9 8.1 8.1 0 1 0 20.1 13.5Z"></path>
+              </svg>
+            </o-if>
+            <o-if :value="themeMode === 'system'">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                <path d="M8 20h8M12 16v4"></path>
+              </svg>
+            </o-if>
+          </button>
+          <div class="theme-menu" class:open="themeMenuOpen" role="menu" attr:aria-label="themeLabel">
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'light' ? 'true' : 'false'"
+              on:click="setTheme('light')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+              </svg>
+              <span>{{themeLight}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'dark' ? 'true' : 'false'"
+              on:click="setTheme('dark')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.1 13.5A8.1 8.1 0 0 1 10.5 3.9 8.1 8.1 0 1 0 20.1 13.5Z"></path>
+              </svg>
+              <span>{{themeDark}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+            <button
+              class="theme-option"
+              type="button"
+              role="menuitemradio"
+              attr:aria-checked="themeMode === 'system' ? 'true' : 'false'"
+              on:click="setTheme('system')"
+            >
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                <path d="M8 20h8M12 16v4"></path>
+              </svg>
+              <span>{{themeSystem}}</span>
+              <span class="theme-check" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
+        <a
+          class="icon-link"
+          href="https://github.com/ofajs/ofa.js"
+          target="_blank"
+          rel="noreferrer"
+          attr:aria-label="labelGithubRepo"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path>
+          </svg>
+          <span>{{labelGithub}}</span>
+        </a>
+        <button
+          class="nav-burger"
+          class:open="menuOpen"
+          type="button"
+          on:click="toggleMenu"
+          attr:aria-expanded="menuOpen"
+          attr:aria-label="labelMenu"
+        >
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <div class="shell-content"><slot></slot></div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="f-brand">
+        <span class="brand">
+          <img class="brand-logo" src="../assets/logo.svg" alt="" aria-hidden="true" />
+          <span class="wordmark">ofa<span>.js</span></span>
+        </span>
+        <p>{{footerTagline}}</p>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerResources}}</h4>
+        <a attr:href="docsUrl">{{footerDocs}}</a>
+        <a href="https://github.com/ofajs/ofa.js" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs" target="_blank" rel="noreferrer">CDN</a>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerEcosystem}}</h4>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/router" target="_blank" rel="noreferrer">o-router</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/scsr" target="_blank" rel="noreferrer">scsr</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/plugins" target="_blank" rel="noreferrer">{{footerPlugins}}</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/xhear" target="_blank" rel="noreferrer">xhear</a>
+      </div>
+
+      <div class="f-col">
+        <h4>{{footerCommunity}}</h4>
+        <a href="https://github.com/ofajs/discussion/discussions" target="_blank" rel="noreferrer">Discussions</a>
+        <a href="https://github.com/ofajs/ofa.js/issues" target="_blank" rel="noreferrer">Issues</a>
+        <a href="https://github.com/ofajs/ofa.js/blob/v5/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2018–2026 ofa.js · MIT License</span>
+      <a class="lang-link" attr:href="languagesUrl" attr:aria-label="labelLanguages">
+        <span aria-hidden="true">◎</span>{{labelLanguages}}
+      </a>
+      <span class="made"><i></i>{{footerNote}}</span>
+    </div>
+  </footer>
+
+  <script>
+    const normalizeSearch = (value) =>
+      String(value || "")
+        .normalize("NFKC")
+        .toLowerCase();
+
+    const fuzzyMatch = (needle, haystack) => {
+      if (needle.length < 2) return false;
+      let index = 0;
+      for (const char of haystack) {
+        if (char === needle[index]) index += 1;
+        if (index === needle.length) return true;
+      }
+      return false;
+    };
+
+    const scoreEntry = (entry, query, terms) => {
+      const title = normalizeSearch(entry.title);
+      const description = normalizeSearch(entry.description);
+      const headings = normalizeSearch((entry.headings || []).join(" "));
+      const text = normalizeSearch(entry.text);
+      let score = 0;
+
+      for (const term of terms) {
+        let hit = false;
+        if (title.includes(term)) {
+          score += 90;
+          hit = true;
+        }
+        if (headings.includes(term)) {
+          score += 45;
+          hit = true;
+        }
+        if (description.includes(term)) {
+          score += 25;
+          hit = true;
+        }
+        if (text.includes(term)) {
+          score += 20 + Math.min(4, text.split(term).length - 1) * 5;
+          hit = true;
+        }
+        if (!hit && fuzzyMatch(term, text)) score += 6;
+      }
+
+      if (title.includes(query)) score += 60;
+
+      // 总览页通常聚合了所有分组标题，避免它压过具体内容页
+      if (entry.url === "index.html" || entry.url.endsWith("/index.html")) {
+        score *= 0.4;
+      }
+
+      return score;
+    };
+
+    const makeSnippet = (entry, terms) => {
+      const text = entry.text || entry.description || "";
+      const lower = normalizeSearch(text);
+      let index = -1;
+      for (const term of terms) {
+        index = lower.indexOf(term);
+        if (index > -1) break;
+      }
+      if (index < 0) return text.slice(0, 140);
+      const start = Math.max(0, index - 48);
+      const end = Math.min(text.length, index + 140);
+      return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+    };
+
+    const resultKind = (url, english = false) => {
+      if (url.startsWith("api/")) return "API";
+      if (url.startsWith("blog/")) return english ? "Blog" : "博客";
+      if (url.startsWith("tutorial/")) return english ? "Tutorial" : "教程";
+      if (url.startsWith("docs/")) return english ? "Docs" : "文档";
+      return english ? "Home" : "首页";
+    };
+
+    export default {
+      tag: "site-shell",
+      attrs: {
+        labelNav: "Main navigation",
+        labelHome: "Home",
+        labelTutorial: "Tutorial",
+        labelDocs: "Docs",
+        labelApi: "API",
+        labelGithub: "GitHub",
+        labelGithubRepo: "GitHub repository",
+        labelMenu: "Toggle menu",
+        labelLanguages: "Languages",
+        variant: "site",
+        homeUrl: "./",
+        tutorialUrl: "./tutorial/",
+        languagesUrl: "../",
+        docsUrl: "./docs/",
+        apiUrl: "./api/",
+        blogUrl: "./blog/",
+        labelBlog: "博客",
+        searchUrl: "./search-index.json",
+        searchPlaceholder: "搜索文档、教程、API…",
+        searchEmpty: "没有匹配内容",
+        searchLoading: "正在加载搜索索引…",
+        searchLabel: "搜索站点内容",
+        themeLabel: "切换主题",
+        themeLight: "白天模式",
+        themeDark: "黑夜模式",
+        themeSystem: "跟随系统",
+        footerTagline:
+          "Zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
+        footerResources: "Resources",
+        footerEcosystem: "Ecosystem",
+        footerCommunity: "Community",
+        footerDocs: "Documentation",
+        footerPlugins: "Plugins",
+        footerNote: "This page is built with ofa.js itself.",
+      },
+      data: {
+        lang: location.pathname.split("/")[1] === "en" ? "en" : "cn",
+        isEnglish: document.documentElement.lang.startsWith("en"),
+        menuOpen: false,
+        searchOpen: false,
+        searchQuery: "",
+        searchResults: [],
+        searchActive: 0,
+        searchIndexLoading: false,
+        themeMode: "dark",
+        themeMenuOpen: false,
+      },
+      proto: {
+        switchLanguage(event) {
+          const next = event.target.value;
+          if (next === this.lang) return;
+          const url = new URL(location.href);
+          const parts = url.pathname.split("/");
+          if (parts[1] === "cn" || parts[1] === "en") {
+            parts[1] = next;
+          } else {
+            parts.splice(1, 0, next);
+          }
+          url.pathname = parts.join("/");
+          location.href = url.href;
+        },
+
+        toggleMenu() {
+          this.menuOpen = !this.menuOpen;
+          if (this.menuOpen) {
+            this.searchOpen = false;
+            this.themeMenuOpen = false;
+          }
+        },
+        closeMenu() {
+          this.menuOpen = false;
+        },
+        ensureSearchIndex() {
+          if (this._searchEntries) return Promise.resolve(this._searchEntries);
+
+          if (!this._searchPromise) {
+            this.searchIndexLoading = true;
+            const indexUrl = new URL(
+              this.searchUrl || "./search-index.json",
+              location.href,
+            );
+            this._searchBase = new URL("./", indexUrl);
+
+            this._searchPromise = fetch(indexUrl)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("search index HTTP " + response.status);
+                }
+                return response.json();
+              })
+              .then((data) => {
+                this._searchEntries = Array.isArray(data.entries)
+                  ? data.entries
+                  : [];
+                return this._searchEntries;
+              })
+              .catch((error) => {
+                console.warn("[site-shell] failed to load search index", error);
+                this._searchEntries = [];
+                return this._searchEntries;
+              })
+              .finally(() => {
+                this.searchIndexLoading = false;
+              });
+          }
+
+          return this._searchPromise;
+        },
+
+        openSearch() {
+          this.searchOpen = true;
+          this.menuOpen = false;
+          this.themeMenuOpen = false;
+          this.ensureSearchIndex();
+          requestAnimationFrame(() => {
+            this.shadow?.$(".search-input")?.ele?.focus();
+          });
+        },
+
+        closeSearch() {
+          this.searchOpen = false;
+        },
+
+        toggleSearch() {
+          if (this.searchOpen) {
+            this.closeSearch();
+          } else {
+            this.openSearch();
+          }
+        },
+
+        onSearchInput(event) {
+          this.searchQuery = event.target.value;
+          this.searchOpen = true;
+          this.ensureSearchIndex();
+          clearTimeout(this._searchTimer);
+          this._searchTimer = setTimeout(() => this.performSearch(), 80);
+        },
+
+        onSearchKeydown(event) {
+          if (event.key === "Escape") {
+            this.closeSearch();
+            event.target.blur();
+            return;
+          }
+
+          if (!this.searchResults.length) return;
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            this.searchActive =
+              (this.searchActive + 1) % this.searchResults.length;
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            this.searchActive =
+              (this.searchActive - 1 + this.searchResults.length) %
+              this.searchResults.length;
+          } else if (event.key === "Enter") {
+            event.preventDefault();
+            const result = this.searchResults[this.searchActive];
+            if (result) this.openResult(result);
+          }
+        },
+
+        async performSearch() {
+          const query = this.searchQuery.trim();
+
+          if (!query) {
+            this.searchResults = [];
+            this.searchActive = 0;
+            return;
+          }
+
+          const entries = await this.ensureSearchIndex();
+          if (this.searchQuery.trim() !== query) return;
+
+          const normalized = normalizeSearch(query);
+          const terms = normalized.split(/\s+/).filter(Boolean);
+          const results = entries
+            .map((entry) => ({
+              entry,
+              score: scoreEntry(entry, normalized, terms),
+            }))
+            .filter((item) => item.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 8)
+            .map(({ entry }) => ({
+              ...entry,
+              kind: resultKind(entry.url, this.isEnglish),
+              snippet: makeSnippet(entry, terms),
+            }));
+
+          this.searchResults = results;
+          this.searchActive = 0;
+        },
+
+        openResult(entry) {
+          if (!entry || !entry.url) return;
+
+          const base =
+            this._searchBase ||
+            new URL("./", new URL(this.searchUrl || "./", location.href));
+          const target = new URL(entry.url, base);
+          const query = this.searchQuery.trim();
+          if (query) target.searchParams.set("search", query);
+          const href = target.href;
+
+          this.closeSearch();
+
+          if (this._app?.goto) {
+            this._app.goto(href);
+          } else {
+            location.href = href;
+          }
+        },
+
+        syncTheme() {
+          let mode = "dark";
+          try {
+            mode = localStorage.getItem("st-theme-mode") || "dark";
+          } catch {}
+          this.themeMode =
+            mode === "auto" ? "system" : mode === "light" ? "light" : "dark";
+        },
+
+        setTheme(mode) {
+          const stored = mode === "system" ? "auto" : mode;
+          try {
+            localStorage.setItem("st-theme-mode", stored);
+          } catch {}
+
+          const classes = document.documentElement.classList;
+          classes.remove("st-light", "st-dark");
+          if (mode === "light") classes.add("st-light");
+          else if (mode === "dark") classes.add("st-dark");
+
+          this.themeMode = mode;
+          this.themeMenuOpen = false;
+        },
+
+        toggleThemeMenu() {
+          this.themeMenuOpen = !this.themeMenuOpen;
+          if (this.themeMenuOpen) {
+            this.searchOpen = false;
+            this.menuOpen = false;
+          }
+        },
+
+        syncActive() {
+          const tutorialLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="tutorial"]',
+          );
+          tutorialLink?.classList.toggle(
+            "active",
+            /\/tutorial(?:\/|$)/.test(location.pathname),
+          );
+
+          const docsLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="docs"]',
+          );
+          docsLink?.classList.toggle(
+            "active",
+            /\/docs(?:\/|$)/.test(location.pathname),
+          );
+
+          const apiLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="api"]',
+          );
+          apiLink?.classList.toggle(
+            "active",
+            /\/api(?:\/|$)/.test(location.pathname),
+          );
+
+          const blogLink = this.ele.shadowRoot?.querySelector(
+            '[data-nav="blog"]',
+          );
+          blogLink?.classList.toggle(
+            "active",
+            /\/blog(?:\/|$)/.test(location.pathname),
+          );
+        },
+      },
+      attached() {
+        const root = this.ele.shadowRoot;
+        this._navWrap = root && root.querySelector(".nav-wrap");
+        this._app = (window.$ ? window.$(this.ele) : this.ele).app;
+        this._onRoute = () => {
+          this.syncActive();
+          this.closeMenu();
+          this.closeSearch();
+          this.themeMenuOpen = false;
+        };
+        this._app?.on?.("router-change", this._onRoute);
+        this.syncActive();
+
+        const searchParam = new URL(location.href).searchParams.get("search");
+        if (searchParam) this.searchQuery = searchParam;
+
+        this.syncTheme();
+        this._onThemeStorage = (event) => {
+          if (event.key === "st-theme-mode") this.syncTheme();
+        };
+        window.addEventListener("storage", this._onThemeStorage);
+
+        this._onDocClick = (event) => {
+          const path = event.composedPath?.() || [];
+          if (this.searchOpen && !path.includes(this.ele)) this.closeSearch();
+          if (this.themeMenuOpen) {
+            const themeSwitch = this.shadow?.$(".theme-switch")?.ele;
+            if (themeSwitch && !path.includes(themeSwitch)) {
+              this.themeMenuOpen = false;
+            }
+          }
+        };
+        document.addEventListener("click", this._onDocClick);
+        this._onScroll = () => {
+          this._navWrap?.classList.toggle("scrolled", window.scrollY > 8);
+        };
+        window.addEventListener("scroll", this._onScroll, { passive: true });
+        this._onScroll();
+      },
+      detached() {
+        this._app?.off?.("router-change", this._onRoute);
+        window.removeEventListener("scroll", this._onScroll);
+        document.removeEventListener("click", this._onDocClick);
+        window.removeEventListener("storage", this._onThemeStorage);
+        clearTimeout(this._searchTimer);
+      },
+    };
+  </script>
+</template>

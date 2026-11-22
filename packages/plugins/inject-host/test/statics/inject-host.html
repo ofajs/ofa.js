@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>inject-host 插件自检</title>
+    <style>
+      /* 显式底色：移除注入样式后，回落色可被确定性断言 */
+      body { color: rgb(29, 29, 31); }
+    </style>
+  </head>
+  <body>
+    <!-- inject-host 插件自检（纯页面，spec 驱动）：
+        收编样式作用于光 DOM、head 去重、style 文本实时变更、link 切换移除。
+        演示组件按 ofa.js 正统方式：HTML 文件 + l-m 引用 -->
+    <style-host></style-host>
+    <!-- inject-host 提升的样式作用于光 DOM -->
+    <div class="hosted-color" id="light-target">hosted text</div>
+    <!-- inject-host 响应式检查的目标元素 -->
+    <inject-dyn></inject-dyn>
+    <div class="inj-style-target" id="inj-style-target">style target</div>
+    <div class="inj-link-target" id="inj-link-target">link target</div>
+
+    <!-- 双重组件嵌于 o-page：user-list 声明的样式收编进页面 shadowRoot，
+         多层选择器命中内层组件 user-list-item 槽内的 .item-name -->
+    <o-app style="display:block">
+      <o-page src="./fixtures/user-list-page.html"></o-page>
+    </o-app>
+
+    <l-m src="./style-host.html"></l-m>
+    <l-m src="./inject-dyn.html"></l-m>
+    <l-m src="./user-list.html"></l-m>
+    <l-m src="./user-list-item.html"></l-m>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../inject-host.mjs";
+
+      window.__dyn = ofa("inject-dyn");
+    </script>
+  </body>
+</html>

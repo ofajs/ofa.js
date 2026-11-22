@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 扩展实例</p>
+      <h1>扩展实例</h1>
+      <p class="doc-lead">在单个实例或全部实例上增加方法、getter 和新指令。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="extend"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.extend(obj, options)</code></td><td>只扩展当前实例；默认不可枚举</td></tr>
+          <tr><td><code>$.fn.extend(obj)</code></td><td>扩展到所有实例；可定义 getter / setter 作为新指令</td></tr>
+          <tr><td><code>enumerable: true</code></td><td>显式让扩展可枚举（会影响 Object.keys / toJSON）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>扩展名不要与内置成员（attr、class、text、html、watch 等）冲突。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

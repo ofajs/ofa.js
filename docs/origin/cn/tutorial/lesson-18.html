@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 18</p>
+      <h1>嵌套布局</h1>
+      <p class="doc-lead">子页声明 parent，父页用 slot 承接；切子页时父页不销毁。</p>
+
+      <p>
+  导航栏、侧边栏这类公共结构放在父页里，子页只写内容，通过
+  <code>parent</code> 挂到父页的 <code>&lt;slot&gt;</code> 下。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-18" fold-styles="true"></docs-playground>
+<h2>布局如何工作</h2>
+<ul>
+  <li><code>layout.html</code>：导航 + <code>&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;</code>；</li>
+  <li><code>home.html</code> / <code>settings.html</code>：
+    <code>export const parent = "./layout.html"</code>；</li>
+  <li>父页的 <code>routerChange</code> 在子页切换时触发，用来更新导航高亮。</li>
+</ul>
+<p>
+  两个子页互相切换时，父页实例不会重建，导航状态和布局都保留。
+</p>
+<div class="doc-note">
+  <strong>别在子页里重复布局：</strong>导航和页脚只写一次，放在父页；
+  子页只关心自己的内容。需要多级嵌套时，父页也可以再声明 parent。
+</div>
+<h2>动手改</h2>
+<p>
+  再加一个 <code>profile.html</code> 子页和对应导航项，确认切换时布局不会闪动。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-17.html">17 · 页面与路由 →</a>　·　下一篇：<a olink href="./lesson-19.html">19 · 异步与加载态 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

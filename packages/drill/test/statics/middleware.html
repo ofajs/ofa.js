@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill · 中间件 middleware</title>
+  </head>
+  <body>
+    <script type="module">
+      import lm from "../../src/main.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      const logs = [];
+
+      // 裸函数形式：默认注册到模块类型 js 与 mjs
+      lm.use(async (ctx, next) => {
+        const name = ctx.url.split("/").pop();
+        logs.push(`before:${name}`);
+        await next();
+        logs.push(`after:${name}`);
+      });
+
+      // 自定义类型处理器：md 扩展名走这里
+      lm.use("md", async (ctx, next) => {
+        const text = await fetch(ctx.url).then((e) => e.text());
+        ctx.result = `[md] ${text.trim()}`;
+      });
+
+      const load = lm(import.meta);
+
+      test("裸函数 use() 包装默认模块类型 / a bare use() handler wraps default module types", async () => {
+        assertEqual(await load("./esm/answer.mjs"), { answer: 42 });
+        // 洋葱顺序：先注册的处理器包在最先与最后执行
+        assertEqual(logs, ["before:answer.mjs", "after:answer.mjs"]);
+      });
+
+      test("自定义类型处理器处理自己的扩展名 / a custom type processor handles its own extension", async () => {
+        assertEqual(await load("./note.md"), "[md] # custom markdown");
+      });
+
+      test("-ctx 参数返回完整加载上下文 / the -ctx param resolves with the full load context", async () => {
+        // --real 记录真实地址到 ctx.realUrl
+        const ctx = await load(
+          "./data.json -ctx --real:/fake/origin/data.json"
+        );
+
+        assertEqual(ctx.result, { name: "drill", major: 6 });
+        assertEqual(ctx.params, ["-ctx", "--real:/fake/origin/data.json"]);
+        assertEqual(ctx.realUrl, "/fake/origin/data.json");
+        assert(
+          ctx.url.endsWith("/data.json"),
+          `ctx.url 异常 / unexpected ctx.url: ${ctx.url}`
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

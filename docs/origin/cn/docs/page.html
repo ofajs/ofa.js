@@ -1,0 +1,161 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>页面</h1>
+      <p class="doc-lead">
+        页面模块是应用路由中的一屏内容。它没有 <code>tag</code>，
+        由 <code>o-page</code> 或 <code>o-app</code> 加载，
+        并通过模块函数接收 URL 查询参数。
+      </p>
+
+      <h2>页面模块结构</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "未命名页面",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> 是解析后的查询参数对象。访问
+        <code>./detail.html?id=42&amp;tab=info</code> 时，
+        <code>query.id</code> 为 <code>"42"</code>。
+      </p>
+
+      <h2>在页面里跳转</h2>
+      <p>
+        页面实例自带 <code>goto</code>、<code>replace</code>、<code>back</code>：
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;去详情&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;返回&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> 压入新页面，<code>replace</code> 替换当前页，
+        <code>back</code> 返回上一页。完整的页面栈与 hash 路由见
+        <a olink href="./routing.html">路由与导航</a>。
+      </p>
+
+      <h2>相对资源与相对 import</h2>
+      <p>
+        页面里的相对地址以<strong>页面文件自身</strong>为基准解析，
+        不是入口 HTML 的地址。框架会自动改写页面模板里的
+        <code>img src</code>、<code>style</code> 中的 <code>url()</code>
+        等相对资源；<code>.mjs</code> 页面里的 <code>import</code>
+        则按模块自身地址解析。
+      </p>
+      <pre><code>&lt;!-- page.html 位于 /pages/detail/ --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- detail.mjs 同目录 --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        所以页面可以放在任意子目录，不需要把资源路径改成基于站点根的绝对路径。
+      </p>
+
+      <h2>进阶：.mjs 页面模块</h2>
+      <p>
+        页面通常写成 <code>&lt;template page&gt;</code> 的 HTML 模块；
+        需要把模板与逻辑分开时，也可以用 <code>.mjs</code> 编写，
+        声明 <code>$.PAGE</code> 类型并用 <code>temp</code> 指向外置模板：
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "Hello" };
+export const proto = {};</code></pre>
+      <p>
+        入口仍是 <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code>。
+        大多数场景推荐 HTML 模块，<code>.mjs</code> 适合逻辑较重、
+        需要拆分模板或复用现有模块的项目。
+      </p>
+
+      <h2>内嵌子页面</h2>
+      <p>
+        一个页面同时装下列表、表单和弹窗时，可以把独立业务单元拆成子页面，
+        用常驻的 <code>&lt;o-page&gt;</code> 内嵌：
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;新增&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        子页面暴露方法供宿主调用，完成后再用事件把结果抛回宿主：
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong><code>o-page</code> 的 src 初始化后不可变。</strong>
+        运行时改 <code>src</code>（包括 <code>:src</code> 绑定）会直接抛错。
+        传参请调用子页面方法；确实需要全新实例时，用 <code>o-if</code>
+        包住 <code>o-page</code> 销毁重建。
+      </div>
+
+      <h2>页面拆分原则</h2>
+      <ul>
+        <li>子页面负责自己的表单状态与交互完整性；</li>
+        <li>数据归一化、持久化、跨模块协调放在宿主页面；</li>
+        <li>向上抛结果时 <code>bubbles: true, composed: true</code> 必须同时设置；</li>
+        <li>能常驻就常驻，用方法重置状态，避免频繁销毁重建。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./component.html">组件 →</a>
+        　·　下一篇：<a olink href="./lifecycle.html">生命周期 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

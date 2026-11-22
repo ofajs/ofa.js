@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>表单与注册组合回归 / Form and registration regressions</title>
+  </head>
+  <body>
+    <fill-opt-demo></fill-opt-demo>
+    <before-init-demo id="before-init-target"></before-init-demo>
+    <loop-attr-demo></loop-attr-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      /* ===== 用例来源 230904/fill-option：select 内 replace-temp + fill + if ===== */
+      $.register({
+        tag: "fill-opt-demo",
+        temp: `
+        select: <span id="comp-val">{{val}}</span>
+        <br />
+        <select sync:value="val">
+          <template is="replace-temp">
+            <option value="a">AA</option>
+            <o-fill :value="arr">
+              <option attr:value="$data.value">{{$data.name}}</option>
+            </o-fill>
+            <o-if :value="val !== 'a'">
+              <option value="b">BB</option>
+            </o-if>
+          </template>
+        </select>
+        `,
+        data: {
+          val: "t-cn",
+          arr: [
+            { name: "简体中文", value: "cn" },
+            { name: "繁体中文", value: "t-cn" },
+          ],
+        },
+      });
+
+      test("select 内 replace-temp 与条件选项 / replace-temp in select with condition", async () => {
+        const $demo = $("fill-opt-demo");
+        const $shadow = $demo.shadow;
+
+        const select = $shadow.$("select");
+        const optionCount = () => select.ele.querySelectorAll("option").length;
+
+        // 初始 val=t-cn（非 a）→ 条件选项 b 存在，共 4 个 option
+        await waitFor(() => optionCount() === 4);
+        assertEqual($shadow.$("#comp-val").text, "t-cn");
+
+        // 选中 a → 条件选项 b 移除，剩 3 个
+        select.ele.value = "a";
+        select.ele.dispatchEvent(new Event("change"));
+        await waitFor(() => $shadow.$("#comp-val").text === "a");
+        await waitFor(() => optionCount() === 3);
+
+        // 换回 cn 条件选项恢复
+        select.ele.value = "cn";
+        select.ele.dispatchEvent(new Event("change"));
+        await waitFor(() => $shadow.$("#comp-val").text === "cn");
+        await waitFor(() => optionCount() === 4);
+      });
+
+      /* ===== 用例来源 set-data-before-init：注册前设置数据 ===== */
+      // 页面加载即先赋值，组件在下方才注册
+      $("#before-init-target").count = 100;
+      $("#before-init-target").num = 100;
+
+      $.register({
+        tag: "before-init-demo",
+        temp: `
+        <div id="c">count:{{count}}</div>
+        <div id="n">num:{{num}}</div>
+        `,
+        attrs: {
+          num: 1,
+        },
+        data: {
+          count: 0,
+        },
+      });
+
+      test("注册前设置的数据保留 / data set before register is kept", async () => {
+        const $demo = $("before-init-demo");
+        const $shadow = $demo.shadow;
+
+        await waitFor(() => $shadow.$("#c").text === "count:100");
+        // num 是 attrs 成员：注册前赋值会反射到属性上
+        assertEqual($demo.ele.getAttribute("num"), "100");
+        assertEqual($shadow.$("#n").text, "num:100");
+      });
+
+      /* ===== 用例来源 loop-set-attr-bug：attrs 反射与模板赋值不成死循环 ===== */
+      $.register({
+        tag: "loop-attr-child",
+        attrs: {
+          activeItem: null,
+        },
+        temp: `<div class="tab-label">tab - {{activeItem}}</div>`,
+      });
+
+      $.register({
+        tag: "loop-attr-demo",
+        temp: `
+        <div id="tabs">
+          <o-fill :value="arr">
+            <loop-attr-child :active-item="$data.active"></loop-attr-child>
+          </o-fill>
+        </div>
+        `,
+        data: {
+          arr: [{ active: "hahaha" }],
+        },
+      });
+
+      test("attrs 数据变化不引发循环 / attrs change stays stable", async () => {
+        const $demo = $("loop-attr-demo");
+        const $shadow = $demo.shadow;
+
+        // 子组件渲染在自身 shadow 内，取值需穿透一级
+        const label = () =>
+          $shadow.$("loop-attr-child").shadow.$(".tab-label");
+
+        await waitFor(() => label() && label().text === "tab - hahaha");
+
+        // 修改数据项 → 反射链条走完一轮后必须稳定
+        $demo.arr[0].active = 1;
+        await waitFor(() => label() && label().text === "tab - 1");
+        await new Promise((r) => setTimeout(r, 200));
+        assertEqual(label().text, "tab - 1");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

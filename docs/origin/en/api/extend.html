@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Extending instances</p>
+      <h1>Extending instances</h1>
+      <p class="doc-lead">Add methods, getters, and new directives to a single instance or to all instances.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="extend"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.extend(obj, options)</code></td><td>Extends only the current instance; non-enumerable by default</td></tr>
+          <tr><td><code>$.fn.extend(obj)</code></td><td>Extends all instances; getters / setters can be defined as new directives</td></tr>
+          <tr><td><code>enumerable: true</code></td><td>Explicitly makes the extension enumerable (affects Object.keys / toJSON)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> do not let extension names collide with built-in members (attr, class, text, html, watch, and so on).
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

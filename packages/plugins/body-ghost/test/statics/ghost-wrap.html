@@ -1,0 +1,16 @@
+<template component>
+  <style>
+    #wrap-box { padding: 12px; border: 1px solid #ccc; }
+  </style>
+  <div id="wrap-box">
+    <body-ghost>
+      <button id="ghost-btn" on:click="count++">浮层按钮</button>
+    </body-ghost>
+    <span id="wrap-count">{{count}}</span>
+  </div>
+  <script>
+    export default {
+      data: { count: 0 },
+    };
+  </script>
+</template>

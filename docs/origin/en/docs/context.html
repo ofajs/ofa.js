@@ -1,0 +1,108 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>Cross-Component Context</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> places data into a subtree, and <code>o-consumer</code> consumes
+        it from the nearest provider. This suits passing user info, themes, and business context
+        across several component layers, avoiding prop drilling.
+      </p>
+
+      <h2>Providers and consumers</h2>
+      <pre><code>&lt;!-- Provider: name identifies the context; the remaining attributes are shared data --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="Alice"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- Consumer: syncs context attributes into its own data fields --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        The consumer walks up the DOM to find the <strong>nearest</strong> provider with the
+        same name. The provider must be an ancestor of the consumer; a sibling will not be found.
+      </p>
+
+      <h2>Runtime updates</h2>
+      <p>
+        A provider's HTML attributes are read only once, during initialization. To update at
+        runtime you must change its data properties directly; <code>setAttribute</code> does
+        not work:
+      </p>
+      <pre><code>// Correct: change the provider's data
+const provider = $("#userProvider");
+provider.userName = "Bob";
+
+// Wrong: setAttribute does not broadcast to consumers
+provider.ele.setAttribute("user-name", "Bob");</code></pre>
+
+      <h2>Nesting and reconnection</h2>
+      <p>
+        When several providers with the same name are nested, their data is merged field by
+        field, and the provider closer to the consumer overrides fields from the farther one.
+        A consumer's <code>name</code> can also be changed dynamically; after the change it
+        looks up the nearest provider with the new name again.
+      </p>
+
+      <h2>Defaults: o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        When no provider with the same name exists, the consumer falls back to the
+        document-level root-provider. When both exist, the provider closer to the consumer wins.
+      </p>
+
+      <h2>Looking up a provider explicitly</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "Carol"; // consumers update automatically
+
+// any element can look up a provider
+$(".profile").getProvider("userInfo");
+
+// global root provider
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>Providers dispatching events to consumers</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "Hello" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>When not to use it</h2>
+      <ul>
+        <li>Passing values only between parent and child: use <code>:prop</code> / <code>sync:</code>;</li>
+        <li>Sharing business state across pages: use <code>$.stanz()</code>;</li>
+        <li>Contexts that are purely styling, such as theme colors or sizes: prefer CSS variables or <code>match-var</code>.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./state.html">Global State →</a>
+         · Next: <a olink href="./app.html">o-app Applications →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

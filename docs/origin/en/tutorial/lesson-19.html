@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 19</p>
+      <h1>Async and Loading States</h1>
+      <p class="doc-lead">Drive the UI with the three async states loading / error / success; don't put async results in a getter.</p>
+
+      <p>
+  Page initialization often has to wait for an API. Don't wrap async logic in a getter; use explicit
+  state fields instead: <code>loading</code>, <code>error</code>, and <code>user</code>, and let them drive the UI.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-19" fold-styles="true"></docs-playground>
+<h2>Recommended flow</h2>
+<ol>
+  <li>Start the request: <code>status = "loading"</code>, clear the previous error;</li>
+  <li>On success: write the result into data, <code>status = "done"</code>;</li>
+  <li>On failure: write the error message into <code>error</code>, <code>status = "error"</code>.</li>
+</ol>
+<p>
+  The UI uses <code>o-if</code> / <code>o-else-if</code> / <code>o-else</code>
+  to show loading, error, and content respectively.
+</p>
+<div class="doc-note">
+  <strong>Why explicit state matters:</strong> a single <code>user</code> cannot distinguish
+  "not started yet", "loading", and "failed to load". State fields give each case a definite UI,
+  and make interactions such as disabling buttons or retrying easy to add.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Give the request a 600ms delay (the example already has one) and disable the "Reload" button while loading;
+  then try making the failure message clickable to retry.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-18.html">18 · Nested Layouts →</a> · Next: <a olink href="./lesson-20.html">20 · Putting It Together: A Todo List →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

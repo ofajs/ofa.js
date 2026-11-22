@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>模板指令总览 — ofa.js 文档</title>
+    <meta name="description" content="ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="模板指令总览 — ofa.js 文档" />
+    <meta property="og:description" content="ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>模板指令总览</h1>
+      <p class="doc-lead">
+        ofa.js 的模板语法直接写在 HTML 上：用指令绑定数据、事件和渲染逻辑，
+        没有 JSX，也没有需要编译的模板文件。
+      </p>
+
+      <h2>指令总表</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>语法</th><th>用途</th><th>示例</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>文本插值，仅限元素文本内容</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>渲染 HTML 内容</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>单向属性绑定</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>双向属性绑定</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>HTML attribute 绑定</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>条件类名</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>内联样式绑定</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>事件绑定</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>只触发一次的事件</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>事件对象</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>文本插值</h2>
+      <pre><code>&lt;p&gt;你好，{{name}}&lt;/p&gt;
+&lt;p&gt;计数：{{count}}，双倍：{{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> 只在元素文本内容中生效。属性值、事件参数和样式值
+        一律使用指令表达式。需要渲染 HTML 时使用 <code>:html</code>，
+        并确保内容可信。
+      </p>
+
+      <h2>属性与双向绑定</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;链接&lt;/a&gt;
+&lt;!-- 布尔属性一律用 attr: --&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> 是单向绑定，<code>sync:</code> 是双向绑定。
+        <code>attr:</code> 对 <code>true</code> 设置空属性、对
+        <code>false</code> 移除属性，因此布尔属性必须用它。
+      </p>
+
+      <h2>类名与样式</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> 根据布尔表达式加/减类名；
+        <code>:style.prop</code> 使用驼峰属性名。详细规则见
+        <a olink href="./binding.html">绑定与样式</a>。
+      </p>
+
+      <h2>事件</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        纯方法名会自动绑定 <code>this</code>，也可以直接写表达式。
+        自定义事件的数据通过 <code>event.data</code> 读取。详见
+        <a olink href="./events.html">事件与表单</a>。
+      </p>
+
+      <h2>条件与列表</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;大于 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;大于 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;小于等于 5&lt;/p&gt;
+&lt;/o-else&gt;
+
+&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        条件标签必须连续书写；<code>o-fill</code> 内只能使用
+        <code>$data</code>、<code>$index</code>、<code>$host</code>、
+        <code>$parent</code>、<code>$ele</code>。详见
+        <a olink href="./render.html">条件与列表</a>。
+      </p>
+
+      <h2>数据来源</h2>
+      <p>
+        模板中的每个变量都必须先在 <code>data</code> 或 <code>attrs</code>
+        中声明。未声明不是 <code>undefined</code>，而是直接抛
+        <code>ReferenceError</code> 并中断整页渲染。
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lifecycle.html">生命周期 →</a>
+        　·　下一篇：<a olink href="./binding.html">绑定与样式 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

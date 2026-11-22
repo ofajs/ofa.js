@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Installation &amp; Setup — ofa.js Docs</title>
+    <meta name="description" content="Load ofa.js v5 from a CDN or local file and run your first page." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Installation &amp; Setup — ofa.js Docs" />
+    <meta property="og:description" content="Load ofa.js v5 from a CDN or local file and run your first page." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">Getting started</p>
+        <h1>Installation</h1>
+        <p class="doc-lead">
+          ofa.js requires no dependencies and no build step. Reference the ESM file on a CDN
+          with a single script tag, and you can start writing components and pages.
+        </p>
+
+        <h2>1. Load ofa.js</h2>
+        <p>
+          We recommend the v5 ESM build. Put the following URL in the
+          <code>src</code> of a <code>&lt;script type="module"&gt;</code>:
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          If your environment is better suited to classic scripts, you can use the UMD build
+          instead (it exposes a global <code>$</code>):
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>Version note:</strong> CDN URLs for the v5 branch must be written as
+          <code>@refs/heads/v5</code>, not shortened to <code>@v5</code>;
+          otherwise jsDelivr parses it as a version tag and returns a 404.
+        </div>
+
+        <h2>2. Write an entry point</h2>
+        <p>
+          The entry HTML only loads ofa.js and includes an <code>o-page</code> to load the page module:
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;My first ofa.js page&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. Write a page module</h2>
+        <p>
+          An <code>.html</code> file is a page module. The template, styles, and logic all live inside
+          <code>&lt;template page&gt;</code>:
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;Clicked {{count}} times&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>Note:</strong> the page and component <code>&lt;script&gt;</code>
+          must be inside <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code>. ofa.js only extracts scripts inside the template;
+          scripts placed outside are ignored.
+        </div>
+
+        <h2>4. Open the page</h2>
+        <p>
+          Pages must be served over HTTP; you cannot open the HTML file directly
+          (<code>file://</code> is blocked by the CORS policy for module loading). Any static server works:
+        </p>
+        <pre><code>$ npx serve .
+
+# or
+$ python3 -m http.server</code></pre>
+        <p>
+          Open http://localhost:3000 and you'll see the page. Run
+          <code>$.version</code> in the console to confirm the framework has loaded.
+        </p>
+
+        <h2>Next Steps</h2>
+        <p>
+          Now that the page runs, the next step is learning how data drives the template:
+          text interpolation, events, two-way binding, conditionals, and lists.
+        </p>
+        <p class="doc-end">
+          Next: <a olink href="./first-component.html">Your First Component →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

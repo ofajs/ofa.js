@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 10</p>
+      <h1>Computed Properties and Watching</h1>
+      <p class="doc-lead">Getters in proto compute synchronously; watch observes changes and handles side effects.</p>
+
+      <p>
+  For values derived from existing data, use a getter in <code>proto</code>.
+  When you need to do extra work after data changes (logging, writing to external storage), use <code>watch</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10" fold-styles="true"></docs-playground>
+<h2>How getters and watch divide the work</h2>
+<ul>
+  <li><code>get total()</code>: use it in templates like a normal field; it updates automatically with its dependencies;</li>
+  <li><code>watch.qty(value, { watchers })</code>: runs after the data changes;</li>
+  <li>watch is called once during initialization, when <code>watchers</code> does not exist yet,
+    so you can use <code>if (!watchers) return</code> to skip that first call.</li>
+</ul>
+<div class="doc-note">
+  <strong>Limits of getters:</strong> a getter is evaluated when the template initializes,
+  so it can only depend on synchronous data that already exists. If you depend on async data
+  returned by an API, store the result in a data field first, then assign it in the async callback.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a "discount" input (0–1) so the total price is calculated with the discount;
+  then use watch to log discount changes.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-9.html">09 · Editing a List →</a> · Next: <a olink href="./lesson-11.html">11 · Lifecycle →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

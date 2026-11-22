@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data &amp; Watchers — ofa.js Docs</title>
+    <meta name="description" content="Reactive data, computed getters, watch listeners, and common edge cases." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Data &amp; Watchers — ofa.js Docs" />
+    <meta property="og:description" content="Reactive data, computed getters, watch listeners, and common edge cases." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>Data and Watchers</h1>
+      <p class="doc-lead">
+        <code>data</code> is the reactive state of a component or page. It is powered by stanz,
+        so deep changes to objects and arrays automatically trigger view updates.
+      </p>
+
+      <h2>data is an object, not a function</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "Alice", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        Each component instance has its own data. Assigning to nested objects and array
+        <code>push</code>/<code>splice</code>/<code>sort</code> all trigger updates:
+      </p>
+      <pre><code>this.user.name = "Bob";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>Computed properties</h2>
+      <p>Use getters in <code>proto</code>; do not use Vue-style computed:</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>Use them in templates like ordinary fields: <code>{{double}}</code>, <code>{{fullName}}</code>.</p>
+      <div class="doc-note">
+        <strong>Getters are evaluated as soon as the template initializes, before ready.</strong>
+        They only suit simple computations that depend on synchronous initial values. Do not put
+        computations that depend on async data in a getter; use a data field and assign it in the
+        async callback instead, otherwise a <code>TypeError</code> may occur and break rendering
+        for the whole page.
+      </div>
+
+      <h2>Watchers</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // first call during initialization
+    console.log("count changed to", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // objects and arrays are watched deeply
+    console.log("user changed");
+  },
+},</code></pre>
+      <p>
+        The second callback argument is <code>{ watchers }</code>, the set of changes merged
+        during the current debounce cycle. <code>watchers[0]</code> carries
+        <code>name</code>, <code>oldValue</code>, <code>value</code>,
+        <code>type</code>, <code>target</code>, and <code>args</code>.
+      </p>
+      <p>
+        A watch function runs once when component initialization completes; at that point
+        <code>watchers</code> is empty, and the call is used to establish the watch. If you do
+        not need business logic to run during initialization, check
+        <code>if (!watchers) return;</code> first.
+      </p>
+
+      <h2>Avoiding write-back loops</h2>
+      <pre><code>// Wrong: watch count and also change count in the callback
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        When you need a derived value, use a computed property, or add an explicit trigger
+        condition. Do not unconditionally write back to the watched data inside a watch.
+      </p>
+
+      <h2>watch and async data</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        Watch callbacks can be async functions. With concurrent requests, track a request
+        sequence number or use <code>AbortController</code> so an older request cannot
+        overwrite a newer result.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./render.html">Conditionals and Lists →</a>
+         · Next: <a olink href="./state.html">Global State →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

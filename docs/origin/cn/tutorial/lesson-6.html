@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 06</p>
+      <h1>双向绑定</h1>
+      <p class="doc-lead">sync: 让表单和 data 双向同步，适合标量值。</p>
+
+      <p>
+  <code>sync:</code> 同时做两件事：数据变化时更新表单，用户输入时写回数据。
+  它适合字符串、数字、布尔这类标量值。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-6" fold-styles="true"></docs-playground>
+<h2>常用表单</h2>
+<ul>
+  <li><code>sync:value="name"</code>：文本框、textarea、select；</li>
+  <li><code>sync:checked="subscribe"</code>：复选框的选中状态；</li>
+  <li>下方预览会随输入实时更新，说明数据已经写回 <code>data</code>。</li>
+</ul>
+<div class="doc-note">
+  <strong>对象不要 sync：</strong>双向绑定对象会造成引用混乱。
+  对象/数组的编辑用 <code>sync:value="$data.field"</code> 绑定到具体字段，
+  或通过 <code>on:input</code> 调方法处理。
+</div>
+<h2>动手改</h2>
+<p>
+  增加一个「年龄」数字输入框（<code>type="number"</code>），用
+  <code>sync:value</code> 绑定，并在预览里显示明年年龄。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-5.html">05 · 事件 →</a>　·　下一篇：<a olink href="./lesson-7.html">07 · 条件渲染 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

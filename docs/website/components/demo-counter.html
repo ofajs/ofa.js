@@ -1,0 +1,112 @@
+<template component>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/button.html"></l-m>
+  <style>
+    :host {
+      display: block;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .counter {
+      padding: 20px;
+      border: 1px solid var(--md-sys-color-outline-variant, #43474e);
+      border-radius: var(--md-sys-shape-corner-xl, 24px);
+      background: var(--md-sys-color-surface-container-high, #272a2f);
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: none;
+    }
+
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--md-sys-color-secondary, #ccc2dc);
+    }
+
+    .live i {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--md-sys-shape-corner-full, 999px);
+      background: var(--md-sys-color-primary, #a2c9ff);
+    }
+
+    .value {
+      color: var(--md-sys-color-on-surface, #e2e2e9);
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .hint {
+      margin: 12px 0 0;
+      color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+  <div class="counter">
+    <div class="meta">
+      <span>Reactive Counter</span>
+      <span class="live"><i></i>Live</span>
+    </div>
+
+    <div class="value">{{currentValue}}</div>
+
+    <div class="actions">
+      <st-button variant="outlined" on:click="decrement">−1</st-button>
+      <st-button on:click="increment">+1</st-button>
+      <st-button variant="outlined" on:click="resetCount">{{resetLabel}}</st-button>
+    </div>
+
+    <p class="hint">state → UI, automatically</p>
+  </div>
+
+  <script>
+    export default {
+      tag: "demo-counter",
+      attrs: { start: 0, resetLabel: "Reset" },
+      data: { currentValue: 0 },
+      watch: {
+        start(val) {
+          this.currentValue = Number(val) || 0;
+        },
+      },
+      proto: {
+        increment() {
+          this.currentValue += 1;
+        },
+        decrement() {
+          this.currentValue -= 1;
+        },
+        resetCount() {
+          this.currentValue = Number(this.start) || 0;
+        },
+      },
+      ready() {
+        this.currentValue = Number(this.start) || 0;
+      },
+    };
+  </script>
+</template>

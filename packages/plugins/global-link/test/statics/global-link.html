@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>global-link 插件自检</title>
+    <style>
+      body { color: rgb(29, 29, 31); }
+    </style>
+  </head>
+  <body>
+    <!-- global-link 插件自检（纯页面，spec 驱动）：
+        shadow 注入生效、href 实时切换、移除后恢复。
+        o-global-link 必须写在其他组件之前（只有之后挂载的组件拿到样式）；
+        演示组件按 ofa.js 正统方式：HTML 文件 + l-m 引用 -->
+    <o-global-link id="glink" href="./fixtures/global-red.css"></o-global-link>
+
+    <styled-a></styled-a>
+    <styled-b></styled-b>
+
+    <l-m src="./styled-a.html"></l-m>
+    <l-m src="./styled-b.html"></l-m>
+    <l-m src="./styled-c.html"></l-m>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../global-link/global-link.mjs";
+
+      window.__glink = ofa("o-global-link");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,661 @@
+<!--
+  docs/origin/cn/index.html — 页面模块源文件（不是最终 HTML 文档）。
+  npm run build:website 会把 template[page] 内容内联进 SCSR 完整文档
+  docs/website/cn/index.html。
+-->
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <l-m src="{{SITE}}/components/demo-counter.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/icon-button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/code/code.html"></l-m>
+
+  <main class="main">
+      <!-- ============ HERO ============ -->
+      <section class="hero" id="top">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <div class="hero-badges">
+              <span class="eyebrow">
+                <i class="pulse"></i>
+                v5 · 零构建 Web Components 框架
+              </span>
+              <a
+                class="legacy-docs"
+                href="https://v4.ofajs.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="访问旧版 v4 文档（新标签页）"
+              >
+                旧版 v4 文档
+                <span class="arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+  
+            <h1>把组件，<br /><span class="grad">写成 HTML。</span></h1>
+  
+            <p class="lead">
+              ofa.js 是一个<b>零构建、零依赖</b>的前端框架。<b>一个 .html 文件就是一个组件</b>，
+              浏览器直接运行——没有脚手架，没有打包黑盒，只有你早已熟悉的 HTML、CSS 和 JavaScript。
+            </p>
+  
+            <div class="actions">
+              <st-button class="btn btn-primary" on:click="jump('start')">
+                5 分钟上手
+                <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </st-button>
+              <st-button
+                class="btn btn-ghost"
+                variant="outlined"
+                on:click="openExternal(githubUrl)"
+              >
+                在 GitHub 上查看
+              </st-button>
+            </div>
+  
+            <div class="cdn-box">
+              <div class="cdn-top">
+                <span class="cdn-tag">CDN · v5</span>
+                <span class="cdn-label">ESM</span>
+                <st-icon-button
+                  class="copy-btn"
+                  on:click="copySnippet(cdnUrl)"
+                  aria-label="复制 v5 ESM 地址"
+                  title="复制 v5 ESM 地址"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                  </svg>
+                </st-icon-button>
+              </div>
+              <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+              <p class="cdn-hint">复制地址，粘贴到 &lt;script type="module"&gt; 或 import 中。</p>
+            </div>
+  
+            <div class="stats">
+              <div class="stat">
+                <b>0</b>
+                <span>运行时依赖</span>
+              </div>
+              <div class="stat">
+                <b>24 KB</b>
+                <span>Gzip 体积</span>
+              </div>
+              <div class="stat">
+                <b>100%</b>
+                <span>原生标准</span>
+              </div>
+              <div class="stat">
+                <b>2018</b>
+                <span>开源至今</span>
+              </div>
+            </div>
+          </div>
+  
+          <div class="hero-visual" data-reveal style="--d: 120ms">
+            <st-code
+              frame
+              lang="html"
+              title="components/hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-xl);"
+              :code="codeHero"
+            ></st-code>
+  
+            <div class="window-status">
+              <span class="ok"><i></i>No build step</span>
+              <span>HTML → Browser</span>
+            </div>
+  
+            <div class="hero-float">
+              <span class="float-label"><i></i>真实组件 · 此刻运行</span>
+              <demo-counter start="12" attr:reset-label="site.demo.reset"></demo-counter>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ TICKER ============ -->
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Proxy Reactivity</span><i></i>
+          <span>Zero Build</span><i></i>
+          <span>Zero Dependencies</span><i></i>
+          <span>Hash Router</span><i></i>
+          <span>SEO Friendly</span><i></i>
+          <span>Micro Frontend</span><i></i>
+          <span>AI Friendly</span><i></i>
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Proxy Reactivity</span><i></i>
+          <span>Zero Build</span><i></i>
+          <span>Zero Dependencies</span><i></i>
+          <span>Hash Router</span><i></i>
+          <span>SEO Friendly</span><i></i>
+          <span>Micro Frontend</span><i></i>
+          <span>AI Friendly</span><i></i>
+        </div>
+      </div>
+  
+      <!-- ============ FEATURES ============ -->
+      <section class="section" id="features">
+        <div class="section-head" data-reveal>
+          <span class="kicker">Why ofa.js</span>
+          <h2>为下一代的 Web，<br />减掉所有多余。</h2>
+          <p>
+            不需要 npm、Node.js、webpack，也不需要理解一整套新的编译规则。
+            浏览器本来就支持组件，ofa.js 只是把这件事变得足够简单。
+          </p>
+        </div>
+  
+        <div class="bento">
+          <article class="card card-split span-4" data-reveal>
+            <div class="card-copy">
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                  <path d="M14 2v6h6"></path>
+                </svg>
+              </span>
+              <h3>一个 HTML 文件，就是一个组件</h3>
+              <p>
+                模板、样式、逻辑都住在同一个文件里。标签名就是组件名，
+                浏览器直接加载，没有编译产物，也没有隐藏的魔法。
+              </p>
+              <div class="file-flow">
+                <span class="file-pill">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                    <path d="M14 2v6h6"></path>
+                  </svg>
+                  hello-ofa.html
+                </span>
+                <span class="flow-arrow">→</span>
+                <span class="tag-pill">&lt;hello-ofa&gt;</span>
+              </div>
+            </div>
+  
+            <st-code
+              aria-hidden="true"
+              frame
+              lang="html"
+              title="hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeMini"
+            ></st-code>
+          </article>
+  
+          <article class="card span-2 card-counter" data-reveal style="--d: 80ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"></path>
+              </svg>
+            </span>
+            <h3>细粒度响应式</h3>
+            <p>Proxy 驱动的数据追踪，改数据就是改界面。点一下试试。</p>
+            <demo-counter start="7" attr:reset-label="site.demo.reset"></demo-counter>
+          </article>
+  
+          <article class="card span-2" data-reveal>
+            <span class="icon-chip amber">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m21 8-9-5-9 5v8l9 5 9-5Z"></path>
+                <path d="m3 8 9 5 9-5"></path>
+                <path d="M12 13v8"></path>
+              </svg>
+            </span>
+            <h3>零构建，没有黑盒</h3>
+            <p>没有安装、没有配置、没有构建队列。写完保存，刷新即见，AI 生成的代码也能直接验证。</p>
+            <div class="zero-pills">
+              <span>npm</span>
+              <span>webpack</span>
+              <span>vite</span>
+              <span>babel</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 60ms">
+            <span class="icon-chip">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="6" cy="19" r="2.5"></circle>
+                <circle cx="18" cy="5" r="2.5"></circle>
+                <path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"></path>
+              </svg>
+            </span>
+            <h3>路由，为页面而生</h3>
+            <p>o-app 管应用，o-router 管地址栏，scsr 输出真实路径。前进、后退、刷新直达。</p>
+            <div class="routes" aria-hidden="true">
+              <span class="route active"><i class="dot"></i>#/pages/home.html</span>
+              <span class="route"><i class="dot"></i>#/pages/detail.html?id=42</span>
+              <span class="route"><i class="dot"></i>/posts/hello-world</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 120ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path>
+              </svg>
+            </span>
+            <h3>一次请求，整包就位</h3>
+            <p>压缩后约 24 KB，没有运行时依赖。小到可以放进任何一个页面里。</p>
+            <div class="bundle">
+              <div class="bundle-num">24<small>KB · gzip</small></div>
+              <div class="bar"><i></i></div>
+              <div class="bar-label"><span>ofa.min.mjs</span><span>≈ 70 KB min</span></div>
+            </div>
+          </article>
+  
+          <article class="card card-wide span-6" data-reveal>
+            <div>
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+                  <path d="m3 13 9 5 9-5"></path>
+                </svg>
+              </span>
+              <h3>原生标准，不做孤岛</h3>
+              <p>
+                组件就是 Custom Element，样式在 Shadow DOM 里隔离，模块走 ES Modules。
+                ofa.js 写的组件可以嵌进任何页面，也能和 React、Vue 和平共处——它不是另一套运行时，只是原生能力之上的一层薄封装。
+              </p>
+            </div>
+            <div class="standard-grid">
+              <div class="standard">
+                <b><i></i>Custom Elements</b>
+                <span>组件即标签，浏览器原生注册</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Shadow DOM</b>
+                <span>样式天然作用域隔离</span>
+              </div>
+              <div class="standard">
+                <b><i></i>ES Modules</b>
+                <span>模块加载，无需打包器</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Proxy</b>
+                <span>数据变化自动追踪</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+  
+      <!-- ============ LIVE DEMO ============ -->
+      <section class="section" id="demo">
+        <div class="demo-grid">
+          <div class="demo-copy" data-reveal>
+            <span class="kicker">Live Playground</span>
+            <h2>别只看截图，<br />现在就点两下。</h2>
+            <p>
+              右边这个待办应用，就是一份普通的 HTML 文件：列表、双向绑定、
+              计算统计全部由 ofa.js 在浏览器里完成。
+            </p>
+  
+            <ul class="check-list">
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>输入、勾选、删除，全部即时生效</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>列表用 <b>o-fill</b> + <b>fill-key</b>，增删自动对账</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>样式在 Shadow DOM 内隔离，不污染页面</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>整个演示没有一行手动 DOM 操作</span>
+              </li>
+            </ul>
+  
+            <span class="demo-meta"><i></i>真实运行中 · 不是录屏</span>
+          </div>
+  
+          <div class="app-window" data-reveal style="--d: 100ms">
+            <div class="app-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="app-url">demo / todo.html</span>
+              <span class="live-pill"><i></i>Live</span>
+            </div>
+  
+            <div class="todo">
+              <div class="todo-head">
+                <div>
+                  <span class="todo-kicker">{{site.demo.kicker}}</span>
+                  <h3>{{site.demo.heading}}</h3>
+                </div>
+                <span class="todo-count">{{remaining}} {{site.demo.remainingSuffix}}</span>
+              </div>
+  
+              <div class="todo-input">
+                <input
+                  sync:value="draft"
+                  on:keydown="addOnEnter($event)"
+                  attr:placeholder="site.demo.placeholder"
+                  attr:aria-label="site.demo.inputAria"
+                />
+                <st-button
+                  class="todo-add"
+                  on:click="addTodo"
+                  attr:disabled="!draft.trim()"
+                >{{site.demo.add}}</st-button>
+              </div>
+  
+              <ul class="todo-list">
+                <o-fill :value="todos" fill-key="id">
+                  <li class:done="$data.done">
+                    <input
+                      class="todo-check"
+                      type="checkbox"
+                      sync:checked="$data.done"
+                      on:change="$host.refreshStats()"
+                      attr:aria-label="$host.site.demo.checkAria"
+                    />
+                    <span class="todo-text">{{$data.text}}</span>
+                    <st-icon-button
+                      class="todo-del"
+                      on:click="$host.removeTodo($data.id)"
+                      attr:aria-label="$host.site.demo.deleteAria"
+                    >×</st-icon-button>
+                  </li>
+                </o-fill>
+              </ul>
+  
+              <div class="todo-foot">
+                <st-button
+                  class="todo-clear"
+                  variant="text"
+                  on:click="clearDone"
+                  attr:disabled="doneCount === 0"
+                >{{site.demo.clear}}</st-button>
+                <span>{{doneCount}} / {{todos.length}} {{site.demo.doneSuffix}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ QUICK START ============ -->
+      <section class="section" id="start">
+        <div class="section-head center" data-reveal>
+          <span class="kicker">Quick Start</span>
+          <h2>三步，从零到第一个页面。</h2>
+          <p>不用安装，不用配置文件。打开编辑器，写一个 HTML 文件就够了。</p>
+        </div>
+  
+        <div class="steps">
+          <article class="step" data-reveal>
+            <span class="step-no">STEP 01</span>
+            <h3>引入 ofa.js</h3>
+            <p>复制 v5 的 mjs 地址即可使用，没有依赖，没有构建。</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+            >
+              <textarea hidden>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+></script>
+              </textarea>
+            </st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 70ms">
+            <span class="step-no">STEP 02</span>
+            <h3>写一个页面</h3>
+            <p>模板、样式、逻辑写在同一个文件里，保存即可运行。</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codePage"
+            ></st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 140ms">
+            <span class="step-no">STEP 03</span>
+            <h3>打开浏览器</h3>
+            <p>把文件放进任意静态目录，用浏览器打开——完成了。</p>
+            <st-code
+              frame
+              lang="js"
+              format="off"
+              title="terminal"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeTerminal"
+            ></st-code>
+          </article>
+        </div>
+  
+        <div class="start-note" data-reveal>
+          <span>想了解组件、路由、状态管理的完整用法？文档里有从零开始的完整指南。</span>
+          <a olink attr:href="navUrls.docs">
+            阅读完整文档
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
+  
+      <!-- ============ ECOSYSTEM ============ -->
+      <section class="section" id="ecosystem">
+        <div class="section-head" data-reveal>
+          <span class="kicker">Ecosystem</span>
+          <h2>一个内核，四层能力。</h2>
+          <p>
+            框架本体与三个基础库同仓开发、同源演进。每一层都很薄，
+            也都可以单独使用。
+          </p>
+        </div>
+  
+        <div class="eco-grid">
+          <div class="stack" data-reveal>
+            <div class="stack-head"><i></i>Monorepo · 同源演进</div>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>ofa.js</b><em>应用层</em></span>
+              <span class="layer-desc">组件 · 页面 · 路由 · 上下文</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>xhear</b><em>组件底座</em></span>
+              <span class="layer-desc">Web Components 与模板渲染</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>stanz</b><em>响应式</em></span>
+              <span class="layer-desc">Proxy 驱动的数据观察</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>drill</b><em>模块加载</em></span>
+              <span class="layer-desc">浏览器里的 ESM 加载器</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+          </div>
+  
+          <div class="eco-list" data-reveal style="--d: 80ms">
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>ofa.js</code><span class="eco-arrow">↗</span></span>
+              <p>应用层框架。组件、页面、o-app 路由、上下文与模板语法。</p>
+              <span class="eco-tag">Framework</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>xhear</code><span class="eco-arrow">↗</span></span>
+              <p>Web Components 底座。把元素封装、模板渲染与数据绑定做薄。</p>
+              <span class="eco-tag">Web Components</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>stanz</code><span class="eco-arrow">↗</span></span>
+              <p>Proxy 响应式内核。对象、数组、深层变更，全部可观察。</p>
+              <span class="eco-tag">Reactivity</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/v5/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>drill</code><span class="eco-arrow">↗</span></span>
+              <p>浏览器端模块加载器。让 HTML、CSS、JS 都能成为模块。</p>
+              <span class="eco-tag">Module Loader</span>
+            </a>
+          </div>
+        </div>
+  
+        <div class="eco-more" data-reveal>
+          <span>可选扩展</span>
+          <code>o-router</code>
+          <code>scsr</code>
+          <code>formdata</code>
+          <code>inject-host</code>
+          <code>body-ghost</code>
+          <code>global-link</code>
+          <span>引用即用，不进默认构建。</span>
+        </div>
+      </section>
+  
+      <!-- ============ CTA ============ -->
+      <section class="cta">
+        <div class="cta-inner" data-reveal>
+          <span class="kicker">Ready when you are</span>
+          <h2>现在，把想法<br />写成一个 HTML 文件。</h2>
+          <p>
+            不需要先搭环境，也不用等构建完成。创建文件，写下标签，
+            然后刷新浏览器——你的应用已经开始了。
+          </p>
+  
+          <div class="actions">
+            <a
+              class="btn btn-primary"
+              olink
+              attr:href="navUrls.firstLesson"
+            >
+              开始第一课
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/ofajs/ofa.js"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub 仓库
+            </a>
+          </div>
+  
+          <div class="cdn-box">
+            <div class="cdn-top">
+              <span class="cdn-tag">CDN · v5</span>
+              <span class="cdn-label">ESM</span>
+              <button
+                class="copy-btn"
+                type="button"
+                on:click="copySnippet(cdnUrl)"
+                aria-label="复制 v5 ESM 地址"
+                title="复制 v5 ESM 地址"
+              >
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                  <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                </svg>
+              </button>
+            </div>
+            <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+            <p class="cdn-hint">复制地址，粘贴到 &lt;script type="module"&gt; 或 import 中。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  <div class="toast" class:show="toastVisible" role="status" aria-live="polite">
+    {{toastText}}
+  </div>
+
+  <script>
+    import { createLandingPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createLandingPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

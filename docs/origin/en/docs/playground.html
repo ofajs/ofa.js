@@ -1,0 +1,64 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Reference</p>
+      <h1>Live examples</h1>
+      <p class="doc-lead">
+        This page mounts a virtual file system in the browser with NoneOS Core.
+        Edit an ofa.js page module on the left and run it in a virtual container
+        on the right — no backend required.
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground></docs-playground>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>on first open, it registers NoneOS Core's <code>sw.js</code>;</li>
+        <li>the page opens the browser's OPFS directly, and the Service Worker
+          maps <code>/$ofa-docs-playground/...</code> to the virtual file system;</li>
+        <li>the editor writes the page module to the virtual file
+          <code>page.html</code> and generates a fixed <code>index.html</code>
+          entry;</li>
+        <li>the iframe on the right opens
+          <code>/$ofa-docs-playground/index.html</code> in the virtual container,
+          and ofa.js renders the page.</li>
+      </ol>
+
+      <div class="doc-note">
+        <strong>Deployment requirement:</strong>
+        the Service Worker is registered at the site root path <code>/sw.js</code>,
+        so this feature requires the docs to be deployed at the domain root (or
+        previewed locally with <code>npm run server:website</code>, rooted at
+        <code>docs/website</code>). In a subdirectory, the Service Worker cannot
+        take over the <code>/$</code> path.
+      </div>
+
+      <h2>What you can change</h2>
+      <ul>
+        <li>edit the template, styles, <code>data</code>, and <code>proto</code> methods, then click “Run code” to apply them immediately;</li>
+        <li>reference other ofa.js components on a CDN with <code>&lt;l-m&gt;</code>;</li>
+        <li>the code is saved in the browser's <code>localStorage</code> and survives a refresh;</li>
+        <li>clear the editor and write a new page module to start experimenting from scratch.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./examples.html">Full examples →</a>
+         · Next: <a olink href="./deployment.html">Deployment →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

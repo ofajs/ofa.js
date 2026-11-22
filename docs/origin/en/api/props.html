@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Content, Attributes & Styles</p>
+      <h1>Content, Attributes & Styles</h1>
+      <p class="doc-lead">Read and write text, HTML, attributes, classes, and inline styles.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="props"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.text</code></td><td>Read and write textContent (reactive)</td></tr>
+          <tr><td><code>el.html</code></td><td>Read and write innerHTML (reactive)</td></tr>
+          <tr><td><code>el.attr(name[, value])</code></td><td>Read or write an HTML attribute; relative href/src inside a component resolve against PATH automatically</td></tr>
+          <tr><td><code>el.prop(name[, value])</code></td><td>Read or write a data property (same as el[name]); supports dot paths</td></tr>
+          <tr><td><code>el.class(name[, bool])</code></td><td>Read / toggle a class</td></tr>
+          <tr><td><code>el.classList</code></td><td>Native DOMTokenList</td></tr>
+          <tr><td><code>el.data</code></td><td>Native dataset (not reactive)</td></tr>
+          <tr><td><code>el.style</code></td><td>Native inline style object (not reactive)</td></tr>
+          <tr><td><code>el.css</code></td><td>Style proxy: falls back to computed styles when there is no inline value; supports --variables</td></tr>
+          <tr><td><code>el.refresh()</code></td><td>Manually dispatch one refresh update event</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> el.css can be written one property at a time (el.css.color), replaced wholesale as an object, or replaced wholesale as a string.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

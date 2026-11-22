@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>路由与导航 — ofa.js 文档</title>
+    <meta name="description" content="goto/replace/back、olink、query 传参、o-router hash 路由与 router-change。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="路由与导航 — ofa.js 文档" />
+    <meta property="og:description" content="goto/replace/back、olink、query 传参、o-router hash 路由与 router-change。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>路由与导航</h1>
+      <p class="doc-lead">
+        ofa.js 的页面跳转有两种形态：只在前端应用内切换的 hash 路由
+        （o-router），以及每个 URL 都是真实文档的 scsr。页面导航 API
+        在两种形态下一致。
+      </p>
+
+      <h2>页面导航 API</h2>
+      <pre><code>// 页面模块内，this 是页面实例
+this.goto("./detail.html?id=42"); // 压入页面栈
+this.replace("./detail.html");    // 替换当前页，不增加历史
+this.back();                      // 返回上一页
+this.forward();                   // 需应用配置 allowForward: true</code></pre>
+      <p>声明式跳转用 <code>olink</code>：</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;查看详情&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> 只在 <code>o-app</code> 内生效，会走应用内路由
+        和切换动画，不刷新整页。外部链接不要加 <code>olink</code>。
+      </p>
+
+      <h2>通过 query 传参</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query 是页面模块函数的入参，不是 <code>this.$route</code>。
+        需要响应 query 变化时，在页面模块函数里读取即可；
+        同一页面地址变化会重新加载模块。
+      </p>
+
+      <h2>o-router：hash 路由</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router 是桥接包，必须在 ofa.js 之后加载；</li>
+        <li><code>fix-body</code> 重置 html/body 的满尺寸，移除即撤销；</li>
+        <li>页面栈同步到 hash，例如 <code>#/pages/detail.html?id=42</code>；</li>
+        <li>刷新、直达、分享、前进后退都能恢复页面，无需服务器 rewrite；</li>
+        <li>一个页面只配合一个 o-app。</li>
+      </ul>
+
+      <h2>hash URL 格式</h2>
+      <pre><code>// 正确
+location.origin + "/#/pages/detail.html?id=42"
+
+// 错误：多了 pathname 或 ./ 
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>监听路由变化</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> 是 <code>goto</code>、<code>replace</code>、
+        <code>back</code> 或 <code>forward</code>；<code>src</code>
+        是目标页面地址。页面模块内的 <code>routerChange</code> 钩子
+        只在布局父页触发，用于高亮当前文章。
+      </p>
+
+      <h2>需要真实路径时</h2>
+      <p>
+        hash 路由适合纯前端应用；如果要求每个 URL 都能被爬虫抓取、
+        直接访问和分享，使用
+        <a olink href="./scsr.html">scsr 真实路径路由</a>。
+        两者的页面 API、嵌套布局和动画行为一致。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./app.html">o-app 应用 →</a>
+        　·　下一篇：<a olink href="./nested-routing.html">嵌套路由 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

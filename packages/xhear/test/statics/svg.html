@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SVG 渲染 / SVG rendering</title>
+  </head>
+  <body>
+    <svg-demo></svg-demo>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      $.register({
+        tag: "svg-demo",
+        temp: `
+        <svg id="chart" xmlns="http://www.w3.org/2000/svg" width="100" height="60">
+          <a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-heart">
+            <text id="label" x="10" y="30">{{label}}</text>
+          </a>
+          <rect id="bar" attr:width="barWidth" height="10" fill="steelblue"></rect>
+          <circle id="dot" attr:cx="dotX" cy="50" r="4"></circle>
+        </svg>
+        `,
+        data: {
+          label: "hello svg",
+          barWidth: 40,
+          dotX: 20,
+        },
+      });
+
+      const $demo = $("svg-demo");
+      const $shadow = $demo.shadow;
+
+      test("SVG 元素在正确命名空间下创建 / SVG elements use SVG namespace", async () => {
+        await waitFor(() => !!$shadow.$("#chart"));
+        const svg = $shadow.$("#chart").ele;
+        assertEqual(svg.namespaceURI, "http://www.w3.org/2000/svg");
+        // rect 必须是 SVGElement（而非 HTMLUnknownElement）
+        const rect = $shadow.$("#bar").ele;
+        assert(
+          rect instanceof SVGElement,
+          "rect 应为 SVGElement / rect should be an SVGElement",
+        );
+      });
+
+      test("xmlns 声明保留且不干扰渲染 / xmlns declarations stay and do not break render", async () => {
+        const svg = $shadow.$("#chart").ele;
+        // 命名空间声明是保留属性，不当作模板指令处理
+        assert(svg.hasAttribute("xmlns"), "xmlns 应保留 / xmlns should stay");
+      });
+
+      test("静态 xlink:href 正确保留 / static xlink:href is preserved", async () => {
+        const link = $shadow.$("a").ele;
+        await waitFor(
+          () =>
+            link.getAttributeNS("http://www.w3.org/1999/xlink", "href") ===
+            "#icon-heart",
+        );
+      });
+
+      test("SVG 文本插值与更新 / SVG text interpolation", async () => {
+        await waitFor(() => $shadow.$("#label").text === "hello svg");
+        $demo.label = "updated";
+        await waitFor(() => $shadow.$("#label").text === "updated");
+      });
+
+      test("SVG 属性绑定与更新 / SVG attribute bindings", async () => {
+        const rect = $shadow.$("#bar").ele;
+        await waitFor(() => rect.getAttribute("width") === "40");
+        $demo.barWidth = 80;
+        await waitFor(() => rect.getAttribute("width") === "80");
+        $demo.dotX = 55;
+        await waitFor(() => $shadow.$("#dot").ele.getAttribute("cx") === "55");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

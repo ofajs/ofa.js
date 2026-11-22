@@ -1,0 +1,43 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid #007acc;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    .label {
+      color: #666;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #007acc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005999;
+    }
+  </style>
+  <p class="label">影子节点内的文本：</p>
+  <p id="shadow-text">原始文本</p>
+  <button on:click="changeShadowText('内部修改文本','red')">
+    点击修改影子节点文本
+  </button>
+  <script>
+    export default async () => {
+      return {
+        tag: "shadow-demo",
+        proto: {
+          changeShadowText(text, color) {
+            this.shadow.$("#shadow-text").text = text;
+            this.shadow.$("#shadow-text").style.color = color || "inherit";
+          },
+        },
+      };
+    };
+  </script>
+</template>

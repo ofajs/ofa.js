@@ -1,0 +1,163 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>Plugins and Extensions</h1>
+      <p class="doc-lead">
+        Plugins are optional capabilities that only take effect when referenced;
+        they are not part of the default ofa.js build. They attach to the global
+        <code>$</code> already loaded by the page and never pull in a second
+        framework instance.
+      </p>
+
+      <h2>Available plugins</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Plugin</th><th>Capability</th><th>Usage</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>Two-way binding between container form values and stanz objects</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>Hoists style/link tags from the shadow to the host, reaching deep through slots</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>Teleports template content to the end of body for rendering (dialogs / overlays)</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>Injects a global stylesheet into components mounted after it</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Importing</h2>
+      <p>Import the source form directly, or use the classic script or ESM dist form:</p>
+      <pre><code>// monorepo / npm source
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist classic script (with dist ofa.js)
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        Plugins must load after ofa.js because they attach to the global <code>$</code>;
+        if it is missing they throw immediately.
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // read
+data.username = "Yao";  // write back to the form
+data.revoke();          // release the binding</code></pre>
+      <p>
+        Checkboxes are aggregated into an array, and multi-select, radio, and file
+        inputs each have their own handling. A custom form component only needs to
+        expose a <code>value</code> property and set <code>name</code> to participate.
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> can only reach the first level of slotted content.
+        To style elements deep inside a slot, use <code>&lt;inject-host&gt;</code>
+        to hoist the styles to the host:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        Write the full component path in selectors to avoid leaking styles into other
+        components; use this sparingly in cases that update styles frequently.
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        When dialogs, toasts, or overlays need to escape a parent's <code>overflow</code>
+        or <code>transform</code> constraints, teleport the content to body:
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        Framework bindings follow the element as it moves, and native events bubble
+        from its real DOM position.
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        The stylesheet is injected only into the shadow of components mounted
+        <strong>after</strong> it; once <code>o-global-link</code> is removed, new
+        components no longer receive the styles. It leaks into global scope, so use
+        it carefully.
+      </p>
+
+      <h2>match-var (core style query)</h2>
+      <p>
+        To switch a component's internal styles based on CSS variables, use the core
+        <code>&lt;match-var&gt;</code>; it requires no extra plugin:
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- multiple conditions must all match --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+      <p>
+        Conditions come from the values of CSS variables. On the outside, use
+        <code>data()</code> to write data into the variables:
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox:</strong> if styles do not switch immediately after a variable
+        changes, call <code>$.checkMatch()</code> manually to trigger a re-check.
+      </div>
+
+      <p class="doc-end">
+        Previous: <a olink href="./api.html">$.fn and wrapper objects →</a>
+         · Next: <a olink href="./pitfalls.html">Common Pitfalls →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "lang": "zh-CN",
+    "language": "简体中文",
+    "title": "ofa.js — 把组件，写成 HTML",
+    "description": "ofa.js 是一个零构建、零依赖的 Web Components 前端框架。一个 HTML 文件就是一个组件，浏览器直接运行，无需 npm、Node.js 或打包器。",
+    "noscript": "此页面需要启用 JavaScript 才能运行 ofa.js。",
+    "order": 10
+  },
+  "shell": {
+    "nav": {
+      "tutorial": "教程",
+      "docs": "文档",
+      "api": "API",
+      "blog": "博客"
+    },
+    "actions": {
+      "nav": "主导航",
+      "home": "首页",
+      "github": "GitHub",
+      "githubRepo": "GitHub 仓库",
+      "menu": "切换菜单",
+      "languages": "语言"
+    },
+    "footer": {
+      "tagline": "零构建、零依赖的 Web Components 框架。把组件写成 HTML，把开发还给浏览器。",
+      "resources": "资源",
+      "ecosystem": "生态",
+      "community": "社区",
+      "docs": "官方文档",
+      "plugins": "插件",
+      "note": "这个页面本身，也是用 ofa.js 写的。"
+    },
+    "search": {
+      "label": "搜索站点内容",
+      "placeholder": "搜索文档、教程、API…",
+      "empty": "没有匹配内容",
+      "loading": "正在加载搜索索引…"
+    },
+    "theme": {
+      "label": "切换主题",
+      "light": "白天模式",
+      "dark": "黑夜模式",
+      "system": "跟随系统"
+    }
+  },
+  "demo": {
+    "reset": "重置",
+    "kicker": "Today",
+    "heading": "要完成的事",
+    "remainingSuffix": "项待办",
+    "placeholder": "今天想完成什么？",
+    "inputAria": "新的待办事项",
+    "add": "添加",
+    "clear": "清除已完成",
+    "doneSuffix": "已完成",
+    "checkAria": "标记完成",
+    "deleteAria": "删除",
+    "todos": [
+      "用一份 HTML 写出第一个组件",
+      "用 o-fill 渲染待办列表",
+      "把页面丢到任意静态服务器"
+    ]
+  },
+  "toast": {
+    "copied": "已复制到剪贴板",
+    "failed": "复制失败，请手动选择"
+  },
+  "docs": {
+    "label": "文档",
+    "overview": "文档总览",
+    "onThisPage": "本页内容",
+    "nav": {
+      "start": {
+        "label": "开始使用",
+        "items": {
+          "gettingStarted": "安装与引入",
+          "firstComponent": "第一个组件",
+          "firstPage": "第一个页面"
+        }
+      },
+      "basics": {
+        "label": "组件与页面",
+        "items": {
+          "component": "组件",
+          "page": "页面",
+          "lifecycle": "生命周期"
+        }
+      },
+      "template": {
+        "label": "模板语法",
+        "items": {
+          "template": "指令总览",
+          "binding": "绑定与样式",
+          "events": "事件与表单",
+          "render": "条件与列表"
+        }
+      },
+      "data": {
+        "label": "数据与状态",
+        "items": {
+          "data": "数据与侦听",
+          "state": "全局状态",
+          "context": "跨组件上下文"
+        }
+      },
+      "app": {
+        "label": "应用与路由",
+        "items": {
+          "app": "o-app 应用",
+          "routing": "路由与导航",
+          "nestedRouting": "嵌套路由",
+          "scsr": "真实路径 scsr"
+        }
+      },
+      "reference": {
+        "label": "参考",
+        "items": {
+          "api": "$.fn 与包装对象",
+          "plugins": "插件与扩展",
+          "pitfalls": "常见错误",
+          "examples": "完整示例",
+          "playground": "案例预览",
+          "deployment": "部署"
+        }
+      }
+    }
+  },
+  "pages": {
+    "docs/index.html": {
+      "title": "ofa.js 文档",
+      "description": "ofa.js v5 文档总览：从安装、组件、页面到路由、状态与 API 参考。"
+    },
+    "docs/getting-started.html": {
+      "title": "安装与引入 — ofa.js 文档",
+      "description": "通过 CDN 或本地文件引入 ofa.js v5，并运行第一个页面。"
+    },
+    "docs/first-component.html": {
+      "title": "第一个组件 — ofa.js 文档",
+      "description": "创建第一个自定义 Web Component，理解 tag、data、attrs 与 slot。"
+    },
+    "docs/first-page.html": {
+      "title": "第一个页面 — ofa.js 文档",
+      "description": "使用 template[page] 创建页面模块，并通过 o-page 或 o-app 运行。"
+    },
+    "docs/component.html": {
+      "title": "组件 — ofa.js 文档",
+      "description": "ofa.js 组件的结构、attrs/data、props 传递、插槽、自定义事件与组件复用。"
+    },
+    "docs/page.html": {
+      "title": "页面 — ofa.js 文档",
+      "description": "页面模块、query 参数、o-page 内嵌子页面与页面拆分。"
+    },
+    "docs/lifecycle.html": {
+      "title": "生命周期 — ofa.js 文档",
+      "description": "ready、attached、loaded、detached 的时机、顺序与资源清理。"
+    },
+    "docs/template.html": {
+      "title": "模板指令总览 — ofa.js 文档",
+      "description": "ofa.js 模板指令总表：插值、属性、事件、双向绑定、条件与列表。"
+    },
+    "docs/binding.html": {
+      "title": "绑定与样式 — ofa.js 文档",
+      "description": "attr:、:prop、sync:、class:、:style 与布尔属性的正确写法。"
+    },
+    "docs/events.html": {
+      "title": "事件与表单 — ofa.js 文档",
+      "description": "on:、one:、$event、表单双向绑定、自定义事件与事件冒泡。"
+    },
+    "docs/render.html": {
+      "title": "条件与列表 — ofa.js 文档",
+      "description": "o-if/o-else-if/o-else 条件渲染，o-fill 列表与 $data 作用域。"
+    },
+    "docs/data.html": {
+      "title": "数据与侦听 — ofa.js 文档",
+      "description": "响应式 data、computed getter、watch 侦听器与常见边界。"
+    },
+    "docs/state.html": {
+      "title": "全局状态 — ofa.js 文档",
+      "description": "使用 $.stanz() 创建跨页面共享的响应式状态，并正确挂载与清理。"
+    },
+    "docs/context.html": {
+      "title": "跨组件上下文 — ofa.js 文档",
+      "description": "o-provider、o-consumer、o-root-provider、getProvider 与 dispatch。"
+    },
+    "docs/app.html": {
+      "title": "o-app 应用 — ofa.js 文档",
+      "description": "o-app 应用配置、页面栈、切换动画、loading/fail 与扩展 proto。"
+    },
+    "docs/routing.html": {
+      "title": "路由与导航 — ofa.js 文档",
+      "description": "goto/replace/back、olink、query 传参、o-router hash 路由与 router-change。"
+    },
+    "docs/nested-routing.html": {
+      "title": "嵌套路由 — ofa.js 文档",
+      "description": "通过 export const parent 与 slot 建立共享布局的多级嵌套路由。"
+    },
+    "docs/scsr.html": {
+      "title": "真实路径路由 scsr — ofa.js 文档",
+      "description": "用 scsr 让每个 URL 都是可直接访问的完整文档，适合 SEO 与分享。"
+    },
+    "docs/api.html": {
+      "title": "$.fn 与包装对象 — ofa.js 文档",
+      "description": "ofa.js 包装对象 API：选择、树导航、DOM 操作、事件、属性与扩展。"
+    },
+    "docs/plugins.html": {
+      "title": "插件与扩展 — ofa.js 文档",
+      "description": "ofa.js 可选插件：formData、inject-host、body-ghost、global-link 的引入方式与使用场景。"
+    },
+    "docs/pitfalls.html": {
+      "title": "常见错误与排查 — ofa.js 文档",
+      "description": "ReferenceError、保留名冲突、布尔属性、o-page src 与缓存问题排查。"
+    },
+    "docs/examples.html": {
+      "title": "完整示例 — ofa.js 文档",
+      "description": "最小应用、自定义组件、待办清单与路由应用四个完整示例。"
+    },
+    "docs/playground.html": {
+      "title": "案例预览 — ofa.js 文档",
+      "description": "在 NoneOS Core 虚拟容器中在线编辑并运行 ofa.js 页面模块。"
+    },
+    "docs/deployment.html": {
+      "title": "部署 — ofa.js 文档",
+      "description": "把 ofa.js 应用部署到任意静态服务器、CDN 与子目录的注意事项。"
+    },
+    "tutorial/index.html": {
+      "title": "ofa.js 教程",
+      "description": "20 节渐进式 ofa.js 教程：从第一个页面到组件、上下文、状态、路由与综合实战。"
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · 第一个页面 — ofa.js 教程",
+      "description": "ofa.js 的页面就是一个 HTML 文件：结构、样式和逻辑都在同一个文件里。"
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · 数据与插值 — ofa.js 教程",
+      "description": "data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。"
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · 动态属性 — ofa.js 教程",
+      "description": "HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。"
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · 样式与 class — ofa.js 教程",
+      "description": "页面里的 <style> 只作用于当前页面，class: 和 :style 让样式跟随数据变化。"
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · 事件 — ofa.js 教程",
+      "description": "用 on: 监听事件：简单逻辑写表达式，复杂逻辑写 proto 方法。"
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · 双向绑定 — ofa.js 教程",
+      "description": "sync: 让表单和 data 双向同步，适合标量值。"
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · 条件渲染 — ofa.js 教程",
+      "description": "o-if / o-else-if / o-else 控制内容是否存在。"
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · 列表渲染 — ofa.js 教程",
+      "description": "o-fill 渲染数组；列表项内用 $data、$index、$host。"
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · 编辑列表 — ofa.js 教程",
+      "description": "数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。"
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · 计算属性与侦听 — ofa.js 教程",
+      "description": "proto 的 getter 做同步计算，watch 观察变化并处理副作用。"
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · 生命周期 — ofa.js 教程",
+      "description": "ready → attached → loaded，移除时 detached；定时器和监听要在 detached 清理。"
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · 第一个组件 — ofa.js 教程",
+      "description": "把可复用的 UI 拆成 <template component>，用 l-m 引入。"
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · 组件参数 — ofa.js 教程",
+      "description": "外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。"
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · 插槽与事件 — ofa.js 教程",
+      "description": "slot 让组件接收外部内容，emit 把组件内部发生的事告诉外部。"
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · 跨层上下文 — ofa.js 教程",
+      "description": "用 o-provider / o-consumer 在组件子树里共享数据。"
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · 全局状态 — ofa.js 教程",
+      "description": "多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。"
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · 页面与路由 — ofa.js 教程",
+      "description": "o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。"
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · 嵌套布局 — ofa.js 教程",
+      "description": "子页声明 parent，父页用 slot 承接；切子页时父页不销毁。"
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · 异步与加载态 — ofa.js 教程",
+      "description": "异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。"
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · 综合：待办清单 — ofa.js 教程",
+      "description": "把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。"
+    },
+    "api/index.html": {
+      "title": "API 参考 — ofa.js API",
+      "description": "所有实例成员、全局静态成员与运行示例。"
+    },
+    "api/instance.html": {
+      "title": "实例基础 — ofa.js API",
+      "description": "实例对象同时是 DOM 包装器、响应式数据和子元素集合。先认识它的基础属性。"
+    },
+    "api/traverse.html": {
+      "title": "选择与遍历 — ofa.js API",
+      "description": "在实例内部查找元素，并沿 DOM / shadow 边界前后移动。"
+    },
+    "api/structure.html": {
+      "title": "结构操作 — ofa.js API",
+      "description": "子元素按数组语义操作；可变方法会真实搬动 DOM 并触发更新。"
+    },
+    "api/props.html": {
+      "title": "内容、属性与样式 — ofa.js API",
+      "description": "读写文本、HTML、attribute、class 与内联样式。"
+    },
+    "api/events.html": {
+      "title": "事件 — ofa.js API",
+      "description": "用实例方法绑定、解绑和派发事件；事件可以带业务数据并跨 shadow。"
+    },
+    "api/reactive.html": {
+      "title": "数据与侦听 — ofa.js API",
+      "description": "实例数据来自 stanz：读写字段就是响应式更新，监听与清理都有对应方法。"
+    },
+    "api/context.html": {
+      "title": "上下文通信 — ofa.js API",
+      "description": "o-provider 把数据放进一棵子树，o-consumer 就近消费；实例方法可以主动查找 provider。"
+    },
+    "api/global.html": {
+      "title": "全局 $ 静态成员 — ofa.js API",
+      "description": "挂在全局 $ 上的选择器、注册、响应式、渲染与版本信息。"
+    },
+    "api/extend.html": {
+      "title": "扩展实例 — ofa.js API",
+      "description": "在单个实例或全部实例上增加方法、getter 和新指令。"
+    },
+    "api/app.html": {
+      "title": "o-app 与 o-page — ofa.js API",
+      "description": "应用容器负责页面栈和导航；页面实例负责自己的一屏内容。"
+    },
+    "blog/index.html": {
+      "title": "博客 — ofa.js",
+      "description": "ofa.js 的工程博客：版本演进、性能、架构与实战经验。"
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "ofa.js v5 比 v4 进步了多少？ — ofa.js",
+      "description": "从架构、模板渲染、列表性能、路由和工程体验，拆解 ofa.js v5 相对 v4 的真实进步。"
+    }
+  },
+  "tutorial": {
+    "label": "教程",
+    "overview": "教程总览",
+    "groups": {
+      "start": {
+        "label": "入门",
+        "lessons": {
+          "lesson1": "01 · 第一个页面",
+          "lesson2": "02 · 数据与插值",
+          "lesson3": "03 · 动态属性",
+          "lesson4": "04 · 样式与 class"
+        }
+      },
+      "interact": {
+        "label": "交互与状态",
+        "lessons": {
+          "lesson5": "05 · 事件",
+          "lesson6": "06 · 双向绑定",
+          "lesson7": "07 · 条件渲染",
+          "lesson8": "08 · 列表渲染",
+          "lesson9": "09 · 编辑列表",
+          "lesson10": "10 · 计算属性与侦听",
+          "lesson11": "11 · 生命周期"
+        }
+      },
+      "component": {
+        "label": "组件",
+        "lessons": {
+          "lesson12": "12 · 第一个组件",
+          "lesson13": "13 · 组件参数",
+          "lesson14": "14 · 插槽与事件"
+        }
+      },
+      "app": {
+        "label": "应用与实战",
+        "lessons": {
+          "lesson15": "15 · 跨层上下文",
+          "lesson16": "16 · 全局状态",
+          "lesson17": "17 · 页面与路由",
+          "lesson18": "18 · 嵌套布局",
+          "lesson19": "19 · 异步与加载态",
+          "lesson20": "20 · 综合：待办清单"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "API 参考",
+    "overview": "API 总览",
+    "groups": {
+      "instance": {
+        "label": "实例相关",
+        "items": {
+          "instance": "实例基础",
+          "traverse": "选择与遍历",
+          "structure": "结构操作"
+        }
+      },
+      "props": {
+        "label": "属性与事件",
+        "items": {
+          "props": "内容、属性与样式",
+          "events": "事件"
+        }
+      },
+      "data": {
+        "label": "数据与扩展",
+        "items": {
+          "reactive": "数据与侦听",
+          "context": "上下文通信",
+          "global": "全局 $ 静态成员",
+          "extend": "扩展实例"
+        }
+      },
+      "app": {
+        "label": "应用与页面",
+        "items": {
+          "app": "o-app 与 o-page"
+        }
+      }
+    }
+  }
+}

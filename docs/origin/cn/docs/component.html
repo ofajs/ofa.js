@@ -1,0 +1,136 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>组件</h1>
+      <p class="doc-lead">
+        组件是可复用的 Web Component 模块。它有自己的 Shadow DOM、响应式
+        data、外部 attrs，以及向外抛事件的接口。
+      </p>
+
+      <h2>模块契约</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>字段</th><th>必填</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>是</td><td>组件标签名，使用时必须一致</td></tr>
+          <tr><td><code>attrs</code></td><td>否</td><td>外部传入的标量属性，反映到 HTML attribute</td></tr>
+          <tr><td><code>data</code></td><td>否</td><td>内部响应式状态；对象或数组直接放这里</td></tr>
+          <tr><td><code>proto</code></td><td>否</td><td>方法、getter/setter</td></tr>
+          <tr><td><code>watch</code></td><td>否</td><td>侦听 data/attrs 的变化</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>否</td><td>生命周期钩子</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        未声明 <code>tag</code> 时，框架会按文件名推断标签名：
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>。
+        建议仍然显式声明，文件改名或移动时不会悄悄改变组件的对外标签。
+      </p>
+
+      <h2>attrs 与 data</h2>
+      <p>
+        <code>attrs</code> 是组件的公开入参，适合字符串、数字、布尔值；
+        <code>data</code> 是组件内部状态，适合数组和对象。两者 key 不可重复：
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>外部传入时，短横线命名会自动对应驼峰字段：</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        动态传入带 <code>:</code> 前缀；布尔属性用 <code>attr:</code>：
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>组件引用</h2>
+      <p>
+        页面模板顶部用 <code>&lt;l-m&gt;</code> 异步引入组件文件。它会立即返回，
+        不会阻塞页面首次渲染：
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        需要确保组件在使用前已经注册时，在模块函数里 <code>await load()</code>：
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>插槽</h2>
+      <pre><code>&lt;!-- 组件内 --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;默认标题&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- 使用方 --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;张三&lt;/h3&gt;
+  &lt;p&gt;这是默认插槽内容&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        默认插槽接收没有 <code>slot</code> 属性的子节点，命名插槽按
+        <code>slot="name"</code> 匹配，slot 内可以写兜底内容。
+      </p>
+
+      <h2>自定义事件</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "张三" },
+});</code></pre>
+      <p>
+        事件默认 <code>bubbles: true</code>、<code>composed: false</code>。
+        需要让事件穿出 Shadow DOM 时显式设置 <code>composed: true</code>，
+        这在页面嵌套 <code>o-page</code> 时尤其常见。
+      </p>
+
+      <p>
+        组件的 <code>PATH</code> 指向注册文件地址；组件模板里的相对
+        <code>img src</code>、<code>style url()</code> 等资源会按
+        <code>PATH</code> 解析，而不是按使用它的页面地址解析。
+      </p>
+
+      <h2>样式隔离</h2>
+      <p>
+        组件模板里的 <code>&lt;style&gt;</code> 只作用于组件自己的 Shadow DOM。
+        根节点用 <code>:host</code> 选中；<code>::slotted()</code> 只能命中
+        插槽内容的第一层。需要深入命中时使用 <code>inject-host</code> 插件。
+      </p>
+
+      <h2>命名约束</h2>
+      <p>
+        <code>tag</code> 不能与已有组件重复；<code>data</code>/<code>proto</code>
+        不能使用 <code>back</code>、<code>goto</code>、<code>replace</code>、
+        <code>src</code>、<code>on</code>、<code>emit</code> 等内置保留名。
+        重名会直接导致注册失败。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./first-page.html">第一个页面 →</a>
+        　·　下一篇：<a olink href="./page.html">页面 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

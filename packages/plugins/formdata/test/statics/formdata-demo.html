@@ -1,0 +1,42 @@
+<template component>
+  <div><input type="text" name="a" value="I am A" /></div>
+  <o-if :value="count % 2">
+    <div><input type="text" name="b" value="I am B" /></div>
+  </o-if>
+  <div id="fill-inputs">
+    <o-fill :value="arr">
+      <div>
+        <input type="text" attr:name="$data.name" sync:value="$data.val" />
+      </div>
+    </o-fill>
+  </div>
+  <div id="target">{{fdata}}</div>
+  <script>
+    export default {
+      data: {
+        fdata: {},
+        count: 0,
+        arr: [
+          { name: "K1", val: 1 },
+          { name: "K2", val: "2" },
+        ],
+      },
+      proto: {
+        addItem() {
+          this.addItemCount = (this.addItemCount || 2) + 1;
+          this.arr.push({
+            name: `K${this.addItemCount}`,
+            val: this.addItemCount,
+          });
+        },
+      },
+      attached() {
+        // formData 插件：容器的 $ 实例直接调用
+        this.fdata = this.shadow.formData();
+      },
+      detached() {
+        this.fdata = {};
+      },
+    };
+  </script>
+</template>

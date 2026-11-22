@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>安装与引入 — ofa.js 文档</title>
+    <meta name="description" content="通过 CDN 或本地文件引入 ofa.js v5，并运行第一个页面。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="安装与引入 — ofa.js 文档" />
+    <meta property="og:description" content="通过 CDN 或本地文件引入 ofa.js v5，并运行第一个页面。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">Getting started</p>
+        <h1>安装与引入</h1>
+        <p class="doc-lead">
+          ofa.js 不要求安装依赖，也不需要构建。用一行 script 引用 CDN 上的
+          ESM 文件，就可以开始写组件和页面。
+        </p>
+
+        <h2>1. 引入 ofa.js</h2>
+        <p>
+          推荐直接使用 v5 的 ESM 构建。把下面的地址放进
+          <code>&lt;script type="module"&gt;</code> 的 <code>src</code> 中：
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          如果你的环境更适合经典脚本，也可以使用 UMD 版本（会暴露全局
+          <code>$</code>）：
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>版本说明：</strong>v5 分支的 CDN 地址必须写成
+          <code>@refs/heads/v5</code>，不能简写成 <code>@v5</code>，
+          否则 jsDelivr 会把它当成版本标签解析而 404。
+        </div>
+
+        <h2>2. 写一个入口</h2>
+        <p>
+          入口 HTML 只负责加载 ofa.js，并放一个 <code>o-page</code> 来加载页面模块：
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;我的第一个 ofa.js 页面&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. 写页面模块</h2>
+        <p>
+          一个 <code>.html</code> 文件就是一个页面模块。模板、样式和逻辑都写在
+          <code>&lt;template page&gt;</code> 里面：
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;点了 {{count}} 次&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>注意：</strong>页面和组件的 <code>&lt;script&gt;</code>
+          必须写在 <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code> 内部。ofa.js 只提取模板里的脚本，
+          写在外面的脚本会被忽略。
+        </div>
+
+        <h2>4. 打开页面</h2>
+        <p>
+          页面需要通过 HTTP 访问，不能直接双击 HTML 文件（
+          <code>file://</code> 会被模块加载的 CORS 策略拦截）。任意静态服务器都可以：
+        </p>
+        <pre><code>$ npx serve .
+
+# 或者
+$ python3 -m http.server</code></pre>
+        <p>
+          打开 http://localhost:3000 就能看到页面。控制台执行
+          <code>$.version</code> 可以确认框架已经加载。
+        </p>
+
+        <h2>下一步</h2>
+        <p>
+          页面已经能运行之后，下一步是掌握数据如何驱动模板：文本插值、事件、
+          双向绑定、条件与列表。
+        </p>
+        <p class="doc-end">
+          下一篇：<a olink href="./first-component.html">第一个组件 →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

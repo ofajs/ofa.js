@@ -1,0 +1,200 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .doc-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 800px) 220px;
+      align-items: start;
+      gap: 48px;
+      max-width: 1068px;
+    }
+
+    .doc-wrap.no-toc {
+      display: block;
+      max-width: 800px;
+    }
+
+    .wide-layout {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: none;
+    }
+
+    .doc-slot {
+      min-width: 0;
+    }
+
+    .toc {
+      position: sticky;
+      top: 96px;
+      min-width: 0;
+    }
+
+    .toc[hidden] {
+      display: none;
+    }
+
+    .toc-kicker {
+      margin: 0 0 10px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .toc-nav {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .toc-link {
+      display: block;
+      margin-left: -1px;
+      padding: 4px 0 4px 12px;
+      border-left: 2px solid transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 13px;
+      line-height: 1.5;
+      transition:
+        color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)),
+        border-color var(--md-sys-motion-duration-short, 150ms) var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+    }
+
+    .toc-link:hover {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .toc-link.active {
+      color: var(--md-sys-color-primary);
+      border-left-color: var(--md-sys-color-primary);
+    }
+
+    .toc-link:focus-visible {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1180px) {
+      .doc-wrap {
+        grid-template-columns: minmax(0, 1fr) !important;
+        max-width: 800px;
+      }
+
+      .toc {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .doc-wrap,
+      .doc-wrap.no-toc {
+        max-width: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .toc-link {
+        transition-duration: 0.001ms;
+      }
+    }
+  </style>
+
+  <div
+    class="doc-wrap"
+    class:no-toc="noHeadings"
+    class:wide-layout="layout === 'wide'"
+  >
+    <div class="doc-slot"><slot></slot></div>
+
+    <aside class="toc" hidden>
+      <p class="toc-kicker">{{labelOnThisPage}}</p>
+      <nav class="toc-nav" attr:aria-label="labelOnThisPage"></nav>
+    </aside>
+  </div>
+
+  <script>
+    import { highlightCodeBlocks } from "../content/highlight.mjs";
+
+    export default {
+      tag: "docs-layout",
+      attrs: {
+        labelOnThisPage: "On this page",
+        layout: "doc",
+      },
+      data: {
+        noHeadings: false,
+      },
+      ready() {
+        requestAnimationFrame(() => highlightCodeBlocks(this.ele));
+
+        const root = this.ele.shadowRoot;
+        const toc = root?.querySelector(".toc");
+        const nav = root?.querySelector(".toc-nav");
+        if (!toc || !nav) return;
+
+        if (this.layout === "wide") {
+          toc.hidden = true;
+          return;
+        }
+
+        const headings = [...this.ele.querySelectorAll("article.doc > h2")];
+        if (!headings.length) {
+          toc.hidden = true;
+          this.noHeadings = true;
+          return;
+        }
+
+        const links = headings.map((heading, index) => {
+          const id = heading.id || `doc-section-${index + 1}`;
+          heading.id = id;
+
+          const link = document.createElement("a");
+          link.className = "toc-link";
+          link.href = `#${id}`;
+          link.textContent = heading.textContent.trim();
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            heading.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+          nav.appendChild(link);
+          return link;
+        });
+
+        toc.hidden = false;
+
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                const index = headings.indexOf(entry.target);
+                links.forEach((link, i) => {
+                  link.classList.toggle("active", i === index);
+                });
+              }
+            },
+            { rootMargin: "-96px 0px -65% 0px", threshold: 0 },
+          );
+
+          headings.forEach((heading) => observer.observe(heading));
+          this._observer = observer;
+        }
+      },
+      detached() {
+        if (this._observer) this._observer.disconnect();
+      },
+    };
+  </script>
+</template>

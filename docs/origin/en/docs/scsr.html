@@ -1,0 +1,116 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>Real-path routing with scsr</h1>
+      <p class="doc-lead">
+        scsr makes every URL a real HTML document that can be opened directly.
+        In-site navigation still goes through app routing, but reloads, sharing,
+        and crawlers all get the complete content.
+      </p>
+
+      <h2>How it differs from o-router</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Capability</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>URL form</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>Server rewrite</td><td>Not needed</td><td>One HTML per path</td></tr>
+          <tr><td>SEO / visible without JS</td><td>Weaker</td><td>Full first-screen HTML</td></tr>
+          <tr><td>Page API</td><td colspan="2">Same: goto / replace / back / nested layouts / animations</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Page structure</h2>
+      <p>
+        Each URL maps to a complete HTML document, with the page content inlined
+        in the <code>&lt;template page&gt;</code> of <code>o-app</code>:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;Home&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;Home content&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;Go to details&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>The app config does not declare home</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr adopts the current URL as the page, and the home page is the HTML
+        at that URL, so do not set <code>home</code> in the config. Navigate
+        within the site with <code>olink</code> or <code>goto()</code>, keeping
+        real paths as addresses.
+      </p>
+
+      <h2>Server requirements</h2>
+      <ul>
+        <li>every path returns its corresponding HTML with <code>Content-Type: text/html; charset=UTF-8</code>;</li>
+        <li>the <code>&lt;template page&gt;</code> in the page may contain static content rendered on the server;</li>
+        <li>CSS, JS, and images are served as ordinary static assets;</li>
+        <li>scsr must load after ofa.js, since it attaches to the page's existing global <code>$</code>.</li>
+      </ul>
+
+      <h2>Fallback and first screen</h2>
+      <p>
+        Without JS, the page is still the complete HTML produced by the server;
+        only the interactive logic does not run. With JS, scsr takes over, turns
+        the current URL into an in-app page, and later navigation no longer
+        needs a full page reload.
+      </p>
+
+      <h2>When to choose it</h2>
+      <ul>
+        <li>sites that need SEO and shareable links, such as marketing sites, docs, and blogs;</li>
+        <li>every page has its own URL and its own meta information;</li>
+        <li>you already have server templates or SSG that can output HTML per path.</li>
+      </ul>
+      <p>
+        For purely internal apps that do not need search engine indexing,
+        o-router is simpler.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./nested-routing.html">Nested routing →</a>
+         · Next: <a olink href="./api.html">$.fn and wrapped objects →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

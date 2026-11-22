@@ -1,0 +1,145 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>o-app 应用</h1>
+      <p class="doc-lead">
+        <code>o-app</code> 是微应用容器。它加载一份应用配置模块，管理页面栈、
+        页面切换动画和导航事件，但本身不直接加载页面 HTML。
+      </p>
+
+      <h2>最小应用</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        <code>o-app</code> 的 <code>src</code> 必须是应用配置模块，
+        不能直接指向页面。单个页面需要独立运行时，用
+        <code>&lt;o-page src="./page.html"&gt;</code>。
+      </p>
+
+      <h2>应用配置</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;加载中...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;加载失败：${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// 跨域页面访问控制：返回 true 放行，false 或 Error 则拒绝
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("应用已就绪", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>导出</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>启动后加载的首页地址</td></tr>
+          <tr><td><code>pageAnime</code></td><td>页面切换三态动画：current / next / previous</td></tr>
+          <tr><td><code>loading</code></td><td>页面加载中显示的 HTML</td></tr>
+          <tr><td><code>fail</code></td><td>加载失败时显示的 HTML，接收 <code>{ src, error }</code></td></tr>
+          <tr><td><code>allowForward</code></td><td>是否允许 <code>forward()</code>，默认关闭</td></tr>
+          <tr><td><code>access</code></td><td>跨域页面访问控制，返回 true 放行；同源页面不需要</td></tr>
+          <tr><td><code>proto</code></td><td>扩展 o-app 实例的方法和 getter</td></tr>
+          <tr><td><code>ready</code></td><td>配置加载完成后的回调，<code>this</code> 为应用实例</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> 接收页面 <code>src</code>，返回
+        <code>true</code> 才允许加载跨域页面；返回 <code>false</code> 或
+        <code>Error</code> 会被拒绝。目标站点仍需正确配置 CORS，
+        否则浏览器会先拦截请求。
+      </p>
+
+      <h2>应用实例</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // 当前页面实例
+app.appIsReady; // 首个页面渲染完成（可用 watchUntil 等待）
+app.routers;   // 路由栈，父级布局页不会进入栈
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // 需要 allowForward: true</code></pre>
+      <p>
+        页面模块内也可以直接用 <code>this.goto</code>、
+        <code>this.replace</code>、<code>this.back</code>，
+        <code>this.app</code> 指向所在应用。
+      </p>
+
+      <h2>监听路由变化</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // 目标页面地址
+});</code></pre>
+
+      <h2>页面动画</h2>
+      <p>
+        <code>pageAnime.current</code> 是页面稳定后的状态，
+        <code>next</code> 是新页面入场起点，<code>previous</code>
+        是旧页面离场终点。三个状态都可以省略，省略时使用默认值。
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./context.html">跨组件上下文 →</a>
+        　·　下一篇：<a olink href="./routing.html">路由与导航 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

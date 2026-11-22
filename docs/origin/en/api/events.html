@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Events</p>
+      <h1>Events</h1>
+      <p class="doc-lead">Bind, unbind, and dispatch events with instance methods; events can carry payload data and cross shadow boundaries.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="events"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.on(name, handler)</code></td><td>Bind an event; returns el so calls can be chained</td></tr>
+          <tr><td><code>el.one(name, handler)</code></td><td>Fire once and unbind automatically</td></tr>
+          <tr><td><code>el.off(name, handler)</code></td><td>Unbind an event</td></tr>
+          <tr><td><code>el.emit(name, opts)</code></td><td>Dispatch an event; opts.data is attached as event.data and the remaining fields are passed as Event init options</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> on:click="method" in a template is unbound automatically when the component unmounts, so there is no need to call off manually.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

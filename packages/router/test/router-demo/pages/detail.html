@@ -1,0 +1,63 @@
+<template page>
+  <style>
+    .back { margin: 0 2px 14px; }
+    .back a { color: var(--muted); text-decoration: none; font-size: 13.5px; }
+    .back a:hover { color: var(--accent); }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+      padding: 30px 34px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 16px 36px -18px rgba(15, 23, 42, 0.12);
+    }
+    .ico {
+      width: 60px; height: 60px; border-radius: 16px; font-size: 30px;
+      display: grid; place-items: center; background: var(--accent-soft); margin-bottom: 16px;
+    }
+    .eyebrow { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--accent); }
+    h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.4px; }
+    .grad {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .muted { color: var(--muted); margin: 0 0 12px; }
+    .code {
+      margin: 0 0 20px; padding: 12px 16px; background: #0f172a; color: #a5f3fc;
+      border-radius: 12px; font-size: 13px; overflow: auto;
+    }
+    .links { display: flex; gap: 10px; }
+    /* 小号 outline 按钮（Bootstrap .btn 风格） */
+    .links a {
+      padding: .3em .9em; font-size: 13px; border-radius: .25em;
+      color: var(--accent); border: 1px solid var(--accent); text-decoration: none;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+    }
+    .links a:hover { background: var(--accent); color: #fff; }
+    .links a:active { background: color-mix(in srgb, var(--accent) 72%, #000); border-color: color-mix(in srgb, var(--accent) 72%, #000); }
+  </style>
+  <div class="wrap">
+    <p class="back"><a olink href="./list.html">← 返回列表</a></p>
+    <div class="card">
+      <span class="ico">🏷️</span>
+      <p class="eyebrow">商品详情 · QUERY 传参</p>
+      <h2>商品 <span class="grad">#{{id}}</span></h2>
+      <p class="muted">default 写成函数，入参里的 query 就是页面地址的查询参数：</p>
+      <pre class="code">{{queryText}}</pre>
+      <div class="links">
+        <a olink href="./list.html">← 返回列表</a>
+        <a olink href="./home.html">回首页</a>
+      </div>
+    </div>
+  </div>
+<script>
+  export const parent = "./layout.html";
+
+  // default 写成函数：入参提供 query（页面地址的查询参数）与 load
+  export default ({ query }) => {
+    return {
+      data: {
+        id: query.id || "(未指定)",
+        queryText: JSON.stringify(query),
+      },
+    };
+  };
+</script>
+</template>

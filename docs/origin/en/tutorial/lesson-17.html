@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 17</p>
+      <h1>Pages and Routing</h1>
+      <p class="doc-lead">o-app manages the page stack: navigate with olink / goto, pass parameters with query, and return with back.</p>
+
+      <p>
+  A multi-page app uses <code>&lt;o-app src="./app.mjs"&gt;</code> as its container.
+  <code>app.mjs</code> holds only app configuration, such as the home page address and transition animation.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-17" fold-styles="true"></docs-playground>
+<h2>Three files</h2>
+<ul>
+  <li><code>app.mjs</code>: <code>home</code> points to the home page, <code>pageAnime</code> configures the transition animation;</li>
+  <li><code>home.html</code>: navigates to the about page with <code>olink</code> or <code>goto()</code>;</li>
+  <li><code>about.html</code>: reads parameters from <code>query</code> and returns with <code>back()</code>.</li>
+</ul>
+<p>
+  <code>olink</code> is declarative navigation and does not reload the page; <code>this.goto(url)</code>
+  navigates from code. <code>query</code> arrives as an argument to the page module function, not on
+  <code>this</code>.
+</p>
+<div class="doc-note">
+  <strong>o-app only accepts app configuration:</strong> do not pass a page module directly to
+  <code>o-app src</code>. For a single page use <code>o-page src</code>;
+  for a multi-page app use <code>o-app</code> plus the page address.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add an "About page (with parameters)" button to the home page that navigates with
+  <code>goto("./about.html?from=home-btn")</code>;
+  then show the source on the about page.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-16.html">16 · Global State →</a> · Next: <a olink href="./lesson-18.html">18 · Nested Layouts →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

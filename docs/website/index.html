@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="mul">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js — Languages</title>
+    <meta
+      name="description"
+      content="Choose a language for the ofa.js website."
+    />
+    <meta name="theme-color" content="#1a1c1e" />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
+        overflow-x: hidden;
+        overflow-x: clip;
+          }
+
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 32px 20px;
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      main {
+        width: 100%;
+        max-width: 720px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 48px;
+      }
+
+      .brand-logo {
+        width: auto;
+        height: 44px;
+        display: block;
+        flex: none;
+      }
+
+      .wordmark {
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.01em;
+      }
+
+      .wordmark span {
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        color: var(--md-sys-color-primary);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(40px, 7vw, 57px);
+        font-weight: 400;
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+      }
+
+      h1 em {
+        display: block;
+        margin-top: 8px;
+        color: var(--md-sys-color-on-surface-variant);
+        font-style: normal;
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 1.4;
+        letter-spacing: 0;
+      }
+
+      .langs {
+        display: grid;
+        gap: 12px;
+        margin-top: 40px;
+      }
+
+      .lang-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 24px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 24px;
+        background: var(--md-sys-color-surface-container-low);
+        transition:
+          background 150ms cubic-bezier(0.2, 0, 0, 1),
+          border-color 150ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .lang-card:hover {
+        border-color: var(--md-sys-color-outline);
+        background: var(--md-sys-color-surface-container);
+      }
+
+      .lang-card:focus-visible {
+        outline: 2px solid var(--md-sys-color-primary);
+        outline-offset: 2px;
+      }
+
+      .lang-mark {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        flex: none;
+        border-radius: 16px;
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+        font-family: "Roboto Mono", ui-monospace, monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .lang-main {
+        min-width: 0;
+      }
+
+      .lang-native {
+        display: block;
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+
+      .lang-title {
+        display: block;
+        margin-top: 2px;
+        overflow: hidden;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .lang-arrow {
+        margin-left: auto;
+        color: var(--md-sys-color-primary);
+        font-size: 18px;
+      }
+
+      .foot {
+        margin-top: 40px;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 12px;
+      }
+
+      @media (max-width: 640px) {
+        .lang-card {
+          padding: 16px 18px;
+          border-radius: 20px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="brand">
+        <img class="brand-logo" src="./assets/logo.svg" alt="" aria-hidden="true" />
+        <span class="wordmark">ofa<span>.js</span></span>
+      </span>
+
+      <p class="kicker">Languages</p>
+      <h1>
+        选择语言
+        <em>Choose your language</em>
+      </h1>
+
+      <div class="langs">        <a class="lang-card" href="./cn/" hreflang="zh-CN">
+          <span class="lang-mark">cn</span>
+          <span class="lang-main">
+            <span class="lang-native">简体中文</span>
+            <span class="lang-title">ofa.js — 把组件，写成 HTML</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="lang-card" href="./en/" hreflang="en">
+          <span class="lang-mark">en</span>
+          <span class="lang-main">
+            <span class="lang-native">English</span>
+            <span class="lang-title">ofa.js — Write Components as HTML</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a></div>
+
+      <p class="foot">© 2018–2026 ofa.js · MIT License</p>
+    </main>
+  </body>
+</html>

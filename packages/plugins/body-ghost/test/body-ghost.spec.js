@@ -1,0 +1,125 @@
+import { test, expect } from "@playwright/test";
+
+// body-ghost 插件的 spec：mapping 载体挂载、内容传送、事件沿原位置
+// 冒泡、宿主移除后清理。
+
+const PAGE = "/packages/plugins/body-ghost/test/statics/body-ghost.html";
+const DIST = "/packages/plugins/body-ghost/test/statics/dist-host.html";
+
+test("mapping 载体挂到 body，内容传送进其 shadow / mapping mounts on body", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+
+  const ghostBtn = page.locator("#ghost-btn");
+  await ghostBtn.waitFor({ state: "visible", timeout: 15000 });
+
+  // 真实 DOM 已传送到 body 末尾的 mapping 载体内
+  const state = await page.evaluate(() => {
+    const mapping = document.querySelector("body-ghost-mapping");
+    return {
+      mappingInBody: mapping?.parentElement === document.body,
+      ghostInMappingShadow: !!mapping?.shadowRoot.querySelector("#ghost-btn"),
+      ghostId: mapping?.getAttribute("ghost-id"),
+    };
+  });
+  expect(state.mappingInBody).toBe(true);
+  expect(state.ghostInMappingShadow).toBe(true);
+  expect(state.ghostId).toBeTruthy();
+
+  // 原位置壳不占布局（display:none）；body-ghost 在 ghost-wrap 的 shadow 内，
+  // 裸 querySelector 穿不透，需显式走 shadowRoot
+  expect(
+    await page.evaluate(() => {
+      const host = document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("body-ghost");
+      return host ? getComputedStyle(host).display : null;
+    }),
+  ).toBe("none");
+});
+
+test("ghost 内容交互在原组件作用域生效 / ghost content interactions run in host scope", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+
+  const ghostBtn = page.locator("#ghost-btn");
+  await ghostBtn.waitFor({ state: "visible", timeout: 15000 });
+
+  // on:click 绑定在原组件作用域（ghost-wrap 的 data），传送后依然生效
+  await ghostBtn.click();
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("#wrap-count")?.textContent === "1",
+    undefined,
+    { timeout: 15000 },
+  );
+
+  // 事件在真实 DOM 位置（body 下的 mapping）正常冒泡
+  await page.evaluate(() => {
+    window.__bubbleAtBody = false;
+    document.body.addEventListener(
+      "click",
+      () => {
+        window.__bubbleAtBody = true;
+      },
+      { once: true },
+    );
+  });
+
+  await ghostBtn.click();
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector("ghost-wrap")
+        ?.shadowRoot?.querySelector("#wrap-count")?.textContent === "2",
+    undefined,
+    { timeout: 15000 },
+  );
+
+  expect(
+    await page.evaluate(() => window.__bubbleAtBody),
+  ).toBe(true);
+});
+
+test("宿主移除后 mapping 清理 / mapping removed with host", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+
+  const ghostBtn = page.locator("#ghost-btn");
+  await ghostBtn.waitFor({ state: "visible", timeout: 15000 });
+  await page.waitForFunction(
+    () => !!document.querySelector("body-ghost-mapping"),
+    undefined,
+    { timeout: 15000 },
+  );
+
+  await page.evaluate(() => window.__wrap.remove());
+  await page.waitForFunction(
+    () => !document.querySelector("body-ghost-mapping"),
+    undefined,
+    { timeout: 15000 },
+  );
+});
+
+test("dist 冒烟：经典脚本 dist ofa + dist body-ghost / dist artifacts smoke", async ({
+  page,
+}) => {
+  await page.goto(DIST);
+
+  await page.waitForFunction(
+    () => {
+      const mapping = document.querySelector("body-ghost-mapping");
+      return (
+        mapping?.parentElement === document.body &&
+        !!mapping?.shadowRoot.querySelector("#bg-in")
+      );
+    },
+    undefined,
+    { timeout: 15000 },
+  );
+});

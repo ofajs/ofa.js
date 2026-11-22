@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill · 路径解析 path</title>
+  </head>
+  <body>
+    <script type="module">
+      import { path } from "../../src/path.mjs";
+      import { test, run, assertEqual } from "./harness.mjs";
+
+      test("相对标识符基于 baseURI 解析 / resolves a relative specifier against the baseURI", () => {
+        assertEqual(
+          path("./a.png", "http://x.com/y/z.html"),
+          "http://x.com/y/a.png"
+        );
+      });
+
+      test("父级相对标识符解析 / resolves a parent-relative specifier", () => {
+        assertEqual(path("../b.js", "http://x.com/y/z/"), "http://x.com/y/b.js");
+      });
+
+      test("绝对 http URL 直接透传 / passes absolute http URLs through", () => {
+        assertEqual(
+          path("https://k.com/a.js", "http://x.com/"),
+          "https://k.com/a.js"
+        );
+      });
+
+      test("保留尾部加载参数 / keeps trailing load params", () => {
+        assertEqual(
+          path("./data.json .txt --real:/a", "http://x.com/y/"),
+          "http://x.com/y/data.json .txt --real:/a"
+        );
+      });
+
+      test("默认以当前文档为基准 / defaults the base to the current document", () => {
+        // 期望值动态计算，保证 file:// 等任意环境下都可人工核对
+        assertEqual(path("c.html"), new URL("c.html", location.href).href);
+      });
+
+      run();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 07</p>
+      <h1>条件渲染</h1>
+      <p class="doc-lead">o-if / o-else-if / o-else 控制内容是否存在。</p>
+
+      <p>
+  需要根据状态显示不同内容时，用 <code>&lt;o-if :value="条件"&gt;</code>。
+  条件为假时内容会被移除，为真时重新创建。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-7" fold-styles="true"></docs-playground>
+<h2>三个标签必须连续</h2>
+<ul>
+  <li><code>o-if</code> 必须有 <code>:value</code>；</li>
+  <li><code>o-else-if</code> 继续判断下一个条件；</li>
+  <li><code>o-else</code> 不带 <code>:value</code>，收尾兜底。</li>
+</ul>
+<div class="doc-note">
+  <strong>频繁显隐用 class：</strong>如果只是切换颜色、显示/隐藏，
+  优先用 <code>class:</code> 保留 DOM；<code>o-if</code> 会销毁并重建内容，
+  适合条件不常变化或需要真正移除资源的场景。
+</div>
+<h2>动手改</h2>
+<p>
+  把 60 分以下改成「不及格」，并新增一档 80–89 分的「良好」。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-6.html">06 · 双向绑定 →</a>　·　下一篇：<a olink href="./lesson-8.html">08 · 列表渲染 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

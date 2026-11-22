@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>真实路径路由 scsr — ofa.js 文档</title>
+    <meta name="description" content="用 scsr 让每个 URL 都是可直接访问的完整文档，适合 SEO 与分享。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="真实路径路由 scsr — ofa.js 文档" />
+    <meta property="og:description" content="用 scsr 让每个 URL 都是可直接访问的完整文档，适合 SEO 与分享。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>真实路径路由 scsr</h1>
+      <p class="doc-lead">
+        scsr 让每个 URL 都是一份真实、可直接访问的 HTML 文档。
+        站内跳转仍然走应用路由，但刷新、分享和爬虫拿到的都是完整内容。
+      </p>
+
+      <h2>与 o-router 的区别</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>能力</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>地址形式</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>服务器 rewrite</td><td>不需要</td><td>每个路径一份 HTML</td></tr>
+          <tr><td>SEO / 无 JS 可见</td><td>较弱</td><td>完整首屏 HTML</td></tr>
+          <tr><td>页面 API</td><td colspan="2">相同：goto / replace / back / 嵌套布局 / 动画</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>页面结构</h2>
+      <p>
+        每个 URL 对应一份完整 HTML，页面内容内联在
+        <code>o-app</code> 的 <code>&lt;template page&gt;</code> 中：
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;首页&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;首页内容&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;去详情&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>应用配置不声明 home</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr 会把当前 URL 收编为页面，首页就是当前 URL 的 HTML，
+        因此配置里不要写 <code>home</code>。站内跳转使用
+        <code>olink</code> 或 <code>goto()</code>，地址保持真实路径。
+      </p>
+
+      <h2>服务端要求</h2>
+      <ul>
+        <li>每个路径返回对应 HTML，<code>Content-Type: text/html; charset=UTF-8</code>；</li>
+        <li>页面里的 <code>&lt;template page&gt;</code> 可以包含服务端渲染好的静态内容；</li>
+        <li>CSS、JS、图片按普通静态资源路径提供；</li>
+        <li>scsr 必须在 ofa.js 之后加载，它挂接页面已有的全局 <code>$</code>。</li>
+      </ul>
+
+      <h2>降级与首屏</h2>
+      <p>
+        无 JS 时，页面仍是服务端输出的完整 HTML，只是不会执行交互逻辑。
+        有 JS 时，scsr 接管后把当前 URL 转成应用内页面，后续跳转不需要
+        整页刷新。
+      </p>
+
+      <h2>什么时候选它</h2>
+      <ul>
+        <li>官网、文档、博客等需要 SEO 和链接分享的站点；</li>
+        <li>每个页面都有独立 URL 和独立 meta 信息；</li>
+        <li>已有服务端模板或 SSG，能按路径输出 HTML。</li>
+      </ul>
+      <p>
+        纯后台应用、无需被搜索引擎索引时，o-router 更省事。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./nested-routing.html">嵌套路由 →</a>
+        　·　下一篇：<a olink href="./api.html">$.fn 与包装对象 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

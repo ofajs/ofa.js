@@ -1,0 +1,14 @@
+<template page>
+  <div class="page-root">
+    <h3 id="r-title">r1</h3>
+  </div>
+<script>
+  // 渲染计数：hash 直达/伪 popstate 竞态用例断言"只渲染一次"
+  export default {
+    attached() {
+      window.__r1renders = (window.__r1renders || 0) + 1;
+    },
+    data: {},
+  };
+</script>
+</template>

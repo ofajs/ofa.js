@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill · load-module 元素 elements</title>
+  </head>
+  <body>
+    <!-- 被测元素：正常加载 / pause 延迟 / css 注入 / 无 src -->
+    <l-m id="ok" src="./esm/answer.mjs"></l-m>
+    <l-m id="paused" src="./esm/answer.mjs" pause></l-m>
+    <l-m id="css" src="./styles/main.css"></l-m>
+    <l-m id="empty"></l-m>
+
+    <script type="module">
+      import "../../src/main.mjs";
+      import { test, run, assert, waitFor } from "./harness.mjs";
+
+      const el = (id) => document.getElementById(id);
+
+      test("l-m 加载 src、置位 loaded 并派发 load 事件 / l-m loads its src, sets loaded and fires the load event", async () => {
+        let eventFired = false;
+        // 监听器在元素升级前注册，保证能收到事件
+        el("ok").addEventListener("load", () => {
+          eventFired = true;
+        });
+
+        await waitFor(() => el("ok").loaded, "l-m#ok 未完成加载 / l-m#ok never finished loading");
+        assert(eventFired, "load 事件未触发 / the load event was not fired");
+      });
+
+      test("pause 属性保持元素不加载 / the pause attribute keeps the element unloaded", async () => {
+        await waitFor(() => el("ok").loaded, "l-m#ok 未完成加载 / l-m#ok never finished loading");
+        assert(!el("paused").loaded, "带 pause 的 l-m 应保持未加载 / the paused l-m should stay unloaded");
+      });
+
+      test("移除 pause 触发延迟加载 / removing pause triggers the deferred load", async () => {
+        el("paused").removeAttribute("pause");
+        await waitFor(
+          () => el("paused").loaded,
+          "移除 pause 后未加载 / the paused l-m did not load after pause removal"
+        );
+      });
+
+      test("css src 向文档 head 注入样式链接 / a css src injects a stylesheet link into the document head", async () => {
+        await waitFor(
+          () => document.querySelector('head link[rel="stylesheet"]'),
+          "样式链接未注入 / the stylesheet link was not injected"
+        );
+
+        const href = document.querySelector('head link[rel="stylesheet"]').href;
+        assert(
+          href.includes("styles/main.css"),
+          `样式地址异常 / unexpected stylesheet href: ${href}`
+        );
+      });
+
+      test("断开连接后移除注入的样式链接 / the injected stylesheet link is removed on disconnect", async () => {
+        el("css").remove();
+
+        await waitFor(
+          () => !document.querySelector('head link[rel="stylesheet"]'),
+          "断开后样式链接未移除 / the stylesheet link was not removed after disconnect"
+        );
+      });
+
+      test("无 src 的元素保持未加载 / an element without src stays unloaded", () => {
+        assert(!el("empty").loaded, "无 src 的 l-m 应保持未加载 / an l-m without src should stay unloaded");
+      });
+
+      test("初始化后 src 属性被锁定 / the src property is locked after initialization", () => {
+        let threw = false;
+
+        // 模块代码是严格模式，对锁定的实例属性赋值会抛 TypeError
+        try {
+          el("ok").src = "./note.txt";
+        } catch (error) {
+          threw = true;
+        }
+
+        assert(threw, "初始化后 el.src 赋值应抛错 / assigning el.src should throw after initialization");
+      });
+
+      test("修改 src 特性会被回退 / changing the src attribute is reverted", async () => {
+        // 特性变更由元素异步回退，并伴随一次预期的 change_lm_src 抛错
+        el("ok").setAttribute("src", "./note.txt");
+
+        await waitFor(
+          () => el("ok").getAttribute("src") === "./esm/answer.mjs",
+          "src 特性未被回退 / the src attribute was not reverted after a foreign change"
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<template page>
+  <div>img relate cases</div>
+  <!-- 相对图片地址：页面模板直写 / relative img in page template -->
+  <img class="img1" src="./logo-relate.png" height="20" />
+
+  <!-- 条件内容里的相对地址 / relative img inside conditional content -->
+  <o-if :value="val">
+    <img class="img2" src="./logo-relate.png" height="20" />
+  </o-if>
+
+  <!-- 命名模板内的相对地址 / relative img inside a named template -->
+  <o-fill :value="arr" name="img-item"></o-fill>
+  <template name="img-item">
+    <div>
+      <o-if :value="$host.val">
+        <img class="img3" src="./logo-relate.png" height="20" />
+      </o-if>
+    </div>
+  </template>
+
+  <script>
+    export default {
+      data: {
+        val: false,
+        arr: [1],
+      },
+      ready() {
+        // 延迟点亮条件，覆盖"后渲染内容也要被改写"的场景
+        setTimeout(() => {
+          this.val = true;
+        }, 30);
+      },
+    };
+  </script>
+</template>

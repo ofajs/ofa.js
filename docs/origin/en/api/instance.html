@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Instance basics</p>
+      <h1>Instance basics</h1>
+      <p class="doc-lead">An instance object is a DOM wrapper, reactive data, and a collection of child elements all at once. Start by getting to know its basic properties.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="instance"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.ele</code></td><td>The native DOM element; every browser API is reached through it</td></tr>
+          <tr><td><code>el.tag</code></td><td>Lowercase tag name (read-only)</td></tr>
+          <tr><td><code>el.owner</code></td><td>The data ownership chain (a Set); reactive updates bubble up along it (read-only)</td></tr>
+          <tr><td><code>el.length</code></td><td>Number of child elements, matching ele.children.length (read-only)</td></tr>
+          <tr><td><code>el[0], el[1]</code></td><td>Read a child element instance by index (read-only)</td></tr>
+          <tr><td><code>el.index</code></td><td>Position within the parent; null when there is no parent (read-only)</td></tr>
+          <tr><td><code>el.PATH</code></td><td>Location of the component / page file; relative resources resolve against it (read-only)</td></tr>
+          <tr><td><code>el.app</code></td><td>Nearest o-app instance; undefined when outside an app (read-only)</td></tr>
+          <tr><td><code>el.shadow</code></td><td>The element's own shadow root instance (read-only)</td></tr>
+          <tr><td><code>el.root</code></td><td>The root node it lives in: document or some shadow root (read-only)</td></tr>
+          <tr><td><code>el.host</code></td><td>Nearest shadow host component instance (read-only)</td></tr>
+          <tr><td><code>el.xid</code></td><td>Unique identifier of the instance, used to tell apart instances with the same tag (read-only)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Note:</strong> Members marked “read-only” are maintained internally by the instance; assigning to them does not change the structure.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

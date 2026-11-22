@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">Getting started</p>
+        <h1>安装与引入</h1>
+        <p class="doc-lead">
+          ofa.js 不要求安装依赖，也不需要构建。用一行 script 引用 CDN 上的
+          ESM 文件，就可以开始写组件和页面。
+        </p>
+
+        <h2>1. 引入 ofa.js</h2>
+        <p>
+          推荐直接使用 v5 的 ESM 构建。把下面的地址放进
+          <code>&lt;script type="module"&gt;</code> 的 <code>src</code> 中：
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          如果你的环境更适合经典脚本，也可以使用 UMD 版本（会暴露全局
+          <code>$</code>）：
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>版本说明：</strong>v5 分支的 CDN 地址必须写成
+          <code>@refs/heads/v5</code>，不能简写成 <code>@v5</code>，
+          否则 jsDelivr 会把它当成版本标签解析而 404。
+        </div>
+
+        <h2>2. 写一个入口</h2>
+        <p>
+          入口 HTML 只负责加载 ofa.js，并放一个 <code>o-page</code> 来加载页面模块：
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;我的第一个 ofa.js 页面&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. 写页面模块</h2>
+        <p>
+          一个 <code>.html</code> 文件就是一个页面模块。模板、样式和逻辑都写在
+          <code>&lt;template page&gt;</code> 里面：
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;点了 {{count}} 次&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>注意：</strong>页面和组件的 <code>&lt;script&gt;</code>
+          必须写在 <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code> 内部。ofa.js 只提取模板里的脚本，
+          写在外面的脚本会被忽略。
+        </div>
+
+        <h2>4. 打开页面</h2>
+        <p>
+          页面需要通过 HTTP 访问，不能直接双击 HTML 文件（
+          <code>file://</code> 会被模块加载的 CORS 策略拦截）。任意静态服务器都可以：
+        </p>
+        <pre><code>$ npx serve .
+
+# 或者
+$ python3 -m http.server</code></pre>
+        <p>
+          打开 http://localhost:3000 就能看到页面。控制台执行
+          <code>$.version</code> 可以确认框架已经加载。
+        </p>
+
+        <h2>下一步</h2>
+        <p>
+          页面已经能运行之后，下一步是掌握数据如何驱动模板：文本插值、事件、
+          双向绑定、条件与列表。
+        </p>
+        <p class="doc-end">
+          下一篇：<a olink href="./first-component.html">第一个组件 →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

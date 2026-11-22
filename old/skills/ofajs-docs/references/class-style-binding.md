@@ -1,0 +1,346 @@
+# 类和样式绑定
+
+在 ofa.js 中，你可以通过动态绑定类名、样式和属性来实现灵活的 UI 状态管理。这使得界面可以根据数据的变化自动调整外观。
+
+## 类绑定
+
+类绑定允许你根据数据状态动态地添加或移除 CSS 类。你可以使用 `class:className="booleanExpression"` 的语法来绑定特定的类。
+
+当 `booleanExpression` 为 `true` 时，类名会被添加到元素上；当为 `false` 时，类名会被移除。
+
+### 基础类绑定
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+    .hide {
+      display: none;
+    }
+  </style>
+  <button on:click="isHide = !isHide">Toggle Display</button>
+  <p class="green" class:hide="isHide">{{val}}</p>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          isHide: false,
+          val: "Hello ofa.js Demo Code",
+        },
+      };
+    };
+  </script>
+</template>
+```
+
+### 多个类绑定
+
+你还可以同时绑定多个类，使元素根据不同的条件拥有不同的外观状态。
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+    .active {
+      background-color: #e6f7ff;
+      border: 2px solid #1890ff;
+    }
+    .disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #52c41a;
+    }
+  </style>
+  <button on:click="toggleStates">Toggle States</button>
+  <p class:active="isActive" class:disabled="isDisabled" class:highlight="isHighlighted">
+    Current State - Active: {{isActive}}, Disabled: {{isDisabled}}, Highlighted: {{isHighlighted}}
+  </p>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          isActive: false,
+          isDisabled: false,
+          isHighlighted: false,
+        },
+        proto: {
+          toggleStates() {
+            this.isActive = !this.isActive;
+            this.isDisabled = !this.isDisabled;
+            this.isHighlighted = !this.isHighlighted;
+          }
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+## 样式绑定
+
+样式绑定允许你直接设置内联样式的值，支持动态更新。ofa.js 提供了两种样式绑定方式：
+
+### 单一样式属性绑定
+
+使用 `:style.propertyName` 语法来绑定特定的样式属性。
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+  </style>
+  <p class="green" :style.color="isGreen ? 'green' : 'red'">{{val}}</p>
+  <button on:click="isGreen = !isGreen">Toggle Color</button>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          isGreen: false,
+          val: "Hello ofa.js Demo Code",
+        },
+      };
+    };
+  </script>
+</template>
+```
+
+### 多样式属性绑定
+
+你也可以一次性绑定多个样式属性：
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+  </style>
+  <p :style.color="textColor" :style.fontSize="fontSize + 'px'" :style.backgroundColor="bgColor">
+    Dynamic Styling Example
+  </p>
+  <button on:click="changeStyles">Change Styles</button>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          textColor: 'blue',
+          fontSize: 16,
+          bgColor: '#f0f0f0'
+        },
+        proto: {
+          changeStyles() {
+            this.textColor = this.textColor === 'blue' ? 'red' : 'blue';
+            this.fontSize = this.fontSize === 16 ? 20 : 16;
+            this.bgColor = this.bgColor === '#f0f0f0' ? '#ffffcc' : '#f0f0f0';
+          }
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+## 属性绑定
+
+除了类和样式绑定，你还可以动态绑定其他 HTML 属性。ofa.js 使用 `attr:attributeName` 语法来实现属性绑定。
+
+### 基础属性绑定
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+    [bg-color="red"]{
+        background-color: red;
+    }
+    [bg-color="green"]{
+        background-color: green;
+    }
+  </style>
+  <p attr:bg-color="bgColor" attr:title="tooltipText">{{val}}</p>
+  <button on:click="changeColor">Change Color</button>  
+  <script>
+    export default async () => {
+      return {
+        data: {
+          bgColor: "green",
+          tooltipText: "这是一个提示信息",
+          val: "Hover over me to see the title",
+        },
+        proto: {
+          changeColor() {
+            this.bgColor = this.bgColor === "green" ? "red" : "green";
+          }
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+> ⚠️ **`attr:` 的值是 JavaScript 表达式，不是字符串字面量**——**纯静态的属性值不要用 `attr:`，直接写普通属性**（中文文案最容易踩）：
+>
+> ```html
+> ❌ <button attr:title="点这里选择要看的订单状态">   <!-- 被当标识符求值 → ReferenceError，且中断整个组件 render -->
+> ✅ <button title="点这里选择要看的订单状态">         <!-- 静态值 → 普通属性（ofa 不处理无指令前缀的属性） -->
+> ✅ <button attr:title="'点这里选择要看的订单状态'">   <!-- 非要用 attr: 就包成字符串表达式 -->
+> ✅ <button attr:title="locked ? '已锁定' : ''">     <!-- attr: 留给真正的动态表达式 -->
+> ```
+>
+> 静态文案误写进 `attr:` 时，异常会**中断组件 render**：模板 HTML 已挂进 shadowRoot，但 `ready()` 不执行、后面的 `o-fill` / `o-if` 不展开、数据恒为空——表象像「绑定不生效 / 接口没返回」，极易误诊。详见 [SKILL.md](../SKILL.md) 的「模板指令的值是 JS 表达式」一节。
+
+### 布尔属性处理
+
+对于布尔类型的属性（如 `disabled`, `hidden`），ofa.js 会根据绑定值的真假性来决定是否添加该属性。
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+  </style>
+  <input type="text" attr:disabled="isDisabled" placeholder="Type here..." />
+  <br /><br />
+  <button attr:disabled="isButtonDisabled" on:click="handleButtonClick">Click Me</button>
+  <br /><br />
+  <label>
+    <input type="checkbox" on:change="toggleAll" /> Toggle All States
+  </label>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          isDisabled: false,
+          isChecked: true,
+          isButtonDisabled: false,
+        },
+        proto: {
+          handleButtonClick() {
+            alert('Button clicked!');
+          },
+          toggleAll(event) {
+            const checked = event.target.checked;
+            this.isDisabled = checked;
+            this.isChecked = checked;
+            this.isButtonDisabled = checked;
+          }
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+> **踩坑提示（布尔值与自定义 `data-*` 属性）**：
+> `attr:disabled="isDisabled"` 这类**内置布尔属性**（disabled / hidden 等）会按绑定值的真假渲染（true 添加属性 / false 移除属性）；
+> 但**自定义 `attr:data-xxx="boolValue"` 绑定布尔值时，`true` 会渲染成无值属性**（如 `<button data-active>`），JS 中 `e.target.dataset.active` 读到的是 `""`（空字符串）而非 `"true"`，`"" !== "true"` 会让取反逻辑判断出错。
+> **修复**：绑定到 `data-*` 的布尔值必须显式转字符串：`attr:data-active="$data.isActive ? 'true' : 'false'"`。
+
+## data() 函数
+
+可以在样式中使用 `data(key)` 来绑定组件数据。这非常适合需要根据组件数据动态改变样式的场景。
+
+```html
+<template page>
+  <style>
+    :host {
+      display: block;
+      border: 1px solid red;
+      padding: 10px;
+    }
+    p {
+      font-size: 10px;
+      color:red;
+      transition: all .3s ease;
+    }
+  </style>
+  <style>
+    p:hover {
+      font-size: data(size);
+      color: green;
+      transition: all data(time)s ease;
+    }
+  </style>
+  Hover FontSize: <input type="number" sync:value="size" placeholder="这是一个双向绑定的输入框" />
+  <br />
+  TransitionTime: <input type="number" step="0.3" min="0" sync:value="time" placeholder="这是一个双向绑定的输入框" />
+  <p>{{val}} - size: {{size}}</p>
+  <script>
+    export default async () => {
+      return {
+        data: {
+          size: 16,
+          time: 0.3,
+          val: "Hello ofa.js Demo Code",
+        }
+      };
+    };
+  </script>
+</template>
+```
+
+## 注意事项
+
+`style` 标签内的 `data(key)` 在原理上会替换整个 style 的内容。为避免重复渲染无关样式，建议将包含 `data(key)` 的样式单独放在一个 `style` 标签中，而不需要数据绑定的样式则放到另一个 `style` 标签里，以获得更好的性能表现。
+
+```html
+<!-- ❌ 不带有 data(key) 的 p:hover 也会被刷新 -->
+<style>
+  p {
+    font-size: data(size);
+    color:green;
+    transition: all data(time)s ease;
+  }
+  p:hover{
+    color:red;
+  }
+</style>
+```
+
+```html
+<!-- ✅ 只带有 data(xxx) 的样式会被重新渲染 -->
+<style>
+  p {
+    font-size: data(size);
+    color:green;
+    transition: all data(time)s ease;
+  }
+</style>
+<style>
+  p:hover{
+    color:red;
+  }
+</style>
+```
+
+## 关键要点
+
+- **类绑定**：使用 `class:className="booleanExpression"` 动态添加/移除类
+- **样式绑定**：使用 `:style.propertyName` 绑定样式属性
+- **属性绑定**：使用 `attr:attributeName` 绑定 HTML 属性
+- **data() 函数**：在样式中使用 `data(key)` 绑定组件数据
+- **性能优化**：将包含 `data(key)` 的样式单独放在一个 style 标签中

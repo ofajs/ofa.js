@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js 教程</title>
+    <meta name="description" content="20 节渐进式 ofa.js 教程：从第一个页面到组件、上下文、状态、路由与综合实战。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js 教程" />
+    <meta property="og:description" content="20 节渐进式 ofa.js 教程：从第一个页面到组件、上下文、状态、路由与综合实战。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>从零开始用 ofa.js</h1>
+      <p class="doc-lead">
+        20 节短课，按「入门 → 交互与状态 → 组件 → 应用与实战」组织。
+        每节课都从一个小问题开始，改代码、按 Ctrl/⌘+S 立即看结果。
+      </p>
+
+      <h2>入门</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>第一个页面</h2>
+          <p>ofa.js 的页面就是一个 HTML 文件：结构、样式和逻辑都在同一个文件里。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>数据与插值</h2>
+          <p>data 可以放字符串、数字、布尔、对象和数组，{{ }} 里还能写简单表达式。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>动态属性</h2>
+          <p>HTML attribute 用 attr:，DOM 属性用 :prop；布尔属性必须用 attr:。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>样式与 class</h2>
+          <p>页面里的 &lt;style&gt; 只作用于当前页面，class: 和 :style 让样式跟随数据变化。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+      </div>
+
+      <h2>交互与状态</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>事件</h2>
+          <p>用 on: 监听事件：简单逻辑写表达式，复杂逻辑写 proto 方法。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>双向绑定</h2>
+          <p>sync: 让表单和 data 双向同步，适合标量值。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>条件渲染</h2>
+          <p>o-if / o-else-if / o-else 控制内容是否存在。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>列表渲染</h2>
+          <p>o-fill 渲染数组；列表项内用 $data、$index、$host。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>编辑列表</h2>
+          <p>数组的 push/splice 会自动更新视图；行内编辑直接 sync 到 $data 字段。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>计算属性与侦听</h2>
+          <p>proto 的 getter 做同步计算，watch 观察变化并处理副作用。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>生命周期</h2>
+          <p>ready → attached → loaded，移除时 detached；定时器和监听要在 detached 清理。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+      </div>
+
+      <h2>组件</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>第一个组件</h2>
+          <p>把可复用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>组件参数</h2>
+          <p>外部数据通过 attrs 传给组件；组件内部用 data 保存自己的状态。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>插槽与事件</h2>
+          <p>slot 让组件接收外部内容，emit 把组件内部发生的事告诉外部。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+      </div>
+
+      <h2>应用与实战</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>跨层上下文</h2>
+          <p>用 o-provider / o-consumer 在组件子树里共享数据。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>全局状态</h2>
+          <p>多个组件共享同一份状态时，用 $.stanz 建一个模块级 store，并在 attached/detached 挂载、清理。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>页面与路由</h2>
+          <p>o-app 管理页面栈：olink / goto 切页，query 传参，back 返回。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>嵌套布局</h2>
+          <p>子页声明 parent，父页用 slot 承接；切子页时父页不销毁。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>异步与加载态</h2>
+          <p>异步请求用 loading / error / success 三种状态驱动界面，不要把异步结果放进 getter。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>综合：待办清单</h2>
+          <p>把列表、表单、条件、计算属性、侦听和 localStorage 串成一个完整应用。</p>
+          <span class="more">开始学习 →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>怎么学？</strong>
+        先读说明，再改右侧代码，按 <kbd>Ctrl</kbd>+<kbd>S</kbd>（Mac 为
+        <kbd>⌘</kbd>+<kbd>S</kbd>）运行。改坏了可以点编辑器里的「重置」，
+        恢复本课示例。
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

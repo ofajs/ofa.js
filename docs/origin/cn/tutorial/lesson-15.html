@@ -1,0 +1,63 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 15</p>
+      <h1>跨层上下文</h1>
+      <p class="doc-lead">组件层级深了以后，逐层传 attrs 很啰嗦；用 o-provider 和 o-consumer 把数据放进一棵子树，后代按名字就近消费。</p>
+
+      <p>
+        前面把数据从父组件传到子组件，用的是 <code>attrs</code>。
+        如果一份数据要穿过很多层组件，逐层转发会很累。
+        <code>o-provider</code> 把数据挂在某个祖先上，
+        后代任意深度的 <code>o-consumer</code> 都能直接读取。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-15" fold-styles="true"></docs-playground>
+
+      <h2>三张卡片</h2>
+      <ul>
+        <li>前两张卡片在 <code>o-provider</code> 里，读取的是 provider 的 Yao / 维护者；</li>
+        <li>第三张卡片在 provider 外，回退到 <code>o-root-provider</code> 的默认用户；</li>
+        <li>组件里的 <code>o-consumer</code> 用 <code>watch:user-name="name"</code> 把上下文属性同步到自己的 data。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>三个容易踩的点：</strong>
+        <ul>
+          <li>provider 的 HTML attribute 只在初始化时读取一次；运行时更新要直接改它的数据属性（示例里的 <code>provider.userName = ...</code>），<code>setAttribute</code> 不会广播。</li>
+          <li>provider 必须是 consumer 的祖先；兄弟节点和更外层都找不到。</li>
+          <li>consumer 要同步到哪些字段，先在 <code>data</code> 里声明默认值，否则初始化会报 <code>ReferenceError</code>。</li>
+        </ul>
+      </div>
+
+      <h2>和全局状态怎么选</h2>
+      <p>
+        只有某棵组件子树共享的数据，用 provider / consumer；
+        跨页面、整个应用共享的状态，用下一课的 <code>$.stanz</code>。
+        纯主题色、尺寸这类样式上下文，优先 CSS 变量或 <code>match-var</code>。
+      </p>
+
+      <h2>动手改</h2>
+      <p>
+        给 provider 增加一个 <code>user-department</code> 字段，在卡片里显示部门；
+        再给 provider 加一个按钮，切换整棵子树的用户。
+      </p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-14.html">14 · 插槽与事件 →</a>　·　下一篇：<a olink href="./lesson-16.html">16 · 全局状态 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API 参考 — ofa.js API</title>
+    <meta name="description" content="所有实例成员、全局静态成员与运行示例。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="API 参考 — ofa.js API" />
+    <meta property="og:description" content="所有实例成员、全局静态成员与运行示例。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · API 参考</p>
+      <h1>API 参考</h1>
+      <p class="doc-lead">所有实例成员、全局静态成员与运行示例。</p>
+
+      <h2>先试一个：用全局 $ 操作 body 元素</h2>
+      <p>
+        这个示例不是 page 模块：<code>body</code> 里直接写
+        <code>&lt;div id="target"&gt;</code>，下面的 <code>&lt;script type="module"&gt;</code>
+        用全局 <code>$("#target")</code> 取到元素并绑定点击事件，像 jQuery 一样直接操作 DOM。
+        改代码后按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 或「运行代码」看效果。
+      </p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground example="globalBody"></docs-playground>
+
+      <div class="doc-note">
+        <strong>API 适合非模板方式的语法：</strong>
+        这里的实例方法与全局 <code>$</code> 用于在 JS 里动态查找/创建节点、读写数据、
+        绑定事件、控制页面栈等。模板里能用 <code>on:</code>、<code>o-if</code>、
+        <code>o-fill</code>、<code>attr:</code> 表达的逻辑，优先留在模板里。
+      </div>
+
+      <p>
+        API 按用途分组，每个成员都给出签名和说明；页面顶部的编辑器可以直接改代码，
+        在右侧预览里看效果。
+      </p>
+
+      <h2>实例相关</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./instance.html">
+          <span class="num">API</span>
+          <h2>实例基础</h2>
+          <p>ele / tag / PATH 等基础属性</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./traverse.html">
+          <span class="num">API</span>
+          <h2>选择与遍历</h2>
+          <p>$ / all / parent / siblings</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./structure.html">
+          <span class="num">API</span>
+          <h2>结构操作</h2>
+          <p>push / splice / before / remove</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>属性与事件</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./props.html">
+          <span class="num">API</span>
+          <h2>内容、属性与样式</h2>
+          <p>text / html / attr / css</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./events.html">
+          <span class="num">API</span>
+          <h2>事件</h2>
+          <p>on / one / off / emit</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>数据与扩展</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./reactive.html">
+          <span class="num">API</span>
+          <h2>数据与侦听</h2>
+          <p>watch / watchUntil / refresh</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./context.html">
+          <span class="num">API</span>
+          <h2>上下文通信</h2>
+          <p>getProvider / dispatch</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./global.html">
+          <span class="num">API</span>
+          <h2>全局 $ 静态成员</h2>
+          <p>$.all / $.stanz / $.version</p>
+          <span class="more">查看 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./extend.html">
+          <span class="num">API</span>
+          <h2>扩展实例</h2>
+          <p>el.extend / $.fn.extend</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <h2>应用与页面</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./app.html">
+          <span class="num">API</span>
+          <h2>o-app 与 o-page</h2>
+          <p>页面栈、goto、pageIsReady</p>
+          <span class="more">查看 →</span>
+        </a>
+
+      </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

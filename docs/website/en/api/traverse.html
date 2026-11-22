@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selection &amp; Traversal — ofa.js API</title>
+    <meta name="description" content="Find elements inside an instance and move across DOM and shadow boundaries." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Selection &amp; Traversal — ofa.js API" />
+    <meta property="og:description" content="Find elements inside an instance and move across DOM and shadow boundaries." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Selection and traversal</p>
+      <h1>Selection and traversal</h1>
+      <p class="doc-lead">Find elements inside an instance and move back and forth across DOM and shadow boundaries.</p>
+
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground example="traverse"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.$(expr)</code></td><td>Find the first match inside the instance; inside a component, use this.shadow.$()</td></tr>
+          <tr><td><code>el.all(expr)</code></td><td>Find every match inside the instance and return an array of instances</td></tr>
+          <tr><td><code>el.parent</code></td><td>The parent element instance; null when the parent is document</td></tr>
+          <tr><td><code>el.parents</code></td><td>Array of all ancestor instances</td></tr>
+          <tr><td><code>el.parentsUntil(expr)</code></td><td>Collect ancestors upward until expr is matched (that node excluded)</td></tr>
+          <tr><td><code>el.hosts</code></td><td>The chain of shadow hosts, level by level</td></tr>
+          <tr><td><code>el.next / el.nexts</code></td><td>The next sibling / all following sibling elements</td></tr>
+          <tr><td><code>el.prev / el.prevs</code></td><td>The previous sibling / all preceding sibling elements</td></tr>
+          <tr><td><code>el.siblings</code></td><td>All sibling elements except the element itself</td></tr>
+          <tr><td><code>el.is(expr)</code></td><td>Whether it matches a selector, or equals an instance or native element</td></tr>
+          <tr><td><code>el.contains(expr)</code></td><td>Whether it contains a given selector, instance, or native element</td></tr>
+          <tr><td><code>el.composedPath()</code></td><td>The event system's full path (across shadow boundaries), returned as an array of native nodes</td></tr>
+          <tr><td><code>el.get("a.b.c")</code></td><td>Read a value by dot path; a single key is the same as direct access</td></tr>
+          <tr><td><code>el.set("a.b.c", value)</code></td><td>Assign a value by dot path; a single key is the same as direct assignment</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> In the example, second.prev / second.next are sibling instances; class() toggles class names on and off.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>This page requires JavaScript to run ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

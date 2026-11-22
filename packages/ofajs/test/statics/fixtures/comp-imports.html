@@ -1,0 +1,26 @@
+<template component>
+  <div id="imports-result">loading</div>
+  <script>
+    // import 前的行注释 / leading comment before imports
+    import { ok1 } from "./ok1.mjs";
+    /* import 之间的块注释 / block comment between imports */
+    import { ok2 } from "./ok2.mjs"; // 行尾注释 / trailing comment
+    import * as ns3 from "./ok3.mjs";
+    import ok4 from "./ok4.mjs";
+    import "./ok5.mjs";
+
+    // 形似 import 的字符串、模板串与正则不能被改写
+    // strings / templates / regexes that look like imports must be kept
+    const fakeStr = "import { x } from './not-real.mjs';";
+    const fakeTpl = `import y from "../not-real.mjs"`;
+    const fakeReg = /['";]/;
+
+    export default {
+      attached() {
+        if (fakeStr && fakeTpl && fakeReg) {
+          this.shadow.$("#imports-result").text = `${ok1()}-${ok2()}-${ns3.ok3()}-${ok4()}-${window.__ofaTestOk5}`;
+        }
+      },
+    };
+  </script>
+</template>

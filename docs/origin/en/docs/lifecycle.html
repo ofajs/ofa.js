@@ -1,0 +1,134 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>Lifecycle</h1>
+      <p class="doc-lead">
+        Components and pages share the same set of lifecycle hooks. Understanding the
+        order they run in keeps you from touching elements before the DOM exists and
+        helps you clean up timers and listeners properly.
+      </p>
+
+      <h2>The four hooks</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Hook</th><th>When it runs</th><th>Typical uses</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ready()</code></td>
+            <td>Template rendered and DOM created, though not necessarily in the document yet</td>
+            <td>Initialize the DOM and third-party libraries, measure the initial state</td>
+          </tr>
+          <tr>
+            <td><code>attached()</code></td>
+            <td>The element is mounted into the DOM</td>
+            <td>Start timers, add global listeners, load shared state</td>
+          </tr>
+          <tr>
+            <td><code>loaded()</code></td>
+            <td>The element, its child components, and async resources have all finished loading</td>
+            <td>Finalization that depends on the full component tree, hiding loading indicators</td>
+          </tr>
+          <tr>
+            <td><code>detached()</code></td>
+            <td>The element is removed from the DOM</td>
+            <td>Clear timers, listeners, and shared-state references</td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>On first mount the order is <code>ready → attached → loaded</code>; <code>detached</code> is called when the element is removed.</p>
+
+      <h2>A complete cleanup example</h2>
+      <pre><code>export default {
+  tag: "clock-view",
+  data: {
+    now: Date.now(),
+  },
+  attached() {
+    this._timer = setInterval(() =&gt; {
+      this.now = Date.now();
+    }, 1000);
+    this._onResize = () =&gt; {
+      this.width = window.innerWidth;
+    };
+    window.addEventListener("resize", this._onResize);
+  },
+  detached() {
+    clearInterval(this._timer);
+    window.removeEventListener("resize", this._onResize);
+  },
+};</code></pre>
+      <p>
+        Timers, global event listeners, and shared-state references should all be
+        released in <code>detached</code>; otherwise updates may still fire after the
+        component is destroyed, leaking memory.
+      </p>
+
+      <h2>ready vs. attached</h2>
+      <p>
+        <code>ready</code> is the right place to work with a component's own Shadow DOM,
+        for example querying <code>this.shadow.$("#id")</code>. If the logic depends on
+        the element's actual size or position in the document, <code>attached</code> is safer.
+      </p>
+      <pre><code>ready() {
+  this.shadow.$("#canvas").css.width = "100%";
+},
+attached() {
+  const rect = this.ele.getBoundingClientRect();
+  this.width = rect.width;
+},</code></pre>
+
+      <h2>Async data and computed properties</h2>
+      <p>
+        Getters in <code>proto</code> are evaluated as soon as the template initializes,
+        before <code>ready</code>. They are only suitable for simple computations over
+        synchronous initial values:
+      </p>
+      <pre><code>data: { count: 0 },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+},</code></pre>
+      <p>
+        If a computation depends on an async API, don't put it in a getter. Use a data
+        field instead and assign it in the async callback:
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = user.role === "admin" ? "Admin" : "User";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+      <p>
+        For more debugging scenarios, see <a olink href="./pitfalls.html">Common Pitfalls</a>.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./page.html">Pages →</a>
+         · Next: <a olink href="./template.html">Template Directives →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

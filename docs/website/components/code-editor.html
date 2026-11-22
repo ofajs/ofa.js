@@ -1,0 +1,531 @@
+<template component>
+  <style>
+    :host {
+      display: block;
+      height: 100%;
+      min-height: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .editor {
+      position: relative;
+      display: flex;
+      height: 100%;
+      min-height: 0;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: "SF Mono", "Cascadia Code", Consolas, "Liberation Mono",
+        monospace;
+      font-size: 12.5px;
+    }
+
+    .gutter {
+      flex: none;
+      width: 62px;
+      margin: 0;
+      padding: 16px 8px;
+      overflow: hidden;
+      color: #858585;
+      font: inherit;
+      line-height: 20px;
+      user-select: none;
+    }
+
+    .ln-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      height: 20px;
+    }
+
+    .ln {
+      min-width: 22px;
+      text-align: right;
+    }
+
+    .fold {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 20px;
+      padding: 0;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: #858585;
+      cursor: pointer;
+    }
+
+    .fold::before {
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 5px solid currentColor;
+      content: "";
+      transition: transform 120ms ease;
+    }
+
+    .fold.open::before {
+      transform: rotate(90deg);
+    }
+
+    .fold:hover {
+      background: #2a2d2e;
+      color: #ffffff;
+    }
+
+    .fold-space {
+      width: 14px;
+    }
+
+    .code-pane {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .highlight,
+    .code-pane textarea {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 16px 18px;
+      border: 0;
+      font: inherit;
+      line-height: 20px;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    .highlight {
+      overflow: hidden;
+      color: #d4d4d4;
+      pointer-events: none;
+    }
+
+    .highlight code {
+      display: block;
+      font: inherit;
+    }
+
+    .code-pane textarea {
+      overflow: auto;
+      resize: none;
+      outline: none;
+      background: transparent;
+      color: transparent;
+      caret-color: #ffffff;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .code-pane textarea::selection {
+      background: rgba(38, 79, 120, 0.8);
+    }
+
+    .fold-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: none;
+      flex-direction: column;
+      background: #1e1e1e;
+    }
+
+    .fold-overlay.visible {
+      display: flex;
+    }
+
+    .fold-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 32px;
+      padding: 0 12px;
+      border-bottom: 1px solid #2b2b2b;
+      color: #9d9d9d;
+      font-family: system-ui, sans-serif;
+      font-size: 11.5px;
+    }
+
+    .fold-head span:nth-child(2) {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fold-head button {
+      flex: none;
+      margin-left: auto;
+      padding: 2px 8px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      background: transparent;
+      color: #cccccc;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .fold-head button:hover {
+      border-color: #007acc;
+      color: #fff;
+    }
+
+    .fold-content {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .folded-gutter {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #1e1e1e;
+      overflow: visible;
+    }
+
+    .folded-code {
+      margin: 0;
+      padding: 16px 18px;
+      overflow: visible;
+      color: #d4d4d4;
+      font: inherit;
+      line-height: 20px;
+      white-space: pre;
+    }
+
+    .folded-code code {
+      display: block;
+      font: inherit;
+    }
+
+    /* VSCode Dark+ token colors */
+    .tok-comment { color: #6a9955; font-style: italic; }
+    .tok-str { color: #ce9178; }
+    .tok-kw { color: #c586c0; }
+    .tok-tag { color: #569cd6; }
+    .tok-attr { color: #9cdcfe; }
+    .tok-num { color: #b5cea8; }
+    .tok-expr { color: #dcdcaa; }
+    .tok-punct { color: #808080; }
+  </style>
+
+  <div class="editor">
+    <pre class="gutter" :html="gutterHtml" on:click="onGutterClick" aria-hidden="true"></pre>
+
+    <div class="code-pane">
+      <pre class="highlight" aria-hidden="true"><code :html="codeHtml"></code></pre>
+      <textarea
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+        wrap="off"
+        :value="code"
+        on:input="onInput($event)"
+        on:scroll="syncScroll($event)"
+        on:keydown="onKeydown($event)"
+        on:keyup="updateCursor($event)"
+        on:click="updateCursor($event)"
+        attr:aria-label="ui.editorAria"
+      ></textarea>
+
+    </div>
+
+    <div class="fold-overlay" class:visible="foldedView">
+      <div class="fold-head">
+        <span>{{ui.foldedPrefix}}{{foldedCount}}{{ui.foldedSuffix}}</span>
+        <span>{{ui.foldHint}}</span>
+        <button on:click="clearFolds">{{ui.expandAll}}</button>
+      </div>
+      <div class="fold-content">
+        <pre class="gutter folded-gutter" :html="foldedGutterHtml" on:click="onGutterClick"></pre>
+        <pre class="folded-code"><code :html="foldedCodeHtml"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { highlightCode } from "../content/highlight.mjs";
+
+    const IS_EN = document.documentElement.lang.startsWith("en");
+    const UI = IS_EN
+      ? {
+          editorAria: "Code editor",
+          foldedPrefix: "Collapsed regions: ",
+          foldedSuffix: "",
+          foldHint: "Click ▸ left of a line number to expand, or",
+          expandAll: "Expand all and edit",
+          foldToggle: "Collapse or expand",
+        }
+      : {
+          editorAria: "代码编辑器",
+          foldedPrefix: "已折叠 ",
+          foldedSuffix: " 个区块",
+          foldHint: "点击行号左侧的 ▸ 展开，或",
+          expandAll: "展开全部并编辑",
+          foldToggle: "折叠或展开",
+        };
+
+    const VOID_TAGS = new Set([
+      "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+      "meta", "param", "source", "track", "wbr",
+    ]);
+
+    const escapeHtml = (value) =>
+      value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+
+    const parseFolds = (code) => {
+      const lines = code.split("\n");
+      const stack = [];
+      const folds = new Map();
+      const foldTags = new Map();
+
+      lines.forEach((line, index) => {
+        const tagRe = /<\/?([A-Za-z][\w-]*)(?:\s[^<>]*?)?\/?>/g;
+        for (const match of line.matchAll(tagRe)) {
+          const raw = match[0];
+          const tag = match[1].toLowerCase();
+          if (raw.startsWith("</")) {
+            for (let i = stack.length - 1; i >= 0; i -= 1) {
+              if (stack[i].tag !== tag) continue;
+              const start = stack[i].line;
+              stack.splice(i, 1);
+              if (start < index && !folds.has(start)) {
+                folds.set(start, index);
+                foldTags.set(start, tag);
+              }
+              break;
+            }
+            continue;
+          }
+          if (raw.endsWith("/>") || VOID_TAGS.has(tag)) continue;
+          stack.push({ tag, line: index });
+        }
+      });
+
+      return { lines, folds, foldTags };
+    };
+
+    export default {
+      tag: "code-editor",
+      attrs: {
+        value: "",
+        language: "html",
+        // 逗号分隔的标签名，例如 "style"：载入时自动折叠这些标签
+        fold: "",
+      },
+      data: {
+        ui: UI,
+        code: "",
+        codeHtml: "",
+        gutterHtml: "",
+        foldedView: false,
+        foldedCount: 0,
+        foldedCodeHtml: "",
+        foldedGutterHtml: "",
+        cursorLine: 1,
+        cursorColumn: 1,
+      },
+
+      watch: {
+        value(value) {
+          if (value === this.code) return;
+          this._autoFold = true;
+          this.code = value;
+        },
+        code(value) {
+          this.paint(value);
+        },
+        fold() {
+          this._applyAutoFolds();
+        },
+      },
+
+      attached() {
+        this._foldedStarts = new Set();
+        this._autoFold = true;
+        this.code = this.value || "";
+        this.paint(this.code);
+        // 属性绑定可能晚于首次 paint 到达，下一帧再按 fold 补一次
+        requestAnimationFrame(() => this._applyAutoFolds());
+      },
+
+      proto: {
+        onInput(event) {
+          const value = event.target.value;
+          this.code = value;
+          this.emit("change", { data: { value } });
+        },
+
+        getValue() {
+          return this.code;
+        },
+        setValue(value) {
+          this.code = value;
+        },
+        paint(value) {
+          this.codeHtml = highlightCode(value);
+          const { lines, folds, foldTags } = parseFolds(value);
+          this._lines = lines;
+          this._folds = folds;
+          this._foldTags = foldTags;
+          if (!this._foldedStarts) this._foldedStarts = new Set();
+          this._foldedStarts.clear();
+          this.renderGutter();
+          this.foldedView = false;
+          this.foldedCount = 0;
+          this._foldInitialView();
+        },
+
+        _foldInitialView() {
+          if (!this._autoFold) return;
+          this._autoFold = false;
+          this._applyAutoFolds();
+        },
+
+        _applyAutoFolds() {
+          const tags = String(this.fold || "")
+            .split(",")
+            .map((tag) => tag.trim().toLowerCase())
+            .filter(Boolean);
+          if (!tags.length || !this._foldedStarts) return;
+
+          for (const [line, tag] of this._foldTags || []) {
+            if (tags.includes(tag)) this._foldedStarts.add(line);
+          }
+          this.renderFolded();
+        },
+        gutterRows(visibleLines, useFoldedState) {
+          return visibleLines
+            .map(({ line, number }) => {
+              const foldable = this._folds.has(line);
+              const folded = useFoldedState && this._foldedStarts.has(line);
+              const button = foldable
+                ? `<button class="fold${folded ? "" : " open"}" data-fold="${line}" aria-label="${UI.foldToggle}"></button>`
+                : '<span class="fold-space"></span>';
+              return `<div class="ln-row">${button}<span class="ln">${number}</span></div>`;
+            })
+            .join("");
+        },
+        renderGutter() {
+          const visible = this._lines.map((text, line) => ({
+            line,
+            number: line + 1,
+          }));
+          this.gutterHtml = this.gutterRows(visible, false);
+          this.renderFolded();
+        },
+        renderFolded() {
+          if (!this._foldedStarts.size) {
+            this.foldedView = false;
+            this.foldedCount = 0;
+            return;
+          }
+
+          const visible = [];
+          for (let line = 0; line < this._lines.length; line += 1) {
+            visible.push({ line, number: line + 1, text: this._lines[line] });
+            if (!this._foldedStarts.has(line)) continue;
+            const end = this._folds.get(line);
+            if (end === undefined) continue;
+            visible.push({ line: end, number: end + 1, text: this._lines[end] });
+            line = end;
+          }
+
+          const visibleCode = visible.map((item) => item.text).join("\n");
+          this.foldedCodeHtml = highlightCode(visibleCode);
+          this.foldedGutterHtml = this.gutterRows(visible, true);
+          this.foldedCount = this._foldedStarts.size;
+          this.foldedView = true;
+        },
+        onGutterClick(event) {
+          const button = event.target.closest?.("[data-fold]");
+          if (!button) return;
+
+          const line = Number(button.dataset.fold);
+          if (this._foldedStarts.has(line)) {
+            this._foldedStarts.delete(line);
+          } else if (this._folds.has(line)) {
+            this._foldedStarts.add(line);
+          }
+          this.renderFolded();
+        },
+        clearFolds() {
+          this._foldedStarts.clear();
+          this.renderFolded();
+          requestAnimationFrame(() => this.shadow.$("textarea")?.ele?.focus());
+        },
+        syncScroll(event) {
+          const area = event.target;
+          const pre = this.shadow.$(".highlight").ele;
+          const gutter = this.shadow.$(".gutter:not(.folded-gutter)").ele;
+          if (pre) {
+            pre.scrollTop = area.scrollTop;
+            pre.scrollLeft = area.scrollLeft;
+          }
+          if (gutter) gutter.scrollTop = area.scrollTop;
+        },
+        updateCursor(event) {
+          const area = event.target;
+          const before = area.value.slice(0, area.selectionStart);
+          const lines = before.split("\n");
+          this.cursorLine = lines.length;
+          this.cursorColumn = lines[lines.length - 1].length + 1;
+          this.emit("cursor", {
+            data: { line: this.cursorLine, column: this.cursorColumn },
+          });
+        },
+        onKeydown(event) {
+          const area = event.target;
+
+          if (
+            (event.metaKey || event.ctrlKey) &&
+            (event.key === "Enter" || event.key.toLowerCase() === "s")
+          ) {
+            event.preventDefault();
+            this.emit("run");
+            return;
+          }
+
+          if (event.key === "Tab") {
+            event.preventDefault();
+            const start = area.selectionStart;
+            const end = area.selectionEnd;
+            this.code = `${area.value.slice(0, start)}  ${area.value.slice(end)}`;
+            requestAnimationFrame(() => {
+              area.selectionStart = area.selectionEnd = start + 2;
+            });
+            return;
+          }
+
+          if (event.key === "Enter") {
+            const start = area.selectionStart;
+            const before = area.value.slice(0, start);
+            const line = before.slice(before.lastIndexOf("\n") + 1);
+            const indent = line.match(/^[ \t]*/)?.[0] || "";
+            if (!indent) return;
+
+            event.preventDefault();
+            this.code = `${before}\n${indent}${area.value.slice(area.selectionEnd)}`;
+            requestAnimationFrame(() => {
+              area.selectionStart = area.selectionEnd = start + 1 + indent.length;
+            });
+          }
+        },
+      },
+    };
+  </script>
+</template>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stanz benchmark</title>
+    <style>
+      body { font: 15px/1.6 -apple-system, "PingFang SC", "Segoe UI", sans-serif; margin: 32px auto; max-width: 820px; padding: 0 16px; color: #1d1d1f; }
+      h1 { font-size: 20px; }
+      .note { color: #6e6e73; font-size: 13px; }
+      #status { color: #6e6e73; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8e8ed; }
+      th { font-size: 13px; color: #6e6e73; font-weight: 500; }
+      th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      tr.pending td.num { color: #a1a1a6; }
+    </style>
+  </head>
+  <body>
+    <h1>stanz benchmark <span class="note">同页 A/B 交替测量 · legacy 8.2.x vs new 9.0</span></h1>
+    <p id="status">准备中… / preparing</p>
+    <table>
+      <thead>
+        <tr>
+          <th>场景 / scenario</th>
+          <th class="num">旧版 8.2.x</th>
+          <th class="num">新版 9.0</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script type="module">
+      // stanz 无全局副作用（不占 window、不注册元素），新旧两版可在同一页面
+      // 共存。每个场景内 A/B 交替采集，机器漂移对两版 equally 生效，
+      // 从根上消除"先后采集顺序"带来的热偏差。
+      const IMPLS = {
+        old: (await import("./vendor/legacy/src/base.mjs")).default,
+        new: (await import("../src/base.mjs")).default,
+      };
+
+      const status = document.getElementById("status");
+      const rowsEl = document.getElementById("rows");
+      const results = (window.__benchResults = []);
+
+      const median = (arr) => [...arr].sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+
+      const ROUNDS = 5; // 场景内 A/B 交替轮数
+
+      /**
+       * A/B 吞吐测量：
+       * @param {Function} setup(stanz) => state 每轮为每版重建状态
+       * @param {Function} step(i, state) 单次操作
+       */
+      const benchAB = async (id, label, { ops, rounds = ROUNDS, setup, step }) => {
+        const tr = document.createElement("tr");
+        tr.className = "pending";
+        tr.innerHTML = `<td>${label}</td><td class="num">…</td><td class="num">…</td>`;
+        rowsEl.appendChild(tr);
+        status.textContent = `运行中 ${results.length + 1}… / running`;
+
+        // 预热：完整一轮触发 JIT 分层编译
+        for (const version of ["old", "new"]) {
+          const state = setup(IMPLS[version]);
+          for (let i = 0; i < Math.min(ops, 2000); i++) {
+            step(i, state);
+          }
+        }
+
+        const times = { old: [], new: [] };
+
+        for (let round = 0; round < rounds; round++) {
+          // 交替采集：同轮内旧版先行、新版紧随，热状态对称
+          for (const version of ["old", "new"]) {
+            const state = setup(IMPLS[version]);
+            const t0 = performance.now();
+            for (let i = 0; i < ops; i++) {
+              step(i, state);
+            }
+            times[version].push(performance.now() - t0);
+          }
+        }
+
+        const oldOps = Math.round(ops / (median(times.old) / 1000));
+        const newOps = Math.round(ops / (median(times.new) / 1000));
+
+        tr.className = "";
+        tr.children[1].textContent = oldOps.toLocaleString("en-US");
+        tr.children[2].textContent = newOps.toLocaleString("en-US");
+
+        results.push({ id, label, oldValue: oldOps, newValue: newOps, unit: "ops/s" });
+        status.textContent = `运行中 ${results.length}… / running`;
+      };
+
+      // ---- 夹具 ----
+
+      const makeChain = () => {
+        const root = {};
+        let node = root;
+        for (let i = 1; i <= 10; i++) {
+          node = node[`l${i}`] = { val: 0 };
+        }
+        return root;
+      };
+
+      const makeWide = () => {
+        const data = {};
+        for (let i = 0; i < 50; i++) {
+          data[`k${i}`] = i % 5 === 0 ? { inner: i } : i;
+        }
+        return data;
+      };
+
+      const makeTree = (depth) => {
+        const node = { val: depth };
+        if (depth > 0) {
+          node.children = Array.from({ length: 3 }, () => makeTree(depth - 1));
+        }
+        return node;
+      };
+
+      const wideData = makeWide();
+      const treeData = makeTree(5);
+      // 千项源数组：splice 场景每轮据此重建
+      const THOUSAND = Array.from({ length: 1000 }, (_, i) => ({ val: i }));
+
+      // ---- 场景 ----
+      // 每个场景可在独立页面运行（?only=id）：页面生命周期越短，
+      // V8 优化/GC 状态漂移对长串场景的污染越小
+
+      const ONLY = new URLSearchParams(location.search).get("only");
+      const ALL_SCENARIOS = {
+        create: () =>
+          benchAB("create", "创建宽对象实例 ×500 / create wide instances ×500", {
+            ops: 500,
+            setup: (S) => S,
+            step: (i, S) => S(wideData),
+          }),
+
+        set: () =>
+          benchAB("set", "无监听赋值 ×50k / set without watchers ×50k", {
+            ops: 50000,
+            setup: (S) => S({ val: 0 }),
+            step: (i, d) => {
+              d.val = i;
+            },
+          }),
+
+        "set-watched": () =>
+          benchAB("set-watched", "带监听赋值 ×20k / set with a watcher ×20k", {
+            ops: 20000,
+            setup: (S) => {
+              const d = S({ val: 0 });
+              d.watch(() => {});
+              return d;
+            },
+            step: (i, d) => {
+              d.val = i;
+            },
+          }),
+
+        bubble: () =>
+          benchAB("bubble", "10 层深冒泡赋值 ×10k / 10-level deep bubbling set ×10k", {
+            ops: 10000,
+            setup: (S) => {
+              const d = S(makeChain());
+              d.watch(() => {});
+              return d;
+            },
+            step: (i, d) => {
+              d.l1.l2.l3.l4.l5.l6.l7.l8.l9.l10.val = i;
+            },
+          }),
+
+        push: () =>
+          benchAB("push", "数组 push 普通对象 ×800 / array push of plain objects ×800", {
+            ops: 800,
+            rounds: 3,
+            setup: (S) => S([]),
+            step: (i, arr) => arr.push({ val: i }),
+          }),
+
+        splice: () =>
+          benchAB("splice", "包装千项并中部 splice ×200 / wrap 1k items then mid-splice ×200", {
+            ops: 200,
+            rounds: 3,
+            setup: (S) => S(THOUSAND),
+            step: (i, arr) => arr.splice(500, 1),
+          }),
+
+        tojson: () =>
+          benchAB("tojson", "深层树 toJSON ×2k / deep tree toJSON ×2k", {
+            ops: 2000,
+            setup: (S) => S(treeData),
+            step: (i, d) => d.toJSON(),
+          }),
+      };
+
+      const scenarios = ONLY ? { [ONLY]: ALL_SCENARIOS[ONLY] } : ALL_SCENARIOS;
+
+      for (const run of Object.values(scenarios)) {
+        await run();
+      }
+
+      status.textContent = "完成 / done";
+      window.__benchDone = true;
+    </script>
+  </body>
+</html>

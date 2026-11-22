@@ -1,0 +1,147 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>o-app Applications</h1>
+      <p class="doc-lead">
+        <code>o-app</code> is a micro-app container. It loads an application configuration module
+        and manages the page stack, page transition animations, and navigation events, but it does
+        not load page HTML itself.
+      </p>
+
+      <h2>Minimal application</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        The <code>src</code> of <code>o-app</code> must be an application configuration module;
+        it cannot point directly to a page. To run a single page standalone, use
+        <code>&lt;o-page src="./page.html"&gt;</code>.
+      </p>
+
+      <h2>Application configuration</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;Loading...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;Failed to load: ${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// Cross-origin page access control: return true to allow, false or an Error to deny
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("app is ready", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Export</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>Home page address loaded at startup</td></tr>
+          <tr><td><code>pageAnime</code></td><td>Three-state page transition animation: current / next / previous</td></tr>
+          <tr><td><code>loading</code></td><td>HTML shown while a page is loading</td></tr>
+          <tr><td><code>fail</code></td><td>HTML shown when loading fails; receives <code>{ src, error }</code></td></tr>
+          <tr><td><code>allowForward</code></td><td>Whether <code>forward()</code> is allowed; off by default</td></tr>
+          <tr><td><code>access</code></td><td>Cross-origin page access control; return true to allow. Not needed for same-origin pages</td></tr>
+          <tr><td><code>proto</code></td><td>Methods and getters added to the o-app instance</td></tr>
+          <tr><td><code>ready</code></td><td>Callback after the configuration has loaded; <code>this</code> is the app instance</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> receives a page <code>src</code> and must return
+        <code>true</code> for a cross-origin page to load; returning <code>false</code> or an
+        <code>Error</code> rejects it. The target site must still configure CORS correctly,
+        otherwise the browser blocks the request first.
+      </p>
+
+      <h2>App instance</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // current page instance
+app.appIsReady; // first page has rendered (wait with watchUntil)
+app.routers;   // routing stack; parent layout pages do not enter it
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // requires allowForward: true</code></pre>
+      <p>
+        Inside a page module you can also call <code>this.goto</code>,
+        <code>this.replace</code>, and <code>this.back</code> directly;
+        <code>this.app</code> points to the app the page belongs to.
+      </p>
+
+      <h2>Watching routing changes</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // target page URL
+});</code></pre>
+
+      <h2>Page animations</h2>
+      <p>
+        <code>pageAnime.current</code> is the state of a settled page,
+        <code>next</code> is the entry start for the incoming page, and <code>previous</code>
+        is the exit end for the outgoing page. All three states can be omitted; defaults are
+        used when they are.
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        Previous: <a olink href="./context.html">Cross-Component Context →</a>
+         · Next: <a olink href="./routing.html">Routing and Navigation →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

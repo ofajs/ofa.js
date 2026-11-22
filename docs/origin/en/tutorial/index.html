@@ -1,0 +1,193 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>Get started with ofa.js from scratch</h1>
+      <p class="doc-lead">
+        20 short lessons, organized as "Getting started → Interactivity and state →
+        Components → Apps in practice". Every lesson starts with a small problem:
+        change the code and press Ctrl/⌘+S to see the result instantly.
+      </p>
+
+      <h2>Getting started</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>Your first page</h2>
+          <p>A page in ofa.js is just an HTML file: structure, styles, and logic all live in one file.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>Data and interpolation</h2>
+          <p>data can hold strings, numbers, booleans, objects, and arrays, and {{ }} can evaluate simple expressions.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>Dynamic attributes</h2>
+          <p>Use attr: for HTML attributes and :prop for DOM properties; boolean attributes must use attr:.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>Styles and class</h2>
+          <p>A page's &lt;style&gt; applies only to that page; class: and :style let styles follow data changes.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+      </div>
+
+      <h2>Interactivity and state</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>Events</h2>
+          <p>Use on: to listen for events: write simple logic as expressions, complex logic as proto methods.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>Two-way binding</h2>
+          <p>sync: keeps a form field and data in two-way sync; best suited to scalar values.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>Conditional rendering</h2>
+          <p>o-if / o-else-if / o-else control whether content exists.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>List rendering</h2>
+          <p>o-fill renders arrays; inside each list item use $data, $index, and $host.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>Editing a list</h2>
+          <p>Array push/splice updates the view automatically; inline editing syncs straight to a $data field.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>Computed properties and watchers</h2>
+          <p>Getters on proto compute synchronously; watch observes changes and handles side effects.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>Lifecycle</h2>
+          <p>ready → attached → loaded, then detached on removal; clean up timers and listeners in detached.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+      </div>
+
+      <h2>Components</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>Your first component</h2>
+          <p>Split reusable UI into a &lt;template component&gt; and load it with l-m.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>Component parameters</h2>
+          <p>External data reaches a component through attrs; inside, the component keeps its own state in data.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>Slots and events</h2>
+          <p>slot lets a component receive outside content; emit reports what happened inside to the outside.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+      </div>
+
+      <h2>Apps in practice</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>Cross-layer context</h2>
+          <p>Use o-provider / o-consumer to share data across a component subtree.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>Global state</h2>
+          <p>When several components share one piece of state, build a module-level store with $.stanz and mount/clean it up in attached/detached.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>Pages and routing</h2>
+          <p>o-app manages the page stack: switch pages with olink / goto, pass parameters with query, return with back.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>Nested layouts</h2>
+          <p>A child page declares parent and the parent page receives it through a slot; switching child pages does not destroy the parent.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>Async and loading states</h2>
+          <p>Drive the UI from loading / error / success states for async requests; never put async results in a getter.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>Putting it together: a todo list</h2>
+          <p>Combine lists, forms, conditionals, computed properties, watchers, and localStorage into one complete app.</p>
+          <span class="more">Start learning →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>How should you study?</strong>
+        Read the explanation first, then edit the code on the right and press <kbd>Ctrl</kbd>+<kbd>S</kbd>
+        (<kbd>⌘</kbd>+<kbd>S</kbd> on Mac) to run it. If you break something, click "Reset" in the editor
+        to restore this lesson's example.
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

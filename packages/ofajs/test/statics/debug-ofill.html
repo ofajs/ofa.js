@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><title>ofill probe</title></head>
+  <body>
+    <demo-host></demo-host>
+    <pre id="out"></pre>
+    <script type="module">
+      import "../../src/main.mjs";
+      const out = (m) => (document.querySelector("#out").textContent += m + "\n");
+
+      const { register } = ofa;
+
+      register({
+        tag: "demo-host",
+        temp: `
+        <button on:click="mode = 0" id="m0">0</button>
+        <div id="items">
+          <o-fill :value="arr" fill-key="id">
+            <div class="row">
+              <span class="rv">{{$index}}:{{$data.name}}</span>
+              <span class="rh">{{$host.hostName}}</span>
+              <o-if :value="$data.id % 2">
+                <em class="odd">odd</em>
+              </o-if>
+            </div>
+          </o-fill>
+        </div>`,
+        data: {
+          mode: 0,
+          hostName: "H",
+          arr: [
+            { id: 1, name: "a" },
+            { id: 2, name: "b" },
+            { id: 3, name: "c" },
+          ],
+        },
+      });
+
+      window.addEventListener("error", (e) =>
+        out("PE: " + String(e.error).slice(0, 150) + " @ " + String(e.error && e.error.stack).split("\n")[1]),
+      );
+
+      setTimeout(async () => {
+        const $demo = ofa("demo-host");
+        const $shadow = $demo.shadow;
+        const rows = () => $shadow.all(".row");
+        const rowVals = () =>
+          rows().map((e) => e.text.replace(/\s+/g, " ").trim()).join(",");
+
+        out("t0 rows=" + rows().length + " vals=" + JSON.stringify(rowVals()));
+
+        $demo.arr.push({ id: 4, name: "d" });
+        await new Promise((r) => setTimeout(r, 300));
+        out("after push rows=" + rows().length + " vals=" + JSON.stringify(rowVals()));
+
+        $demo.arr.splice(1, 1);
+        await new Promise((r) => setTimeout(r, 300));
+        out("after splice rows=" + rows().length + " vals=" + JSON.stringify(rowVals()));
+      }, 400);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>第一个组件</h1>
+      <p class="doc-lead">把可复用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
+
+      <p>
+  页面负责组织内容，组件负责可复用的一块 UI。组件也是 HTML 文件，
+  根节点换成 <code>&lt;template component&gt;</code>，并声明唯一的
+  <code>tag</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12" fold-styles="true"></docs-playground>
+<h2>两个文件，两个标签页</h2>
+<p>
+  编辑器顶部的标签页可以在 <code>page.html</code> 和
+  <code>hello-card.html</code> 之间切换。页面用
+  <code>&lt;l-m src="./hello-card.html"&gt;</code> 加载组件，之后就能像普通
+  HTML 标签一样使用 <code>&lt;hello-card&gt;</code>。
+</p>
+<ul>
+  <li><code>tag</code>：组件的标签名，必须和使用时一致；</li>
+  <li>组件的 <code>data</code> 是独立的，两张卡片各自计数；</li>
+  <li>组件里的 <code>&lt;style&gt;</code> 只作用于该组件。</li>
+</ul>
+<div class="doc-note">
+  <strong>文件名不等于标签名：</strong>标签名以组件里的
+  <code>tag</code> 为准；未声明时才按文件名推断。不要依赖推断，显式写清楚。
+</div>
+<h2>动手改</h2>
+<p>
+  改组件里的标题和按钮文案，再在页面里放第三张卡片；观察三张卡片的计数是否
+  互不影响。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-11.html">11 · 生命周期 →</a>　·　下一篇：<a olink href="./lesson-13.html">13 · 组件参数 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

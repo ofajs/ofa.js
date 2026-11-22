@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js — 把组件，写成 HTML</title>
+    <meta name="description" content="ofa.js 是一个零构建、零依赖的 Web Components 前端框架。一个 HTML 文件就是一个组件，浏览器直接运行，无需 npm、Node.js 或打包器。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js — 把组件，写成 HTML" />
+    <meta property="og:description" content="ofa.js 是一个零构建、零依赖的 Web Components 前端框架。一个 HTML 文件就是一个组件，浏览器直接运行，无需 npm、Node.js 或打包器。" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../app.mjs">
+      <template page>
+<!--
+  所有内容页的嵌套路由父页（layout）。
+  子页通过 `export const parent = "…/layout.html"` 挂到这里，
+  在 slot 中切换；header/footer 与文档左侧目录只创建一次。
+-->
+<link rel="stylesheet" href="../styles/site.css" />
+<link rel="stylesheet" href="../styles/docs.css" />
+<l-m src="../components/site-shell.html"></l-m>
+<l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/list/list.html"></l-m>
+
+<style>
+  :host {
+    display: block;
+    min-height: 100vh;
+    background: var(--md-sys-color-surface, #111318);
+  }
+
+  site-shell {
+    display: block;
+  }
+
+  /* 子页面由 layout 的 slot 承接，避免每个 child 再撑出一个 100vh */
+  ::slotted(o-page) {
+    display: block !important;
+    min-height: 0 !important;
+    background: transparent !important;
+  }
+</style>
+
+<site-shell
+  attr:label-nav="site.shell.actions.nav"
+  attr:label-tutorial="site.shell.nav.tutorial"
+  attr:label-docs="site.shell.nav.docs"
+  attr:label-home="site.shell.actions.home"
+  attr:label-github="site.shell.actions.github"
+  attr:label-github-repo="site.shell.actions.githubRepo"
+  attr:label-menu="site.shell.actions.menu"
+  attr:label-languages="site.shell.actions.languages"
+  attr:variant="docsMode || tutorialMode || apiMode ? 'docs' : 'site'"
+  attr:home-url="navUrls.home"
+  attr:tutorial-url="navUrls.tutorial"
+  attr:docs-url="navUrls.docs"
+  attr:label-api="site.shell.nav.api"
+  attr:api-url="navUrls.api"
+  attr:blog-url="navUrls.blog"
+  attr:label-blog="site.shell.nav.blog"
+  attr:search-url="navUrls.searchIndex"
+  attr:search-placeholder="site.shell.search.placeholder"
+  attr:search-empty="site.shell.search.empty"
+  attr:search-loading="site.shell.search.loading"
+  attr:search-label="site.shell.search.label"
+  attr:theme-label="site.shell.theme.label"
+  attr:theme-light="site.shell.theme.light"
+  attr:theme-dark="site.shell.theme.dark"
+  attr:theme-system="site.shell.theme.system"
+  attr:languages-url="navUrls.languages"
+  attr:footer-tagline="site.shell.footer.tagline"
+  attr:footer-resources="site.shell.footer.resources"
+  attr:footer-ecosystem="site.shell.footer.ecosystem"
+  attr:footer-community="site.shell.footer.community"
+  attr:footer-docs="site.shell.footer.docs"
+  attr:footer-plugins="site.shell.footer.plugins"
+  attr:footer-note="site.shell.footer.note"
+>
+  <div class="docs-shell" class:no-nav="!docsMode && !tutorialMode && !apiMode">
+    <aside class="docs-nav" class:is-hidden="!docsMode" attr:aria-label="site.docs.label">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="current === 'index'"
+          on:click="navigateDocs('index')"
+        >
+          <span class="side-label">{{site.docs.overview}}</span>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.start.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'getting-started'"
+              on:click="navigateDocs('getting-started')"
+            >
+              <span class="side-label">{{site.docs.nav.start.items.gettingStarted}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'first-component'"
+              on:click="navigateDocs('first-component')"
+            >
+              <span class="side-label">{{site.docs.nav.start.items.firstComponent}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'first-page'"
+              on:click="navigateDocs('first-page')"
+            >
+              <span class="side-label">{{site.docs.nav.start.items.firstPage}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.basics.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'component'"
+              on:click="navigateDocs('component')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.component}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'page'"
+              on:click="navigateDocs('page')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.page}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'lifecycle'"
+              on:click="navigateDocs('lifecycle')"
+            >
+              <span class="side-label">{{site.docs.nav.basics.items.lifecycle}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.template.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'template'"
+              on:click="navigateDocs('template')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.template}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'binding'"
+              on:click="navigateDocs('binding')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.binding}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'events'"
+              on:click="navigateDocs('events')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.events}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'render'"
+              on:click="navigateDocs('render')"
+            >
+              <span class="side-label">{{site.docs.nav.template.items.render}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.data.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'data'"
+              on:click="navigateDocs('data')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.data}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'state'"
+              on:click="navigateDocs('state')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.state}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'context'"
+              on:click="navigateDocs('context')"
+            >
+              <span class="side-label">{{site.docs.nav.data.items.context}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.app.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'app'"
+              on:click="navigateDocs('app')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.app}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'routing'"
+              on:click="navigateDocs('routing')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.routing}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'nested-routing'"
+              on:click="navigateDocs('nested-routing')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.nestedRouting}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'scsr'"
+              on:click="navigateDocs('scsr')"
+            >
+              <span class="side-label">{{site.docs.nav.app.items.scsr}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.docs.nav.reference.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item
+              button
+              class:active="current === 'api'"
+              on:click="navigateDocs('api')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.api}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'plugins'"
+              on:click="navigateDocs('plugins')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.plugins}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'pitfalls'"
+              on:click="navigateDocs('pitfalls')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.pitfalls}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'examples'"
+              on:click="navigateDocs('examples')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.examples}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'playground'"
+              on:click="navigateDocs('playground')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.playground}}</span>
+            </st-list-item>
+            <st-list-item
+              button
+              class:active="current === 'deployment'"
+              on:click="navigateDocs('deployment')"
+            >
+              <span class="side-label">{{site.docs.nav.reference.items.deployment}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+      </st-list>
+    </aside>
+
+    <aside class="docs-nav is-hidden" class:is-hidden="!tutorialMode" attr:aria-label="site.tutorial.label">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="current === 'index'"
+          on:click="navigateTutorial('index')"
+        >
+          <span class="side-label">{{site.tutorial.overview}}</span>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.start.label}}</span>
+          <st-list slot="sublist">
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-1'"
+              on:click="navigateTutorial('lesson-1')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson1}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-2'"
+              on:click="navigateTutorial('lesson-2')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson2}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-3'"
+              on:click="navigateTutorial('lesson-3')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson3}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-4'"
+              on:click="navigateTutorial('lesson-4')"
+            >
+              <span class="side-label">{{site.tutorial.groups.start.lessons.lesson4}}</span>
+            </st-list-item>
+
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.interact.label}}</span>
+          <st-list slot="sublist">
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-5'"
+              on:click="navigateTutorial('lesson-5')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson5}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-6'"
+              on:click="navigateTutorial('lesson-6')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson6}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-7'"
+              on:click="navigateTutorial('lesson-7')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson7}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-8'"
+              on:click="navigateTutorial('lesson-8')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson8}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-9'"
+              on:click="navigateTutorial('lesson-9')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson9}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-10'"
+              on:click="navigateTutorial('lesson-10')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson10}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-11'"
+              on:click="navigateTutorial('lesson-11')"
+            >
+              <span class="side-label">{{site.tutorial.groups.interact.lessons.lesson11}}</span>
+            </st-list-item>
+
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.component.label}}</span>
+          <st-list slot="sublist">
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-12'"
+              on:click="navigateTutorial('lesson-12')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson12}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-13'"
+              on:click="navigateTutorial('lesson-13')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson13}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-14'"
+              on:click="navigateTutorial('lesson-14')"
+            >
+              <span class="side-label">{{site.tutorial.groups.component.lessons.lesson14}}</span>
+            </st-list-item>
+
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.tutorial.groups.app.label}}</span>
+          <st-list slot="sublist">
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-15'"
+              on:click="navigateTutorial('lesson-15')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson15}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-16'"
+              on:click="navigateTutorial('lesson-16')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson16}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-17'"
+              on:click="navigateTutorial('lesson-17')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson17}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-18'"
+              on:click="navigateTutorial('lesson-18')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson18}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-19'"
+              on:click="navigateTutorial('lesson-19')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson19}}</span>
+            </st-list-item>
+
+            <st-list-item
+              button
+              class:active="current === 'lesson-20'"
+              on:click="navigateTutorial('lesson-20')"
+            >
+              <span class="side-label">{{site.tutorial.groups.app.lessons.lesson20}}</span>
+            </st-list-item>
+
+          </st-list>
+        </st-list-item>
+      </st-list>
+    </aside>
+
+    <aside class="docs-nav is-hidden" class:is-hidden="!apiMode" attr:aria-label="site.api.label">
+      <st-list class="side-list">
+        <st-list-item
+          button
+          class:active="apiKey === 'index'"
+          on:click="navigateApi('index')"
+        >
+          <span class="side-label">{{site.api.overview}}</span>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.api.groups.instance.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item button class:active="apiKey === 'instance'" on:click="navigateApi('instance')">
+              <span class="side-label">{{site.api.groups.instance.items.instance}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'traverse'" on:click="navigateApi('traverse')">
+              <span class="side-label">{{site.api.groups.instance.items.traverse}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'structure'" on:click="navigateApi('structure')">
+              <span class="side-label">{{site.api.groups.instance.items.structure}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.api.groups.props.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item button class:active="apiKey === 'props'" on:click="navigateApi('props')">
+              <span class="side-label">{{site.api.groups.props.items.props}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'events'" on:click="navigateApi('events')">
+              <span class="side-label">{{site.api.groups.props.items.events}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.api.groups.data.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item button class:active="apiKey === 'reactive'" on:click="navigateApi('reactive')">
+              <span class="side-label">{{site.api.groups.data.items.reactive}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'context'" on:click="navigateApi('context')">
+              <span class="side-label">{{site.api.groups.data.items.context}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'global'" on:click="navigateApi('global')">
+              <span class="side-label">{{site.api.groups.data.items.global}}</span>
+            </st-list-item>
+            <st-list-item button class:active="apiKey === 'extend'" on:click="navigateApi('extend')">
+              <span class="side-label">{{site.api.groups.data.items.extend}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+
+        <st-list-item collapsible expanded>
+          <span class="side-label">{{site.api.groups.app.label}}</span>
+          <st-list slot="sublist">
+            <st-list-item button class:active="apiKey === 'app'" on:click="navigateApi('app')">
+              <span class="side-label">{{site.api.groups.app.items.app}}</span>
+            </st-list-item>
+          </st-list>
+        </st-list-item>
+      </st-list>
+    </aside>
+
+    <div class="docs-content">
+      <slot></slot>
+    </div>
+  </div>
+</site-shell>
+
+<script>
+  import { createLayoutPage } from "../content/page-runtime.mjs";
+
+  export default (args) =>
+    createLayoutPage({ ...args, sitePath: "./site.json" });
+</script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../boot.js"></script>
+  </body>
+</html>

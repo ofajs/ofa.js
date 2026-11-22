@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 14</p>
+      <h1>Slots and Events</h1>
+      <p class="doc-lead">slot lets a component receive outside content; emit reports what happens inside the component to the outside.</p>
+
+      <p>
+  Use <code>&lt;slot&gt;</code> when the component should keep its structure but let the consumer decide
+  the content. When something happens inside the component — a click, a save — notify the consumer with
+  <code>this.emit()</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14" fold-styles="true"></docs-playground>
+<h2>Slots</h2>
+<ul>
+  <li><code>&lt;slot&gt;</code>: the default slot, which receives the content inside the component tag;</li>
+  <li><code>&lt;slot name="hint"&gt;</code>: a named slot; the consumer marks content with
+    <code>slot="hint"</code>;</li>
+  <li>content inside the slot tag is the default fallback content.</li>
+</ul>
+<h2>Custom events</h2>
+<p>
+  Inside the component, call <code>this.emit("confirm", { data: {...} })</code>, and have the page listen
+  with <code>on:confirm="onConfirm"</code>; the event payload is in
+  <code>event.data</code>. If the event must cross multiple levels of Shadow DOM,
+  also add <code>bubbles: true, composed: true</code>.
+</p>
+<div class="doc-note">
+  <strong>One-way data flow:</strong> a component does not modify the page's data directly; it only reports
+  what happened and lets the page decide how to handle it. That is what lets the same component be reused on
+  different pages.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a "Cancel" button to the component that emits a <code>cancel</code> event;
+  have the page listen for it and change the hint text to "Cancelled".
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-13.html">13 · Component Parameters →</a> · Next: <a olink href="./lesson-15.html">15 · Cross-level Context →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

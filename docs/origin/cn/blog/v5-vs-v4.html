@@ -1,0 +1,270 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/blog.css" />
+
+  <main class="article-page">
+    <a class="article-back" olink href="./">← 返回博客</a>
+
+    <article class="article-body">
+      <p class="article-kicker">Engineering · Version comparison</p>
+      <h1>ofa.js v5 比 v4<br />进步了多少？</h1>
+      <p class="article-lead">
+        v5 不是一次“加几个 API”的升级。它保住了 v4 的使用方式，
+        却把模板渲染、列表对账、模块边界和路由细节重新做了一遍。
+      </p>
+
+      <div class="article-meta">
+        <span>2026-11-22</span>
+        <span>约 9 分钟</span>
+        <span>基于 ofa.js 5.0 与 4.7.7</span>
+      </div>
+
+      <div class="article-tags" aria-label="主题">
+        <span>o-if / o-fill</span>
+        <span>LIS 对账</span>
+        <span>monorepo</span>
+        <span>AI 辅助开发</span>
+      </div>
+
+      <p>
+        如果要给 v5 写一句准确的总结，大概是：
+        <strong>表面上还是 ofa.js，底层已经换了一套更干净的实现。</strong>
+        v4 的组件、页面、<code>o-app</code>、<code>o-page</code>、
+        provider/consumer、零构建这些概念都还在；变化发生在它们下面的运行时。
+      </p>
+
+      <h2>1. 先把结论说清楚</h2>
+      <p>
+        对大多数业务代码来说，v5 的迁移成本并不高：模板语法基本不变，
+        页面和组件的组织方式不变，SCSR 真实路径路由也延续下来。
+        但如果你关心性能、可维护性或模板边界行为，v5 的变化非常实质：
+      </p>
+      <ul>
+        <li>列表对账使用 LIS，交换、部分更新、批量操作的耗时大幅下降；</li>
+        <li>核心从多仓库收拢为 monorepo，drill、stanz、xhear、ofajs 四个包同仓开发；</li>
+        <li>模板渲染改用 xhear v9 的新管线，<code>o-if</code> / <code>o-fill</code> 下沉重写；</li>
+        <li>移除 <code>x-*</code> 旧语法，统一为 <code>o-*</code>；</li>
+        <li>应用层去掉了对全局 <code>window.lm</code> 的隐式依赖，错误码本地化；</li>
+        <li>路由在离场页面锁定、嵌套布局重排等边界上更稳定；</li>
+        <li>开发过程大量使用 AI 辅助，测试、文档和问题反馈都在同一仓里闭环。</li>
+      </ul>
+
+      <h2>2. 列表性能：这次不是“感觉快了”</h2>
+      <p>
+        v5 最硬的进步在列表运行时。旧版对账存在两个结构性问题：
+        深层 item 的任意变更都可能触发整表刷新；逐位对账加 <code>indexOf</code>
+        在交换场景下会退化成 O(n²)，并产生大量不必要的 DOM 移动。
+      </p>
+      <p>
+        v5 改成结构判定 + LIS 对账 + 轻量行上下文 + 绑定级依赖过滤，
+        并把撤销操作批量化。仓库内用同一台机器、Chromium 156、3 轮中位数
+        做的基准里，数字变化是这样的：
+      </p>
+
+      <table class="article-table">
+        <thead>
+          <tr><th>场景</th><th>v4 (4.7.7)</th><th>v5 (5.0)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>交换 1000 行中的两项</td><td class="metric-v4">3020ms</td><td class="metric-v5">120ms</td></tr>
+          <tr><td>部分更新 ×10</td><td class="metric-v4">421ms</td><td class="metric-v5">93ms</td></tr>
+          <tr><td>追加 1000 行</td><td class="metric-v4">247ms</td><td class="metric-v5">39ms</td></tr>
+          <tr><td>删除 100 行</td><td class="metric-v4">53ms</td><td class="metric-v5">20ms</td></tr>
+          <tr><td>清空 2000 行</td><td class="metric-v4">35ms</td><td class="metric-v5">16ms</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        需要说明的是，这是仓库内部的基准，不是对所有设备、所有数据形态的承诺。
+        建 1000 行和首屏渲染的改善就小得多（约 38ms → 34ms、69ms 基本持平），
+        因为那部分成本主要在模块执行和元素注册，而不是列表对账。
+        但交换、批量删除、部分更新这些高频操作，差距已经不是一个量级。
+      </p>
+      <p>
+        顺带看体积：v4 的 <code>ofa.min.mjs</code> 是 75,749 B
+        （gzip 25,327 B，brotli 22,662 B），v5 对应产物是 69,914 B
+        （gzip 24,168 B，brotli 21,552 B）。raw 体积约小 7.7%，gzip 约小 4.6%，
+        brotli 约小 4.9%。这不是数量级变化，但至少说明性能提升不是靠堆代码换来的。
+      </p>
+
+      <div class="article-note">
+        <strong>为什么交换场景提升最大？</strong>
+        <p>
+          因为旧实现对每次移动都要重新计算 key 映射，交换两项会级联出一串
+          DOM 移动；新实现先用 LIS 找出真正需要移动的最少节点集合，
+          其余节点保持原位，再把变更批量提交。
+        </p>
+      </div>
+
+      <h2>3. 从多仓库到 monorepo：四个包，一个仓库</h2>
+      <p>
+        v4 时代，核心能力分散在多个仓库：
+        <strong>drill</strong> 负责浏览器端模块加载，
+        <strong>stanz</strong> 负责 Proxy 响应式数据，
+        <strong>xhear</strong> 负责 Web Components 与模板编译，
+        <strong>ofajs</strong> 只补应用层能力——页面、路由、上下文、<code>o-link</code>。
+        它们各自能工作，但跨仓库修改、联调和版本对齐都很费劲。
+      </p>
+      <p>
+        v5 的核心变化不是把这些能力重新“拆开”，而是把原来分属不同仓库的
+        部分收进同一个 monorepo，放在一个仓库里共同演进。
+        四个包的边界仍然清楚，但一次跨包改动可以在同一个提交里完成，
+        也能用同一套测试和构建一次验证。
+      </p>
+      <p>
+        对维护 ofa.js 本身也方便很多。以前升级 ofa.js 往往要在多个仓库之间
+        同步版本、测试和 issue；现在改一处，drill / stanz / xhear 的下游影响
+        就在同一个仓里，搜索、跳转、跑测试、定位问题都不用切仓库。
+        发现问题时，可以把复现用例、修复和回归测试放在同一个提交里，
+        更新 ofa.js 和查找问题的路径都短了很多。
+      </p>
+      <p>
+        这对框架本身很重要：改 <strong>xhear</strong> 的渲染管线时，
+        可以同时跑 <strong>ofajs</strong> 的页面/路由测试；
+        改 <strong>stanz</strong> 的响应式发射时，也能立刻看到
+        <strong>xhear</strong> 列表重渲染是否退化。
+        ofajs 还显式 <code>import</code> 自己需要的加载器，
+        不再依赖“页面上碰巧有一个全局 <code>lm</code>”。
+        同时，v5 把错误码表收回框架内部，移除了单独的 <code>ofa-error</code> 包。
+      </p>
+      <p>
+        另一个容易被忽略的变化是发布形态：
+        <strong>源码就是产物</strong>。除了 ofa.js 主包和少数桥接包需要 rollup，
+        其他包保持 source-only ESM，浏览器看到的 <code>.mjs</code>
+        就是仓库里的源码。调试时不需要在 sourcemap 和真实实现之间来回跳。
+      </p>
+
+      <h2>4. 模板与渲染：修掉“看起来能用”的边界</h2>
+      <p>
+        v4 的模板系统已经足够好用，但它建立在旧的 xtext / x-bind-data 管线上。
+        v5 把渲染迁到 xhear v9 之后，<code>o-if</code> 和
+        <code>o-fill</code> 不再是简单的“包一层模板”，而是按需编译、
+        缓存编译结果，并走描述符快路径。
+      </p>
+      <p>
+        这些改动带来的直接结果是，一些过去会在复杂组合里静默失效的场景
+        变得可靠了，例如：
+      </p>
+      <ul>
+        <li><code>o-if</code> 内部再放 <code>o-fill</code>；</li>
+        <li><code>o-fill</code> 的每一项里再写 <code>o-if</code>；</li>
+        <li>在 <code>&lt;table&gt;</code> 里通过 <code>replace-temp</code> 渲染行；</li>
+        <li>命名模板递归引用自身。</li>
+      </ul>
+      <p>
+        同时，v5 明确移除了 <code>x-if</code>、<code>x-else-if</code>、
+        <code>x-else</code>、<code>x-fill</code>。这些标签不再注册，
+        继续使用会在控制台得到弃用提示，而不是悄悄表现不一致。
+        统一到 <code>o-*</code> 之后，模板语义和文档终于只有一套。
+      </p>
+      <pre class="code-sample"><code><span class="tok-comment">&lt;!-- v4 旧写法 --&gt;</span>
+<span class="tok-tag">&lt;x-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/x-fill&gt;</span>
+
+<span class="tok-comment">&lt;!-- v5 --&gt;</span>
+<span class="tok-tag">&lt;o-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/o-fill&gt;</span></code></pre>
+
+      <h2>5. 路由与页面：把“能用”变成“稳定”</h2>
+      <p>
+        v5 继续使用 SCSR 真实路径：每个 URL 对应一份 HTML，
+        可以直接部署到静态服务器，也能被 <code>o-app</code> 接管成嵌套页面。
+        v4 已经证明这套模型可行，v5 主要修的是边界：
+      </p>
+      <ul>
+        <li>离场旧页在布局变化时锁定尺寸和位置，不再突然跳到左上角；</li>
+        <li>嵌套路由公共父页通过 <code>export const parent</code> 保留，切换子页时父页不重建；</li>
+        <li><code>waitPageReaded</code> 优先复用页面自身的 <code>_rendered</code> Promise，而不是纯轮询；</li>
+        <li><code>o-app</code> 支持 <code>access</code>、<code>allowForward</code>、页面动画配置，失败页也有明确入口。</li>
+      </ul>
+      <p>
+        这些改动单独看都不大，但组合起来，页面切换的观感和可预测性会明显不同。
+        尤其是“从首页进入文档，再返回”的路径，v5 不会让旧页面在布局重排时闪一下。
+      </p>
+
+      <h2>6. 状态与上下文：保留 API，收紧实现</h2>
+      <p>
+        <code>o-provider</code> / <code>o-consumer</code> /
+        <code>o-root-provider</code> 在 v5 中继续存在，并明确通过
+        <code>composedPath</code> 跨 shadow 查找。<code>getProvider</code>、
+        <code>watchUntil</code>、<code>access</code> 等能力也保留了 v4 的使用手感。
+      </p>
+      <p>
+        区别在于实现更克制：上下文数据不再依赖全局变量，
+        组件和页面可以更明确地知道自己属于哪个 app、哪个 provider；
+        <code>o-consumer</code> 的 light children 不参与编译这一边界也被写进了测试。
+        对使用者来说，这通常意味着更少的“为什么这里不更新”，
+        而不是一套新的学习成本。
+      </p>
+
+      <h2>7. 工程与生态：把零构建坚持到底</h2>
+      <p>
+        v4 已经把“不用打包”做成了核心卖点，v5 没有背叛它。
+        一个 HTML 文件仍然是组件/页面，浏览器直接运行；
+        <code>l-m</code>、<code>olink</code>、SCSR 都不要求 Node.js。
+        变化主要在生态组织：
+      </p>
+      <ul>
+        <li><code>inject-host</code>、<code>formdata</code> 等能力拆成插件，按需引用；</li>
+        <li>测试覆盖组件、条件/列表、路由、上下文、命名模板等关键路径；</li>
+        <li>文档、API、教程与 playground 共用同一套可运行示例；</li>
+        <li>错误信息更具体，调试模式（<code>#debug</code>）能打开 sourcemap。</li>
+      </ul>
+
+      <h2>8. AI 深度参与开发，反馈链路更短</h2>
+      <p>
+        v5 的开发过程大量使用了 AI 辅助：从框架重构、测试补齐、文档与教程，
+        到这个官网本身，都有 AI 参与。真正有价值的不是“让 AI 写几段代码”，
+        而是仓库结构让 AI 能形成稳定的反馈闭环。
+      </p>
+      <ul>
+        <li>每个包都有 <code>CONTEXT.md</code>，记录真实目录、API 契约和踩坑；</li>
+        <li>自检页 + Playwright 三浏览器测试，能直接复现“看起来只是偶发”的问题；</li>
+        <li>文档、教程、playground 和源码在同一个仓，行为变了可以同步修正说明；</li>
+        <li>monorepo 让跨包修改一次跑完全量测试，AI 不用在多个仓库之间猜上下文。</li>
+      </ul>
+      <p>
+        所以“AI 辅助开发”在这里不是一句宣传语。它意味着后面查问题、修问题时，
+        AI 能读到同一份上下文、跑同一套测试、看到同一个失败结果，
+        再把修复和文档一起提交。反馈越短，修复越不容易跑偏。
+      </p>
+
+      <h2>9. 迁移成本：比想象中低，但不是零</h2>
+      <p>
+        如果你是从 v4 过来的，主要需要处理三件事：
+      </p>
+      <ol>
+        <li>把模板里的 <code>x-if</code> / <code>x-fill</code> 换成 <code>o-if</code> / <code>o-fill</code>；</li>
+        <li>确认组件和页面的 <code>&lt;script&gt;</code> 写在
+          <code>&lt;template&gt;</code> 内部（v4 也建议如此，v5 会直接忽略外部脚本）；</li>
+        <li>如果有第三方代码依赖旧的全局 <code>lm</code>，改成显式模块引用。</li>
+      </ol>
+      <p>
+        CDN 地址也要注意：v5 分支要用
+        <code>@refs/heads/v5</code>，不能简写成 <code>@v5</code>。
+        除此之外，页面组织、路由、上下文和状态写法基本可以原样带过来。
+      </p>
+
+      <h2>结论</h2>
+      <p>
+        v5 的进步不是“多了一个功能”，而是把 v4 里那些
+        <strong>能用但不够稳、够快但不够可解释</strong> 的部分重新做了一遍。
+        它让模板组合更可靠，让列表操作从秒级回到毫秒级，
+        让模块边界和错误路径更清楚，同时没有把零构建的简单性拿走。
+      </p>
+      <p>
+        如果你只需要一个能跑的页面，v4 和 v5 的差别可能不明显；
+        但如果你在维护一个长期项目，或者曾经被列表重排、嵌套条件、
+        离场页面闪动这些问题咬过，v5 的价值会非常具体。
+      </p>
+
+      <p class="article-end">
+        想继续看实现细节，可以从
+        <a olink href="../../docs/">文档</a> 或
+        <a olink href="../../tutorial/">教程</a> 开始。
+      </p>
+    </article>
+  </main>
+
+  <script>
+    export const parent = "{{LOCALE}}/layout.html";
+  </script>
+</template>

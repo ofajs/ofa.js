@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 01</p>
+      <h1>Your first page</h1>
+      <p class="doc-lead">A page in ofa.js is just an HTML file: structure, styles, and logic all live in one file.</p>
+
+      <p>
+  A page module is declared with <code>&lt;template page&gt;</code>. Write the content you want to show
+  in the template, put the data in <code>data</code>, then use <code>{{ }}</code> to place data into text.
+</p>
+<h2>Change one line, run it once</h2>
+<p>
+  Change <code>name</code> in the editor to your own name, then press <kbd>Ctrl</kbd>+<kbd>S</kbd>
+  (<kbd>⌘</kbd>+<kbd>S</kbd> on Mac) or click "Run code" and watch the preview on the right update.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-1" fold-styles="true"></docs-playground>
+<h2>The three things you just wrote</h2>
+<ul>
+  <li><code>&lt;template page&gt;</code>: declares that this is a page module;</li>
+  <li><code>data</code>: the page's reactive data; change it and the page updates;</li>
+  <li><code>{{name}}</code>: inserts a value from data into the text.</li>
+</ul>
+<div class="doc-note">
+  <strong>Common pitfall:</strong> the <code>&lt;script&gt;</code> must be written inside
+  <code>&lt;template page&gt;</code>; every field used in the template must first be declared in
+  <code>data</code>, otherwise the whole page throws a <code>ReferenceError</code>.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add a <code>city</code> field to <code>data</code> and display it on the page with
+  <code>{{city}}</code>.
+</p>
+
+      <p class="doc-end">Next: <a olink href="./lesson-2.html">02 · Data and interpolation →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

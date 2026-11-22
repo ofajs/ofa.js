@@ -1,0 +1,30 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+    }
+
+    #frame {
+      width: 320px;
+    }
+
+    /* 模拟路由切换过程中布局容器改变位置（如文档站 docs/home 模式切换） */
+    #frame.shift {
+      margin-left: 60px;
+    }
+
+    ::slotted(o-page) {
+      display: block;
+    }
+  </style>
+
+  <div id="frame" class:shift="shifted"><slot></slot></div>
+
+  <script>
+    export default {
+      data: {
+        shifted: false,
+      },
+    };
+  </script>
+</template>

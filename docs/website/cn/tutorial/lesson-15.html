@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>15 · 跨层上下文 — ofa.js 教程</title>
+    <meta name="description" content="用 o-provider / o-consumer 在组件子树里共享数据。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="15 · 跨层上下文 — ofa.js 教程" />
+    <meta property="og:description" content="用 o-provider / o-consumer 在组件子树里共享数据。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 15</p>
+      <h1>跨层上下文</h1>
+      <p class="doc-lead">组件层级深了以后，逐层传 attrs 很啰嗦；用 o-provider 和 o-consumer 把数据放进一棵子树，后代按名字就近消费。</p>
+
+      <p>
+        前面把数据从父组件传到子组件，用的是 <code>attrs</code>。
+        如果一份数据要穿过很多层组件，逐层转发会很累。
+        <code>o-provider</code> 把数据挂在某个祖先上，
+        后代任意深度的 <code>o-consumer</code> 都能直接读取。
+      </p>
+
+      <l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-15" fold-styles="true"></docs-playground>
+
+      <h2>三张卡片</h2>
+      <ul>
+        <li>前两张卡片在 <code>o-provider</code> 里，读取的是 provider 的 Yao / 维护者；</li>
+        <li>第三张卡片在 provider 外，回退到 <code>o-root-provider</code> 的默认用户；</li>
+        <li>组件里的 <code>o-consumer</code> 用 <code>watch:user-name="name"</code> 把上下文属性同步到自己的 data。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>三个容易踩的点：</strong>
+        <ul>
+          <li>provider 的 HTML attribute 只在初始化时读取一次；运行时更新要直接改它的数据属性（示例里的 <code>provider.userName = ...</code>），<code>setAttribute</code> 不会广播。</li>
+          <li>provider 必须是 consumer 的祖先；兄弟节点和更外层都找不到。</li>
+          <li>consumer 要同步到哪些字段，先在 <code>data</code> 里声明默认值，否则初始化会报 <code>ReferenceError</code>。</li>
+        </ul>
+      </div>
+
+      <h2>和全局状态怎么选</h2>
+      <p>
+        只有某棵组件子树共享的数据，用 provider / consumer；
+        跨页面、整个应用共享的状态，用下一课的 <code>$.stanz</code>。
+        纯主题色、尺寸这类样式上下文，优先 CSS 变量或 <code>match-var</code>。
+      </p>
+
+      <h2>动手改</h2>
+      <p>
+        给 provider 增加一个 <code>user-department</code> 字段，在卡片里显示部门；
+        再给 provider 加一个按钮，切换整棵子树的用户。
+      </p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-14.html">14 · 插槽与事件 →</a>　·　下一篇：<a olink href="./lesson-16.html">16 · 全局状态 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此页面需要启用 JavaScript 才能运行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

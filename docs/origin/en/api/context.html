@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Context communication</p>
+      <h1>Context communication</h1>
+      <p class="doc-lead">o-provider puts data into a subtree and o-consumer consumes the nearest one; instance methods can look up a provider proactively.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="context"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.getProvider(name)</code></td><td>Searches upward across shadow boundaries for an o-provider with the same name, falls back to o-root-provider, and returns null when neither exists</td></tr>
+          <tr><td><code>provider.dispatch(name, { data })</code></td><td>Dispatches a custom event to that provider's consumers</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>Gets the app-level root provider instance</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> a provider's HTML attribute is read only once, at initialization; to update it at runtime, change the provider's data property directly.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

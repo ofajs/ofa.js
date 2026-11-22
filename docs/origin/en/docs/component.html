@@ -1,0 +1,141 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>Components</h1>
+      <p class="doc-lead">
+        A component is a reusable Web Component module. It has its own Shadow DOM, reactive
+        data, external attrs, and an interface for emitting events outward.
+      </p>
+
+      <h2>Module Contract</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>Yes</td><td>Component tag name; it must match at usage</td></tr>
+          <tr><td><code>attrs</code></td><td>No</td><td>Scalar attributes passed in from outside, reflected to HTML attributes</td></tr>
+          <tr><td><code>data</code></td><td>No</td><td>Internal reactive state; put objects and arrays directly here</td></tr>
+          <tr><td><code>proto</code></td><td>No</td><td>Methods, getters/setters</td></tr>
+          <tr><td><code>watch</code></td><td>No</td><td>Watch changes to data/attrs</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>No</td><td>Lifecycle hooks</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        When <code>tag</code> is not declared, the framework infers the tag name from the filename:
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>.
+        Declaring it explicitly is still recommended so that renaming or moving the file doesn't
+        silently change the component's public tag.
+      </p>
+
+      <h2>attrs and data</h2>
+      <p>
+        <code>attrs</code> are the component's public inputs, suitable for strings, numbers, and
+        booleans; <code>data</code> is the component's internal state, suitable for arrays and
+        objects. Their keys must not overlap:
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>When passed from outside, kebab-case names map to camelCase fields automatically:</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        Pass dynamic values with a <code>:</code> prefix; use <code>attr:</code> for boolean attributes:
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>Importing Components</h2>
+      <p>
+        At the top of a page template, use <code>&lt;l-m&gt;</code> to import a component file
+        asynchronously. It returns immediately and does not block the page's first render:
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        When you need to ensure a component is registered before use, <code>await load()</code>
+        in the module function:
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>Slots</h2>
+      <pre><code>&lt;!-- inside the component --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;Default title&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- consumer --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;Alice&lt;/h3&gt;
+  &lt;p&gt;This is default slot content&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        The default slot receives child nodes without a <code>slot</code> attribute; named slots
+        match <code>slot="name"</code>, and a slot can contain fallback content.
+      </p>
+
+      <h2>Custom Events</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Alice" },
+});</code></pre>
+      <p>
+        Events default to <code>bubbles: true</code> and <code>composed: false</code>.
+        Set <code>composed: true</code> explicitly when an event needs to escape the Shadow DOM;
+        this is especially common when pages nest <code>o-page</code>.
+      </p>
+
+      <p>
+        A component's <code>PATH</code> points to the URL of its registration file; relative
+        resources in the component template, such as <code>img src</code> and
+        <code>style url()</code>, resolve against <code>PATH</code> rather than against the URL
+        of the page that uses it.
+      </p>
+
+      <h2>Style Isolation</h2>
+      <p>
+        A <code>&lt;style&gt;</code> in a component template only applies within the component's
+        own Shadow DOM. Use <code>:host</code> to select the root node; <code>::slotted()</code>
+        can only reach the first level of slot content. Use the <code>inject-host</code> plugin
+        when you need to reach deeper.
+      </p>
+
+      <h2>Naming Constraints</h2>
+      <p>
+        <code>tag</code> must not duplicate an existing component; <code>data</code>/<code>proto</code>
+        must not use built-in reserved names such as <code>back</code>, <code>goto</code>,
+        <code>replace</code>, <code>src</code>, <code>on</code>, and <code>emit</code>.
+        A duplicate name causes registration to fail outright.
+      </p>
+
+      <p class="doc-end">
+        Previous: <a olink href="./first-page.html">Your First Page →</a>
+        · Next: <a olink href="./page.html">Pages →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

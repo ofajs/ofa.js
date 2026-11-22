@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 01</p>
+      <h1>第一个页面</h1>
+      <p class="doc-lead">ofa.js 的页面就是一个 HTML 文件：结构、样式和逻辑都在同一个文件里。</p>
+
+      <p>
+  一个页面模块用 <code>&lt;template page&gt;</code> 声明。把要显示的内容写在模板里，
+  把数据写在 <code>data</code> 里，再用 <code>{{ }}</code> 把数据放进文本。
+</p>
+<h2>改一行，跑一次</h2>
+<p>
+  把编辑器里的 <code>name</code> 改成你的名字，按 <kbd>Ctrl</kbd>+<kbd>S</kbd>
+  （Mac 是 <kbd>⌘</kbd>+<kbd>S</kbd>）或点「运行代码」，看右侧预览变化。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-1" fold-styles="true"></docs-playground>
+<h2>你写下的三样东西</h2>
+<ul>
+  <li><code>&lt;template page&gt;</code>：声明这是一个页面模块；</li>
+  <li><code>data</code>：页面的响应式数据，改它页面就会更新；</li>
+  <li><code>{{name}}</code>：把 data 里的值插入到文本中。</li>
+</ul>
+<div class="doc-note">
+  <strong>容易踩的坑：</strong><code>&lt;script&gt;</code> 必须写在
+  <code>&lt;template page&gt;</code> 内部；模板里用到的字段都要在
+  <code>data</code> 里先声明，否则整页会抛 <code>ReferenceError</code>。
+</div>
+<h2>动手改</h2>
+<p>
+  在 <code>data</code> 里新增一个 <code>city</code> 字段，并在页面里用
+  <code>{{city}}</code> 显示它。
+</p>
+
+      <p class="doc-end">下一篇：<a olink href="./lesson-2.html">02 · 数据与插值 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Global $ static members</p>
+      <h1>Global $ static members</h1>
+      <p class="doc-lead">Selectors, registration, reactivity, rendering, and version information attached to the global $.</p>
+      <p>
+        To first see how the global <code>$</code> selects an element on the body, check the
+        runnable example at the top of the <a olink href="./index.html">API Reference</a>.
+      </p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="global"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>$(expr)</code></td><td>Selector / element factory, returns an instance or null</td></tr>
+          <tr><td><code>$.all(expr)</code></td><td>Queries all matches globally and returns an array of instances</td></tr>
+          <tr><td><code>$.register(opts)</code></td><td>Registers a component (tag/temp/data/attrs/proto/lifecycle)</td></tr>
+          <tr><td><code>$.stanz(data)</code></td><td>Creates an independent reactive data object</td></tr>
+          <tr><td><code>$.Stanz</code></td><td>The stanz constructor class, used for instanceof checks</td></tr>
+          <tr><td><code>$.fn</code></td><td>Instance prototype, the mount point for $.fn.extend()</td></tr>
+          <tr><td><code>$.nextTick(cb)</code></td><td>Runs on the next microtask</td></tr>
+          <tr><td><code>$.frag()</code></td><td>Creates a DocumentFragment instance</td></tr>
+          <tr><td><code>$.render / $.convert</code></td><td>Low-level entry points for template rendering / compilation</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>Gets the app-level root provider</td></tr>
+          <tr><td><code>$.version</code></td><td>Framework version (read-only)</td></tr>
+          <tr><td><code>$.debugMode</code></td><td>Whether it was loaded with #debug (read-only)</td></tr>
+          <tr><td><code>$.showlog</code></td><td>Internal diagnostic log switch, readable and writable at runtime</td></tr>
+          <tr><td><code>$.COMP / $.PAGE</code></td><td>Type markers for components / page modules</td></tr>
+          <tr><td><code>$.extensions</code></td><td>Lifecycle hook extension container (afterAttached/afterDetached)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> most page code only needs $, $.all, and $.stanz; the other static members are for framework extensions or diagnostics.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,165 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>Pages</h1>
+      <p class="doc-lead">
+        A page module is one screen of content in the app's routing. It has no
+        <code>tag</code>, is loaded by <code>o-page</code> or <code>o-app</code>,
+        and receives URL query parameters through its module function.
+      </p>
+
+      <h2>Page module structure</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "Untitled page",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> is the parsed query parameter object. When you visit
+        <code>./detail.html?id=42&amp;tab=info</code>,
+        <code>query.id</code> is <code>"42"</code>.
+      </p>
+
+      <h2>Navigating within a page</h2>
+      <p>
+        Every page instance provides <code>goto</code>, <code>replace</code>, and <code>back</code>:
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;Go to detail&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;Back&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> pushes a new page, <code>replace</code> replaces the current page,
+        and <code>back</code> returns to the previous page. For the full page stack and
+        hash routing, see <a olink href="./routing.html">Routing &amp; Navigation</a>.
+      </p>
+
+      <h2>Relative assets and relative imports</h2>
+      <p>
+        Relative URLs inside a page resolve against <strong>the page file itself</strong>,
+        not the entry HTML. The framework automatically rewrites relative assets such as
+        <code>img src</code> and <code>url()</code> in <code>style</code>;
+        <code>import</code> statements in <code>.mjs</code> pages resolve against the
+        module's own URL.
+      </p>
+      <pre><code>&lt;!-- page.html lives in /pages/detail/ --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- detail.mjs in the same directory --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        This means a page can live in any subdirectory without rewriting asset paths
+        to site-root absolute URLs.
+      </p>
+
+      <h2>Advanced: .mjs page modules</h2>
+      <p>
+        Pages are usually written as <code>&lt;template page&gt;</code> HTML modules;
+        when you want to separate the template from the logic, you can also write them
+        as <code>.mjs</code>, declaring the <code>$.PAGE</code> type and pointing
+        <code>temp</code> at an external template:
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "Hello" };
+export const proto = {};</code></pre>
+      <p>
+        The entry is still <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code>.
+        HTML modules are recommended for most cases; <code>.mjs</code> suits projects
+        with heavier logic that need to split the template out or reuse existing modules.
+      </p>
+
+      <h2>Embedded child pages</h2>
+      <p>
+        When a single page has to hold a list, a form, and a dialog, you can split the
+        independent units into child pages and embed them with a persistent
+        <code>&lt;o-page&gt;</code>:
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;Add&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        The child page exposes methods for the host to call and, when it finishes,
+        sends the result back to the host with an event:
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong>An <code>o-page</code>'s src is immutable after initialization.</strong>
+        Changing <code>src</code> at runtime (including a <code>:src</code> binding) throws.
+        Pass arguments by calling methods on the child page; if you truly need a fresh
+        instance, wrap <code>o-page</code> in <code>o-if</code> to destroy and recreate it.
+      </div>
+
+      <h2>Splitting pages</h2>
+      <ul>
+        <li>Child pages own their form state and interaction integrity;</li>
+        <li>Data normalization, persistence, and cross-module coordination belong to the host page;</li>
+        <li>When sending results upward, <code>bubbles: true, composed: true</code> must both be set;</li>
+        <li>Prefer keeping child pages mounted and resetting state through methods over destroying and recreating them.</li>
+      </ul>
+
+      <p class="doc-end">
+        Previous: <a olink href="./component.html">Components →</a>
+         · Next: <a olink href="./lifecycle.html">Lifecycle →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

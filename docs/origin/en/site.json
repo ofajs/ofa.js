@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "lang": "en",
+    "language": "English",
+    "title": "ofa.js — Write Components as HTML",
+    "description": "ofa.js is a zero-build, zero-dependency front-end framework built on Web Components. One HTML file is one component, running directly in the browser — no npm, Node.js, or bundler required.",
+    "noscript": "This page requires JavaScript to run ofa.js.",
+    "order": 20
+  },
+  "shell": {
+    "nav": {
+      "tutorial": "Tutorial",
+      "docs": "Docs",
+      "api": "API",
+      "blog": "Blog"
+    },
+    "actions": {
+      "nav": "Main navigation",
+      "home": "Home",
+      "github": "GitHub",
+      "githubRepo": "GitHub repository",
+      "menu": "Toggle menu",
+      "languages": "Languages"
+    },
+    "footer": {
+      "tagline": "A zero-build, zero-dependency Web Components framework. Write components as HTML and give development back to the browser.",
+      "resources": "Resources",
+      "ecosystem": "Ecosystem",
+      "community": "Community",
+      "docs": "Documentation",
+      "plugins": "Plugins",
+      "note": "This page is itself built with ofa.js."
+    },
+    "search": {
+      "label": "Search site content",
+      "placeholder": "Search docs, tutorials…",
+      "empty": "No matching content",
+      "loading": "Loading search index…"
+    },
+    "theme": {
+      "label": "Toggle theme",
+      "light": "Light mode",
+      "dark": "Dark mode",
+      "system": "Follow system"
+    }
+  },
+  "demo": {
+    "reset": "Reset",
+    "kicker": "Today",
+    "heading": "Things to do",
+    "remainingSuffix": "items left",
+    "placeholder": "What do you want to get done today?",
+    "inputAria": "New todo item",
+    "add": "Add",
+    "clear": "Clear completed",
+    "doneSuffix": "completed",
+    "checkAria": "Mark complete",
+    "deleteAria": "Delete",
+    "todos": [
+      "Write your first component in a single HTML file",
+      "Render the todo list with o-fill",
+      "Drop the page onto any static server"
+    ]
+  },
+  "toast": {
+    "copied": "Copied to clipboard",
+    "failed": "Copy failed — please select the text manually"
+  },
+  "docs": {
+    "label": "Docs",
+    "overview": "Documentation Overview",
+    "onThisPage": "On this page",
+    "nav": {
+      "start": {
+        "label": "Getting Started",
+        "items": {
+          "gettingStarted": "Installation & Setup",
+          "firstComponent": "Your First Component",
+          "firstPage": "Your First Page"
+        }
+      },
+      "basics": {
+        "label": "Components & Pages",
+        "items": {
+          "component": "Components",
+          "page": "Pages",
+          "lifecycle": "Lifecycle"
+        }
+      },
+      "template": {
+        "label": "Template Syntax",
+        "items": {
+          "template": "Directive Overview",
+          "binding": "Bindings & Styles",
+          "events": "Events & Forms",
+          "render": "Conditionals & Lists"
+        }
+      },
+      "data": {
+        "label": "Data & State",
+        "items": {
+          "data": "Data & Watchers",
+          "state": "Global State",
+          "context": "Cross-Component Context"
+        }
+      },
+      "app": {
+        "label": "Apps & Routing",
+        "items": {
+          "app": "o-app Applications",
+          "routing": "Routing & Navigation",
+          "nestedRouting": "Nested Routing",
+          "scsr": "Real-Path scsr"
+        }
+      },
+      "reference": {
+        "label": "Reference",
+        "items": {
+          "api": "$.fn & Wrapped Objects",
+          "plugins": "Plugins & Extensions",
+          "pitfalls": "Common Pitfalls",
+          "examples": "Complete Examples",
+          "playground": "Live Playground",
+          "deployment": "Deployment"
+        }
+      }
+    }
+  },
+  "pages": {
+    "docs/index.html": {
+      "title": "ofa.js Docs",
+      "description": "ofa.js v5 documentation overview: installation, components, pages, routing, state, and API reference."
+    },
+    "docs/getting-started.html": {
+      "title": "Installation & Setup — ofa.js Docs",
+      "description": "Load ofa.js v5 from a CDN or local file and run your first page."
+    },
+    "docs/first-component.html": {
+      "title": "Your First Component — ofa.js Docs",
+      "description": "Create your first custom Web Component and understand tag, data, attrs, and slot."
+    },
+    "docs/first-page.html": {
+      "title": "Your First Page — ofa.js Docs",
+      "description": "Create a page module with template[page] and run it with o-page or o-app."
+    },
+    "docs/component.html": {
+      "title": "Components — ofa.js Docs",
+      "description": "ofa.js component structure, attrs/data, prop passing, slots, custom events, and component reuse."
+    },
+    "docs/page.html": {
+      "title": "Pages — ofa.js Docs",
+      "description": "Page modules, query parameters, nested child pages in o-page, and splitting pages."
+    },
+    "docs/lifecycle.html": {
+      "title": "Lifecycle — ofa.js Docs",
+      "description": "Timing, order, and resource cleanup for ready, attached, loaded, and detached."
+    },
+    "docs/template.html": {
+      "title": "Template Directives Overview — ofa.js Docs",
+      "description": "Complete table of ofa.js template directives: interpolation, attributes, events, two-way binding, conditionals, and lists."
+    },
+    "docs/binding.html": {
+      "title": "Bindings & Styles — ofa.js Docs",
+      "description": "The correct syntax for attr:, :prop, sync:, class:, :style, and boolean attributes."
+    },
+    "docs/events.html": {
+      "title": "Events & Forms — ofa.js Docs",
+      "description": "on:, one:, $event, two-way form binding, custom events, and event bubbling."
+    },
+    "docs/render.html": {
+      "title": "Conditionals & Lists — ofa.js Docs",
+      "description": "Conditional rendering with o-if/o-else-if/o-else, o-fill lists, and the $data scope."
+    },
+    "docs/data.html": {
+      "title": "Data & Watchers — ofa.js Docs",
+      "description": "Reactive data, computed getters, watch listeners, and common edge cases."
+    },
+    "docs/state.html": {
+      "title": "Global State — ofa.js Docs",
+      "description": "Use $.stanz() to create reactive state shared across pages, and mount and clean it up correctly."
+    },
+    "docs/context.html": {
+      "title": "Cross-Component Context — ofa.js Docs",
+      "description": "o-provider, o-consumer, o-root-provider, getProvider, and dispatch."
+    },
+    "docs/app.html": {
+      "title": "o-app Applications — ofa.js Docs",
+      "description": "o-app configuration, page stack, transition animations, loading/fail states, and extending proto."
+    },
+    "docs/routing.html": {
+      "title": "Routing & Navigation — ofa.js Docs",
+      "description": "goto/replace/back, olink, query parameters, o-router hash routing, and router-change."
+    },
+    "docs/nested-routing.html": {
+      "title": "Nested Routing — ofa.js Docs",
+      "description": "Multi-level nested routing with shared layouts via export const parent and slots."
+    },
+    "docs/scsr.html": {
+      "title": "Real-Path Routing with scsr — ofa.js Docs",
+      "description": "Use scsr to make every URL a complete, directly accessible document — ideal for SEO and sharing."
+    },
+    "docs/api.html": {
+      "title": "$.fn & Wrapped Objects — ofa.js Docs",
+      "description": "The ofa.js wrapped-object API: selection, tree traversal, DOM operations, events, properties, and extension."
+    },
+    "docs/plugins.html": {
+      "title": "Plugins & Extensions — ofa.js Docs",
+      "description": "How to load the optional ofa.js plugins — formData, inject-host, body-ghost, and global-link — and when to use them."
+    },
+    "docs/pitfalls.html": {
+      "title": "Common Pitfalls & Troubleshooting — ofa.js Docs",
+      "description": "Troubleshooting ReferenceError, reserved-name conflicts, boolean attributes, o-page src, and caching issues."
+    },
+    "docs/examples.html": {
+      "title": "Complete Examples — ofa.js Docs",
+      "description": "Four complete examples: a minimal app, a custom component, a todo list, and a routing app."
+    },
+    "docs/playground.html": {
+      "title": "Live Playground — ofa.js Docs",
+      "description": "Edit and run ofa.js page modules online in a NoneOS Core virtual container."
+    },
+    "docs/deployment.html": {
+      "title": "Deployment — ofa.js Docs",
+      "description": "Things to know when deploying an ofa.js app to any static server, CDN, or subdirectory."
+    },
+    "tutorial/index.html": {
+      "title": "ofa.js Tutorial",
+      "description": "A 20-lesson progressive ofa.js tutorial: from your first page to components, context, state, routing, and a full project."
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · Your First Page — ofa.js Tutorial",
+      "description": "A page in ofa.js is just an HTML file: structure, styles, and logic all live in one file."
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · Data & Interpolation — ofa.js Tutorial",
+      "description": "data can hold strings, numbers, booleans, objects, and arrays; {{ }} also supports simple expressions."
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · Dynamic Attributes — ofa.js Tutorial",
+      "description": "Use attr: for HTML attributes and :prop for DOM properties; boolean attributes must use attr:."
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · Styles & Classes — ofa.js Tutorial",
+      "description": "<style> in a page only applies to that page; class: and :style let styles follow data changes."
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · Events — ofa.js Tutorial",
+      "description": "Listen to events with on:; use expressions for simple logic and proto methods for complex logic."
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · Two-Way Binding — ofa.js Tutorial",
+      "description": "sync: keeps forms and data in two-way sync; it works best with scalar values."
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · Conditional Rendering — ofa.js Tutorial",
+      "description": "o-if / o-else-if / o-else control whether content exists."
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · List Rendering — ofa.js Tutorial",
+      "description": "o-fill renders arrays; use $data, $index, and $host inside list items."
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · Editing Lists — ofa.js Tutorial",
+      "description": "push/splice on arrays update the view automatically; inline editing syncs directly to $data fields."
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · Computed Properties & Watchers — ofa.js Tutorial",
+      "description": "proto getters compute synchronously; watch observes changes and handles side effects."
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · Lifecycle — ofa.js Tutorial",
+      "description": "ready → attached → loaded, then detached on removal; clean up timers and listeners in detached."
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · Your First Component — ofa.js Tutorial",
+      "description": "Split reusable UI into <template component> and load it with l-m."
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · Component Parameters — ofa.js Tutorial",
+      "description": "Pass external data into a component via attrs; keep internal state in data."
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · Slots & Events — ofa.js Tutorial",
+      "description": "slots let a component receive external content; emit tells the outside world what happened inside."
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · Cross-Level Context — ofa.js Tutorial",
+      "description": "Share data across a component subtree with o-provider / o-consumer."
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · Global State — ofa.js Tutorial",
+      "description": "When several components share state, create a module-level store with $.stanz and mount/clean it up in attached/detached."
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · Pages & Routing — ofa.js Tutorial",
+      "description": "o-app manages the page stack: switch pages with olink / goto, pass query parameters, and go back with back."
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · Nested Layouts — ofa.js Tutorial",
+      "description": "Child pages declare a parent, and the parent uses a slot to host them; the parent survives child page switches."
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · Async & Loading States — ofa.js Tutorial",
+      "description": "Drive the UI with loading / error / success states for async requests, and never put async results in getters."
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · Putting It Together: Todo List — ofa.js Tutorial",
+      "description": "Combine lists, forms, conditionals, computed properties, watchers, and localStorage into a complete app."
+    },
+    "api/index.html": {
+      "title": "API Reference — ofa.js API",
+      "description": "All instance members, global static members, and live examples."
+    },
+    "api/instance.html": {
+      "title": "Instance Basics — ofa.js API",
+      "description": "An instance is a DOM wrapper, reactive data, and a child-element collection all at once. Start with its basic properties."
+    },
+    "api/traverse.html": {
+      "title": "Selection & Traversal — ofa.js API",
+      "description": "Find elements inside an instance and move across DOM and shadow boundaries."
+    },
+    "api/structure.html": {
+      "title": "Structure Operations — ofa.js API",
+      "description": "Operate on child elements with array semantics; mutating methods really move DOM nodes and trigger updates."
+    },
+    "api/props.html": {
+      "title": "Content, Attributes & Styles — ofa.js API",
+      "description": "Read and write text, HTML, attributes, classes, and inline styles."
+    },
+    "api/events.html": {
+      "title": "Events — ofa.js API",
+      "description": "Bind, unbind, and dispatch events with instance methods; events can carry payload data and cross shadow boundaries."
+    },
+    "api/reactive.html": {
+      "title": "Data & Watchers — ofa.js API",
+      "description": "Instance data comes from stanz: reading and writing fields is reactive, with dedicated methods for watching and cleanup."
+    },
+    "api/context.html": {
+      "title": "Context Communication — ofa.js API",
+      "description": "o-provider puts data into a subtree and o-consumer consumes the nearest one; instance methods can also look up providers."
+    },
+    "api/global.html": {
+      "title": "Global $ Static Members — ofa.js API",
+      "description": "Selectors, registration, reactivity, rendering, and version info on the global $."
+    },
+    "api/extend.html": {
+      "title": "Extending Instances — ofa.js API",
+      "description": "Add methods, getters, and new directives to a single instance or to all instances."
+    },
+    "api/app.html": {
+      "title": "o-app & o-page — ofa.js API",
+      "description": "The app container manages the page stack and navigation; a page instance manages its own screen of content."
+    },
+    "blog/index.html": {
+      "title": "Blog — ofa.js",
+      "description": "Engineering notes from ofa.js: releases, performance, architecture, and practice."
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "How Much Better Is ofa.js v5 Than v4? — ofa.js",
+      "description": "A grounded look at what changed between ofa.js v4 and v5: architecture, rendering, list performance, routing, and developer experience."
+    }
+  },
+  "tutorial": {
+    "label": "Tutorial",
+    "overview": "Tutorial Overview",
+    "groups": {
+      "start": {
+        "label": "Getting Started",
+        "lessons": {
+          "lesson1": "01 · Your First Page",
+          "lesson2": "02 · Data & Interpolation",
+          "lesson3": "03 · Dynamic Attributes",
+          "lesson4": "04 · Styles & Classes"
+        }
+      },
+      "interact": {
+        "label": "Interaction & State",
+        "lessons": {
+          "lesson5": "05 · Events",
+          "lesson6": "06 · Two-Way Binding",
+          "lesson7": "07 · Conditional Rendering",
+          "lesson8": "08 · List Rendering",
+          "lesson9": "09 · Editing Lists",
+          "lesson10": "10 · Computed Properties & Watchers",
+          "lesson11": "11 · Lifecycle"
+        }
+      },
+      "component": {
+        "label": "Components",
+        "lessons": {
+          "lesson12": "12 · Your First Component",
+          "lesson13": "13 · Component Parameters",
+          "lesson14": "14 · Slots & Events"
+        }
+      },
+      "app": {
+        "label": "Apps in Practice",
+        "lessons": {
+          "lesson15": "15 · Cross-Level Context",
+          "lesson16": "16 · Global State",
+          "lesson17": "17 · Pages & Routing",
+          "lesson18": "18 · Nested Layouts",
+          "lesson19": "19 · Async & Loading States",
+          "lesson20": "20 · Putting It Together: Todo List"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "API Reference",
+    "overview": "API Overview",
+    "groups": {
+      "instance": {
+        "label": "Instance",
+        "items": {
+          "instance": "Instance basics",
+          "traverse": "Selection & traversal",
+          "structure": "Structure operations"
+        }
+      },
+      "props": {
+        "label": "Properties & events",
+        "items": {
+          "props": "Content, props & styles",
+          "events": "Events"
+        }
+      },
+      "data": {
+        "label": "Data & extensions",
+        "items": {
+          "reactive": "Data & watchers",
+          "context": "Context communication",
+          "global": "Global $ static members",
+          "extend": "Extending instances"
+        }
+      },
+      "app": {
+        "label": "App & pages",
+        "items": {
+          "app": "o-app & o-page"
+        }
+      }
+    }
+  }
+}

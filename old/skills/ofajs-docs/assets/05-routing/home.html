@@ -1,0 +1,35 @@
+<template page>
+  <style>
+    :host {
+      display: block;
+    }
+    h1 {
+      color: #333;
+    }
+    .card {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+  </style>
+  <h1>欢迎使用 ofa.js</h1>
+  <div class="card">
+    <p>这是一个使用 o-router 和 o-app 的单页应用示例。</p>
+    <p>特点：</p>
+    <ul>
+      <li>使用 o-router 实现路由功能</li>
+      <li>支持浏览器前进/后退</li>
+      <li>支持页面切换动画</li>
+      <li>支持多级嵌套页面</li>
+    </ul>
+  </div>
+  <script>
+    export const parent = "./layout.html";
+    export default async () => {
+      return {
+        data: {},
+      };
+    };
+  </script>
+</template>

@@ -1,0 +1,59 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 16</p>
+      <h1>Global State</h1>
+      <p class="doc-lead">When several components share the same state, create a module-level store with $.stanz and mount it in attached, then clean it up in detached.</p>
+
+      <p>
+  A component's own <code>data</code> belongs only to itself. When multiple components
+  need to read and write the same data, create a reactive store with <code>$.stanz()</code>
+  and share it from a separate module.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
+<h2>Three files</h2>
+<ul>
+  <li><code>store.mjs</code>: exports only <code>$.stanz({ count: 0 })</code>;</li>
+  <li><code>counter-panel.html</code>: both component instances reference the same store;</li>
+  <li><code>page.html</code>: hosts two panels plus the increment and decrement buttons.</li>
+</ul>
+<p>
+  In <code>attached</code>, each component sets <code>this.sharedState = store</code> directly,
+  and in <code>detached</code> it clears the reference with <code>this.sharedState = {}</code>.
+  The template reads <code>sharedState.label</code> and <code>sharedState.count</code> directly;
+  when the store changes, both panels update automatically.
+</p>
+<div class="doc-note">
+  <strong>Convention:</strong> declare a placeholder <code>sharedState: {}</code> in <code>data</code> first,
+  then mount the store in the <code>attached</code> phase and clear it in the <code>detached</code> phase.
+  Only then can you avoid memory leaks and stale references held after the component is destroyed.
+</div>
+<div class="doc-note">
+  <strong>How to choose:</strong> if the data belongs to one component subtree rather than the whole app,
+  the previous lesson's <code>o-provider</code> / <code>o-consumer</code> fits better;
+  see <a olink href="./lesson-15.html">Cross-Level Context</a>.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add <code>step</code> to the store so the "+1" button adds
+  <code>store.step</code> each time; then add a button that sets step to 5.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-15.html">15 · Cross-Level Context →</a> · Next: <a olink href="./lesson-17.html">17 · Pages and Routing →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

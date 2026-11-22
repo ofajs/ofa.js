@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stanz · 实例方法 methods</title>
+  </head>
+  <body>
+    <script type="module">
+      import stanz, { Stanz } from "../../src/base.mjs";
+      import { test, run, assert, assertEqual } from "./harness.mjs";
+
+      test("revoke 注销实例并解除双向引用 / revoke tears down the instance and cross references", () => {
+        const d = stanz({
+          val: "I am d",
+          obj: { val: "I am obj", sub: { val: "I am sub" } },
+        });
+
+        const obj = d.obj;
+        d.push(obj);
+        const sub = d.obj.sub;
+
+        assertEqual(sub.owner.size, 1);
+
+        obj.revoke();
+
+        assertEqual(sub.owner.size, 0, "子孙 owner 应解除 / descendants' owners should be cleared");
+        assertEqual(d.obj, null, "宿主属性应置空 / host property should be nulled");
+        assertEqual(d[0], null, "数组槽位应置空 / array slot should be nulled");
+      });
+
+      test("stanz.is 判定 stanz 实例 / stanz.is detects stanz instances", () => {
+        const a = { val: "I am a" };
+        const b = stanz({ val: "I am b" });
+
+        assertEqual(stanz.is(a), false);
+        assertEqual(stanz.is(b), true);
+      });
+
+      test("extend 扩展实例方法 / extend adds instance methods", () => {
+        const d = stanz({ val: "I am d" });
+
+        d.extend({
+          _a: 0,
+          set a(val) {
+            this._a = val;
+          },
+          get a() {
+            return this._a + 100;
+          },
+        });
+
+        assertEqual(Object.keys(d), ["val", "_a", "a"]);
+        assertEqual(d.a, 100);
+
+        d.a++;
+        assertEqual(d.a, 201);
+      });
+
+      test("toString 输出 JSON / toString serializes to JSON", () => {
+        const d = stanz({ val: "I am val", arr: [1, 2] });
+
+        assertEqual(d.toString(), '{"val":"I am val","arr":[1,2]}');
+      });
+
+      test("实例是 Array 的子类 / instances are Array subclasses", () => {
+        const d = stanz({ val: "I am d" });
+        const arr = stanz([1, 2]);
+
+        assert(d instanceof Stanz, "对象实例应属于 Stanz / object instance should be a Stanz");
+        assert(arr instanceof Stanz, "数组实例应属于 Stanz / array instance should be a Stanz");
+        assertEqual(arr.length, 2, "数组初始长度保留 / initial array length kept");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

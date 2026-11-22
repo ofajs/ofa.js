@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>drill · fetch 缓存 cache</title>
+  </head>
+  <body>
+    <script type="module">
+      import lm from "../../src/main.mjs";
+      import { test, run, assertEqual } from "./harness.mjs";
+
+      // 计数经过缓存层的 fetch 次数
+      window.fetchCount = 0;
+      const rawFetch = window.fetch.bind(window);
+      window.fetch = (...args) => {
+        window.fetchCount++;
+        return rawFetch(...args);
+      };
+
+      const load = lm(import.meta);
+
+      test("不同 query 拼接共享一次 fetch / different query spellings share one fetch", async () => {
+        // 缓存键默认剥掉查询串
+        const a = await load("./data.json?v=1");
+        const b = await load("./data.json?v=2");
+
+        assertEqual(a, { name: "drill", major: 6 });
+        assertEqual(b, { name: "drill", major: 6 });
+        assertEqual(window.fetchCount, 1, "?v=1 与 ?v=2 应共享一次 fetch / should share one fetch");
+      });
+
+      test("-direct 参数绕过共享缓存键 / the -direct param bypasses the shared cache key", async () => {
+        // -direct 保留查询串，产生第二个缓存键
+        const c = await load("./data.json?v=1 -direct");
+
+        assertEqual(c, { name: "drill", major: 6 });
+        assertEqual(window.fetchCount, 2, "-direct 应发起第二次 fetch / -direct should issue a second fetch");
+      });
+
+      run();
+    </script>
+  </body>
+</html>

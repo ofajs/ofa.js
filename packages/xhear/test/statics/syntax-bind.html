@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>属性绑定 / Prop, attr and class binding</title>
+  </head>
+  <body>
+    <bind-host></bind-host>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      // 子组件：展示 :prop 传入的数据
+      $.register({
+        tag: "bind-child",
+        temp: `
+        <span id="val">{{val}}</span>
+        <span id="camel">{{myVal}}</span>
+        <span id="objval">{{obj.val}}</span>
+        <span id="flag" attr:data-on="flagOn">{{flagOn}}</span>
+        `,
+        data: {
+          val: "",
+          myVal: "",
+          obj: { val: "" },
+          flagOn: null,
+        },
+      });
+
+      $.register({
+        tag: "bind-host",
+        temp: `
+        <bind-child id="child" :val="num" :my-val="name" :obj="objData" :flag-on="onFlag"></bind-child>
+        <div id="attr-demo" attr:data-num="num" attr:data-empty="emptyVal">attr target</div>
+        <div id="class-demo" class:active="isActive">class target</div>
+        `,
+        data: {
+          num: 1,
+          name: "n",
+          objData: { val: "inner" },
+          onFlag: true,
+          emptyVal: "keep",
+          isActive: false,
+        },
+      });
+
+      const $host = $("bind-host");
+      const $child = $host.shadow.$("bind-child");
+
+      test(":prop 初始传递 / prop binding initial value", async () => {
+        // prop 绑定经 watchTick 防抖刷新，先等值到位
+        await waitFor(() => $child.shadow.$("#val").text === "1");
+        assertEqual($child.shadow.$("#val").text, "1");
+        await waitFor(() => $child.shadow.$("#camel").text === "n");
+        assertEqual($child.shadow.$("#camel").text, "n");
+      });
+
+      test(":prop 随宿主数据更新 / prop updates on host change", async () => {
+        $host.num = 42;
+        await waitFor(() => $child.shadow.$("#val").text === "42");
+      });
+
+      test(":prop 属性名 dash 转驼峰 / dash-case prop name", async () => {
+        $host.name = "changed";
+        await waitFor(() => $child.shadow.$("#camel").text === "changed");
+      });
+
+      test(":prop 传递对象 / prop passing object", async () => {
+        assertEqual($child.shadow.$("#objval").text, "inner");
+        // 修改宿主对象内部值，子组件同步渲染
+        $host.objData.val = "updated";
+        await waitFor(() => $child.shadow.$("#objval").text === "updated");
+      });
+
+      test(":prop 布尔值传递 / prop boolean value", async () => {
+        // on=true 经 attr:data-on 输出为 ""
+        assertEqual($child.shadow.$("#flag").ele.getAttribute("data-on"), "");
+        $host.onFlag = false;
+        await waitFor(
+          () => $child.shadow.$("#flag").ele.getAttribute("data-on") === null,
+        );
+      });
+
+      test("attr: 基本绑定与更新 / attr binding and update", async () => {
+        const el = $host.shadow.$("#attr-demo").ele;
+        // 前面用例已把 num 更新为 42，attr 绑定应同步到了该值
+        assertEqual(el.getAttribute("data-num"), "42");
+        $host.num = 7;
+        await waitFor(() => el.getAttribute("data-num") === "7");
+      });
+
+      test("attr: false/null 移除属性、true 置空 / attr boolean semantics", async () => {
+        const el = $host.shadow.$("#attr-demo").ele;
+        assertEqual(el.getAttribute("data-empty"), "keep");
+        $host.emptyVal = true;
+        await waitFor(() => el.getAttribute("data-empty") === "");
+        $host.emptyVal = false;
+        await waitFor(() => el.getAttribute("data-empty") === null);
+        $host.emptyVal = null;
+        await waitFor(() => el.getAttribute("data-empty") === null);
+      });
+
+      test("class: 开关绑定 / class toggle binding", async () => {
+        const ele = $host.shadow.$("#class-demo").ele;
+        assert(!ele.classList.contains("active"), "初始不应有 active / no active initially");
+        $host.isActive = true;
+        await waitFor(() => ele.classList.contains("active"));
+        $host.isActive = false;
+        await waitFor(() => !ele.classList.contains("active"));
+      });
+
+      run();
+    </script>
+  </body>
+</html>

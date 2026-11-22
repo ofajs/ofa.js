@@ -1,0 +1,36 @@
+{
+  "name": "ofa-inject-host",
+  "version": "5.0.0",
+  "description": "ofa.js plugin: hoist link/style inside <inject-host> to the host root so slotted multi-level elements can be styled (inject-host)",
+  "type": "module",
+  "main": "inject-host.mjs",
+  "exports": {
+    ".": "./inject-host.mjs"
+  },
+  "files": [
+    "inject-host.mjs",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "playwright test --config=../../../playwright.config.mjs --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofajs/ofa.js.git",
+    "directory": "packages/plugins/inject-host"
+  },
+  "author": {
+    "name": "YAO",
+    "email": "kirayao@hotmail.com"
+  },
+  "license": "MIT",
+  "startyear": "2018",
+  "keywords": [
+    "ofa.js",
+    "plugin",
+    "inject-host",
+    "style",
+    "web components"
+  ]
+}

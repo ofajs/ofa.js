@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>真实路径路由 scsr</h1>
+      <p class="doc-lead">
+        scsr 让每个 URL 都是一份真实、可直接访问的 HTML 文档。
+        站内跳转仍然走应用路由，但刷新、分享和爬虫拿到的都是完整内容。
+      </p>
+
+      <h2>与 o-router 的区别</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>能力</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>地址形式</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>服务器 rewrite</td><td>不需要</td><td>每个路径一份 HTML</td></tr>
+          <tr><td>SEO / 无 JS 可见</td><td>较弱</td><td>完整首屏 HTML</td></tr>
+          <tr><td>页面 API</td><td colspan="2">相同：goto / replace / back / 嵌套布局 / 动画</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>页面结构</h2>
+      <p>
+        每个 URL 对应一份完整 HTML，页面内容内联在
+        <code>o-app</code> 的 <code>&lt;template page&gt;</code> 中：
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;首页&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;首页内容&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;去详情&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>应用配置不声明 home</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr 会把当前 URL 收编为页面，首页就是当前 URL 的 HTML，
+        因此配置里不要写 <code>home</code>。站内跳转使用
+        <code>olink</code> 或 <code>goto()</code>，地址保持真实路径。
+      </p>
+
+      <h2>服务端要求</h2>
+      <ul>
+        <li>每个路径返回对应 HTML，<code>Content-Type: text/html; charset=UTF-8</code>；</li>
+        <li>页面里的 <code>&lt;template page&gt;</code> 可以包含服务端渲染好的静态内容；</li>
+        <li>CSS、JS、图片按普通静态资源路径提供；</li>
+        <li>scsr 必须在 ofa.js 之后加载，它挂接页面已有的全局 <code>$</code>。</li>
+      </ul>
+
+      <h2>降级与首屏</h2>
+      <p>
+        无 JS 时，页面仍是服务端输出的完整 HTML，只是不会执行交互逻辑。
+        有 JS 时，scsr 接管后把当前 URL 转成应用内页面，后续跳转不需要
+        整页刷新。
+      </p>
+
+      <h2>什么时候选它</h2>
+      <ul>
+        <li>官网、文档、博客等需要 SEO 和链接分享的站点；</li>
+        <li>每个页面都有独立 URL 和独立 meta 信息；</li>
+        <li>已有服务端模板或 SSG，能按路径输出 HTML。</li>
+      </ul>
+      <p>
+        纯后台应用、无需被搜索引擎索引时，o-router 更省事。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./nested-routing.html">嵌套路由 →</a>
+        　·　下一篇：<a olink href="./api.html">$.fn 与包装对象 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,32 @@
+<template page>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+  </style>
+
+  <l-m src="./filelist.html"></l-m>
+  <l-m src="./editor.html"></l-m>
+  <div style="text-align: center; padding: 4px; border-bottom: 1px solid #ccc">
+    {{currentFile}}
+  </div>
+
+  <div style="display: flex; flex: 1">
+    <o-provider name="project-data" sync:active-path="currentFile">
+      <file-list></file-list>
+      <file-editor></file-editor>
+    </o-provider>
+  </div>
+
+  <script>
+    export default async () => {
+      return {
+        data: {
+          currentFile: null,
+        },
+      };
+    };
+  </script>
+</template>

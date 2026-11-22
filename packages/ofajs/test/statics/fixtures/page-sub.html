@@ -1,0 +1,15 @@
+<template page>
+  <title>Sub</title>
+  <div class="page-root">
+    <h4 id="sub-title">sub:{{subTitle}}</h4>
+  </div>
+<script>
+  // 声明 parent 形成页面继承链：父页 home 会包裹本页
+  export const parent = "./page-home.html";
+  export default {
+    data: {
+      subTitle: "content",
+    },
+  };
+</script>
+</template>

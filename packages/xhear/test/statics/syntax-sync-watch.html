@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>双向与单向数据绑定 / sync and watch binding</title>
+  </head>
+  <body>
+    <sync-host></sync-host>
+
+    <script type="module">
+      import $ from "../../src/base.mjs";
+      import {
+        test,
+        assert,
+        assertEqual,
+        waitFor,
+        run,
+      } from "./harness.mjs";
+
+      // sync 演示子组件：testData 与外部数据双向同步
+      $.register({
+        tag: "sync-child",
+        temp: `<button id="add" on:click="testData++">child add</button>`,
+        data: {
+          testData: null,
+        },
+      });
+
+      $.register({
+        tag: "sync-host",
+        temp: `
+        <button id="host-add" on:click="count++">host add</button>
+        <sync-child id="child" sync:test-data="count"></sync-child>
+        <div id="count">host count:{{count}}</div>
+
+        <div id="watch-target">mirrored:{{mirroredVal}}</div>
+        <div id="watch-src" watch:watched-val="mirroredVal">watch src</div>
+
+        <div id="deep-sync">deep:{{deepDest.inner}}</div>
+        <div id="deep-src" watch:deep-val="deepDest.inner">deep src</div>
+        `,
+        data: {
+          count: 0,
+          mirroredVal: -1,
+          deepDest: { inner: 0 },
+        },
+        proto: {},
+      });
+
+      const $host = $("sync-host");
+
+      test("sync: 数据到元素 / sync: data to element", async () => {
+        $host.count = 5;
+        await waitFor(() => $host.shadow.$("#child").testData === 5);
+      });
+
+      test("sync: 元素到数据 / sync: element to data", async () => {
+        $host.shadow.$("#child").testData = 9;
+        await waitFor(() => $host.count === 9);
+        // 宿主模板上的展示同步更新
+        await waitFor(
+          () => $host.shadow.$("#count").text === "host count:9",
+        );
+      });
+
+      test("sync: dash 属性名转驼峰 / sync dash-case prop", async () => {
+        // sync:test-data 已在初始时把 count 同步给 testData（camelCase）
+        $host.count = 20;
+        await waitFor(() => $host.shadow.$("#child").testData === 20);
+      });
+
+      test("watch: 元素数据单向拷贝到渲染数据 / watch: element data copies to render data", async () => {
+        // watch:watched-val="mirroredVal" —— 元素自身 watchedVal 变化时
+        // 自动拷贝到宿主的 mirroredVal
+        $host.shadow.$("#watch-src").watchedVal = 3;
+        await waitFor(
+          () => $host.shadow.$("#watch-target").text === "mirrored:3",
+        );
+        // 反向不影响：直接改 mirroredVal 不会倒流回元素
+        $host.mirroredVal = 100;
+        await waitFor(() => $host.shadow.$("#watch-src").watchedVal === 3);
+      });
+
+      test("watch: 点路径目标 / watch: dot-path target", async () => {
+        $host.shadow.$("#deep-src").deepVal = 8;
+        await waitFor(
+          () => $host.shadow.$("#deep-sync").text === "deep:8",
+        );
+      });
+
+      run();
+    </script>
+  </body>
+</html>

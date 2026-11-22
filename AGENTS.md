@@ -1,0 +1,187 @@
+# AI 代理开发指南 (AGENTS.md)
+
+本文件为参与此项目开发的 AI 代理提供核心上下文与开发规范。
+在开始任何开发任务前，请务必遵循以下准则。
+
+## 一、项目上下文入口
+
+本项目是 **ofa.js 框架的 monorepo**：框架核心与它的三个基础库（drill 加载器、
+stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
+
+**如果你是首次接手本项目、或尚未阅读过对应包的代码**，请先阅读对应包的
+`CONTEXT.md`（定位、目录结构、API 契约、踩坑都在里面）：
+
+- `packages/drill/CONTEXT.md` —— 浏览器端模块加载器
+- `packages/stanz/CONTEXT.md` —— Proxy 驱动的响应式数据
+- `packages/xhear/CONTEXT.md` —— Web Components 底座与模板渲染语法
+- `packages/ofajs/CONTEXT.md` —— ofa.js 框架本体（组件/页面/路由/上下文）
+- `packages/plugins/CONTEXT.md` —— 统一插件目录（formData 等，引用即用，
+  不进 dist、不发 npm）
+
+**目录约定**：
+
+- `packages/<名>/` —— 各库源码 + 各自的 test/ 与 benchmark/，互不依赖运行时
+- `packages/plugins/` —— 可选插件统一存放（自包含 .mjs，消费方相对导入，
+  见其 CONTEXT.md）
+- `old/` —— 旧仓库完整归档，**只读参考，禁止修改或从中直接拷贝代码**
+- `scripts/static-server.mjs` —— 测试用的零依赖静态服务器（端口 3348）
+- `playwright.config.mjs` —— 根级测试配置，扫描 `packages/*/test/**/*.spec.js`
+
+## 二、CONTEXT.md 同步维护规则
+
+`CONTEXT.md` 是项目知识的**活文档**，必须与代码保持一致：
+
+> 一句话总结：**代码怎么变，`CONTEXT.md` 就怎么改，始终保持一致。**
+
+- **凡是修改了 `packages/<名>/` 下的文件**（新增/删除/重命名文件、改动入口、
+  变更 API 契约、调整测试或基准结构等），**必须同步更新该包的 `CONTEXT.md`**。
+- **发现错误即纠正**：阅读源码后若发现描述与实际代码不符，即便不是本次引入的，
+  也有责任顺手修正。
+- **删除模块要同步清理**：删除文件/功能时，`CONTEXT.md` 里的目录树、契约条目、
+  行为描述一并移除，不留残影。
+- **路径统一用相对路径**（如 `packages/stanz/src/watch.mjs`），
+  **禁止绝对路径或带用户名的写法**。
+- 仅改动注释、格式等不影响语义的修改，可酌情不更新。
+- 目标：让下一个只读 `CONTEXT.md` 的 AI 也能准确理解当前代码的真实状态。
+
+## 三、自动化测试规则
+
+测试双层设计：**自检式测试页**（`packages/*/test/statics/*.html`，人工打开可见
+每条用例的通过/失败）+ **playwright spec**（断言页面渲染出的可见结果）。
+人和自动化看同一份证据。
+
+- **一条命令跑全量**：`npm test`（chromium/firefox/webkit 三浏览器）。
+  **必须在仓库根目录执行**——在包目录里跑会命中该包自己的 test 脚本而加载错配置。
+- **全量全绿才算完成。** 未跑全量不算完成；失败必须定位并修复后重跑。
+- 新增用例优先做成自检页的检查项（`test()` + `harness.mjs`），再由 spec 断言
+  页面汇总；纯函数类可独立 spec。
+- **条件等待，禁止 sleep**：用 `waitFor`/`waitForFunction` 轮询条件，
+  不要 `setTimeout(300)` 式定时等待。
+- 失败三分类，处理不同：**本次改动引入的回归**（必须修）、**历史 flaky**
+  （修或注明原因）、**环境问题**（修环境，不是改测试）。
+  **禁止用"改断言 / 加 skip / 加固定等待"让测试变绿。**
+
+> **事故案例**：在 `packages/drill` 目录里直接跑 `npm test`，npm 就近命中该包
+> 自己的 test 脚本，而那里没有 playwright 配置，报 "Project chromium not
+> found"。正确姿势：包内 test 脚本显式写
+> `playwright test --config=../../playwright.config.mjs`，日常从根目录跑。
+
+## 四、基准测试规则（性能回归，非功能门禁 —— 用户手动驱动）
+
+- **AI 禁止自动跑基准**：不把 benchmark 作为功能完成的门禁，不主动周期运行。
+  只有**用户明确要求**（"跑一下 benchmark""对比新旧性能"）时才运行并解读。
+- 涉及性能敏感路径的改动，完成后应**提醒用户**可以跑
+  `npm run bench:drill` / `npm run bench:stanz` 验证。
+- 命令：`bench:drill` / `bench:stanz` / `bench:xhear` / `bench:ofajs` 各测一包，
+  `bench:cross` 测 ofa.js vs Vue vs React 跨框架对比，`bench` 依次跑四个单包基准。
+- 方法学与坑较多，**做基准相关改动前先读技能 `benchmark-methodology`**。
+
+## 五、踩坑知识沉淀规则
+
+任务结束时自检：这次有没有遇到"非显而易见"的问题（调了很久 / 行为与预期不符 /
+需要 workaround）？有 → 按下面的决策树写下来：
+
+```
+坑跟某个包的行为/契约强相关
+  └─→ 该包的 CONTEXT.md「踩坑」节
+坑跟业务无关（工具链 / 测试基建 / JIT / 浏览器行为）
+  └─→ .agents/skills/<技能名>/SKILL.md
+是影响所有任务的全局纪律
+  └─→ 根 AGENTS.md
+```
+
+**写法必须是「症状 → 根因 → 正确姿势」，可选附排查手法。** 只写"修复了 xxx"
+等于没写。已被现有文档覆盖的知识不重复记录。
+
+> **事故案例**：stanz 重构时 `emitUpdate` 改为直接遍历 `_owner`，漏掉了旧版
+> owner getter（返回 Set）天然的去重语义——同一子项重复 push 后祖先监听对同一
+> 变更收到多次事件。node 冒烟测试当场抓出。教训：**优化热路径时先列出旧代码的
+> 隐式语义清单，逐条确认新代码仍满足。**
+
+## 六、项目专属技能
+
+本项目在 `.agents/skills/` 下维护技能文档，处理对应场景时应先查阅：
+
+| 技能 | 触发场景 |
+|------|---------|
+| `benchmark-methodology` | 新建/修改 benchmark、解读 benchmark 结果、怀疑性能回退时 |
+| `ofajs-docs-v5` | 写/改 ofa.js 页面、组件、路由、状态管理时（**v5 修订版使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。已按 v5 源修订过期声明、移除项目特定泄漏，全文去重至 9 个文件——SKILL.md + syntax/modules/app-routing/state/api/pitfalls/examples/resources） |
+| `ofajs-docs` | 原始完整版（内容冗余、含 v4 残留声明如"o-fill && 必炸"、他项目调试痕迹，且部分说法与 v5 行为相悖）；已被 `ofajs-docs-v5` 取代，**建议删除以免误触发**（两技能触发场景几乎相同） |
+
+**同步维护**：新增或删除 `.agents/skills/` 下的技能时，必须同步更新上表。
+
+## 七、完成标准（强制）
+
+一个功能/阶段完成的判据是：
+
+1. `npm test` **全量**测试全绿
+2. 同步更新了对应包的 `CONTEXT.md`（涉及 API 变化的同步 README）
+3. 基准未自动运行；性能敏感改动已提醒用户可跑 bench
+4. 与用户确认后才 git commit
+
+**未跑全量不算完成。** 全量失败必须定位并修复后重跑，直到全绿。
+
+## 八、运行环境约定
+
+- 静态服务器：`npm run server` → `http://localhost:3348`（测试页手动预览用）；
+  `npm run server:website` 以 `docs/website` 为根目录，直接预览官网产物
+  （`http://localhost:3348/`，可用 `PORT` 指定端口）
+- 测试：`npm test`（playwright 自动起停 webServer，勿手动抢 3348 端口）
+- 基准：`npm run bench:stanz` / `npm run bench:drill` / `npm run bench:xhear` / `npm run bench:ofajs`（runner 自管 3349/3350/3351/3352）；跨框架对比 `npm run bench:cross`（自管 3353，首次先跑 fetch-cross-vendor.mjs）
+- CI：`.github/workflows/ci.yml`，八条并行任务——drill、stanz、router、scsr、plugins（各三浏览器）+ ofa.js 按
+  chromium/firefox/webkit 拆三条（ofajs 覆盖 xhear，不单列）。本地等价命令
+  `npm run test:drill` / `test:stanz` / `test:router` / `test:scsr` / `test:plugins` / `test:ofajs`；CI 下 config 自动启用
+  forbidOnly/retries=2/workers=1，router / scsr / plugins / ofajs 任务测试前先 `npm run build` 保 dist 与源码一致
+- 构建：`npm run build`（rollup 打包 ofajs → 根 `dist/`，产物冒烟页
+  `packages/ofajs/test/statics/dist-host.html` 随 `npm test` 断言）
+- 官网：`npm run build:website`（`docs/origin/<locale>` → `docs/website/<locale>`，
+  生成 SCSR 页面与根语言选择页；共享外壳在 `docs/website/components` 与
+  `styles`，详见 `docs/website/README.md`）
+- 版本：`npm run bump -- patch|minor|major|x.y.z`（统一 bump 根与全部
+  packages 的 package.json、ofa.js 运行时版本串，并同步 package-lock；
+  各包维护独立版本线，显式版本号为全包 lockstep 对齐；`--dry` 只打印计划；
+  bump 后需 `npm run build` 刷新 dist banner + 全量回归）
+- devDependency 是 `@playwright/test`（测试）+ `rollup` / `@rollup/plugin-terser`
+  （仅构建 ofajs dist）；浏览器二进制缺失时报
+  "Executable doesn't exist"，用 `npx playwright install <browser>` 安装
+- **macOS 26 上 Firefox 报 `browserContext.newPage: Target crashed`**：Firefox
+  内容沙箱在本机 `sandbox_init() failed`（环境限制，非用例问题）。用
+  `MOZ_DISABLE_CONTENT_SANDBOX=1 npm test` 跑全量即可全绿；Chromium/WebKit
+  不受影响
+- **macOS 27 上 Firefox 报 `Could not find profile folder` 或 launch 一直挂起**：
+  系统的 TCC 保护了 `~/Library/Application Support/Firefox`，Playwright 自带的
+  Firefox 从终端启动时读不到这个 app-data 根目录（本机装有 Firefox 时必现）。
+  `MOZ_DISABLE_CONTENT_SANDBOX` 对此无效；用 `CFFIXED_USER_HOME` 把 Gecko 的
+  app-data 根目录改到临时目录即可（不影响 Node/Playwright 的 `$HOME` 和浏览器
+  缓存查找）：
+
+  ```bash
+  mkdir -p /tmp/ffhome/Library/Application\ Support
+  CFFIXED_USER_HOME=/tmp/ffhome npm test
+  ```
+
+## 九、技术选型禁令
+
+为保证可维护性，未经确认**不得**引入：
+
+- **任何运行时依赖**：drill 与 stanz 目前零依赖（drill 连 ofa-error 都已移除），
+  错误处理用各包内部的轻量 Error 类
+- **打包器 / 构建步骤**：各包是 source-only ESM，`src/*.mjs` 即发布产物；
+  浏览器直接加载源码，"看到的文件 = 运行的文件"。
+  **例外（用户确认）**：经 rollup 打包的包统一在根 `rollup.config.mjs` 配置，
+  dist 产物不手改、只由 build 生成——
+  ofajs 主包 → 根 `dist/`（ES + UMD + min，2026-10-10 确认，框架本体经典入口，
+  供 `<script src>` 与 CDN）；
+  router / scsr 桥接包 → 各自包内 `dist/`（2026-10-17 确认，UMD 全局名
+  ofaRouter / ofaScsr；源码挂接全局 `$` 不 import 框架源码，自包含随 npm 发布）；
+  `packages/plugins/` 下插件 → 各自子包 `dist/`（2026-10-18 确认，同桥接原则
+  挂全局 `$`，UMD 全局名如 ofaFormData）；
+  其余包不得引入打包（`packages/plugins/` 下的插件为引用即用，同样不参与打包）
+- **测试基建新依赖**：静态服务器保持零依赖 `node:http`；不引入 vitest/jest
+  等第二测试运行器
+- **浏览器全局副作用**：新增代码不得依赖或写入 window 全局做模块间通信
+  （UMD 包对 window.$ / globalThis.ofa 的约定暴露除外，属框架公开契约；
+  桥接包 router / scsr 挂接全局 `$` 亦属此契约的消费者而非破坏者）
+
+理由：每多一层黑盒（转换、隐式行为、全局耦合），定位问题的能力就弱一分。
+stanz 正是靠"零全局副作用"才实现了新旧两版同页 A/B 对比的基准能力。

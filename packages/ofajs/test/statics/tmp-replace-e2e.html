@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8" /></head>
+<body>
+<replace-e2e></replace-e2e>
+<script type="module">
+  import "/packages/ofajs/src/main.mjs";
+  const { test, assert, assertEqual, waitFor, run } = await import("/packages/ofajs/test/statics/harness.mjs");
+
+  ofa.register({
+    tag: "replace-e2e",
+    temp: `
+    <table id="tb"><tbody>
+      <template is="replace-temp">
+        <o-fill :value="rows">
+          <tr><td>{{$data.name}}</td></tr>
+        </o-fill>
+      </template>
+    </tbody></table>
+
+    <select id="sel">
+      <template is="replace-temp">
+        <o-fill :value="opts">
+          <option attr:value="$data">{{$data}}</option>
+        </o-fill>
+      </template>
+    </select>
+
+    <table id="tc"><tbody>
+      <template is="replace-temp">
+        <o-if :value="show">
+          <tr class="cond"><td>conditional row</td></tr>
+        </o-if>
+        <o-else><tr class="else"><td>else row</td></tr></o-else>
+      </template>
+    </tbody></table>
+    `,
+    data: {
+      rows: [{ name: "r1" }, { name: "r2" }],
+      opts: ["A", "B", "C"],
+      show: true,
+    },
+  });
+
+  const $c = ofa("replace-e2e");
+
+  test("table + replace-temp + o-fill", async () => {
+    await waitFor(() => $c.shadow.$("#tb").all("tr").length === 2);
+    assert($c.shadow.$("#tb").text.includes("r1"), "行内容应渲染");
+  });
+
+  test("select + replace-temp + o-fill", async () => {
+    await waitFor(() => {
+      const sel = $c.shadow.$("#sel").ele;
+      return sel.options.length === 3;
+    });
+    assertEqual($c.shadow.$("#sel").ele.options[1].textContent, "B");
+  });
+
+  test("table + replace-temp + o-if 链", async () => {
+    await waitFor(() => !!$c.shadow.$("#tc .cond"));
+    $c.show = false;
+    await waitFor(() => !!$c.shadow.$("#tc .else"));
+    $c.show = true;
+    await waitFor(() => !!$c.shadow.$("#tc .cond"));
+  });
+
+  run();
+</script>
+</body>
+</html>

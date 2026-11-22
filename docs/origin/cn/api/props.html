@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 内容、属性与样式</p>
+      <h1>内容、属性与样式</h1>
+      <p class="doc-lead">读写文本、HTML、attribute、class 与内联样式。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="props"></docs-playground>
+
+      <h2>成员</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成员</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.text</code></td><td>读写 textContent（响应式）</td></tr>
+          <tr><td><code>el.html</code></td><td>读写 innerHTML（响应式）</td></tr>
+          <tr><td><code>el.attr(name[, value])</code></td><td>读写 HTML attribute；组件内相对 href/src 自动按 PATH 解析</td></tr>
+          <tr><td><code>el.prop(name[, value])</code></td><td>读写数据属性（等价 el[name]），支持点路径</td></tr>
+          <tr><td><code>el.class(name[, bool])</code></td><td>读取 / 开关 class</td></tr>
+          <tr><td><code>el.classList</code></td><td>原生 DOMTokenList</td></tr>
+          <tr><td><code>el.data</code></td><td>原生 dataset（非响应式）</td></tr>
+          <tr><td><code>el.style</code></td><td>原生内联样式对象（非响应式）</td></tr>
+          <tr><td><code>el.css</code></td><td>样式代理：读不到内联值时回退到计算样式，支持 --变量</td></tr>
+          <tr><td><code>el.refresh()</code></td><td>手动派发一次 refresh 更新事件</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>el.css 可以单条写（el.css.color）、对象整体覆盖，或字符串整体替换。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 总览</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

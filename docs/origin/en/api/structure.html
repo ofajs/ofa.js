@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Structure operations</p>
+      <h1>Structure operations</h1>
+      <p class="doc-lead">Child elements work with array semantics; mutating methods really move DOM nodes and trigger updates.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="structure"></docs-playground>
+
+      <h2>Members</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Member</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>push(...items)</code></td><td>Append child elements at the end; returns the new child element count</td></tr>
+          <tr><td><code>unshift(...items)</code></td><td>Insert child elements at the beginning; returns the new child element count</td></tr>
+          <tr><td><code>pop() / shift()</code></td><td>Remove the last / first child element and return its instance</td></tr>
+          <tr><td><code>splice(start, count, ...items)</code></td><td>Delete and insert; returns an array of the removed instances</td></tr>
+          <tr><td><code>reverse() / sort(fn)</code></td><td>Reverse / sort child elements in place</td></tr>
+          <tr><td><code>map / filter / slice / forEach</code></td><td>Non-mutating array methods: materialize an array of instances first, then run</td></tr>
+          <tr><td><code>el.before(content) / el.after(content)</code></td><td>Insert content before / after the element itself</td></tr>
+          <tr><td><code>el.remove()</code></td><td>Remove the element from its parent (through splice, so event semantics are intact)</td></tr>
+          <tr><td><code>el.wrap(content)</code></td><td>Wrap the element with content; throws when there is no parent</td></tr>
+          <tr><td><code>el.unwrap()</code></td><td>Remove the element's own wrapper; throws when there is more than one sibling</td></tr>
+          <tr><td><code>el.clone(bool = true)</code></td><td>Clone the element, including child elements by default</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Tip:</strong> Manipulating child elements directly does not update the array in data; use o-fill for template lists.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Back to API overview</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

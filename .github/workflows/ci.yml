@@ -1,0 +1,142 @@
+# CI: eight parallel pipelines
+# - drill / stanz / router / scsr / plugins: each package's full Playwright suite
+#   (chromium, firefox, webkit)
+# - ofa.js: split by browser into three jobs (the ofajs suite covers xhear,
+#   so xhear is not listed separately)
+# Jobs are independent and run in parallel; playwright.config.mjs switches to CI
+# mode automatically (forbidOnly / retries=2 / workers=1) and starts/stops the
+# static server on port 3348 for each run.
+name: CI
+
+on:
+  push:
+    branches: [main, rebuild]
+  pull_request:
+    branches: [main, rebuild]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-drill:
+    name: drill (3 browsers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test packages/drill --reporter=line
+
+  test-stanz:
+    name: stanz (3 browsers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test packages/stanz --reporter=line
+
+  test-router:
+    name: router (3 browsers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # dist smoke pages need the built artifacts; rebuild before testing
+      - run: npm run build
+      - run: npx playwright test packages/router --reporter=line
+
+  test-scsr:
+    name: scsr (3 browsers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # dist smoke pages need the built artifacts; rebuild before testing
+      - run: npm run build
+      - run: npx playwright test packages/scsr --reporter=line
+
+  test-plugins:
+    name: plugins (3 browsers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # dist smoke pages need the built artifacts; rebuild before testing
+      - run: npm run build
+      - run: npx playwright test packages/plugins --reporter=line
+
+  test-ofajs-chromium:
+    name: ofa.js (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # dist-host smoke page needs the built artifacts; rebuild before testing
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=chromium --reporter=line
+
+  test-ofajs-firefox:
+    name: ofa.js (firefox)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps firefox
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=firefox --reporter=line
+
+  test-ofajs-webkit:
+    name: ofa.js (webkit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit
+      - run: npm run build
+      - run: npx playwright test packages/ofajs --project=webkit --reporter=line

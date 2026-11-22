@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 09</p>
+      <h1>Editing a list</h1>
+      <p class="doc-lead">push/splice on an array update the view automatically; inline editing syncs straight to $data fields.</p>
+
+      <p>
+  Arrays in ofa.js are reactive: in-place operations such as <code>push</code> and
+  <code>splice</code> trigger updates, so there is no need to reassign the whole array.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9" fold-styles="true"></docs-playground>
+<h2>Inline editing</h2>
+<p>
+  Each item's input is bound to <code>$data.name</code>, so user input is written
+  straight to the object in the array. Combined with <code>fill-key="id"</code>, this
+  item won't be rebuilt when you reorder the list or delete other items.
+</p>
+<div class="doc-note">
+  <strong>When to replace the array:</strong> when you get a completely new list from
+  an API, <code>this.items = newList</code> is clearer; when adding, removing, or
+  editing a few items on the page, use <code>push</code> / <code>splice</code>.
+</div>
+<h2>Try it</h2>
+<p>
+  Add an "↑" button to each row that swaps it with the row above (hint: use
+  <code>items.splice($index - 1, 2, currentItem, previousItem)</code>).
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-8.html">08 · List rendering →</a> · Next: <a olink href="./lesson-10.html">10 · Computed properties and watchers →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

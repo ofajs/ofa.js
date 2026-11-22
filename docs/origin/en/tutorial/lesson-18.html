@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 18</p>
+      <h1>Nested Layouts</h1>
+      <p class="doc-lead">Child pages declare parent, and the parent page receives them through a slot; switching child pages does not destroy the parent.</p>
+
+      <p>
+  Put shared structure such as navigation bars and sidebars in the parent page; child pages
+  contain only their content and attach under the parent's <code>&lt;slot&gt;</code> via
+  <code>parent</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-18" fold-styles="true"></docs-playground>
+<h2>How the layout works</h2>
+<ul>
+  <li><code>layout.html</code>: navigation + <code>&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;</code>;</li>
+  <li><code>home.html</code> / <code>settings.html</code>:
+    <code>export const parent = "./layout.html"</code>;</li>
+  <li>The parent's <code>routerChange</code> fires when child pages switch, and is used to update the active navigation highlight.</li>
+</ul>
+<p>
+  When the two child pages switch back and forth, the parent instance is not recreated; navigation state and layout are preserved.
+</p>
+<div class="doc-note">
+  <strong>Don't duplicate the layout in child pages:</strong> write navigation and the footer once, in the parent;
+  child pages only care about their own content. For multi-level nesting, the parent can declare a parent too.
+</div>
+<h2>Try it yourself</h2>
+<p>
+  Add another child page, <code>profile.html</code>, plus a matching nav item, and confirm the layout doesn't flicker when switching.
+</p>
+
+      <p class="doc-end">Previous: <a olink href="./lesson-17.html">17 · Pages and Routing →</a> · Next: <a olink href="./lesson-19.html">19 · Async and Loading States →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

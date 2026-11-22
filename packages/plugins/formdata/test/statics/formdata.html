@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>formData 插件自检（源码形态）</title>
+  </head>
+  <body>
+    <!-- formData 插件与 o-if / o-fill 协作的集成自检（纯页面，spec 驱动）。
+        演示组件按 ofa.js 正统方式：HTML 文件 + l-m 引用 -->
+    <formdata-demo></formdata-demo>
+
+    <l-m src="./formdata-demo.html"></l-m>
+
+    <script type="module">
+      import "../../../../ofajs/src/main.mjs";
+      import "../../../formdata/formdata.mjs";
+    </script>
+  </body>
+</html>

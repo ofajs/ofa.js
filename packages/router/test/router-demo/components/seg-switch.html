@@ -1,0 +1,51 @@
+<!--
+  seg-switch：分段开关组件案例。
+
+  用法：
+  <seg-switch :value="当前 key" :options="[{ key, label }]" on:change="handler"></seg-switch>
+
+  组件只负责选中态展示与 change 派发（event.data.key），点击后跳转等
+  业务由使用方决定；选中态也可由使用方回写（如路由前进/后退时同步高亮）。
+-->
+<template component>
+  <style>
+    /* 分段按钮组观感，配色沿用 :root 设计令牌（CSS 变量穿透 shadow DOM） */
+    :host {
+      display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 14px;
+      background: var(--card); border: 1px solid var(--border); border-radius: .375em;
+    }
+    button {
+      padding: .3em 1.1em; border: none; border-radius: .25em; cursor: pointer;
+      background: none; color: var(--muted); font: inherit; font-size: 13.5px;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out;
+    }
+    button:hover { background: var(--accent-soft); color: var(--accent); }
+    button.active { background: var(--accent); color: #fff; }
+    button.active:hover { background: color-mix(in srgb, var(--accent) 85%, #000); }
+  </style>
+  <o-fill :value="options" fill-key="key">
+    <button class:active="$data.key === $host.value" on:click="$host.select($data.key)">{{$data.label}}</button>
+  </o-fill>
+  <script>
+    export default async () => {
+      return {
+        tag: "seg-switch",
+        data: {
+          value: "", // 当前选中的 key
+          options: [], // 可选项 [{ key, label }]
+        },
+        proto: {
+          select(key) {
+            if (key === this.value) {
+              return;
+            }
+
+            this.value = key;
+            // composed：事件要穿出组件的 shadow 边界，使用方才能监听到
+            this.emit("change", { data: { key }, bubbles: true, composed: true });
+          },
+        },
+      };
+    };
+  </script>
+</template>

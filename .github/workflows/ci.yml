@@ -1,8 +1,11 @@
-# CI：七条并行流水线
-# - drill / stanz / router / scsr：各自包的 playwright 全量（三浏览器）
-# - ofa.js：按浏览器拆三条（chromium / firefox / webkit；ofajs 覆盖 xhear，故不单列 xhear）
-# 各任务互不依赖，天然并行；playwright.config.mjs 在 CI 下自动启用
-# forbidOnly / retries=2 / workers=1，并在测试前自动起停 3348 静态服务器。
+# CI: eight parallel pipelines
+# - drill / stanz / router / scsr / plugins: each package's full Playwright suite
+#   (chromium, firefox, webkit)
+# - ofa.js: split by browser into three jobs (the ofajs suite covers xhear,
+#   so xhear is not listed separately)
+# Jobs are independent and run in parallel; playwright.config.mjs switches to CI
+# mode automatically (forbidOnly / retries=2 / workers=1) and starts/stops the
+# static server on port 3348 for each run.
 name: CI
 
 on:
@@ -17,7 +20,7 @@ concurrency:
 
 jobs:
   test-drill:
-    name: drill（三浏览器）
+    name: drill (3 browsers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -31,7 +34,7 @@ jobs:
       - run: npx playwright test packages/drill --reporter=line
 
   test-stanz:
-    name: stanz（三浏览器）
+    name: stanz (3 browsers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -45,7 +48,7 @@ jobs:
       - run: npx playwright test packages/stanz --reporter=line
 
   test-router:
-    name: router（三浏览器）
+    name: router (3 browsers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -56,12 +59,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      # dist smoke pages need the built artifacts; rebuild before testing
       - run: npm run build
       - run: npx playwright test packages/router --reporter=line
 
   test-scsr:
-    name: scsr（三浏览器）
+    name: scsr (3 browsers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -72,12 +75,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      # dist smoke pages need the built artifacts; rebuild before testing
       - run: npm run build
       - run: npx playwright test packages/scsr --reporter=line
 
   test-plugins:
-    name: plugins（三浏览器）
+    name: plugins (3 browsers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -88,12 +91,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      # dist 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      # dist smoke pages need the built artifacts; rebuild before testing
       - run: npm run build
       - run: npx playwright test packages/plugins --reporter=line
 
   test-ofajs-chromium:
-    name: ofa.js（chromium）
+    name: ofa.js (chromium)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -104,12 +107,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      # dist-host 冒烟页依赖 dist 产物，测试前重建保证与源码一致
+      # dist-host smoke page needs the built artifacts; rebuild before testing
       - run: npm run build
       - run: npx playwright test packages/ofajs --project=chromium --reporter=line
 
   test-ofajs-firefox:
-    name: ofa.js（firefox）
+    name: ofa.js (firefox)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -124,7 +127,7 @@ jobs:
       - run: npx playwright test packages/ofajs --project=firefox --reporter=line
 
   test-ofajs-webkit:
-    name: ofa.js（webkit）
+    name: ofa.js (webkit)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

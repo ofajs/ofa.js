@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Extensión de instancias</p>
+      <h1>Extensión de instancias</h1>
+      <p class="doc-lead">Añade métodos, getters y nuevas directivas a una sola instancia o a todas las instancias.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="extend"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.extend(obj, options)</code></td><td>Extiende solo la instancia actual; no enumerable por defecto</td></tr>
+          <tr><td><code>$.fn.extend(obj)</code></td><td>Extiende todas las instancias; los getters / setters se pueden definir como nuevas directivas</td></tr>
+          <tr><td><code>enumerable: true</code></td><td>Hace explícitamente enumerable la extensión (afecta a Object.keys / toJSON)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> no permitas que los nombres de las extensiones colisionen con miembros integrados (attr, class, text, html, watch, etc.).
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

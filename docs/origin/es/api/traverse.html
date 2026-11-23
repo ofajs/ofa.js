@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Selección y recorrido</p>
+      <h1>Selección y recorrido</h1>
+      <p class="doc-lead">Encuentra elementos dentro de una instancia y muévete en ambos sentidos a través de los límites del DOM y del shadow.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="traverse"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.$(expr)</code></td><td>Encuentra la primera coincidencia dentro de la instancia; dentro de un componente, usa this.shadow.$()</td></tr>
+          <tr><td><code>el.all(expr)</code></td><td>Encuentra todas las coincidencias dentro de la instancia y devuelve un array de instancias</td></tr>
+          <tr><td><code>el.parent</code></td><td>La instancia del elemento padre; null cuando el padre es document</td></tr>
+          <tr><td><code>el.parents</code></td><td>Array con todas las instancias ancestro</td></tr>
+          <tr><td><code>el.parentsUntil(expr)</code></td><td>Recorre los ancestros hacia arriba hasta que expr coincida (sin incluir ese nodo)</td></tr>
+          <tr><td><code>el.hosts</code></td><td>La cadena de shadow hosts, nivel por nivel</td></tr>
+          <tr><td><code>el.next / el.nexts</code></td><td>El siguiente hermano / todos los elementos hermanos posteriores</td></tr>
+          <tr><td><code>el.prev / el.prevs</code></td><td>El hermano anterior / todos los elementos hermanos anteriores</td></tr>
+          <tr><td><code>el.siblings</code></td><td>Todos los elementos hermanos excepto el propio elemento</td></tr>
+          <tr><td><code>el.is(expr)</code></td><td>Indica si coincide con un selector, o si es igual a una instancia o a un elemento nativo</td></tr>
+          <tr><td><code>el.contains(expr)</code></td><td>Indica si contiene un selector, una instancia o un elemento nativo dados</td></tr>
+          <tr><td><code>el.composedPath()</code></td><td>La ruta completa del sistema de eventos (a través de los límites del shadow), devuelta como un array de nodos nativos</td></tr>
+          <tr><td><code>el.get("a.b.c")</code></td><td>Lee un valor mediante una ruta con puntos; una sola clave equivale al acceso directo</td></tr>
+          <tr><td><code>el.set("a.b.c", value)</code></td><td>Asigna un valor mediante una ruta con puntos; una sola clave equivale a la asignación directa</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> En el ejemplo, second.prev / second.next son instancias hermanas; class() activa y desactiva nombres de clase.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

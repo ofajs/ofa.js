@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 19</p>
+      <h1>Asincronía y estados de carga</h1>
+      <p class="doc-lead">Controla la interfaz con los tres estados asíncronos: loading / error / success; no pongas resultados asíncronos en un getter.</p>
+
+      <p>
+  La inicialización de una página a menudo tiene que esperar a una API. No envuelvas la lógica asíncrona en un getter; usa
+  campos de estado explícitos: <code>loading</code>, <code>error</code> y <code>user</code>, y deja que ellos controlen la interfaz.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-19" fold-styles="true"></docs-playground>
+<h2>Flujo recomendado</h2>
+<ol>
+  <li>Inicia la petición: <code>status = "loading"</code> y borra el error anterior;</li>
+  <li>Si tiene éxito: escribe el resultado en los datos y pon <code>status = "done"</code>;</li>
+  <li>Si falla: escribe el mensaje de error en <code>error</code> y pon <code>status = "error"</code>.</li>
+</ol>
+<p>
+  La interfaz usa <code>o-if</code> / <code>o-else-if</code> / <code>o-else</code>
+  para mostrar, respectivamente, la carga, el error y el contenido.
+</p>
+<div class="doc-note">
+  <strong>Por qué importa un estado explícito:</strong> un único <code>user</code> no permite distinguir
+  "aún no iniciado", "cargando" y "no se pudo cargar". Los campos de estado dan a cada caso una interfaz definida,
+  y facilitan añadir interacciones como deshabilitar botones o reintentar.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Dale a la petición un retardo de 600 ms (el ejemplo ya lo tiene) y deshabilita el botón "Recargar" mientras carga;
+  después prueba a hacer clicable el mensaje de fallo para reintentar.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-18.html">18 · Diseños anidados →</a> · Siguiente: <a olink href="./lesson-20.html">20 · Poniéndolo todo junto: una lista de tareas →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

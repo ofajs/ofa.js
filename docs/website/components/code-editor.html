@@ -260,6 +260,7 @@
     const IS_EN = document.documentElement.lang.startsWith("en");
     const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
     const IS_JA = document.documentElement.lang.startsWith("ja");
+    const IS_ES = document.documentElement.lang.startsWith("es");
     const UI = IS_EN
       ? {
           editorAria: "Code editor",
@@ -286,6 +287,15 @@
           foldHint: "行番号左の ▸ をクリックして展開、または",
           expandAll: "すべて展開して編集",
           foldToggle: "折りたたみ／展開",
+        }
+      : IS_ES
+      ? {
+          editorAria: "Editor de código",
+          foldedPrefix: "Regiones contraídas: ",
+          foldedSuffix: "",
+          foldHint: "Haz clic en ▸ a la izquierda del número de línea para expandir, o",
+          expandAll: "Expandir todo y editar",
+          foldToggle: "Contraer o expandir",
         }
       : {
           editorAria: "代码编辑器",

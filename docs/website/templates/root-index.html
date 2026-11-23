@@ -210,7 +210,7 @@
             return;
           }
 
-          const supported = ["cn", "t-cn", "en", "ja"];
+          const supported = ["cn", "t-cn", "en", "ja", "es"];
           const forced = params.get("lang");
           let locale = "";
 
@@ -237,6 +237,9 @@
               const hasJapanese = languages.some((lang) =>
                 /^ja(?:-|$)/i.test(lang),
               );
+              const hasSpanish = languages.some((lang) =>
+                /^es(?:-|$)/i.test(lang),
+              );
 
               if (hasTraditional) {
                 locale = "t-cn";
@@ -244,6 +247,8 @@
                 locale = "cn";
               } else if (hasJapanese) {
                 locale = "ja";
+              } else if (hasSpanish) {
+                locale = "es";
               } else if (hasEnglish) {
                 locale = "en";
               } else {
@@ -254,11 +259,15 @@
                     ? "t-cn"
                     : /^(Asia\/Tokyo)$/.test(zone)
                       ? "ja"
-                      : /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi)|Asia\/Singapore)$/.test(
+                      : /^(Europe\/Madrid|America\/(Mexico_City|Bogota|Lima|Santiago|Argentina\/Buenos_Aires))$/.test(
                             zone,
                           )
-                        ? "cn"
-                        : "en";
+                        ? "es"
+                        : /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi)|Asia\/Singapore)$/.test(
+                              zone,
+                            )
+                          ? "cn"
+                          : "en";
               }
             }
           }
@@ -275,7 +284,7 @@
       document.addEventListener("click", (event) => {
         const card = event.target.closest && event.target.closest(".lang-card");
         if (!card) return;
-        const match = (card.getAttribute("href") || "").match(/\/(cn|t-cn|en|ja)\/?$/);
+        const match = (card.getAttribute("href") || "").match(/\/(cn|t-cn|en|ja|es)\/?$/);
         if (!match) return;
         try {
           localStorage.setItem("ofa-site-locale", match[1]);

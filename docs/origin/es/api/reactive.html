@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Datos y observadores</p>
+      <h1>Datos y observadores</h1>
+      <p class="doc-lead">Los datos de la instancia provienen de stanz: leer y escribir campos es una actualización reactiva, y la observación y la limpieza tienen cada una sus propios métodos.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="reactive"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.watch(cb)</code></td><td>Observa los cambios en la instancia y sus hijos; devuelve un id de observador</td></tr>
+          <tr><td><code>el.watchTick(cb)</code></td><td>Igual que watch, pero un lote de cambios en un mismo tick se notifica una sola vez</td></tr>
+          <tr><td><code>el.unwatch(id)</code></td><td>Anula el registro de un observador</td></tr>
+          <tr><td><code>el.watchUntil(fn, timeout = 30000)</code></td><td>Una Promise que se resuelve cuando se cumple la condición y se desvincula a sí misma; el tiempo de espera predeterminado es de 30 segundos</td></tr>
+          <tr><td><code>el.refresh(opts)</code></td><td>Despacha manualmente un evento de refresco sin cambiar los datos</td></tr>
+          <tr><td><code>el.sync(prop, path, options)</code></td><td>Acción de sincronización bidireccional; destinada únicamente a la sincronización de plantillas (sync:), y llamarla directamente lanza un error</td></tr>
+          <tr><td><code>el.toJSON() / el.toString()</code></td><td>Exporta un objeto plano (recursivo) o una cadena JSON</td></tr>
+          <tr><td><code>el.revoke()</code></td><td>Revoca la instancia: borra los observadores y libera las referencias a los datos</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> watchUntil solo evalúa en los cambios de datos y no comprueba inmediatamente después del registro; si la condición ya puede cumplirse, compruébala tú mismo una vez primero.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

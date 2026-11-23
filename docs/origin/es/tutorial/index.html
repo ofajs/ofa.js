@@ -1,0 +1,193 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>Empieza con ofa.js desde cero</h1>
+      <p class="doc-lead">
+        20 lecciones breves, organizadas como «Primeros pasos → Interactividad y estado →
+        Componentes → Aplicaciones en la práctica». Cada lección empieza con un problema
+        pequeño: cambia el código y pulsa Ctrl/⌘+S para ver el resultado al instante.
+      </p>
+
+      <h2>Primeros pasos</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>Tu primera página</h2>
+          <p>En ofa.js, una página es solo un archivo HTML: la estructura, los estilos y la lógica viven en un mismo archivo.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>Datos e interpolación</h2>
+          <p>data puede contener cadenas, números, booleanos, objetos y arreglos, y {{ }} puede evaluar expresiones sencillas.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>Atributos dinámicos</h2>
+          <p>Usa attr: para los atributos HTML y :prop para las propiedades del DOM; los atributos booleanos deben usar attr:.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>Estilos y class</h2>
+          <p>El &lt;style&gt; de una página solo se aplica a esa página; class: y :style hacen que los estilos sigan los cambios de los datos.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Interactividad y estado</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>Eventos</h2>
+          <p>Usa on: para escuchar eventos: la lógica sencilla se escribe como expresiones y la compleja como métodos de proto.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>Enlace bidireccional</h2>
+          <p>sync: mantiene un campo de formulario y los datos sincronizados en ambos sentidos; es más adecuado para valores escalares.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>Renderizado condicional</h2>
+          <p>o-if / o-else-if / o-else controlan si el contenido existe.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>Renderizado de listas</h2>
+          <p>o-fill renderiza arreglos; dentro de cada elemento de la lista usa $data, $index y $host.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>Editar una lista</h2>
+          <p>push/splice en el arreglo actualizan la vista automáticamente; la edición en línea se sincroniza directamente con un campo de $data.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>Propiedades calculadas y observadores</h2>
+          <p>Los getters de proto se calculan de forma síncrona; watch observa los cambios y gestiona los efectos secundarios.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>Ciclo de vida</h2>
+          <p>ready → attached → loaded y, al eliminar el elemento, detached; limpia los temporizadores y los escuchadores de eventos en detached.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Componentes</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>Tu primer componente</h2>
+          <p>Divide la interfaz reutilizable en un &lt;template component&gt; y cárgalo con l-m.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>Parámetros de componente</h2>
+          <p>Los datos externos llegan al componente a través de attrs; internamente, el componente guarda su propio estado en data.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>Slots y eventos</h2>
+          <p>slot permite que un componente reciba contenido externo; emit informa hacia fuera lo que ocurrió dentro.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Aplicaciones en la práctica</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>Contexto entre capas</h2>
+          <p>Usa o-provider / o-consumer para compartir datos en un subárbol de componentes.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>Estado global</h2>
+          <p>Cuando varios componentes comparten una misma parte del estado, crea un almacén a nivel de módulo con $.stanz y móntalo y límpialo en attached/detached.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>Páginas y enrutamiento</h2>
+          <p>o-app gestiona la pila de páginas: cambia de página con olink / goto, pasa parámetros con query y vuelve con back.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>Diseños anidados</h2>
+          <p>Una página hija declara parent y la página padre la recibe mediante un slot; cambiar de página hija no destruye la página padre.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>Asincronía y estados de carga</h2>
+          <p>Controla la interfaz con los estados loading / error / success de las solicitudes asíncronas; nunca pongas resultados asíncronos en un getter.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>Todo junto: una lista de tareas</h2>
+          <p>Combina listas, formularios, condicionales, propiedades calculadas, observadores y localStorage en una aplicación completa.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>¿Cómo deberías estudiar?</strong>
+        Lee primero la explicación y después edita el código de la derecha y pulsa <kbd>Ctrl</kbd>+<kbd>S</kbd>
+        (<kbd>⌘</kbd>+<kbd>S</kbd> en Mac) para ejecutarlo. Si rompes algo, haz clic en «Restablecer» en el editor
+        para recuperar el ejemplo de esta lección.
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,128 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Datos</p>
+      <h1>Estado global</h1>
+      <p class="doc-lead">
+        Cuando varias páginas o componentes necesitan compartir los mismos datos, crea un estado reactivo
+        con <code>$.stanz()</code>. No depende de variables globales y no se persiste
+        automáticamente.
+      </p>
+
+      <h2>Crear un estado compartido</h2>
+      <pre><code>// store.js
+export const cart = $.stanz({
+  items: [],
+  total: 0,
+});
+
+export const session = $.stanz({
+  user: null,
+  theme: "dark",
+});</code></pre>
+      <p>
+        <code>$.stanz()</code> devuelve un proxy profundamente reactivo. Asignar a objetos anidados
+        y hacer <code>push</code>/<code>splice</code> en arreglos notifica a todos los consumidores.
+      </p>
+
+      <h2>Usarlo en una página</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;ul&gt;
+    &lt;o-fill :value="items" fill-key="id"&gt;
+      &lt;li&gt;{{$data.name}} × {{$data.count}}&lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    export default async ({ load }) =&gt; {
+      const { cart } = await load("./store.js");
+
+      return {
+        data: { items: [] },
+        attached() {
+          this.items = cart.items;
+        },
+        detached() {
+          this.items = [];
+        },
+      };
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Convención de montaje y desmontaje:</strong>
+        vincula el estado compartido a tus propios datos en <code>attached</code> y borra la
+        referencia en <code>detached</code>, para que el estado no siga haciendo referencia a un
+        componente destruido.
+      </div>
+
+      <h2>Leer y escribir el estado compartido</h2>
+      <pre><code>cart.items.push({
+  id: Date.now(),
+  name: "productos de ofa.js",
+  count: 1,
+});
+
+cart.total = cart.items.reduce(
+  (sum, item) =&gt; sum + item.count,
+  0,
+);</code></pre>
+      <p>
+        Cuando varias páginas leen el mismo <code>cart</code>, un cambio realizado en cualquiera de ellas
+        se propaga a las demás páginas y componentes.
+      </p>
+
+      <h2>Observar el estado directamente</h2>
+      <pre><code>const tid = cart.watch(() =&gt; {
+  console.log("el carrito cambió", cart.total);
+});
+
+// cuando ya no se necesite
+cart.unwatch(tid);</code></pre>
+      <p>
+        <code>watch</code> observa en profundidad, por lo que los cambios en objetos e arreglos hijos también se disparan.
+        Dentro de los componentes es mejor vincular el estado a los datos y dejar que la plantilla se actualice
+        automáticamente, en lugar de manipular el DOM a mano.
+      </p>
+
+      <h2>Estado local frente a estado compartido</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Escenario</th><th>Enfoque</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Solo se usa en el componente actual</td><td><code>data</code></td></tr>
+          <tr><td>Pasar valores entre componentes padre e hijo</td><td><code>:prop</code> / <code>sync:</code></td></tr>
+          <tr><td>Datos de negocio entre niveles</td><td><code>o-provider</code> / <code>o-consumer</code></td></tr>
+          <tr><td>Compartido globalmente entre páginas</td><td><code>$.stanz()</code></td></tr>
+          <tr><td>Temas puramente de estilo</td><td>Variables CSS / <code>match-var</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        Para una forma más estructurada de compartir datos entre niveles, consulta
+        <a olink href="./context.html">Contexto entre componentes</a>.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./data.html">Datos y observadores →</a>
+         · Siguiente: <a olink href="./context.html">Contexto entre componentes →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

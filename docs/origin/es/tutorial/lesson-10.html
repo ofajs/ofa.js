@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 10</p>
+      <h1>Propiedades calculadas y observación</h1>
+      <p class="doc-lead">Los getters de proto calculan de forma síncrona; watch observa los cambios y gestiona los efectos secundarios.</p>
+
+      <p>
+  Para valores derivados de datos existentes, usa un getter en <code>proto</code>.
+  Cuando necesites hacer trabajo adicional después de que cambien los datos (registrar, escribir en un almacenamiento externo), usa <code>watch</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10" fold-styles="true"></docs-playground>
+<h2>Cómo dividen el trabajo los getters y watch</h2>
+<ul>
+  <li><code>get total()</code>: úsalo en las plantillas como un campo normal; se actualiza automáticamente con sus dependencias;</li>
+  <li><code>watch.qty(value, { watchers })</code>: se ejecuta después de que cambian los datos;</li>
+  <li>watch se llama una vez durante la inicialización, cuando <code>watchers</code> todavía no existe,
+    así que puedes usar <code>if (!watchers) return</code> para omitir esa primera llamada.</li>
+</ul>
+<div class="doc-note">
+  <strong>Límites de los getters:</strong> un getter se evalúa cuando se inicializa la plantilla,
+  por lo que solo puede depender de datos síncronos que ya existan. Si dependes de datos asíncronos
+  devueltos por una API, primero guarda el resultado en un campo de datos y luego asígnalo en la devolución de llamada asíncrona.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade una entrada «descuento» (0–1) para que el precio total se calcule con el descuento;
+  luego usa watch para registrar los cambios del descuento.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-9.html">09 · Edición de una lista →</a> · Siguiente: <a olink href="./lesson-11.html">11 · Ciclo de vida →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

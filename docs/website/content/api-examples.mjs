@@ -477,7 +477,8 @@ export const getApiExample = (
   key,
   english =
     document.documentElement.lang.startsWith("en") ||
-    document.documentElement.lang.startsWith("ja"),
+    document.documentElement.lang.startsWith("ja") ||
+    document.documentElement.lang.startsWith("es"),
   traditional = document.documentElement.lang.startsWith("zh-Hant"),
 ) =>
   (english

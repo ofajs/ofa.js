@@ -30,7 +30,9 @@ const loadingLabel = document.documentElement.lang.startsWith("en")
     ? "頁面載入中"
     : document.documentElement.lang.startsWith("ja")
       ? "ページを読み込み中"
-      : "页面加载中";
+      : document.documentElement.lang.startsWith("es")
+        ? "Cargando página"
+        : "页面加载中";
 
 export const loading = () => `
   <div class="route-progress" role="progressbar" aria-label="${loadingLabel}">

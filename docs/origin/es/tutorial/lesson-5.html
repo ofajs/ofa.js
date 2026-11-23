@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 05</p>
+      <h1>Eventos</h1>
+      <p class="doc-lead">Escucha eventos con el prefijo on:. Para la lógica simple basta una expresión; para algo más complejo, un método de proto.</p>
+
+      <p>
+  Los enlaces de eventos siempre se escriben como <code>on:event-name</code>. El valor puede
+  ser una única expresión o el nombre de un método de <code>proto</code>; los métodos se
+  vinculan automáticamente a la instancia de página actual.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5" fold-styles="true"></docs-playground>
+<h2>Dos estilos</h2>
+<ul>
+  <li><code>on:click="count++"</code>: ideal para la lógica que cabe en una sola línea;</li>
+  <li><code>on:click="decrement"</code>: ideal para lógica de varios pasos o reutilizable;</li>
+  <li><code>on:input="onNameInput($event)"</code>: pasa <code>$event</code> cuando
+    necesites el objeto de evento nativo.</li>
+</ul>
+<div class="doc-note">
+  <strong>No recurras al DOM:</strong> en un manejador basta con cambiar
+  <code>this.count</code> y la página se actualiza automáticamente. Solo necesitas acceder
+  de verdad al DOM para cosas como medir el tamaño, enfocar un elemento o inicializar una
+  biblioteca de terceros.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade un límite a <code>decrement</code>: no dejes que el contador baje de 0.
+  Después añade un botón que multiplique el contador por 2.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-4.html">04 · Estilos y class →</a> · Siguiente: <a olink href="./lesson-6.html">06 · Enlace bidireccional →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

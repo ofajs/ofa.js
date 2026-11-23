@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ciclo de vida — Documentación de ofa.js</title>
+    <meta name="description" content="Momento, orden y liberación de recursos para ready, attached, loaded y detached." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ciclo de vida — Documentación de ofa.js" />
+    <meta property="og:description" content="Momento, orden y liberación de recursos para ready, attached, loaded y detached." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos fundamentales</p>
+      <h1>Ciclo de vida</h1>
+      <p class="doc-lead">
+        Los componentes y las páginas comparten el mismo conjunto de hooks del ciclo de
+        vida. Entender el orden en que se ejecutan evita que toques elementos antes de
+        que exista el DOM y te ayuda a limpiar temporizadores y escuchadores correctamente.
+      </p>
+
+      <h2>Los cuatro hooks</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Hook</th><th>Cuándo se ejecuta</th><th>Usos típicos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ready()</code></td>
+            <td>Plantilla renderizada y DOM creado, aunque no necesariamente ya en el documento</td>
+            <td>Inicializar el DOM y bibliotecas de terceros, medir el estado inicial</td>
+          </tr>
+          <tr>
+            <td><code>attached()</code></td>
+            <td>El elemento se monta en el DOM</td>
+            <td>Iniciar temporizadores, añadir escuchadores globales, cargar estado compartido</td>
+          </tr>
+          <tr>
+            <td><code>loaded()</code></td>
+            <td>El elemento, sus componentes hijos y los recursos asíncronos han terminado de cargarse</td>
+            <td>Finalización que depende del árbol de componentes completo, ocultar indicadores de carga</td>
+          </tr>
+          <tr>
+            <td><code>detached()</code></td>
+            <td>El elemento se elimina del DOM</td>
+            <td>Limpiar temporizadores, escuchadores y referencias a estado compartido</td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>En el primer montaje el orden es <code>ready → attached → loaded</code>; <code>detached</code> se llama cuando se elimina el elemento.</p>
+
+      <h2>Un ejemplo completo de limpieza</h2>
+      <pre><code>export default {
+  tag: "clock-view",
+  data: {
+    now: Date.now(),
+  },
+  attached() {
+    this._timer = setInterval(() =&gt; {
+      this.now = Date.now();
+    }, 1000);
+    this._onResize = () =&gt; {
+      this.width = window.innerWidth;
+    };
+    window.addEventListener("resize", this._onResize);
+  },
+  detached() {
+    clearInterval(this._timer);
+    window.removeEventListener("resize", this._onResize);
+  },
+};</code></pre>
+      <p>
+        Los temporizadores, los escuchadores de eventos globales y las referencias a
+        estado compartido deben liberarse todos en <code>detached</code>; de lo
+        contrario, las actualizaciones pueden seguir disparándose después de que el
+        componente se destruya, provocando fugas de memoria.
+      </p>
+
+      <h2>ready frente a attached</h2>
+      <p>
+        <code>ready</code> es el lugar adecuado para trabajar con el Shadow DOM propio
+        de un componente, por ejemplo consultando <code>this.shadow.$("#id")</code>. Si
+        la lógica depende del tamaño real del elemento o de su posición en el documento,
+        <code>attached</code> es más seguro.
+      </p>
+      <pre><code>ready() {
+  this.shadow.$("#canvas").css.width = "100%";
+},
+attached() {
+  const rect = this.ele.getBoundingClientRect();
+  this.width = rect.width;
+},</code></pre>
+
+      <h2>Datos asíncronos y propiedades calculadas</h2>
+      <p>
+        Los getters de <code>proto</code> se evalúan en cuanto se inicializa la plantilla,
+        antes de <code>ready</code>. Solo son adecuados para cálculos simples sobre
+        valores iniciales síncronos:
+      </p>
+      <pre><code>data: { count: 0 },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+},</code></pre>
+      <p>
+        Si un cálculo depende de una API asíncrona, no lo pongas en un getter. Usa en su
+        lugar un campo de datos y asígnalo en la función de retorno asíncrona:
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = user.role === "admin" ? "Administrador" : "Usuario";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+      <p>
+        Para más escenarios de depuración, consulta <a olink href="./pitfalls.html">Errores comunes</a>.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./page.html">Páginas →</a>
+         · Siguiente: <a olink href="./template.html">Resumen de directivas →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

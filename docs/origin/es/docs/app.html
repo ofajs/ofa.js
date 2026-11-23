@@ -1,0 +1,147 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Aplicaciones o-app</h1>
+      <p class="doc-lead">
+        <code>o-app</code> es un contenedor de microaplicaciones. Carga un módulo de configuración de la aplicación
+        y gestiona la pila de páginas, las animaciones de transición entre páginas y los eventos de navegación, pero no
+        carga el HTML de las páginas por sí mismo.
+      </p>
+
+      <h2>Aplicación mínima</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        El <code>src</code> de <code>o-app</code> debe ser un módulo de configuración de la aplicación;
+        no puede apuntar directamente a una página. Para ejecutar una sola página de forma independiente, usa
+        <code>&lt;o-page src="./page.html"&gt;</code>.
+      </p>
+
+      <h2>Configuración de la aplicación</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;Cargando...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;No se pudo cargar: ${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// Control de acceso a páginas de origen cruzado: devuelve true para permitir, false o un Error para denegar
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("la aplicación está lista", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Exportación</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>Dirección de la página de inicio que se carga al iniciar</td></tr>
+          <tr><td><code>pageAnime</code></td><td>Animación de transición de página de tres estados: current / next / previous</td></tr>
+          <tr><td><code>loading</code></td><td>HTML que se muestra mientras se carga una página</td></tr>
+          <tr><td><code>fail</code></td><td>HTML que se muestra cuando falla la carga; recibe <code>{ src, error }</code></td></tr>
+          <tr><td><code>allowForward</code></td><td>Si se permite <code>forward()</code>; desactivado de forma predeterminada</td></tr>
+          <tr><td><code>access</code></td><td>Control de acceso a páginas de origen cruzado; devuelve true para permitir. No es necesario para páginas del mismo origen</td></tr>
+          <tr><td><code>proto</code></td><td>Métodos y getters añadidos a la instancia de o-app</td></tr>
+          <tr><td><code>ready</code></td><td>Callback que se ejecuta después de cargar la configuración; <code>this</code> es la instancia de la aplicación</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> recibe el <code>src</code> de una página y debe devolver
+        <code>true</code> para que se cargue una página de origen cruzado; devolver <code>false</code> o un
+        <code>Error</code> la rechaza. El sitio de destino debe seguir configurando CORS correctamente;
+        de lo contrario, el navegador bloquea la solicitud primero.
+      </p>
+
+      <h2>Instancia de la aplicación</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // instancia de la página actual
+app.appIsReady; // la primera página se ha renderizado (espera con watchUntil)
+app.routers;   // pila de enrutamiento; las páginas de diseño padre no entran en ella
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // requiere allowForward: true</code></pre>
+      <p>
+        Dentro de un módulo de página también puedes llamar directamente a <code>this.goto</code>,
+        <code>this.replace</code> y <code>this.back</code>;
+        <code>this.app</code> apunta a la aplicación a la que pertenece la página.
+      </p>
+
+      <h2>Observar los cambios de enrutamiento</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // URL de la página de destino
+});</code></pre>
+
+      <h2>Animaciones de página</h2>
+      <p>
+        <code>pageAnime.current</code> es el estado de una página asentada,
+        <code>next</code> es el inicio de entrada de la página entrante y <code>previous</code>
+        es el final de salida de la página saliente. Los tres estados pueden omitirse; en ese caso
+        se usan los valores predeterminados.
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./context.html">Contexto entre componentes →</a>
+         · Siguiente: <a olink href="./routing.html">Enrutamiento y navegación →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

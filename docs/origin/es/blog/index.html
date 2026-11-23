@@ -1,0 +1,33 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/blog.css" />
+
+  <main class="articles-page">
+    <section class="articles-hero">
+      <p class="articles-kicker">Notas de ingeniería</p>
+      <h1>Blog</h1>
+      <p class="articles-lead">
+        Notas sobre las versiones de ofa.js, el flujo de renderizado, las
+        decisiones de rendimiento y la ingeniería detrás de un framework sin compilación.
+      </p>
+    </section>
+
+    <div class="article-list">
+      <a class="article-card" olink href="./v5-vs-v4.html">
+        <span class="article-card-meta">2026-11-22 · 9 min de lectura</span>
+        <h2>¿Cuánto mejor es ofa.js v5 respecto a v4?</h2>
+        <p>
+          Desde el salto de rendimiento en la reconciliación de listas hasta el
+          paso al monorepo, el flujo reescrito de o-if / o-fill y el desarrollo
+          asistido por IA: una mirada fundamentada a lo que realmente mejoró en
+          v5 y a lo que se mantuvo igual.
+        </p>
+        <span class="article-card-link">Leer el artículo →</span>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    export const parent = "{{LOCALE}}/layout.html";
+  </script>
+</template>

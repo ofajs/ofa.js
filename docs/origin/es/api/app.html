@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · o-app y o-page</p>
+      <h1>o-app y o-page</h1>
+      <p class="doc-lead">El contenedor de la aplicación gestiona la pila de páginas y la navegación; una instancia de página gestiona su propia pantalla de contenido.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="app"></docs-playground>
+
+      <h2>Instancia de o-app</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>app.src</code></td><td>URL del módulo de configuración de la aplicación</td></tr>
+          <tr><td><code>app.current</code></td><td>Instancia de la página actual (solo lectura)</td></tr>
+          <tr><td><code>app.routers</code></td><td>Array del historial de rutas, legible y modificable</td></tr>
+          <tr><td><code>app.goto(src)</code></td><td>Navega y añade la página a la pila</td></tr>
+          <tr><td><code>app.replace(src)</code></td><td>Reemplaza la página actual sin añadirla a la pila</td></tr>
+          <tr><td><code>app.back(delta = 1)</code></td><td>Retrocede</td></tr>
+          <tr><td><code>app.forward(delta = 1)</code></td><td>Avanza (requiere allowForward)</td></tr>
+          <tr><td><code>app.appIsReady</code></td><td>La primera página ha terminado de renderizarse (solo lectura)</td></tr>
+          <tr><td><code>app._module</code></td><td>Configuración de la aplicación: home, loading, fail, access, allowForward, pageAnime</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <h2>Instancia de o-page</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>page.src</code></td><td>URL del módulo de página, inmutable después de la inicialización</td></tr>
+          <tr><td><code>page.pageIsReady</code></td><td>Indicador de que la página ha terminado de renderizarse (solo lectura)</td></tr>
+          <tr><td><code>page.goto(src) / page.replace(src)</code></td><td>Resuelve la URL con respecto a la página actual y luego navega</td></tr>
+          <tr><td><code>page.back()</code></td><td>Retrocede</td></tr>
+          <tr><td><code>page.pageAnime</code></td><td>Configuración de animación de esta página, legible y modificable</td></tr>
+          <tr><td><code>page._rendered</code></td><td>Promesa que se resuelve cuando la página termina de renderizarse</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

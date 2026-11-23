@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Contenido, atributos y estilos</p>
+      <h1>Contenido, atributos y estilos</h1>
+      <p class="doc-lead">Lee y escribe texto, HTML, atributos, clases y estilos en línea.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="props"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.text</code></td><td>Lee y escribe textContent (reactivo)</td></tr>
+          <tr><td><code>el.html</code></td><td>Lee y escribe innerHTML (reactivo)</td></tr>
+          <tr><td><code>el.attr(name[, value])</code></td><td>Lee o escribe un atributo HTML; los href/src relativos dentro de un componente se resuelven automáticamente contra PATH</td></tr>
+          <tr><td><code>el.prop(name[, value])</code></td><td>Lee o escribe una propiedad de datos (igual que el[name]); admite rutas con puntos</td></tr>
+          <tr><td><code>el.class(name[, bool])</code></td><td>Lee o alterna una clase</td></tr>
+          <tr><td><code>el.classList</code></td><td>DOMTokenList nativo</td></tr>
+          <tr><td><code>el.data</code></td><td>Dataset nativo (no reactivo)</td></tr>
+          <tr><td><code>el.style</code></td><td>Objeto de estilo en línea nativo (no reactivo)</td></tr>
+          <tr><td><code>el.css</code></td><td>Proxy de estilos: recurre a los estilos calculados cuando no hay valor en línea; admite --variables</td></tr>
+          <tr><td><code>el.refresh()</code></td><td>Despacha manualmente un evento de actualización de refresco</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> el.css permite asignar propiedad por propiedad (el.css.color), reemplazar el objeto completo o sustituir el valor completo por una cadena.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

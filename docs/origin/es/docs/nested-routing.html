@@ -1,0 +1,116 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento anidado</h1>
+      <p class="doc-lead">
+        Cuando varias páginas comparten la misma navegación y barra lateral,
+        coloca la estructura común en una página padre y monta las páginas
+        hijas bajo el <code>&lt;slot&gt;</code> del padre mediante
+        <code>export const parent</code>.
+      </p>
+
+      <h2>Página padre: el diseño</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;Inicio&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;Documentación&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Página hija: declarar el padre</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;Contenido principal&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> se resuelve en relación con la dirección de la
+        propia página hija. La página hija solo se encarga del contenido dentro
+        de <code>slot</code>; el encabezado, el pie de página y la barra lateral
+        compartidos permanecen en el padre.
+      </p>
+
+      <h2>Comportamiento al cambiar</h2>
+      <ul>
+        <li>Cuando se cambia entre páginas hijas del mismo padre, el padre <strong>no se destruye</strong>: solo se reemplaza el contenido del slot;</li>
+        <li>se conservan los datos del padre, la posición de desplazamiento y los componentes cargados;</li>
+        <li>entrar o salir de una página hija a través del padre dispara el <code>routerChange</code> del padre;</li>
+        <li>un padre también puede declarar <code>parent</code>, formando varios niveles de anidación.</li>
+      </ul>
+
+      <h2>La estructura que usa este sitio</h2>
+      <p>
+        Este sitio es en sí mismo una instancia del patrón:
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← diseño del sitio (navegación, pie de página, barra lateral de documentación)
+docs/origin/cn/index.html         ← página de inicio, montada en el diseño
+docs/origin/cn/docs/*.html        ← páginas de documentación, montadas en el mismo diseño</code></pre>
+      <p>
+        Cada página de documentación termina con:
+      </p>
+      <pre><code>export const parent = "{{LOCALE}}/layout.html";</code></pre>
+      <p>
+        Como resultado, cambiar de artículo de documentación no reconstruye el
+        encabezado, el pie de página ni la tabla de contenidos de la izquierda:
+        solo se actualiza el área del cuerpo.
+      </p>
+
+      <h2>Errores comunes</h2>
+      <ul>
+        <li>Olvidar <code>&lt;slot&gt;&lt;/slot&gt;</code> en el padre, de modo que el contenido de la página hija no se muestra;</li>
+        <li>una ruta <code>parent</code> incorrecta, que carga la página de forma independiente y descarta el diseño;</li>
+        <li>colocar <code>routerChange</code> en la página hija: solo se dispara en el padre;</li>
+        <li>usar nombres reservados como <code>back</code>, <code>goto</code> o <code>src</code> en los datos del padre, lo que hace que falle el registro.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./routing.html">Enrutamiento y navegación →</a>
+         · Siguiente: <a olink href="./scsr.html">scsr con rutas reales →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

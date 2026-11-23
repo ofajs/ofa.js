@@ -54,7 +54,8 @@ export const createLandingPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
   const isEnglish =
     document.documentElement.lang.startsWith("en") ||
-    document.documentElement.lang.startsWith("ja");
+    document.documentElement.lang.startsWith("ja") ||
+    document.documentElement.lang.startsWith("es");
 
   const codeZh = {
     hero: `<template component>

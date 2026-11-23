@@ -1,0 +1,118 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento con rutas reales mediante scsr</h1>
+      <p class="doc-lead">
+        scsr hace que cada URL sea un documento HTML real que se puede abrir
+        directamente. La navegación dentro del sitio sigue pasando por el
+        enrutamiento de la aplicación, pero las recargas, el uso compartido y
+        los rastreadores obtienen todo el contenido.
+      </p>
+
+      <h2>En qué se diferencia de o-router</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Capacidad</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Forma de la URL</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>Reescritura en el servidor</td><td>No es necesaria</td><td>Un HTML por ruta</td></tr>
+          <tr><td>SEO / visible sin JS</td><td>Más débil</td><td>HTML completo de la primera pantalla</td></tr>
+          <tr><td>API de páginas</td><td colspan="2">Igual: goto / replace / back / diseños anidados / animaciones</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Estructura de la página</h2>
+      <p>
+        Cada URL se corresponde con un documento HTML completo, con el contenido
+        de la página incluido en línea en el <code>&lt;template page&gt;</code>
+        de <code>o-app</code>:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;Inicio&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;Contenido de inicio&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;Ir a los detalles&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>La configuración de la aplicación no declara home</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr adopta la URL actual como página, y la página de inicio es el HTML
+        de esa URL, así que no configures <code>home</code>. Navega dentro del
+        sitio con <code>olink</code> o <code>goto()</code>, manteniendo rutas
+        reales como direcciones.
+      </p>
+
+      <h2>Requisitos del servidor</h2>
+      <ul>
+        <li>cada ruta devuelve su HTML correspondiente con <code>Content-Type: text/html; charset=UTF-8</code>;</li>
+        <li>el <code>&lt;template page&gt;</code> de la página puede contener contenido estático renderizado en el servidor;</li>
+        <li>CSS, JS e imágenes se sirven como recursos estáticos normales;</li>
+        <li>scsr debe cargarse después de ofa.js, ya que se conecta al <code>$</code> global existente de la página.</li>
+      </ul>
+
+      <h2>Respaldo y primera pantalla</h2>
+      <p>
+        Sin JS, la página sigue siendo el HTML completo producido por el
+        servidor; solo la lógica interactiva no se ejecuta. Con JS, scsr toma el
+        control, convierte la URL actual en una página dentro de la aplicación y
+        la navegación posterior ya no necesita recargar la página completa.
+      </p>
+
+      <h2>Cuándo elegirlo</h2>
+      <ul>
+        <li>sitios que necesitan SEO y enlaces compartibles, como sitios de marketing, documentación y blogs;</li>
+        <li>cada página tiene su propia URL y su propia metainformación;</li>
+        <li>ya dispones de plantillas de servidor o SSG que pueden generar HTML por ruta.</li>
+      </ul>
+      <p>
+        Para aplicaciones puramente internas que no necesitan indexación en
+        buscadores, o-router es más sencillo.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./nested-routing.html">Enrutamiento anidado →</a>
+         · Siguiente: <a olink href="./api.html">$.fn y objetos envueltos →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

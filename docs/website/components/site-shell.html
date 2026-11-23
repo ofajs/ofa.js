@@ -35,6 +35,7 @@
             <option value="t-cn">繁體中文</option>
             <option value="ja">日本語</option>
             <option value="en">English</option>
+            <option value="es">Español</option>
           </st-select>
         </div>
       </div>
@@ -301,19 +302,31 @@
       return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
     };
 
-    const resultKind = (url, english = false, traditional = false, japanese = false) => {
+    const resultKind = (
+      url,
+      english = false,
+      traditional = false,
+      japanese = false,
+      spanish = false,
+    ) => {
       if (url.startsWith("api/")) return "API";
-      if (url.startsWith("blog/")) return english ? "Blog" : japanese ? "ブログ" : "博客";
+      if (url.startsWith("blog/")) {
+        return english ? "Blog" : japanese ? "ブログ" : spanish ? "Blog" : "博客";
+      }
       if (url.startsWith("tutorial/")) {
-        return english ? "Tutorial" : japanese ? "チュートリアル" : "教程";
+        if (english) return "Tutorial";
+        if (japanese) return "チュートリアル";
+        return spanish ? "Tutorial" : "教程";
       }
       if (url.startsWith("docs/")) {
         if (english) return "Docs";
         if (japanese) return "ドキュメント";
+        if (spanish) return "Documentación";
         return traditional ? "文檔" : "文档";
       }
       if (english) return "Home";
       if (japanese) return "ホーム";
+      if (spanish) return "Inicio";
       return traditional ? "首頁" : "首页";
     };
 
@@ -356,7 +369,7 @@
         footerNote: "This page is built with ofa.js itself.",
       },
       data: {
-        lang: ["cn", "t-cn", "en", "ja"].includes(
+        lang: ["cn", "t-cn", "en", "ja", "es"].includes(
           location.pathname.split("/")[1],
         )
           ? location.pathname.split("/")[1]
@@ -364,6 +377,7 @@
         isEnglish: document.documentElement.lang.startsWith("en"),
         isTraditional: document.documentElement.lang.startsWith("zh-Hant"),
         isJapanese: document.documentElement.lang.startsWith("ja"),
+        isSpanish: document.documentElement.lang.startsWith("es"),
         menuOpen: false,
         searchOpen: false,
         searchQuery: "",
@@ -383,7 +397,7 @@
 
           const url = new URL(location.href);
           const parts = url.pathname.split("/");
-          if (["cn", "t-cn", "en", "ja"].includes(parts[1])) {
+          if (["cn", "t-cn", "en", "ja", "es"].includes(parts[1])) {
             parts[1] = next;
           } else {
             parts.splice(1, 0, next);
@@ -523,6 +537,7 @@
                 this.isEnglish,
                 this.isTraditional,
                 this.isJapanese,
+                this.isSpanish,
               ),
               snippet: makeSnippet(entry, terms),
             }));

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>¿Cuánto mejor es ofa.js v5 que v4? — ofa.js</title>
+    <meta name="description" content="Un análisis riguroso de lo que cambió entre ofa.js v4 y v5: arquitectura, renderizado, rendimiento de listas, enrutamiento y experiencia de desarrollo." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="¿Cuánto mejor es ofa.js v5 que v4? — ofa.js" />
+    <meta property="og:description" content="Un análisis riguroso de lo que cambió entre ofa.js v4 y v5: arquitectura, renderizado, rendimiento de listas, enrutamiento y experiencia de desarrollo." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/blog.css" />
+
+  <main class="article-page">
+    <a class="article-back" olink href="./">← Volver al blog</a>
+
+    <article class="article-body">
+      <p class="article-kicker">Ingeniería · Comparación de versiones</p>
+      <h1>¿Cuánto mejor es ofa.js<br />v5 respecto a v4?</h1>
+      <p class="article-lead">
+        v5 no es una versión que se limite a añadir API. Mantiene la forma en que
+        escribes aplicaciones con ofa.js, pero reconstruye por debajo el renderizado
+        de plantillas, la reconciliación de listas, los límites entre módulos y los
+        casos límite del enrutamiento.
+      </p>
+
+      <div class="article-meta">
+        <span>2026-11-22</span>
+        <span>9 min de lectura</span>
+        <span>Basado en ofa.js 5.0 y 4.7.7</span>
+      </div>
+
+      <div class="article-tags" aria-label="Temas">
+        <span>o-if / o-fill</span>
+        <span>Reconciliación con LIS</span>
+        <span>monorepo</span>
+        <span>Asistido por IA</span>
+      </div>
+
+      <p>
+        El resumen más breve y preciso es este:
+        <strong>en la superficie sigue pareciendo ofa.js, pero lo que hay debajo se reconstruyó sobre bases más limpias.</strong>
+        Las ideas de v4 —componentes, páginas, <code>o-app</code>, <code>o-page</code>,
+        provider/consumer, sin compilación— siguen presentes. Lo que cambió es la maquinaria que las sustenta.
+      </p>
+
+      <h2>1. La respuesta breve</h2>
+      <p>
+        Para la mayor parte del código de aplicación, migrar a v5 no resulta caro: la sintaxis
+        de plantillas es en gran medida la misma, las páginas y los componentes se organizan igual,
+        y el enrutamiento SCSR con rutas reales continúa. Pero si te importan el rendimiento,
+        el mantenimiento o los casos límite de las plantillas, los cambios son considerables:
+      </p>
+      <ul>
+        <li>La reconciliación de listas usa LIS, lo que hace que los intercambios, las actualizaciones parciales y las operaciones por lotes sean mucho más rápidos.</li>
+        <li>El núcleo pasó de repositorios separados a un único monorepo: drill, stanz, xhear y ofajs ahora evolucionan juntos.</li>
+        <li>El renderizado de plantillas usa el flujo de xhear v9; <code>o-if</code> y <code>o-fill</code> se trasladaron a xhear y se reescribieron.</li>
+        <li>La antigua sintaxis <code>x-*</code> desapareció; <code>o-*</code> es el único vocabulario de plantillas.</li>
+        <li>La capa de aplicación ya no depende de un <code>window.lm</code> global, y los códigos de error se trasladaron al framework.</li>
+        <li>El enrutamiento gestiona con más fiabilidad la salida de páginas, los recálculos de diseños anidados y otros casos límite relacionados.</li>
+        <li>El desarrollo asistido por IA se apoya en pruebas, documentación y contexto compartidos en el mismo repositorio.</li>
+      </ul>
+
+      <h2>2. Rendimiento de listas: esta vez es medible</h2>
+      <p>
+        La mejora más difícil está en la ejecución de listas. La antigua reconciliación
+        tenía dos problemas estructurales: cualquier cambio profundo en un elemento podía
+        refrescar toda la lista, y la reconciliación basada en índices con <code>indexOf</code>
+        degradaba a O(n²) en los intercambios, además de mover muchos más nodos DOM de los necesarios.
+      </p>
+      <p>
+        v5 usa comprobaciones estructurales, reconciliación con LIS, contextos de fila ligeros,
+        filtrado de dependencias a nivel de enlace y deshacer por lotes. En el
+        benchmark del repositorio —la misma máquina, Chromium 156, mediana de tres ejecuciones— las cifras se movieron así:
+      </p>
+
+      <table class="article-table">
+        <thead>
+          <tr><th>Escenario</th><th>v4 (4.7.7)</th><th>v5 (5.0)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Intercambiar dos elementos en 1.000 filas</td><td class="metric-v4">3020ms</td><td class="metric-v5">120ms</td></tr>
+          <tr><td>Diez actualizaciones parciales</td><td class="metric-v4">421ms</td><td class="metric-v5">93ms</td></tr>
+          <tr><td>Añadir 1.000 filas</td><td class="metric-v4">247ms</td><td class="metric-v5">39ms</td></tr>
+          <tr><td>Eliminar 100 filas</td><td class="metric-v4">53ms</td><td class="metric-v5">20ms</td></tr>
+          <tr><td>Vaciar 2.000 filas</td><td class="metric-v4">35ms</td><td class="metric-v5">16ms</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Este es un benchmark interno, no una promesa para cada dispositivo o forma de
+        datos. La construcción de 1.000 filas y el primer pintado mejoran mucho menos
+        (aproximadamente de 38ms a 34ms, con el primer pintado en torno a 69ms sin cambios), porque
+        ese coste está dominado por la ejecución de módulos y el registro de elementos,
+        no por la reconciliación de listas. Pero en los intercambios, los borrados por lotes y las
+        actualizaciones parciales —las operaciones que suelen doler— la diferencia ya no está en el mismo rango.
+      </p>
+      <p>
+        Sobre el tamaño del paquete: el <code>ofa.min.mjs</code> de v4 ocupa 75.749 B
+        (25.327 B con gzip, 22.662 B con brotli); la compilación de v5 ocupa 69.914 B
+        (24.168 B con gzip, 21.552 B con brotli). Eso es aproximadamente un 7,7% menos en bruto,
+        un 4,6% menos con gzip y un 4,9% menos con brotli. No es un cambio de orden de
+        magnitud, pero sí demuestra que el trabajo de rendimiento no vino de acumular código.
+      </p>
+
+      <div class="article-note">
+        <strong>¿Por qué los intercambios son la mayor ganancia?</strong>
+        <p>
+          La implementación anterior recalculaba las asignaciones de claves después de cada
+          movimiento, así que intercambiar dos elementos se convertía en cascada en una serie de
+          movimientos del DOM. La nueva implementación primero usa LIS para encontrar el
+          conjunto más pequeño de nodos que realmente necesitan moverse y después confirma los cambios en un lote.
+        </p>
+      </div>
+
+      <h2>3. De repositorios separados a un monorepo: cuatro paquetes, un repositorio</h2>
+      <p>
+        En la era de v4, las capacidades del núcleo estaban repartidas en repositorios separados:
+        <strong>drill</strong> cargaba módulos en el navegador,
+        <strong>stanz</strong> proporcionaba datos reactivos basados en Proxy,
+        <strong>xhear</strong> era dueño de los Web Components y de la compilación de plantillas,
+        y <strong>ofajs</strong> añadía la capa de aplicación —páginas, enrutamiento, contexto y <code>o-link</code>.
+        Cada uno podía funcionar por su cuenta, pero los cambios entre repositorios, las pruebas de integración
+        y la alineación de versiones resultaban dolorosos.
+      </p>
+      <p>
+        El cambio central de v5 no es «volver a dividir las cosas». Es reunir
+        esos repositorios antes separados en un solo monorepo para que evolucionen juntos.
+        Los cuatro paquetes siguen teniendo límites claros, pero un cambio que cruza paquetes puede
+        aterrizar en un único commit y verificarse con una sola ejecución de pruebas y una sola compilación.
+      </p>
+      <p>
+        Mantener ofa.js en sí también se vuelve más fácil. En la era multirrepositorio,
+        actualizar ofa.js a menudo implicaba sincronizar versiones, pruebas e incidencias entre
+        repositorios. Ahora un cambio y su impacto aguas abajo en drill, stanz y
+        xhear viven en el mismo repositorio: buscar, saltar a definiciones,
+        ejecutar pruebas y depurar ya no exigen cambiar de repositorio. Una reproducción,
+        una corrección y una prueba de regresión pueden aterrizar en un solo commit: actualizar
+        ofa.js y rastrear problemas recorren un camino mucho más corto.
+      </p>
+      <p>
+        Eso importa para el propio framework: cuando cambia el flujo de renderizado de <strong>xhear</strong>,
+        las pruebas de páginas y enrutamiento de <strong>ofajs</strong> pueden ejecutarse en la misma
+        pasada; cuando <strong>stanz</strong> cambia la forma en que emite las actualizaciones reactivas,
+        es inmediatamente visible si el re-renderizado de listas de <strong>xhear</strong> sufrió una regresión.
+        ofa.js también hace un <code>import</code> explícito del cargador que necesita en lugar de depender
+        de un <code>lm</code> global que casualmente exista en la página. v5 también trasladó la
+        tabla de códigos de error al framework y eliminó el paquete separado <code>ofa-error</code>.
+      </p>
+      <p>
+        Otro cambio fácil de pasar por alto es la forma de la versión:
+        <strong>el código fuente es el artefacto</strong>. Salvo el paquete principal de ofa.js
+        y algunos paquetes puente que usan rollup, los paquetes siguen siendo
+        ESM solo de código fuente. El <code>.mjs</code> que ejecuta el navegador es el código fuente
+        del repositorio, así que la depuración no rebota entre un source map y
+        la implementación real.
+      </p>
+
+      <h2>4. Plantillas y renderizado: corregir los bordes de «funciona hasta que deja de funcionar»</h2>
+      <p>
+        El sistema de plantillas de v4 ya era capaz, pero se apoyaba en el flujo más antiguo
+        de xtext / x-bind-data. Tras trasladar el renderizado a xhear v9,
+        <code>o-if</code> y <code>o-fill</code> ya no son directivas simples que
+        «envuelven una plantilla». Compilan bajo demanda, almacenan en caché el resultado
+        compilado y usan una ruta rápida basada en descriptores.
+      </p>
+      <p>
+        El resultado práctico es que las combinaciones que podían fallar en silencio
+        en plantillas complejas ahora se comportan de forma predecible, por ejemplo:
+      </p>
+      <ul>
+        <li>un <code>o-fill</code> dentro de un <code>o-if</code>;</li>
+        <li>un <code>o-if</code> dentro de cada elemento de <code>o-fill</code>;</li>
+        <li>filas de tabla renderizadas mediante <code>replace-temp</code>;</li>
+        <li>plantillas con nombre que se referencian a sí mismas de forma recursiva.</li>
+      </ul>
+      <p>
+        v5 también elimina explícitamente <code>x-if</code>, <code>x-else-if</code>,
+        <code>x-else</code> y <code>x-fill</code>. Esos elementos ya no se
+        registran; usarlos produce un mensaje de obsolescencia en lugar de comportarse
+        de forma distinta en silencio. La semántica de las plantillas y la documentación ahora tienen un solo
+        vocabulario: <code>o-*</code>.
+      </p>
+      <pre class="code-sample"><code><span class="tok-comment">&lt;!-- v4 --&gt;</span>
+<span class="tok-tag">&lt;x-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/x-fill&gt;</span>
+
+<span class="tok-comment">&lt;!-- v5 --&gt;</span>
+<span class="tok-tag">&lt;o-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/o-fill&gt;</span></code></pre>
+
+      <h2>5. Enrutamiento y páginas: de «funciona» a «estable»</h2>
+      <p>
+        v5 sigue usando rutas reales SCSR: cada URL se asigna a un documento HTML,
+        puede desplegarse en un servidor estático y puede ser adoptada por <code>o-app</code>
+        como una página anidada. v4 demostró el modelo; v5 corrige los bordes:
+      </p>
+      <ul>
+        <li>Las páginas que salen fijan su tamaño y posición durante los cambios de diseño en lugar de saltar a la esquina superior izquierda.</li>
+        <li>Las rutas anidadas mantienen un padre compartido mediante <code>export const parent</code>, así que cambiar de página hija no reconstruye el padre.</li>
+        <li><code>waitPageReaded</code> reutiliza la promesa <code>_rendered</code> de la página en lugar de sondear.</li>
+        <li><code>o-app</code> admite <code>access</code>, <code>allowForward</code>, animaciones de página y una página de error clara.</li>
+      </ul>
+      <p>
+        Por separado, ninguna de estas mejoras es enorme, pero en conjunto hacen que las transiciones de página
+        se sientan más predecibles. En particular, ir de la página de inicio a la
+        documentación y volver ya no hace que la página anterior parpadee mientras se recalcula el diseño.
+      </p>
+
+      <h2>6. Estado y contexto: la misma API, una implementación más ajustada</h2>
+      <p>
+        <code>o-provider</code>, <code>o-consumer</code> y
+        <code>o-root-provider</code> permanecen, ahora recorriendo explícitamente
+        <code>composedPath</code> a través de los límites de shadow.
+        <code>getProvider</code>, <code>watchUntil</code> y
+        <code>access</code> conservan la sensación de v4.
+      </p>
+      <p>
+        La diferencia es una implementación más disciplinada: los datos de contexto ya
+        no dependen de globales, los componentes y las páginas saben a qué aplicación o provider
+        pertenecen, y la regla de que los hijos light de un <code>o-consumer</code>
+        no se compilan está cubierta por pruebas. En la práctica, eso significa
+        menos momentos de «¿por qué no se actualizó esto?» en lugar de una nueva curva de aprendizaje.
+      </p>
+
+      <h2>7. Ingeniería y ecosistema: sin compilación, todavía</h2>
+      <p>
+        v4 convirtió «sin empaquetador» en una característica definitoria, y v5 no la abandona.
+        Un archivo HTML sigue siendo un componente o una página, el navegador lo ejecuta directamente,
+        y <code>l-m</code>, <code>olink</code> y SCSR no requieren Node.js.
+        Lo que cambió es cómo se organiza el ecosistema:
+      </p>
+      <ul>
+        <li><code>inject-host</code>, <code>formdata</code> y capacidades similares se separaron en complementos opcionales.</li>
+        <li>Las pruebas cubren componentes, condicionales/listas, enrutamiento, contexto y plantillas con nombre.</li>
+        <li>La documentación, la referencia de API, el tutorial y el playground comparten los mismos ejemplos ejecutables.</li>
+        <li>Los errores son más específicos, y el modo de depuración (<code>#debug</code>) habilita los source maps.</li>
+      </ul>
+
+      <h2>8. Desarrollo asistido por IA con un ciclo de retroalimentación más corto</h2>
+      <p>
+        v5 se construyó con una fuerte asistencia de IA: la refactorización del framework, la cobertura de pruebas,
+        la documentación y los tutoriales, y este mismo sitio web involucraron IA.
+        Lo valioso no es que «la IA escriba algunos fragmentos». Es que el repositorio
+        le da a la IA un ciclo de retroalimentación estable.
+      </p>
+      <ul>
+        <li>Cada paquete tiene un <code>CONTEXT.md</code> que registra su estructura real, sus contratos de API y sus errores comunes.</li>
+        <li>Las páginas de autoprueba y Playwright en tres navegadores pueden reproducir problemas que de otro modo parecen intermitentes.</li>
+        <li>La documentación, los tutoriales, el playground y el código fuente conviven, así que el comportamiento y su explicación pueden cambiar en el mismo commit.</li>
+        <li>El monorepo permite que un cambio entre paquetes ejecute la suite completa una vez, en lugar de obligar a la IA a adivinar entre repositorios.</li>
+      </ul>
+      <p>
+        «Asistido por IA» no es marketing aquí. Significa que la depuración y las correcciones
+        futuras pueden leer el mismo contexto, ejecutar las mismas pruebas, ver el mismo fallo
+        y confirmar la corrección junto con su documentación. Un ciclo de retroalimentación
+        más corto hace más difícil que una corrección se aleje del problema real.
+      </p>
+
+      <h2>9. Coste de migración: menor de lo esperado, pero no cero</h2>
+      <p>
+        Viniendo de v4, hay tres cosas principales que atender:
+      </p>
+      <ol>
+        <li>Reemplazar <code>x-if</code> / <code>x-fill</code> por <code>o-if</code> / <code>o-fill</code>.</li>
+        <li>Asegurarte de que las etiquetas <code>&lt;script&gt;</code> de componentes y páginas estén dentro de
+          <code>&lt;template&gt;</code> (v4 lo recomendaba; v5 ignora los scripts que están fuera).</li>
+        <li>Si código de terceros depende del antiguo <code>lm</code> global, cámbialo por una importación explícita de módulo.</li>
+      </ol>
+      <p>
+        También vigila la URL del CDN: usa
+        <code>@5</code> para seguir la última versión 5.x; para fijarla exactamente, usa una
+        versión completa como <code>@5.0.2</code>.
+        Por lo demás, la estructura de las páginas, el enrutamiento, el contexto y el código de estado normalmente
+        pueden trasladarse tal cual.
+      </p>
+
+      <h2>La conclusión</h2>
+      <p>
+        La mejora de v5 no es «una característica más». Es una reconstrucción de las
+        partes de v4 que eran <strong>funcionales pero frágiles, o suficientemente rápidas pero difíciles de explicar</strong>.
+        La composición de plantillas es más fiable, las operaciones de lista pasan de segundos
+        a milisegundos, los límites entre módulos y las rutas de error son más claros, y
+        la sencillez de no tener compilación sigue ahí.
+      </p>
+      <p>
+        Si solo necesitas una página que funcione, v4 y v5 pueden parecerte similares. Si
+        mantienes un proyecto de larga vida, o te han mordido la reordenación de listas,
+        los condicionales anidados o los parpadeos al salir de una página, el valor de v5 es muy concreto.
+      </p>
+
+      <p class="article-end">
+        Para los detalles de implementación, empieza por la
+        <a olink href="../../docs/">documentación</a> o el
+        <a olink href="../../tutorial/">tutorial</a>.
+      </p>
+    </article>
+  </main>
+
+  <script>
+    export const parent = "../layout.html";
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

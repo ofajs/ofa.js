@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js — Escribe componentes como HTML</title>
+    <meta name="description" content="ofa.js es un framework front-end sin compilación y sin dependencias basado en Web Components. Un archivo HTML es un componente que se ejecuta directamente en el navegador: no se necesita npm, Node.js ni ningún empaquetador." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js — Escribe componentes como HTML" />
+    <meta property="og:description" content="ofa.js es un framework front-end sin compilación y sin dependencias basado en Web Components. Un archivo HTML es un componente que se ejecuta directamente en el navegador: no se necesita npm, Node.js ni ningún empaquetador." />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../styles/site.css" />
+  <l-m src="../components/demo-counter.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/icon-button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/code/code.html"></l-m>
+
+  <main class="main">
+      <!-- ============ PORTADA ============ -->
+      <section class="hero" id="top">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <div class="hero-badges">
+              <span class="eyebrow">
+                <i class="pulse"></i>
+                v5 · Framework de Web Components sin compilación
+              </span>
+              <a
+                class="legacy-docs"
+                href="https://v4.ofajs.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Abrir la documentación heredada de v4 (nueva pestaña)"
+              >
+                Documentación heredada de v4
+                <span class="arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+  
+            <h1>Escribe componentes<br /><span class="grad">como HTML puro.</span></h1>
+  
+            <p class="lead">
+              ofa.js es un framework de frontend <b>sin compilación y sin dependencias</b>. <b>Un archivo .html es un componente</b>,
+              y el navegador lo ejecuta directamente: sin andamiaje, sin la caja negra de un empaquetador, solo el HTML, CSS y JavaScript que ya conoces.
+            </p>
+  
+            <div class="actions">
+              <st-button class="btn btn-primary" on:click="jump('start')">
+                Empieza en 5 minutos
+                <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </st-button>
+              <st-button
+                class="btn btn-ghost"
+                variant="outlined"
+                on:click="openExternal(githubUrl)"
+              >
+                Ver en GitHub
+              </st-button>
+            </div>
+  
+            <div class="cdn-box">
+              <div class="cdn-top">
+                <span class="cdn-tag">CDN · v5</span>
+                <span class="cdn-label">ESM</span>
+                <st-icon-button
+                  class="copy-btn"
+                  on:click="copySnippet(cdnUrl)"
+                  aria-label="Copiar la URL del ESM de v5"
+                  title="Copiar la URL del ESM de v5"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                  </svg>
+                </st-icon-button>
+              </div>
+              <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+              <p class="cdn-hint">Copia la URL y pégala en una etiqueta &lt;script type="module"&gt; o en un import.</p>
+            </div>
+  
+            <div class="stats">
+              <div class="stat">
+                <b>0</b>
+                <span>Dependencias en tiempo de ejecución</span>
+              </div>
+              <div class="stat">
+                <b>24 KB</b>
+                <span>Tamaño con gzip</span>
+              </div>
+              <div class="stat">
+                <b>100%</b>
+                <span>Estándares nativos</span>
+              </div>
+              <div class="stat">
+                <b>2018</b>
+                <span>Código abierto desde</span>
+              </div>
+            </div>
+          </div>
+  
+          <div class="hero-visual" data-reveal style="--d: 120ms">
+            <st-code
+              frame
+              lang="html"
+              title="components/hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-xl);"
+              :code="codeHero"
+            ></st-code>
+  
+            <div class="window-status">
+              <span class="ok"><i></i>Sin paso de compilación</span>
+              <span>HTML → Navegador</span>
+            </div>
+  
+            <div class="hero-float">
+              <span class="float-label"><i></i>Un componente real · en vivo ahora mismo</span>
+              <demo-counter start="12" attr:reset-label="site.demo.reset"></demo-counter>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ CINTA ============ -->
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Reactividad por Proxy</span><i></i>
+          <span>Sin compilación</span><i></i>
+          <span>Sin dependencias</span><i></i>
+          <span>Enrutador hash</span><i></i>
+          <span>Compatible con SEO</span><i></i>
+          <span>Micro frontend</span><i></i>
+          <span>Compatible con IA</span><i></i>
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Reactividad por Proxy</span><i></i>
+          <span>Sin compilación</span><i></i>
+          <span>Sin dependencias</span><i></i>
+          <span>Enrutador hash</span><i></i>
+          <span>Compatible con SEO</span><i></i>
+          <span>Micro frontend</span><i></i>
+          <span>Compatible con IA</span><i></i>
+        </div>
+      </div>
+  
+      <!-- ============ CARACTERÍSTICAS ============ -->
+      <section class="section" id="features">
+        <div class="section-head" data-reveal>
+          <span class="kicker">Por qué ofa.js</span>
+          <h2>Creado para la próxima web,<br />sin todo lo que sobra.</h2>
+          <p>
+            Sin npm, Node.js ni webpack, y sin un nuevo conjunto de reglas de compilación que aprender.
+            El navegador ya admite componentes; ofa.js solo hace que sea lo bastante sencillo como para usarlo.
+          </p>
+        </div>
+  
+        <div class="bento">
+          <article class="card card-split span-4" data-reveal>
+            <div class="card-copy">
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                  <path d="M14 2v6h6"></path>
+                </svg>
+              </span>
+              <h3>Un archivo HTML, un componente</h3>
+              <p>
+                Plantilla, estilos y lógica viven en el mismo archivo. El nombre de la etiqueta es el nombre del componente,
+                y el navegador lo carga directamente: sin resultados de compilación, sin magia oculta.
+              </p>
+              <div class="file-flow">
+                <span class="file-pill">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                    <path d="M14 2v6h6"></path>
+                  </svg>
+                  hello-ofa.html
+                </span>
+                <span class="flow-arrow">→</span>
+                <span class="tag-pill">&lt;hello-ofa&gt;</span>
+              </div>
+            </div>
+  
+            <st-code
+              aria-hidden="true"
+              frame
+              lang="html"
+              title="hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeMini"
+            ></st-code>
+          </article>
+  
+          <article class="card span-2 card-counter" data-reveal style="--d: 80ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"></path>
+              </svg>
+            </span>
+            <h3>Reactividad de grano fino</h3>
+            <p>Seguimiento de datos impulsado por Proxy: cambia los datos y la interfaz te sigue. Haz clic para probarlo.</p>
+            <demo-counter start="7" attr:reset-label="site.demo.reset"></demo-counter>
+          </article>
+  
+          <article class="card span-2" data-reveal>
+            <span class="icon-chip amber">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m21 8-9-5-9 5v8l9 5 9-5Z"></path>
+                <path d="m3 8 9 5 9-5"></path>
+                <path d="M12 13v8"></path>
+              </svg>
+            </span>
+            <h3>Sin compilación, sin cajas negras</h3>
+            <p>Nada que instalar, configurar ni poner en cola para compilar. Escribe, guarda y actualiza: incluso el código generado por IA puede verificarse tal cual.</p>
+            <div class="zero-pills">
+              <span>npm</span>
+              <span>webpack</span>
+              <span>vite</span>
+              <span>babel</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 60ms">
+            <span class="icon-chip">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="6" cy="19" r="2.5"></circle>
+                <circle cx="18" cy="5" r="2.5"></circle>
+                <path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"></path>
+              </svg>
+            </span>
+            <h3>Un enrutador pensado para páginas</h3>
+            <p>o-app gestiona la aplicación, o-router se ocupa de la barra de direcciones y scsr genera rutas reales. Atrás, adelante y actualizar te llevan exactamente donde deben.</p>
+            <div class="routes" aria-hidden="true">
+              <span class="route active"><i class="dot"></i>#/pages/home.html</span>
+              <span class="route"><i class="dot"></i>#/pages/detail.html?id=42</span>
+              <span class="route"><i class="dot"></i>/posts/hello-world</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 120ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path>
+              </svg>
+            </span>
+            <h3>Una sola petición, todo incluido</h3>
+            <p>Unos 24 KB con gzip y sin dependencias en tiempo de ejecución. Lo bastante pequeño para añadirlo a cualquier página.</p>
+            <div class="bundle">
+              <div class="bundle-num">24<small>KB · gzip</small></div>
+              <div class="bar"><i></i></div>
+              <div class="bar-label"><span>ofa.min.mjs</span><span>≈ 70 KB min</span></div>
+            </div>
+          </article>
+  
+          <article class="card card-wide span-6" data-reveal>
+            <div>
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+                  <path d="m3 13 9 5 9-5"></path>
+                </svg>
+              </span>
+              <h3>Estándares nativos, no una isla</h3>
+              <p>
+                Los componentes son Custom Elements, los estilos están aislados dentro de Shadow DOM y los módulos usan ES Modules.
+                Un componente escrito con ofa.js puede incrustarse en cualquier página y convivir con React o Vue: no es otro entorno de ejecución, solo una capa fina sobre las capacidades nativas.
+              </p>
+            </div>
+            <div class="standard-grid">
+              <div class="standard">
+                <b><i></i>Custom Elements</b>
+                <span>Los componentes son solo etiquetas, registradas de forma nativa por el navegador</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Shadow DOM</b>
+                <span>Los estilos están acotados de forma predeterminada</span>
+              </div>
+              <div class="standard">
+                <b><i></i>ES Modules</b>
+                <span>Carga de módulos sin empaquetador</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Proxy</b>
+                <span>Los cambios en los datos se rastrean automáticamente</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+  
+      <!-- ============ DEMO EN VIVO ============ -->
+      <section class="section" id="demo">
+        <div class="demo-grid">
+          <div class="demo-copy" data-reveal>
+            <span class="kicker">Zona de pruebas en vivo</span>
+            <h2>No te quedes mirando capturas.<br />Haz clic ahora mismo.</h2>
+            <p>
+              La aplicación de tareas de la derecha es un archivo HTML normal: la lista, el enlace bidireccional
+              y las estadísticas calculadas los gestiona ofa.js en el navegador.
+            </p>
+  
+            <ul class="check-list">
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Añade, marca y elimina: todo se actualiza al instante</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>La lista usa <b>o-fill</b> + <b>fill-key</b> para reconciliar automáticamente las altas y las bajas</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Los estilos están aislados dentro de Shadow DOM y nunca se filtran a la página</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Ni una sola operación manual sobre el DOM en toda la demo</span>
+              </li>
+            </ul>
+  
+            <span class="demo-meta"><i></i>Ejecutándose en vivo · no es una grabación</span>
+          </div>
+  
+          <div class="app-window" data-reveal style="--d: 100ms">
+            <div class="app-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="app-url">demo / todo.html</span>
+              <span class="live-pill"><i></i>En vivo</span>
+            </div>
+  
+            <div class="todo">
+              <div class="todo-head">
+                <div>
+                  <span class="todo-kicker">{{site.demo.kicker}}</span>
+                  <h3>{{site.demo.heading}}</h3>
+                </div>
+                <span class="todo-count">{{remaining}} {{site.demo.remainingSuffix}}</span>
+              </div>
+  
+              <div class="todo-input">
+                <input
+                  sync:value="draft"
+                  on:keydown="addOnEnter($event)"
+                  attr:placeholder="site.demo.placeholder"
+                  attr:aria-label="site.demo.inputAria"
+                />
+                <st-button
+                  class="todo-add"
+                  on:click="addTodo"
+                  attr:disabled="!draft.trim()"
+                >{{site.demo.add}}</st-button>
+              </div>
+  
+              <ul class="todo-list">
+                <o-fill :value="todos" fill-key="id">
+                  <li class:done="$data.done">
+                    <input
+                      class="todo-check"
+                      type="checkbox"
+                      sync:checked="$data.done"
+                      on:change="$host.refreshStats()"
+                      attr:aria-label="$host.site.demo.checkAria"
+                    />
+                    <span class="todo-text">{{$data.text}}</span>
+                    <st-icon-button
+                      class="todo-del"
+                      on:click="$host.removeTodo($data.id)"
+                      attr:aria-label="$host.site.demo.deleteAria"
+                    >×</st-icon-button>
+                  </li>
+                </o-fill>
+              </ul>
+  
+              <div class="todo-foot">
+                <st-button
+                  class="todo-clear"
+                  variant="text"
+                  on:click="clearDone"
+                  attr:disabled="doneCount === 0"
+                >{{site.demo.clear}}</st-button>
+                <span>{{doneCount}} / {{todos.length}} {{site.demo.doneSuffix}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ INICIO RÁPIDO ============ -->
+      <section class="section" id="start">
+        <div class="section-head center" data-reveal>
+          <span class="kicker">Inicio rápido</span>
+          <h2>Tres pasos desde cero hasta tu primera página.</h2>
+          <p>Sin instalaciones ni archivos de configuración. Abre tu editor y escribe un solo archivo HTML: eso es todo.</p>
+        </div>
+  
+        <div class="steps">
+          <article class="step" data-reveal>
+            <span class="step-no">PASO 01</span>
+            <h3>Carga ofa.js</h3>
+            <p>Solo copia la URL del .mjs de v5. Sin dependencias, sin compilación.</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+            >
+              <textarea hidden>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+></script>
+              </textarea>
+            </st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 70ms">
+            <span class="step-no">PASO 02</span>
+            <h3>Escribe una página</h3>
+            <p>Plantilla, estilos y lógica en un solo archivo: guárdalo y ya funciona.</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codePage"
+            ></st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 140ms">
+            <span class="step-no">PASO 03</span>
+            <h3>Abre tu navegador</h3>
+            <p>Coloca el archivo en cualquier directorio estático y ábrelo en el navegador: listo.</p>
+            <st-code
+              frame
+              lang="js"
+              format="off"
+              title="terminal"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeTerminal"
+            ></st-code>
+          </article>
+        </div>
+  
+        <div class="start-note" data-reveal>
+          <span>¿Quieres una visión completa de los componentes, el enrutamiento y la gestión de estado? La documentación incluye una guía completa que empieza desde cero.</span>
+          <a olink attr:href="navUrls.docs">
+            Leer la documentación completa
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
+  
+      <!-- ============ ECOSISTEMA ============ -->
+      <section class="section" id="ecosystem">
+        <div class="section-head" data-reveal>
+          <span class="kicker">Ecosistema</span>
+          <h2>Un núcleo, cuatro capas.</h2>
+          <p>
+            El framework en sí y sus tres bibliotecas fundamentales comparten un mismo repositorio y evolucionan juntos. Cada capa es fina
+            y cada una puede usarse por separado.
+          </p>
+        </div>
+  
+        <div class="eco-grid">
+          <div class="stack" data-reveal>
+            <div class="stack-head"><i></i>Monorepo · Evolucionando juntos</div>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>ofa.js</b><em>Capa de aplicación</em></span>
+              <span class="layer-desc">Componentes · Páginas · Enrutamiento · Contexto</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>xhear</b><em>Base de componentes</em></span>
+              <span class="layer-desc">Web Components y renderizado de plantillas</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>stanz</b><em>Reactividad</em></span>
+              <span class="layer-desc">Observación de datos impulsada por Proxy</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>drill</b><em>Carga de módulos</em></span>
+              <span class="layer-desc">Un cargador ESM para el navegador</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+          </div>
+  
+          <div class="eco-list" data-reveal style="--d: 80ms">
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>ofa.js</code><span class="eco-arrow">↗</span></span>
+              <p>El framework de aplicación. Componentes, páginas, enrutamiento con o-app, contexto y sintaxis de plantillas.</p>
+              <span class="eco-tag">Framework</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>xhear</code><span class="eco-arrow">↗</span></span>
+              <p>La base de Web Components. Una capa fina para encapsular elementos, renderizar plantillas y enlazar datos.</p>
+              <span class="eco-tag">Web Components</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>stanz</code><span class="eco-arrow">↗</span></span>
+              <p>Un núcleo reactivo basado en Proxy. Objetos, arrays y cambios profundos: todo es observable.</p>
+              <span class="eco-tag">Reactividad</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>drill</code><span class="eco-arrow">↗</span></span>
+              <p>Un cargador de módulos para el navegador. HTML, CSS y JS pueden ser módulos.</p>
+              <span class="eco-tag">Cargador de módulos</span>
+            </a>
+          </div>
+        </div>
+  
+        <div class="eco-more" data-reveal>
+          <span>Extensiones opcionales</span>
+          <code>o-router</code>
+          <code>scsr</code>
+          <code>formdata</code>
+          <code>inject-host</code>
+          <code>body-ghost</code>
+          <code>global-link</code>
+          <span>Solo importa y usa: no forman parte de la compilación predeterminada.</span>
+        </div>
+      </section>
+  
+      <!-- ============ LLAMADA A LA ACCIÓN ============ -->
+      <section class="cta">
+        <div class="cta-inner" data-reveal>
+          <span class="kicker">Cuando quieras</span>
+          <h2>Ahora, convierte tu idea<br />en un archivo HTML.</h2>
+          <p>
+            Sin entorno que configurar ni compilación que esperar. Crea un archivo, escribe tus etiquetas
+            y actualiza el navegador: tu aplicación ya ha empezado.
+          </p>
+  
+          <div class="actions">
+            <a
+              class="btn btn-primary"
+              olink
+              attr:href="navUrls.firstLesson"
+            >
+              Empezar la lección 1
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/ofajs/ofa.js"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Repositorio de GitHub
+            </a>
+          </div>
+  
+          <div class="cdn-box">
+            <div class="cdn-top">
+              <span class="cdn-tag">CDN · v5</span>
+              <span class="cdn-label">ESM</span>
+              <button
+                class="copy-btn"
+                type="button"
+                on:click="copySnippet(cdnUrl)"
+                aria-label="Copiar la URL del ESM de v5"
+                title="Copiar la URL del ESM de v5"
+              >
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                  <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                </svg>
+              </button>
+            </div>
+            <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+            <p class="cdn-hint">Copia la URL y pégala en una etiqueta &lt;script type="module"&gt; o en un import.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  <div class="toast" class:show="toastVisible" role="status" aria-live="polite">
+    {{toastText}}
+  </div>
+
+  <script>
+    import { createLandingPage } from "../content/page-runtime.mjs";
+
+    export const parent = "./layout.html";
+
+    export default (args) =>
+      createLandingPage({ ...args, sitePath: "./site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../boot.js"></script>
+  </body>
+</html>

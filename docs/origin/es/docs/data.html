@@ -1,0 +1,129 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Datos</p>
+      <h1>Datos y observadores</h1>
+      <p class="doc-lead">
+        <code>data</code> es el estado reactivo de un componente o página. Está impulsado por stanz,
+        por lo que los cambios profundos en objetos y arreglos activan automáticamente las actualizaciones de la vista.
+      </p>
+
+      <h2>data es un objeto, no una función</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "Alice", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        Cada instancia de componente tiene sus propios datos. Asignar a objetos anidados y usar
+        <code>push</code>/<code>splice</code>/<code>sort</code> en arreglos también activa las actualizaciones:
+      </p>
+      <pre><code>this.user.name = "Bob";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>Propiedades calculadas</h2>
+      <p>Usa getters en <code>proto</code>; no uses propiedades calculadas al estilo de Vue:</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>Úsalas en las plantillas como campos normales: <code>{{double}}</code>, <code>{{fullName}}</code>.</p>
+      <div class="doc-note">
+        <strong>Los getters se evalúan en cuanto se inicializa la plantilla, antes de ready.</strong>
+        Solo sirven para cálculos simples que dependen de valores iniciales síncronos. No pongas en un getter
+        cálculos que dependan de datos asíncronos; usa un campo de datos y asígnalo dentro de la
+        función asíncrona, de lo contrario puede producirse un <code>TypeError</code> y romper el renderizado
+        de toda la página.
+      </div>
+
+      <h2>Observadores</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // primera llamada durante la inicialización
+    console.log("el contador cambió a", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // los objetos y arreglos se observan en profundidad
+    console.log("el usuario cambió");
+  },
+},</code></pre>
+      <p>
+        El segundo argumento de la función de callback es <code>{ watchers }</code>, el conjunto de cambios fusionados
+        durante el ciclo de debounce actual. <code>watchers[0]</code> contiene
+        <code>name</code>, <code>oldValue</code>, <code>value</code>,
+        <code>type</code>, <code>target</code> y <code>args</code>.
+      </p>
+      <p>
+        Una función watch se ejecuta una vez cuando finaliza la inicialización del componente; en ese momento
+        <code>watchers</code> está vacío y la llamada se usa para establecer la observación. Si no necesitas
+        que se ejecute lógica de negocio durante la inicialización, comprueba primero
+        <code>if (!watchers) return;</code>.
+      </p>
+
+      <h2>Evitar bucles de reescritura</h2>
+      <pre><code>// Incorrecto: observar count y además cambiar count dentro de la función de callback
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        Cuando necesites un valor derivado, usa una propiedad calculada o añade una condición de activación
+        explícita. No escribas sin condiciones en los datos observados desde dentro de un observador.
+      </p>
+
+      <h2>watch y los datos asíncronos</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        Las funciones de observación pueden ser asíncronas. Con solicitudes concurrentes, lleva
+        un número de secuencia de la solicitud o usa <code>AbortController</code> para que una solicitud
+        anterior no pueda sobrescribir un resultado más reciente.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./render.html">Condicionales y listas →</a>
+         · Siguiente: <a olink href="./state.html">Estado global →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

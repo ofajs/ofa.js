@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 14</p>
+      <h1>Slots y eventos</h1>
+      <p class="doc-lead">slot permite que un componente reciba contenido del exterior; emit informa al exterior lo que ocurre dentro del componente.</p>
+
+      <p>
+  Usa <code>&lt;slot&gt;</code> cuando el componente deba mantener su estructura pero dejar que el consumidor decida
+  el contenido. Cuando ocurre algo dentro del componente —un clic, un guardado—, notifícalo al consumidor con
+  <code>this.emit()</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14" fold-styles="true"></docs-playground>
+<h2>Slots</h2>
+<ul>
+  <li><code>&lt;slot&gt;</code>: el slot predeterminado, que recibe el contenido dentro de la etiqueta del componente;</li>
+  <li><code>&lt;slot name="hint"&gt;</code>: un slot con nombre; el consumidor marca el contenido con
+    <code>slot="hint"</code>;</li>
+  <li>el contenido dentro de la etiqueta slot es el contenido de respaldo predeterminado.</li>
+</ul>
+<h2>Eventos personalizados</h2>
+<p>
+  Dentro del componente, llama a <code>this.emit("confirm", { data: {...} })</code> y haz que la página escuche
+  con <code>on:confirm="onConfirm"</code>; la carga útil del evento está en
+  <code>event.data</code>. Si el evento debe atravesar varios niveles de Shadow DOM,
+  añade también <code>bubbles: true, composed: true</code>.
+</p>
+<div class="doc-note">
+  <strong>Flujo de datos unidireccional:</strong> un componente no modifica directamente los datos de la página; solo informa
+  lo que ocurrió y deja que la página decida cómo manejarlo. Eso es lo que permite reutilizar el mismo componente en
+  páginas diferentes.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade un botón «Cancelar» al componente que emita un evento <code>cancel</code>;
+  haz que la página lo escuche y cambie el texto de la pista a «Cancelado».
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-13.html">13 · Parámetros de componente →</a> · Siguiente: <a olink href="./lesson-15.html">15 · Contexto entre niveles →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

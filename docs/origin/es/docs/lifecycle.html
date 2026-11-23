@@ -1,0 +1,136 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos fundamentales</p>
+      <h1>Ciclo de vida</h1>
+      <p class="doc-lead">
+        Los componentes y las páginas comparten el mismo conjunto de hooks del ciclo de
+        vida. Entender el orden en que se ejecutan evita que toques elementos antes de
+        que exista el DOM y te ayuda a limpiar temporizadores y escuchadores correctamente.
+      </p>
+
+      <h2>Los cuatro hooks</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Hook</th><th>Cuándo se ejecuta</th><th>Usos típicos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ready()</code></td>
+            <td>Plantilla renderizada y DOM creado, aunque no necesariamente ya en el documento</td>
+            <td>Inicializar el DOM y bibliotecas de terceros, medir el estado inicial</td>
+          </tr>
+          <tr>
+            <td><code>attached()</code></td>
+            <td>El elemento se monta en el DOM</td>
+            <td>Iniciar temporizadores, añadir escuchadores globales, cargar estado compartido</td>
+          </tr>
+          <tr>
+            <td><code>loaded()</code></td>
+            <td>El elemento, sus componentes hijos y los recursos asíncronos han terminado de cargarse</td>
+            <td>Finalización que depende del árbol de componentes completo, ocultar indicadores de carga</td>
+          </tr>
+          <tr>
+            <td><code>detached()</code></td>
+            <td>El elemento se elimina del DOM</td>
+            <td>Limpiar temporizadores, escuchadores y referencias a estado compartido</td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>En el primer montaje el orden es <code>ready → attached → loaded</code>; <code>detached</code> se llama cuando se elimina el elemento.</p>
+
+      <h2>Un ejemplo completo de limpieza</h2>
+      <pre><code>export default {
+  tag: "clock-view",
+  data: {
+    now: Date.now(),
+  },
+  attached() {
+    this._timer = setInterval(() =&gt; {
+      this.now = Date.now();
+    }, 1000);
+    this._onResize = () =&gt; {
+      this.width = window.innerWidth;
+    };
+    window.addEventListener("resize", this._onResize);
+  },
+  detached() {
+    clearInterval(this._timer);
+    window.removeEventListener("resize", this._onResize);
+  },
+};</code></pre>
+      <p>
+        Los temporizadores, los escuchadores de eventos globales y las referencias a
+        estado compartido deben liberarse todos en <code>detached</code>; de lo
+        contrario, las actualizaciones pueden seguir disparándose después de que el
+        componente se destruya, provocando fugas de memoria.
+      </p>
+
+      <h2>ready frente a attached</h2>
+      <p>
+        <code>ready</code> es el lugar adecuado para trabajar con el Shadow DOM propio
+        de un componente, por ejemplo consultando <code>this.shadow.$("#id")</code>. Si
+        la lógica depende del tamaño real del elemento o de su posición en el documento,
+        <code>attached</code> es más seguro.
+      </p>
+      <pre><code>ready() {
+  this.shadow.$("#canvas").css.width = "100%";
+},
+attached() {
+  const rect = this.ele.getBoundingClientRect();
+  this.width = rect.width;
+},</code></pre>
+
+      <h2>Datos asíncronos y propiedades calculadas</h2>
+      <p>
+        Los getters de <code>proto</code> se evalúan en cuanto se inicializa la plantilla,
+        antes de <code>ready</code>. Solo son adecuados para cálculos simples sobre
+        valores iniciales síncronos:
+      </p>
+      <pre><code>data: { count: 0 },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+},</code></pre>
+      <p>
+        Si un cálculo depende de una API asíncrona, no lo pongas en un getter. Usa en su
+        lugar un campo de datos y asígnalo en la función de retorno asíncrona:
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = user.role === "admin" ? "Administrador" : "Usuario";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+      <p>
+        Para más escenarios de depuración, consulta <a olink href="./pitfalls.html">Errores comunes</a>.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./page.html">Páginas →</a>
+         · Siguiente: <a olink href="./template.html">Resumen de directivas →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

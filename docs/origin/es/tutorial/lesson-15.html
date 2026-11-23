@@ -1,0 +1,64 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 15</p>
+      <h1>Contexto entre niveles</h1>
+      <p class="doc-lead">Cuando la jerarquía de componentes se hace profunda, pasar los atributos nivel por nivel resulta tedioso; usa o-provider y o-consumer para colocar los datos en un subárbol, de modo que los descendientes los consuman por nombre desde el ancestro más cercano.</p>
+
+      <p>
+        Hasta ahora los datos se han pasado de los componentes padre a los hijos mediante <code>attrs</code>.
+        Si un dato tiene que atravesar muchas capas de componentes, reenviarlo nivel por nivel se vuelve agotador.
+        <code>o-provider</code> asocia los datos a un ancestro, y un
+        <code>o-consumer</code> situado a cualquier profundidad por debajo puede leerlos directamente.
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-15" fold-styles="true"></docs-playground>
+
+      <h2>Tres tarjetas</h2>
+      <ul>
+        <li>Las dos primeras tarjetas están dentro del <code>o-provider</code> y leen el valor Yao / mantenedor del provider;</li>
+        <li>La tercera tarjeta está fuera del provider, así que recurre al usuario predeterminado de <code>o-root-provider</code>;</li>
+        <li>El <code>o-consumer</code> del componente usa <code>watch:user-name="name"</code> para sincronizar la propiedad del contexto con sus propios datos.</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>Tres errores comunes:</strong>
+        <ul>
+          <li>El atributo HTML de un provider se lee una sola vez, al inicializarse; para actualizarlo en tiempo de ejecución hay que cambiar directamente su propiedad de datos (<code>provider.userName = ...</code> en el ejemplo): <code>setAttribute</code> no propaga el cambio.</li>
+          <li>El provider debe ser un ancestro del consumer; ni los hermanos ni los niveles superiores pueden encontrarlo.</li>
+          <li>Declara valores predeterminados en <code>data</code> para los campos que sincronice el consumer; de lo contrario, la inicialización lanza un <code>ReferenceError</code>.</li>
+        </ul>
+      </div>
+
+      <h2>Cómo elegir frente al estado global</h2>
+      <p>
+        Usa provider / consumer para los datos que solo comparte un subárbol de componentes;
+        usa <code>$.stanz</code>, de la siguiente lección, para el estado compartido entre páginas
+        y en toda la aplicación. Para contextos de estilo como los colores del tema y los tamaños,
+        conviene usar variables CSS o <code>match-var</code>.
+      </p>
+
+      <h2>Pruébalo tú mismo</h2>
+      <p>
+        Añade un campo <code>user-department</code> al provider y muestra el departamento en las tarjetas;
+        luego añade al provider un botón que cambie el usuario de todo el subárbol.
+      </p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-14.html">14 · Slots y eventos →</a> · Siguiente: <a olink href="./lesson-16.html">16 · Estado global →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

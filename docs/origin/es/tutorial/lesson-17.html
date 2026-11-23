@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 17</p>
+      <h1>Páginas y enrutamiento</h1>
+      <p class="doc-lead">o-app gestiona la pila de páginas: navega con olink / goto, pasa parámetros con query y vuelve con back.</p>
+
+      <p>
+  Una aplicación multipágina usa <code>&lt;o-app src="./app.mjs"&gt;</code> como contenedor.
+  <code>app.mjs</code> contiene solo la configuración de la aplicación, como la dirección de la página de inicio y la animación de transición.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-17" fold-styles="true"></docs-playground>
+<h2>Tres archivos</h2>
+<ul>
+  <li><code>app.mjs</code>: <code>home</code> apunta a la página de inicio y <code>pageAnime</code> configura la animación de transición;</li>
+  <li><code>home.html</code>: navega a la página Acerca de con <code>olink</code> o <code>goto()</code>;</li>
+  <li><code>about.html</code>: lee los parámetros de <code>query</code> y vuelve con <code>back()</code>.</li>
+</ul>
+<p>
+  <code>olink</code> es una navegación declarativa y no recarga la página; <code>this.goto(url)</code>
+  navega desde el código. <code>query</code> llega como argumento de la función del módulo de página, no en
+  <code>this</code>.
+</p>
+<div class="doc-note">
+  <strong>o-app solo acepta configuración de la aplicación:</strong> no le pases un módulo de página directamente a
+  <code>o-app src</code>. Para una sola página usa <code>o-page src</code>;
+  para una aplicación multipágina usa <code>o-app</code> junto con la dirección de la página.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade a la página de inicio un botón "Página Acerca de (con parámetros)" que navegue con
+  <code>goto("./about.html?from=home-btn")</code>;
+  después muestra el origen en la página Acerca de.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-16.html">16 · Estado global →</a> · Siguiente: <a olink href="./lesson-18.html">18 · Diseños anidados →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

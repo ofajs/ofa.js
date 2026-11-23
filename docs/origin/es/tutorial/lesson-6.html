@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 06</p>
+      <h1>Enlace bidireccional</h1>
+      <p class="doc-lead">sync: mantiene un campo de formulario y los datos sincronizados en ambas direcciones. Es ideal para valores escalares.</p>
+
+      <p>
+  <code>sync:</code> hace dos cosas a la vez: actualiza el formulario cuando cambian los datos
+  y escribe lo que introduce el usuario de vuelta en los datos. Funciona bien con valores
+  escalares como cadenas, números y booleanos.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-6" fold-styles="true"></docs-playground>
+<h2>Campos de formulario habituales</h2>
+<ul>
+  <li><code>sync:value="name"</code>: entradas de texto, textarea y select;</li>
+  <li><code>sync:checked="subscribe"</code>: el estado marcado de una casilla de verificación;</li>
+  <li>La vista previa de abajo se actualiza mientras escribes, lo que demuestra que el valor
+    se ha escrito de vuelta en <code>data</code>.</li>
+</ul>
+<div class="doc-note">
+  <strong>No sincronices objetos:</strong> el enlace bidireccional de un objeto genera
+  referencias confusas. Para editar un objeto o un array, enlaza un campo concreto con
+  <code>sync:value="$data.field"</code>, o gestiona la entrada en un método
+  <code>on:input</code>.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade una entrada numérica "Edad" (<code>type="number"</code>), enlázala con
+  <code>sync:value</code> y muestra en la vista previa la edad que tendrás el próximo año.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-5.html">05 · Eventos →</a> · Siguiente: <a olink href="./lesson-7.html">07 · Renderizado condicional →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

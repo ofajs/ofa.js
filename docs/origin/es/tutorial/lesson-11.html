@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 11</p>
+      <h1>Ciclo de vida</h1>
+      <p class="doc-lead">ready → attached → loaded y, al eliminarse, detached; limpia los temporizadores y los escuchadores de eventos en detached.</p>
+
+      <p>
+  Las páginas y los componentes comparten un conjunto fijo de ganchos del ciclo de vida. Los más usados son
+  <code>ready</code> (el DOM se ha creado), <code>attached</code> (montado en la página)
+  y <code>detached</code> (eliminado).
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-11" fold-styles="true"></docs-playground>
+<h2>Cuándo se ejecutan y qué hacen</h2>
+<ul>
+  <li><code>ready</code>: la plantilla se ha renderizado y ya puedes consultar el DOM;</li>
+  <li><code>attached</code>: el elemento ha entrado en el documento; es un buen lugar para iniciar temporizadores y añadir escuchadores de eventos globales;</li>
+  <li><code>loaded</code>: el elemento en sí y sus recursos asíncronos han terminado de cargarse; es un buen lugar para quitar un estado de carga;</li>
+  <li><code>detached</code>: el elemento ha salido del documento; debes limpiar los temporizadores, los escuchadores de eventos y las referencias al estado compartido.</li>
+</ul>
+<div class="doc-note">
+  <strong>Qué ocurre si no limpias:</strong> los temporizadores siguen ejecutándose y siguen modificando datos después de que la página
+  desaparece, y los escuchadores de eventos conservan referencias de la página anterior, lo que provoca fugas de memoria. Este es el error
+  más común en el ciclo de vida.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Cambia el temporizador para que se actualice cada 0,5 segundos y deje de añadir segundos mientras está en pausa (el ejemplo ya lo hace).
+  Luego intenta restablecer <code>seconds</code> a cero en <code>detached</code> y observa qué ocurre cuando navegas
+  fuera y vuelves.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-10.html">10 · Propiedades calculadas y observación →</a> · Siguiente: <a olink href="./lesson-12.html">12 · Tu primer componente →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

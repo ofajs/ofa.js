@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Errores comunes y solución de problemas — Documentación de ofa.js</title>
+    <meta name="description" content="Solución de problemas de ReferenceError, conflictos con nombres reservados, atributos booleanos, src de o-page y problemas de caché." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Errores comunes y solución de problemas — Documentación de ofa.js" />
+    <meta property="og:description" content="Solución de problemas de ReferenceError, conflictos con nombres reservados, atributos booleanos, src de o-page y problemas de caché." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Referencia</p>
+      <h1>Errores comunes y solución de problemas</h1>
+      <p class="doc-lead">
+        Páginas que no se renderizan, que se renderizan solo a medias o que ignoran los
+        cambios de código: la mayoría de los problemas se remontan a un puñado de causas
+        fijas. Identifica primero el mensaje de error y después revisa las expresiones de
+        la plantilla.
+      </p>
+
+      <h2>ReferenceError: la plantilla hace referencia a una clave no declarada</h2>
+      <p>
+        Cada expresión de una plantilla se evalúa durante la inicialización, así que
+        cualquier clave a la que haga referencia debe declararse antes en <code>data</code>
+        o en <code>attrs</code>. Una clave no declarada lanza un error de inmediato y
+        aborta el renderizado de toda la página:
+      </p>
+      <pre><code>Error evaluating element expression: ':value="flag"'
+Caused by: ReferenceError: flag is not defined</code></pre>
+      <p>
+        Solución: añade el campo a data con un valor predeterminado seguro, por ejemplo
+        <code>data: { flag: false }</code>.
+      </p>
+
+      <h2>TypeError: un getter depende de datos que aún no han llegado</h2>
+      <p>
+        Los getters de propiedades computadas se ejecutan en cuanto se inicializa la
+        plantilla, antes de <code>ready</code>. Si un getter accede a un campo profundo de
+        datos asíncronos, puede lanzar un <code>TypeError</code> y romper toda la página.
+      </p>
+      <pre><code>// Incorrecto: user todavía es un objeto vacío
+get roleText() {
+  return ROLE_TEXT[this.user.role];
+}</code></pre>
+      <p>
+        Cambia a un campo de datos y asígnalo en la función de retorno asíncrona:
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = ROLE_TEXT[user.role] || "";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+
+      <h2>SyntaxError: un literal suelto en el valor de una directiva</h2>
+      <p>
+        Los valores de <code>attr:</code>, <code>:prop</code>, <code>sync:</code> y
+        <code>class:</code> se interpretan todos como expresiones de JavaScript:
+      </p>
+      <pre><code>&lt;!-- Incorrecto --&gt;
+&lt;button attr:data-type="in"&gt;
+&lt;button attr:title="Click to choose"&gt;
+&lt;button attr:title="Choose one"&gt;
+
+&lt;!-- Correcto --&gt;
+&lt;button title="Click to choose"&gt;
+&lt;button attr:title="'Click to choose'"&gt;
+&lt;button attr:title="locked ? 'Locked' : ''"&gt;</code></pre>
+      <p>
+        Síntomas derivados: el HTML de la plantilla ya está en el Shadow DOM, pero
+        <code>ready</code> nunca se ejecuta, <code>o-fill</code> nunca se expande y los
+        datos permanecen vacíos. Cuando veas esta combinación, busca primero texto suelto
+        en los valores de las directivas.
+      </p>
+
+      <h2>Colisiones con nombres reservados</h2>
+      <p>
+        <code>data</code> y <code>proto</code> no deben usar miembros integrados de
+        página/aplicación: <code>back</code>, <code>goto</code>, <code>replace</code>,
+        <code>src</code>, <code>pageAnime</code>, <code>pageIsReady</code>, ni métodos
+        comunes como <code>on</code>, <code>off</code>, <code>emit</code>,
+        <code>$</code>, <code>text</code>, <code>html</code>, <code>css</code>,
+        <code>data</code>, etc. Una colisión provoca que el registro falle o que toda la
+        página dé error.
+      </p>
+
+      <h2>$host / $data solo existen dentro de o-fill</h2>
+      <pre><code>&lt;!-- Incorrecto: no hay $host en el nivel raíz --&gt;
+&lt;button on:click="$host.openHelp()"&gt;?&lt;/button&gt;
+
+&lt;!-- Correcto: llama directamente al nombre del método en el nivel raíz --&gt;
+&lt;button on:click="openHelp()"&gt;?&lt;/button&gt;</code></pre>
+      <p>
+        Hacer referencia a <code>$host</code> desde un <code>o-if</code> de nivel superior
+        puede fallar en silencio; hacer referencia a <code>$host</code> desde un
+        <code>attr:</code> de nivel superior puede no dar error pero nunca establece nada.
+        En el nivel raíz, usa siempre campos de datos y métodos de proto.
+      </p>
+
+      <h2>Usa attr: para los atributos booleanos</h2>
+      <pre><code>&lt;!-- Incorrecto: aún renderiza disabled="false" cuando es false --&gt;
+&lt;button :disabled="loading"&gt;Submit&lt;/button&gt;
+
+&lt;!-- Correcto --&gt;
+&lt;button attr:disabled="loading"&gt;Submit&lt;/button&gt;</code></pre>
+
+      <h2>No uses {{ }} dentro de los valores de atributos</h2>
+      <pre><code>&lt;!-- Incorrecto --&gt;
+&lt;a href="{{url}}"&gt;Link&lt;/a&gt;
+
+&lt;!-- Correcto --&gt;
+&lt;a attr:href="url"&gt;Link&lt;/a&gt;</code></pre>
+
+      <h2>El src de o-page es inmutable</h2>
+      <pre><code>&lt;!-- lanza un error en tiempo de ejecución --&gt;
+&lt;o-page :src="'./form.html?id=' + editingId"&gt;&lt;/o-page&gt;</code></pre>
+      <p>
+        Mantén el o-page montado y pasa parámetros mediante métodos de la página hija;
+        cuando necesites reconstruirlo, envuélvelo en <code>o-if</code> para que se
+        destruya y se vuelva a crear.
+      </p>
+
+      <h2>Formato del enrutamiento hash</h2>
+      <pre><code>// Incorrecto
+location.origin + location.pathname + "#./pages/set.html"
+
+// Correcto
+location.origin + "/#/pages/set.html"</code></pre>
+
+      <h2>Los cambios no surten efecto: revisa primero la caché</h2>
+      <p>
+        ofa.js almacena en caché los módulos de página cargados, y el servidor estático
+        también puede almacenar en caché el HTML. Si después de editar un archivo la
+        navegación por hash sigue mostrando el contenido antiguo y la consola no informa de
+        errores:
+      </p>
+      <ul>
+        <li>Haz que el servidor de desarrollo desactive la caché HTTP (p. ej. <code>http-server -c-1</code>);</li>
+        <li>Recarga la página completa con una URL completa que lleve una nueva consulta;</li>
+        <li>En las pruebas automatizadas, carga la página entera con <code>page.goto(url)</code> en lugar de depender de la navegación por hash.</li>
+      </ul>
+
+      <h2>Objetos wrapper y .ele</h2>
+      <pre><code>// Incorrecto
+$("o-app").current.shadowRoot
+
+// Correcto
+$("o-app").current.ele.shadowRoot.querySelector(".item")
+$("o-app").current.src</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./plugins.html">Complementos y extensiones →</a>
+         · Siguiente: <a olink href="./examples.html">Ejemplos completos →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

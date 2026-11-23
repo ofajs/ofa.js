@@ -1,0 +1,160 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Primeros pasos</p>
+      <h1>Tu primer componente</h1>
+      <p class="doc-lead">
+        Un archivo <code>.html</code> es un componente. El navegador lo carga directamente:
+        sin compilación y sin registro en un punto de entrada de empaquetado.
+      </p>
+
+      <h2>1. El archivo del componente</h2>
+      <p>
+        Crea <code>my-counter.html</code>. Un módulo de componente usa
+        <code>&lt;template component&gt;</code> y declara su nombre de etiqueta con
+        <code>tag</code>:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{count}}&lt;/strong&gt;
+  &lt;button on:click="decrease"&gt;-&lt;/button&gt;
+  &lt;button on:click="increase"&gt;+&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initial: 0,
+      },
+      data: {
+        count: 0,
+      },
+      watch: {
+        initial(value) {
+          this.count = value;
+        },
+      },
+      ready() {
+        this.count = this.initial;
+      },
+      proto: {
+        increase() {
+          this.count += 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+        decrease() {
+          this.count -= 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <div class="doc-note">
+        <strong>El script debe estar dentro de la plantilla.</strong>
+        ofa.js solo extrae los scripts que están dentro de <code>template[component]</code> o
+        <code>template[page]</code>; los scripts fuera de la plantilla se ignoran.
+      </div>
+
+      <h2>2. Usarlo en una página</h2>
+      <p>
+        Importa el archivo del componente con <code>&lt;l-m&gt;</code> y luego úsalo como una etiqueta HTML normal.
+        El nombre de la etiqueta debe coincidir con <code>tag</code>:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter initial="5" on:change="onCountChange"&gt;
+    Recuento actual
+  &lt;/my-counter&gt;
+
+  &lt;p&gt;Último cambio: {{lastChange}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { lastChange: "Aún sin cambios" },
+      proto: {
+        onCountChange(event) {
+          this.lastChange = event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>3. Tres cosas que conviene distinguir</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Dónde</th><th>Propósito</th><th>Ejemplo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tag</code></td>
+            <td>El nombre de etiqueta HTML del componente; obligatorio</td>
+            <td><code>tag: "my-counter"</code></td>
+          </tr>
+          <tr>
+            <td><code>attrs</code></td>
+            <td>Atributos escalares pasados desde fuera</td>
+            <td><code>initial="5"</code></td>
+          </tr>
+          <tr>
+            <td><code>data</code></td>
+            <td>Estado reactivo interno del componente</td>
+            <td><code>count: 0</code></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        Las claves de <code>attrs</code> y <code>data</code> no deben solaparse. Coloca los datos complejos,
+        como arrays y objetos, en <code>data</code> y pásalos con <code>:prop</code>;
+        <code>attrs</code> contiene solo escalares como cadenas y números.
+      </p>
+
+      <h2>4. Slots y eventos</h2>
+      <p>
+        Un <code>&lt;slot&gt;</code> dentro del componente recibe el contenido que los consumidores
+        escriben entre las etiquetas del componente. El <code>&lt;slot&gt;&lt;/slot&gt;</code> de arriba
+        renderiza «Recuento actual».
+      </p>
+      <p>
+        Los componentes emiten eventos hacia fuera con <code>this.emit("change", { data })</code>;
+        los consumidores los escuchan con <code>on:change</code> y leen la carga útil desde
+        <code>event.data</code>. Los eventos burbujean de forma predeterminada pero no cruzan el límite
+        del Shadow DOM; añade <code>composed: true</code> cuando necesiten hacerlo.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./getting-started.html">Instalación →</a>
+        · Siguiente: <a olink href="./first-page.html">Tu primera página →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

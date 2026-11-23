@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 03</p>
+      <h1>Atributos dinámicos</h1>
+      <p class="doc-lead">Usa attr: para los atributos HTML y :prop para las propiedades del DOM; los atributos booleanos deben usar attr:.</p>
+
+      <p>
+  Los atributos de una plantilla son de dos tipos: <code>attr:</code> enlaza un atributo HTML,
+  <code>:prop</code> enlaza una propiedad del DOM del elemento. No escribas valores dinámicos como
+  <code>href="{{url}}"</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3" fold-styles="true"></docs-playground>
+<h2>Por qué hay dos tipos de sintaxis</h2>
+<ul>
+  <li><code>attr:href</code>, <code>attr:title</code>: terminan como atributos HTML;</li>
+  <li><code>:value</code>: establece la propiedad <code>value</code> del DOM, adecuada para elementos de formulario;</li>
+  <li><code>attr:disabled="!ready"</code>: usa <code>attr:</code> para los atributos booleanos;
+    cuando la condición es falsa, el atributo se elimina realmente.</li>
+</ul>
+<div class="doc-note">
+  <strong>Por qué los atributos booleanos no pueden usar :prop:</strong> <code>:disabled="false"</code>
+  deja <code>disabled="false"</code>, así que el atributo sigue existiendo y el botón permanece deshabilitado.
+  La forma correcta es <code>attr:disabled="false"</code>.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Cambia el valor inicial de <code>ready</code> a <code>true</code> y comprueba que el botón empieza
+  habilitado; luego vuelve a cambiarlo y haz clic en el botón para habilitarlo.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-2.html">02 · Datos e interpolación →</a> · Siguiente: <a olink href="./lesson-4.html">04 · Estilos y class →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

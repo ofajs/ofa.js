@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Eventos</p>
+      <h1>Eventos</h1>
+      <p class="doc-lead">Vincula, desvincula y despacha eventos con métodos de instancia; los eventos pueden transportar datos de carga útil y cruzar los límites del shadow DOM.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="events"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.on(name, handler)</code></td><td>Vincula un evento; devuelve el elemento para que las llamadas se puedan encadenar</td></tr>
+          <tr><td><code>el.one(name, handler)</code></td><td>Se ejecuta una vez y se desvincula automáticamente</td></tr>
+          <tr><td><code>el.off(name, handler)</code></td><td>Desvincula un evento</td></tr>
+          <tr><td><code>el.emit(name, opts)</code></td><td>Despacha un evento; opts.data se adjunta como event.data y los campos restantes se pasan como opciones de inicialización de Event</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> on:click="method" en una plantilla se desvincula automáticamente cuando el componente se desmonta, así que no es necesario llamar a off manualmente.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

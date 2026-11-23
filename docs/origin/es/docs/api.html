@@ -1,0 +1,194 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Referencia</p>
+      <h1>$.fn y los objetos wrapper</h1>
+      <p class="doc-lead">
+        <code>$</code> es a la vez un selector y una fábrica de elementos. Devuelve un
+        objeto wrapper de ofa.js, que concentra la mayor parte de las capacidades del
+        framework; a las capacidades nativas del navegador se accede mediante
+        <code>.ele</code>.
+      </p>
+
+      <h2>Obtener elementos</h2>
+      <pre><code>$("#target");                       // primera coincidencia
+$("#target").$("h3");               // elemento hijo
+$("my-component").shadow.$("#x");   // consulta dentro del Shadow DOM
+$.all("li");                        // array con todas las instancias wrapper coincidentes
+
+$(document.createElement("div"));   // elemento nativo → objeto wrapper
+$(`&lt;div&gt;nuevo&lt;/div&gt;`);               // cadena HTML → objeto wrapper
+$({ tag: "div", text: "hola" });      // descripción de objeto → objeto wrapper</code></pre>
+
+      <h2>Objetos wrapper frente a elementos nativos</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Caso</th><th>Sintaxis</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Propiedades/métodos de ofa.js</td><td><code>el.src</code>, <code>el.text</code>, <code>el.on()</code>, <code>el.app</code></td></tr>
+          <tr><td>Propiedades nativas del navegador</td><td><code>el.ele.scrollTop</code>, <code>el.ele.shadowRoot</code></td></tr>
+          <tr><td>Campos de datos del componente</td><td><code>el.count</code> (accede directamente al campo)</td></tr>
+          <tr><td>dataset</td><td><code>el.data.role</code></td></tr>
+          <tr><td>Consulta en el shadow</td><td><code>this.shadow.$("#id")</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        Regla general: usa directamente las propiedades de ofa.js y accede a las nativas
+        del navegador mediante <code>.ele</code>.
+      </p>
+
+      <h2>Navegación por el árbol</h2>
+      <pre><code>el.prev;      el.prevs;
+el.next;      el.nexts;
+el.siblings;
+el.parent;    el.parents;
+el.host;      // instancia del componente host
+el.app;       // el o-app al que pertenece
+el.root;      // instancia de document
+el.shadow;    // instancia del shadow root
+el.tag;       // nombre de etiqueta en minúsculas
+el.index;     // posición dentro del padre
+el.PATH;      // ruta del archivo de registro del componente
+el.is("li");  // si coincide con el selector</code></pre>
+
+      <h2>Añadir y eliminar hijos</h2>
+      <pre><code>$("ul").push("&lt;li&gt;nuevo&lt;/li&gt;");
+$("ul").unshift("&lt;li&gt;primero&lt;/li&gt;");
+$("ul").pop();
+$("ul").shift();
+$("ul").splice(1, 2, "&lt;li&gt;reemplazo&lt;/li&gt;");
+
+el.before("&lt;p&gt;antes&lt;/p&gt;");
+el.after("&lt;p&gt;después&lt;/p&gt;");
+el.remove();
+el.wrap("&lt;div class='wrapper'&gt;&lt;/div&gt;");
+el.unwrap();</code></pre>
+
+      <h2>Contenido y atributos</h2>
+      <pre><code>el.text = "nuevo texto";
+el.html = "&lt;b&gt;hola&lt;/b&gt;";
+
+el.attr("data-id");          // leer un atributo
+el.attr("data-id", "42");    // escribir un atributo
+
+el.css.color = "red";
+el.css = { color: "blue", lineHeight: "1.5" };
+el.css = { ...el.css, color: "red" };
+
+el.classList.add("active");
+el.classList.remove("done");
+el.data.role = "admin";
+el.refresh();                // refrescar manualmente el renderizado no reactivo</code></pre>
+      <p>
+        Los equivalentes en la plantilla son <code>:text</code>, <code>:html</code>,
+        <code>attr:data-id</code>, <code>:style.color</code> y
+        <code>class:active</code>.
+      </p>
+
+      <h2>Eventos</h2>
+      <pre><code>el.on("click", handler);
+el.one("load", init);
+el.off("click", handler);
+
+el.emit("save", {
+  data: { id: 1 },
+  bubbles: true,
+  composed: true,
+});</code></pre>
+
+      <h2>o-app y o-page</h2>
+      <pre><code>const app = $("o-app");
+app.src;
+app.current;
+app.routers;
+app.goto("./page.html");
+app.replace("./page.html");
+app.back();
+app.forward();
+
+const page = app.current;
+page.src;
+page.goto("./next.html");
+page.pageIsReady;</code></pre>
+
+      <h2>Capacidades de stanz</h2>
+      <pre><code>const tid = target.watch(() =&gt; {
+  // observación profunda
+});
+target.watchTick(() =&gt; {}); // observación limitada por tiempo
+target.unwatch(tid);
+
+const data = $.stanz({ count: 0 });
+data._internal = "no observado"; // el prefijo de guion bajo omite la reactividad</code></pre>
+      <p>
+        Para esperar hasta que se cumpla una condición sobre los datos, usa
+        <code>watchUntil</code>; devuelve una Promise que se resuelve cuando se cumple la
+        condición y cancela automáticamente la observación:
+      </p>
+      <pre><code>const app = $("o-app");
+await app.watchUntil(() =&gt; app.appIsReady);
+
+// 30 segundos de tiempo de espera predeterminado; pasa un segundo argumento para cambiarlo
+await app.watchUntil(() =&gt; app.current, 5000);</code></pre>
+      <div class="doc-note">
+        <strong>watchUntil solo evalúa cuando cambian los datos; no comprueba de inmediato al registrarse.</strong>
+        Si la condición puede cumplirse ya, compruébala tú mismo una vez antes de decidir
+        si esperar.
+      </div>
+
+      <h2>Extender instancias</h2>
+      <pre><code>// Una sola instancia
+el.extend({
+  say() {
+    return "hola";
+  },
+});
+
+// Todas las instancias
+$.fn.extend({
+  get good() {
+    return "ofa.js es genial";
+  },
+});
+
+// Nueva directiva: :red="count % 3 === 0"
+$.fn.extend({
+  set red(value) {
+    this.css.color = value ? "red" : "";
+  },
+});</code></pre>
+
+      <h2>Complemento formData</h2>
+      <p>
+        <code>formData()</code> no está en la compilación predeterminada del framework.
+        Primero importa <code>packages/plugins/formdata/formdata.mjs</code> (o el script
+        dist) y después llámalo:
+      </p>
+      <pre><code>const data = this.shadow.formData();
+data.username = "Yao";
+console.log(data.username);
+data.revoke(); // liberar el enlace</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./scsr.html">scsr con rutas reales →</a>
+         · Siguiente: <a olink href="./plugins.html">Complementos y extensiones →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

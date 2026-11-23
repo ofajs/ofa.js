@@ -515,6 +515,7 @@
     const IS_EN = document.documentElement.lang.startsWith("en");
     const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
     const IS_JA = document.documentElement.lang.startsWith("ja");
+    const IS_ES = document.documentElement.lang.startsWith("es");
     const UI = IS_EN
       ? {
           starting: "Starting virtual container…",
@@ -580,6 +581,28 @@
           writing: "仮想ファイルを書き込み中…",
           ran: "実行済みです。編集後は Ctrl/⌘+S で再実行できます。",
           runFailed: "実行に失敗しました：",
+        }
+      : IS_ES
+      ? {
+          starting: "Iniciando el contenedor virtual…",
+          resetTitle: "Restaurar el código de ejemplo de esta lección",
+          reset: "↺ Restablecer",
+          runTitle: "Ejecutar código (Ctrl+S / ⌘S)",
+          run: "▶ Ejecutar código",
+          editorAria: "Editor de código de ofa.js",
+          splitterAria: "Ajustar el ancho del editor y la vista previa",
+          previewAria: "Vista previa del ejemplo",
+          preview: "Vista previa",
+          newTabTitle: "Abrir la vista previa en una pestaña nueva",
+          newTab: "Abrir en pestaña nueva ↗",
+          iframeTitle: "Vista previa del ejemplo de ofa.js",
+          restored: "Código de ejemplo restaurado. Pulsa Ctrl/⌘+S para ejecutar.",
+          ready: "Contenedor virtual listo",
+          initFailed: "Error al inicializar el contenedor virtual: ",
+          unsupported: "Este navegador no admite Service Worker",
+          writing: "Escribiendo archivos virtuales…",
+          ran: "Ejecutado. Sigue editando y pulsa Ctrl/⌘+S para volver a ejecutar.",
+          runFailed: "Error al ejecutar: ",
         }
       : {
           starting: "正在启动虚拟容器…",

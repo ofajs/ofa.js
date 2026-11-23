@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 18</p>
+      <h1>Diseños anidados</h1>
+      <p class="doc-lead">Las páginas hijas declaran parent y la página padre las recibe mediante un slot; cambiar de página hija no destruye la página padre.</p>
+
+      <p>
+  Coloca la estructura compartida, como las barras de navegación y las barras laterales, en la página padre; las páginas hijas
+  contienen solo su propio contenido y se acoplan bajo el <code>&lt;slot&gt;</code> del padre mediante
+  <code>parent</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-18" fold-styles="true"></docs-playground>
+<h2>Cómo funciona el diseño</h2>
+<ul>
+  <li><code>layout.html</code>: navegación + <code>&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;</code>;</li>
+  <li><code>home.html</code> / <code>settings.html</code>:
+    <code>export const parent = "./layout.html"</code>;</li>
+  <li>El <code>routerChange</code> del padre se dispara cuando cambian las páginas hijas y se usa para actualizar el resaltado de la navegación activa.</li>
+</ul>
+<p>
+  Cuando las dos páginas hijas se alternan, la instancia del padre no se vuelve a crear; el estado de la navegación y el diseño se conservan.
+</p>
+<div class="doc-note">
+  <strong>No dupliques el diseño en las páginas hijas:</strong> escribe la navegación y el pie de página una sola vez, en el padre;
+  las páginas hijas solo se ocupan de su propio contenido. Para anidamientos de varios niveles, el padre también puede declarar un parent.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade otra página hija, <code>profile.html</code>, junto con su elemento de navegación correspondiente, y comprueba que el diseño no parpadea al cambiar.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-17.html">17 · Páginas y enrutamiento →</a> · Siguiente: <a olink href="./lesson-19.html">19 · Asincronía y estados de carga →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

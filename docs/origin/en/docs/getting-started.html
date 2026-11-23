@@ -19,19 +19,19 @@
         </p>
         <pre><code>&lt;script
   type="module"
-  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
 &gt;&lt;/script&gt;</code></pre>
 
         <p>
           If your environment is better suited to classic scripts, you can use the UMD build
           instead (it exposes a global <code>$</code>):
         </p>
-        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
 
         <div class="doc-note">
-          <strong>Version note:</strong> CDN URLs for the v5 branch must be written as
-          <code>@refs/heads/v5</code>, not shortened to <code>@v5</code>;
-          otherwise jsDelivr parses it as a version tag and returns a 404.
+          <strong>Version note:</strong> Use
+          <code>@5</code> to follow the latest 5.x release. To pin it exactly, use a full
+          version such as <code>@5.0.2</code>.
         </div>
 
         <h2>2. Write an entry point</h2>
@@ -45,7 +45,7 @@
     &lt;title&gt;My first ofa.js page&lt;/title&gt;
     &lt;script
       type="module"
-      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
     &gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;

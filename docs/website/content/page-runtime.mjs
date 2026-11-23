@@ -12,7 +12,7 @@
 let uid = 100;
 
 export const CDN_URL =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 
 const loadSite = async (url, sitePath = "./site.json") => {
   const res = await fetch(new URL(sitePath, url));
@@ -34,7 +34,7 @@ const getNavUrls = (url, docs = false) => {
       api: new URL("../api/", url).href,
       blog: new URL("../blog/", url).href,
       searchIndex: new URL("../search-index.json", url).href,
-      languages: new URL("../../", url).href,
+      languages: new URL("../../?choose=1", url).href,
     };
   }
 
@@ -46,7 +46,7 @@ const getNavUrls = (url, docs = false) => {
     api: new URL("./api/", url).href,
     blog: new URL("./blog/", url).href,
     searchIndex: new URL("./search-index.json", url).href,
-    languages: new URL("../", url).href,
+    languages: new URL("../?choose=1", url).href,
   };
 };
 

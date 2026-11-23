@@ -203,15 +203,15 @@
         <h4>{{footerResources}}</h4>
         <a attr:href="docsUrl">{{footerDocs}}</a>
         <a href="https://github.com/ofajs/ofa.js" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs" target="_blank" rel="noreferrer">CDN</a>
+        <a href="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs" target="_blank" rel="noreferrer">CDN</a>
       </div>
 
       <div class="f-col">
         <h4>{{footerEcosystem}}</h4>
-        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/router" target="_blank" rel="noreferrer">o-router</a>
-        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/scsr" target="_blank" rel="noreferrer">scsr</a>
-        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/plugins" target="_blank" rel="noreferrer">{{footerPlugins}}</a>
-        <a href="https://github.com/ofajs/ofa.js/tree/v5/packages/xhear" target="_blank" rel="noreferrer">xhear</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/main/packages/router" target="_blank" rel="noreferrer">o-router</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/main/packages/scsr" target="_blank" rel="noreferrer">scsr</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/main/packages/plugins" target="_blank" rel="noreferrer">{{footerPlugins}}</a>
+        <a href="https://github.com/ofajs/ofa.js/tree/main/packages/xhear" target="_blank" rel="noreferrer">xhear</a>
       </div>
 
       <div class="f-col">
@@ -361,6 +361,10 @@
         switchLanguage(event) {
           const next = event.target.value;
           if (next === this.lang) return;
+          try {
+            localStorage.setItem("ofa-site-locale", next);
+          } catch {}
+
           const url = new URL(location.href);
           const parts = url.pathname.split("/");
           if (parts[1] === "cn" || parts[1] === "en") {

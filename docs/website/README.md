@@ -207,8 +207,15 @@ npm run server:website
 - `docs/origin/en/` → `docs/website/en/`（English）
 
 顶部导航的语言下拉使用 senti-ui 的 `<st-select>`，切换时保留当前路径，
-例如 `/cn/docs/routing.html` ↔ `/en/docs/routing.html`。`footer` 仍保留
-语言选择入口，根路径 `/` 提供语言选择页。
+例如 `/cn/docs/routing.html` ↔ `/en/docs/routing.html`。手动选择会写入
+`localStorage["ofa-site-locale"]`，根路径 `/` 会优先用它。
+
+根路径 `/` 还会做一次轻量语言判断：有手动选择时直接进入对应语言；
+否则读取 `navigator.languages`，中文浏览器进入 `/cn/`，其他语言默认
+`/en/`；没有明确语言时再按 `Intl.DateTimeFormat().resolvedOptions().timeZone`
+的亚洲中文时区兜底。要停留在语言选择页，访问 `/?choose=1`；要强制
+指定语言，访问 `/?lang=cn` 或 `/?lang=en`。`footer` 的语言入口使用
+`?choose=1`，不会被自动跳转覆盖。
 
 ## 新增 / 翻译语言
 
@@ -384,7 +391,7 @@ npm run server:website
 按钮即可把完整地址写入剪贴板：
 
 ```
-https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs
+https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs
 ```
 
 Quick Start 第一步展示完整的 `<script type="module">` 引用。页面不再提供

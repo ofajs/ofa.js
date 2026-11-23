@@ -198,6 +198,76 @@
         }
       }
     </style>
+    <script>
+      // 根路径语言自动跳转：
+      // - ?choose=1 或 ?lang=choose 时停留在当前语言选择页
+      // - ?lang=cn / ?lang=en 强制指定语言
+      // - 否则优先使用手动选择过的语言，再按浏览器语言 / 地区判断
+      (function () {
+        try {
+          const params = new URLSearchParams(location.search);
+          if (params.get("choose") === "1" || params.get("lang") === "choose") {
+            return;
+          }
+
+          const supported = ["cn", "en"];
+          const forced = params.get("lang");
+          let locale = "";
+
+          if (supported.includes(forced)) {
+            locale = forced;
+          } else {
+            const stored = localStorage.getItem("ofa-site-locale");
+            if (supported.includes(stored)) {
+              locale = stored;
+            } else {
+              const languages =
+                navigator.languages && navigator.languages.length
+                  ? navigator.languages
+                  : [navigator.language || ""];
+              const hasChinese = languages.some((lang) =>
+                /^zh(?:-|$)/i.test(lang),
+              );
+              const hasEnglish = languages.some((lang) =>
+                /^en(?:-|$)/i.test(lang),
+              );
+
+              if (hasChinese) {
+                locale = "cn";
+              } else if (hasEnglish) {
+                locale = "en";
+              } else {
+                const zone =
+                  Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+                locale =
+                  /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi|Taipei|Hong_Kong|Macau)|Asia\/Singapore)$/.test(
+                    zone,
+                  )
+                    ? "cn"
+                    : "en";
+              }
+            }
+          }
+
+          if (forced && supported.includes(forced)) {
+            localStorage.setItem("ofa-site-locale", forced);
+          }
+
+          location.replace("./" + locale + "/");
+        } catch {}
+      })();
+
+      // 点击语言卡片时记住选择，方便下次从根路径自动进入。
+      document.addEventListener("click", (event) => {
+        const card = event.target.closest && event.target.closest(".lang-card");
+        if (!card) return;
+        const match = (card.getAttribute("href") || "").match(/\/(cn|en)\/?$/);
+        if (!match) return;
+        try {
+          localStorage.setItem("ofa-site-locale", match[1]);
+        } catch {}
+      });
+    </script>
   </head>
   <body>
     <main>

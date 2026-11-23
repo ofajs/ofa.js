@@ -256,8 +256,9 @@
         <li>If third-party code relies on the old global <code>lm</code>, switch it to an explicit module import.</li>
       </ol>
       <p>
-        Also watch the CDN URL: the v5 branch must be referenced as
-        <code>@refs/heads/v5</code>, not <code>@v5</code>.
+        Also watch the CDN URL: use
+        <code>@5</code> to follow the latest 5.x release; to pin it exactly, use a full
+        version such as <code>@5.0.2</code>.
         Otherwise page structure, routing, context, and state code can usually
         move over as-is.
       </p>

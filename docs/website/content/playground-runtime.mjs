@@ -8,7 +8,7 @@ import { DEFAULT_CODE_EN, LESSONS_EN } from "./playground-runtime-en.mjs";
 export const SPACE = "ofa-docs-playground";
 
 export const OFA_CDN =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 
 // 教程结构改版时递增版本，避免旧的本地代码覆盖新示例
 export const STORAGE_KEY = "ofa-docs-playground-code:v2";

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scsr による実パスルーティング — ofa.js ドキュメント</title>
+    <meta name="description" content="scsr を使えば、すべての URL が完全で直接アクセス可能なドキュメントになります。SEO や共有に最適です。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="scsr による実パスルーティング — ofa.js ドキュメント" />
+    <meta property="og:description" content="scsr を使えば、すべての URL が完全で直接アクセス可能なドキュメントになります。SEO や共有に最適です。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">アプリケーション</p>
+      <h1>scsr による実パスルーティング</h1>
+      <p class="doc-lead">
+        scsr はすべての URL を、直接開ける実際の HTML ドキュメントにします。
+        サイト内のナビゲーションは引き続きアプリのルーティングを経由しますが、
+        リロード、共有、クローラーには完全なコンテンツが届きます。
+      </p>
+
+      <h2>o-router との違い</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>機能</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>URL の形式</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>サーバー側のリライト</td><td>不要</td><td>パスごとに 1 つの HTML</td></tr>
+          <tr><td>SEO / JS なしでの表示</td><td>弱い</td><td>完全なファーストスクリーン HTML</td></tr>
+          <tr><td>ページ API</td><td colspan="2">共通: goto / replace / back / ネストしたレイアウト / アニメーション</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>ページ構造</h2>
+      <p>
+        各 URL は完全な HTML ドキュメントに対応し、ページの内容は <code>o-app</code>
+        の <code>&lt;template page&gt;</code> 内にインラインで記述されます:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;ホーム&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;ホームの内容&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;詳細へ移動&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>アプリ設定では home を宣言しない</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr は現在の URL をページとして採用し、ホームページはその URL にある HTML
+        になるため、設定で <code>home</code> を指定しないでください。サイト内は
+        <code>olink</code> または <code>goto()</code> で移動し、アドレスには実パスを
+        使います。
+      </p>
+
+      <h2>サーバーの要件</h2>
+      <ul>
+        <li>すべてのパスが対応する HTML を <code>Content-Type: text/html; charset=UTF-8</code> で返すこと。</li>
+        <li>ページ内の <code>&lt;template page&gt;</code> には、サーバーでレンダリングされた静的コンテンツを含められます。</li>
+        <li>CSS、JS、画像は通常の静的アセットとして配信されます。</li>
+        <li>scsr はページ既存のグローバル <code>$</code> にアタッチするため、ofa.js の後に読み込む必要があります。</li>
+      </ul>
+
+      <h2>フォールバックとファーストスクリーン</h2>
+      <p>
+        JS がない場合でも、ページはサーバーが生成した完全な HTML のままです。
+        動作しないのはインタラクティブなロジックだけです。JS がある場合、scsr が
+        引き継いで現在の URL をアプリ内ページに変換し、以降のナビゲーションでは
+        ページ全体のリロードが不要になります。
+      </p>
+
+      <h2>選ぶべき場面</h2>
+      <ul>
+        <li>SEO と共有可能なリンクが必要なサイト（マーケティングサイト、ドキュメント、ブログなど）。</li>
+        <li>すべてのページが独自の URL と独自のメタ情報を持つ。</li>
+        <li>パスごとに HTML を出力できるサーバーテンプレートや SSG がすでにある。</li>
+      </ul>
+      <p>
+        検索エンジンのインデックスが不要な純粋な内部アプリには、o-router の方が
+        シンプルです。
+      </p>
+
+      <p class="doc-end">
+        前: <a olink href="./nested-routing.html">ネストしたルーティング →</a>
+         · 次: <a olink href="./api.html">$.fn とラップされたオブジェクト →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

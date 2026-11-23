@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 14</p>
+      <h1>スロットとイベント</h1>
+      <p class="doc-lead">slot はコンポーネントが外部コンテンツを受け取れるようにし、emit は内部で起きたことを外部に通知します。</p>
+
+      <p>
+  コンポーネントの構造は保ちつつ、内容は利用側に決めさせたい場合に <code>&lt;slot&gt;</code> を使います。
+  コンポーネント内部でクリックや保存などの出来事が起きたら、
+  <code>this.emit()</code> で利用側に通知します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14" fold-styles="true"></docs-playground>
+<h2>スロット</h2>
+<ul>
+  <li><code>&lt;slot&gt;</code>: デフォルトスロット。コンポーネントタグ内のコンテンツを受け取ります。</li>
+  <li><code>&lt;slot name="hint"&gt;</code>: 名前付きスロット。利用側はコンテンツを
+    <code>slot="hint"</code> で指定します。</li>
+  <li>slot タグ内のコンテンツはデフォルトのフォールバックコンテンツになります。</li>
+</ul>
+<h2>カスタムイベント</h2>
+<p>
+  コンポーネント内で <code>this.emit("confirm", { data: {...} })</code> を呼び出し、ページ側では
+  <code>on:confirm="onConfirm"</code> で受け取ります。イベントのペイロードは
+  <code>event.data</code> にあります。イベントが複数階層の Shadow DOM を越える必要がある場合は、
+  <code>bubbles: true, composed: true</code> も追加してください。
+</p>
+<div class="doc-note">
+  <strong>単方向データフロー:</strong> コンポーネントはページのデータを直接変更せず、起きたことだけを
+  通知して、どう扱うかはページに委ねます。これにより同じコンポーネントを
+  さまざまなページで再利用できます。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  <code>cancel</code> イベントを発行する「キャンセル」ボタンをコンポーネントに追加してみましょう。
+  ページでそれを受け取り、ヒントのテキストを「キャンセル済み」に変更してください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-13.html">13 · コンポーネントのパラメータ →</a> · 次へ: <a olink href="./lesson-15.html">15 · 階層をまたぐコンテキスト →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

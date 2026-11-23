@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>データと監視 — ofa.js ドキュメント</title>
+    <meta name="description" content="リアクティブなデータ、算出ゲッター、watch リスナー、よくあるエッジケース。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="データと監視 — ofa.js ドキュメント" />
+    <meta property="og:description" content="リアクティブなデータ、算出ゲッター、watch リスナー、よくあるエッジケース。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">データ</p>
+      <h1>データと監視</h1>
+      <p class="doc-lead">
+        <code>data</code> はコンポーネントやページのリアクティブな状態です。stanz によって動作するため、
+        オブジェクトや配列への深い変更が自動的にビューの更新を引き起こします。
+      </p>
+
+      <h2>data は関数ではなくオブジェクト</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "Alice", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        各コンポーネントインスタンスは独自の data を持ちます。ネストしたオブジェクトへの代入や配列の
+        <code>push</code>/<code>splice</code>/<code>sort</code> はすべて更新を引き起こします。
+      </p>
+      <pre><code>this.user.name = "Bob";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>算出プロパティ</h2>
+      <p><code>proto</code> 内の getter を使用してください。Vue スタイルの computed は使用しません。</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>テンプレートでは通常のフィールドと同様に使用できます: <code>{{double}}</code>、<code>{{fullName}}</code>。</p>
+      <div class="doc-note">
+        <strong>getter はテンプレートの初期化時、ready より前に評価されます。</strong>
+        同期的な初期値に依存する単純な計算にのみ適しています。非同期データに依存する計算を
+        getter に記述しないでください。代わりにデータフィールドを使い、非同期コールバック内で代入してください。
+        そうしないと <code>TypeError</code> が発生し、ページ全体のレンダリングが壊れる可能性があります。
+      </div>
+
+      <h2>監視</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // 初期化時の最初の呼び出し
+    console.log("count が次の値に変更されました", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // オブジェクトと配列は深く監視される
+    console.log("user が変更されました");
+  },
+},</code></pre>
+      <p>
+        コールバックの第 2 引数は <code>{ watchers }</code> で、現在のデバウンス周期中にマージされた
+        変更の集合です。<code>watchers[0]</code> には
+        <code>name</code>、<code>oldValue</code>、<code>value</code>、
+        <code>type</code>、<code>target</code>、<code>args</code> が含まれます。
+      </p>
+      <p>
+        watch 関数はコンポーネントの初期化完了時に一度実行されます。その時点では
+        <code>watchers</code> は空で、この呼び出しは監視を確立するために使われます。初期化時に
+        ビジネスロジックを実行する必要がない場合は、先に
+        <code>if (!watchers) return;</code> で確認してください。
+      </p>
+
+      <h2>書き戻しループの回避</h2>
+      <pre><code>// 誤り: count を監視しながらコールバック内で count を変更している
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        派生値が必要な場合は算出プロパティを使用するか、明示的な発火条件を追加してください。
+        watch の内部で監視対象のデータに無条件に書き戻さないでください。
+      </p>
+
+      <h2>watch と非同期データ</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        watch コールバックは async 関数にできます。並行リクエストが発生する場合は、リクエストの
+        シーケンス番号を追跡するか <code>AbortController</code> を使用して、古いリクエストが
+        新しい結果を上書きしないようにしてください。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./render.html">条件分岐とリスト →</a>
+         · 次へ: <a olink href="./state.html">グローバル状態 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

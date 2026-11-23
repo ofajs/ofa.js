@@ -1,0 +1,147 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">アプリケーション</p>
+      <h1>o-app アプリ</h1>
+      <p class="doc-lead">
+        <code>o-app</code> はマイクロアプリのコンテナです。アプリケーション設定モジュールを読み込み、
+        ページスタック、ページ遷移アニメーション、ナビゲーションイベントを管理しますが、
+        ページの HTML 自体は読み込みません。
+      </p>
+
+      <h2>最小限のアプリケーション</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        <code>o-app</code> の <code>src</code> はアプリケーション設定モジュールである必要があり、
+        ページを直接指定することはできません。単一のページを単独で実行するには、
+        <code>&lt;o-page src="./page.html"&gt;</code> を使用します。
+      </p>
+
+      <h2>アプリケーション設定</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;読み込み中...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;読み込みに失敗しました: ${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// クロスオリジンページのアクセス制御: true を返すと許可、false または Error を返すと拒否
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("アプリの準備ができました", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>エクスポート</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>起動時に読み込まれるホームページのアドレス</td></tr>
+          <tr><td><code>pageAnime</code></td><td>current / next / previous の 3 状態によるページ遷移アニメーション</td></tr>
+          <tr><td><code>loading</code></td><td>ページの読み込み中に表示される HTML</td></tr>
+          <tr><td><code>fail</code></td><td>読み込み失敗時に表示される HTML。<code>{ src, error }</code> を受け取る</td></tr>
+          <tr><td><code>allowForward</code></td><td><code>forward()</code> を許可するかどうか。デフォルトでは無効</td></tr>
+          <tr><td><code>access</code></td><td>クロスオリジンページのアクセス制御。true を返すと許可。同一オリジンのページには不要</td></tr>
+          <tr><td><code>proto</code></td><td>o-app インスタンスに追加されるメソッドと getter</td></tr>
+          <tr><td><code>ready</code></td><td>設定の読み込み後のコールバック。<code>this</code> はアプリインスタンス</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> はページの <code>src</code> を受け取り、クロスオリジンページを読み込むには
+        <code>true</code> を返す必要があります。<code>false</code> または
+        <code>Error</code> を返すと拒否されます。対象サイト側で CORS が正しく設定されている必要があり、
+        そうでない場合はブラウザが先にリクエストをブロックします。
+      </p>
+
+      <h2>アプリインスタンス</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // 現在のページインスタンス
+app.appIsReady; // 最初のページがレンダリング済みか（watchUntil で待機する）
+app.routers;   // ルーティングスタック。親レイアウトページは含まれない
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // allowForward: true が必要</code></pre>
+      <p>
+        ページモジュール内では <code>this.goto</code>、
+        <code>this.replace</code>、<code>this.back</code> を直接呼び出すこともできます。
+        <code>this.app</code> はそのページが属するアプリを指します。
+      </p>
+
+      <h2>ルーティングの変更を監視する</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // 遷移先ページの URL
+});</code></pre>
+
+      <h2>ページアニメーション</h2>
+      <p>
+        <code>pageAnime.current</code> は遷移が完了したページの状態、
+        <code>next</code> は入ってくるページの開始状態、<code>previous</code>
+        は出ていくページの終了状態です。3 つの状態はすべて省略でき、省略時は
+        デフォルト値が使用されます。
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        前へ: <a olink href="./context.html">コンポーネント間のコンテキスト →</a>
+         · 次へ: <a olink href="./routing.html">ルーティングとナビゲーション →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

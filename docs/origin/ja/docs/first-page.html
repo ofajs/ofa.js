@@ -1,0 +1,116 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">はじめに</p>
+      <h1>はじめてのページ</h1>
+      <p class="doc-lead">
+        ページモジュールは 1 つのルーティング位置のコンテンツを担います。
+        <code>o-page</code> で直接読み込むことも、<code>o-app</code> のページスタックで管理することもできます。
+      </p>
+
+      <h2>1. ページモジュール</h2>
+      <p>
+        <code>page.html</code> を作成します。ページは
+        <code>&lt;template page&gt;</code> を使い、<code>tag</code> は必要ありません:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host {
+      display: block;
+      padding: 24px;
+    }
+  &lt;/style&gt;
+
+  &lt;h1&gt;こんにちは、{{name}}&lt;/h1&gt;
+  &lt;p&gt;現在のカウント: {{count}}&lt;/p&gt;
+  &lt;button on:click="count++"&gt;+1 する&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async ({ query }) =&gt; ({
+      data: {
+        name: query.name || "ofa.js",
+        count: 0,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>2. o-page で直接読み込む</h2>
+      <p>
+        最も簡単な方法は、エントリ HTML に <code>o-page</code> を置き、
+        <code>src</code> をページモジュールに向けることです:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;最初のページ&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html?name=Yao"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      <p>
+        <code>?name=Yao</code> は <code>query</code> 引数としてページモジュール関数に渡されます。
+        <code>this.goto()</code> や <code>this.back()</code> などのメソッドが完全なルーティングの
+        意味を持つのは <code>o-app</code> の中だけです。
+      </p>
+
+      <h2>3. o-app でページを管理する</h2>
+      <p>
+        複数ページのナビゲーション、ページスタック、トランジションアニメーションが必要な場合は、
+        <code>o-app</code> でアプリ設定を読み込みます:
+      </p>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./page.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};</code></pre>
+
+      <p>
+        <code>home</code> はアプリ起動時に最初に読み込まれるページです。ページ内では
+        <code>this.goto("./detail.html")</code> または
+        <code>&lt;a olink href="./detail.html"&gt;</code> で移動します。
+        設定の全体は <a olink href="./app.html">o-app のアプリケーションページ</a> を参照してください。
+      </p>
+
+      <div class="doc-note">
+        <strong>ページは HTTP 経由で配信する必要があります。</strong>
+        HTML ファイルを直接開くと、<code>file://</code> がモジュールスクリプトとページの取得をブロックします。
+        代わりにディレクトリで <code>npx serve .</code> または <code>python3 -m http.server</code> を実行してください。
+      </div>
+
+      <p class="doc-end">
+        前へ: <a olink href="./first-component.html">はじめてのコンポーネント →</a>
+        · 次へ: <a olink href="./component.html">コンポーネント →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

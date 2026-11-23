@@ -3095,3 +3095,13 @@ mark.site-search-hit {
   content: "複製";
   font-size: 12px;
 }
+
+/* Japanese: localize the copy label inside senti-ui st-code */
+:host-context(html[lang^="ja"]) st-code::part(copy) {
+  font-size: 0;
+}
+
+:host-context(html[lang^="ja"]) st-code::part(copy)::after {
+  content: "コピー";
+  font-size: 12px;
+}

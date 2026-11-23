@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>コンポーネント — ofa.js ドキュメント</title>
+    <meta name="description" content="ofa.js のコンポーネント構造、attrs/data、プロパティの受け渡し、スロット、カスタムイベント、コンポーネントの再利用。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="コンポーネント — ofa.js ドキュメント" />
+    <meta property="og:description" content="ofa.js のコンポーネント構造、attrs/data、プロパティの受け渡し、スロット、カスタムイベント、コンポーネントの再利用。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">基本概念</p>
+      <h1>コンポーネント</h1>
+      <p class="doc-lead">
+        コンポーネントは再利用可能な Web Component のモジュールです。独自の Shadow DOM、
+        リアクティブなデータ、外部から渡される attrs、外へイベントを発行するインターフェースを持ちます。
+      </p>
+
+      <h2>モジュールの契約</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>フィールド</th><th>必須</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>はい</td><td>コンポーネントのタグ名。使用時と一致している必要があります</td></tr>
+          <tr><td><code>attrs</code></td><td>いいえ</td><td>外部から渡されるスカラー属性。HTML 属性に反映されます</td></tr>
+          <tr><td><code>data</code></td><td>いいえ</td><td>内部のリアクティブな状態。オブジェクトや配列をそのまま置けます</td></tr>
+          <tr><td><code>proto</code></td><td>いいえ</td><td>メソッド、getter/setter</td></tr>
+          <tr><td><code>watch</code></td><td>いいえ</td><td>data/attrs の変更を監視</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>いいえ</td><td>ライフサイクルフック</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>tag</code> を宣言しない場合、フレームワークはファイル名からタグ名を推測します:
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>。
+        ただし、ファイルの名前変更や移動でコンポーネントの公開タグが黙って変わらないよう、
+        明示的に宣言することをおすすめします。
+      </p>
+
+      <h2>attrs と data</h2>
+      <p>
+        <code>attrs</code> はコンポーネントの公開入力で、文字列、数値、真偽値に適しています。
+        <code>data</code> はコンポーネントの内部状態で、配列やオブジェクトに適しています。
+        両者のキーは重複させてはいけません:
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>外部から渡すときは、ケバブケースの名前が自動的にキャメルケースのフィールドにマッピングされます:</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        動的な値は <code>:</code> プレフィックスで渡します。真偽値属性には <code>attr:</code> を使います:
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>コンポーネントのインポート</h2>
+      <p>
+        ページテンプレートの先頭で <code>&lt;l-m&gt;</code> を使い、コンポーネントファイルを
+        非同期にインポートします。即座に制御を返すため、ページの初回レンダリングをブロックしません:
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        使用前にコンポーネントが登録されていることを保証したい場合は、
+        モジュール関数内で <code>await load()</code> を呼びます:
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>スロット</h2>
+      <pre><code>&lt;!-- コンポーネント内 --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;デフォルトのタイトル&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- 利用側 --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;Alice&lt;/h3&gt;
+  &lt;p&gt;これはデフォルトスロットの内容です&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        デフォルトスロットは <code>slot</code> 属性を持たない子ノードを受け取ります。名前付きスロットは
+        <code>slot="name"</code> に一致し、スロットにはフォールバックコンテンツを入れられます。
+      </p>
+
+      <h2>カスタムイベント</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Alice" },
+});</code></pre>
+      <p>
+        イベントはデフォルトで <code>bubbles: true</code>、<code>composed: false</code> です。
+        イベントが Shadow DOM の外へ出る必要がある場合は、<code>composed: true</code> を明示的に設定します。
+        ページが <code>o-page</code> をネストする場合に特によくあります。
+      </p>
+
+      <p>
+        コンポーネントの <code>PATH</code> は登録ファイルの URL を指します。コンポーネントテンプレート内の
+        相対リソース（<code>img src</code> や <code>style url()</code> など）は、利用するページの
+        URL ではなく <code>PATH</code> を基準に解決されます。
+      </p>
+
+      <h2>スタイルの分離</h2>
+      <p>
+        コンポーネントテンプレート内の <code>&lt;style&gt;</code> は、そのコンポーネント自身の
+        Shadow DOM 内にのみ適用されます。ルートノードを選択するには <code>:host</code> を使います。
+        <code>::slotted()</code> はスロットコンテンツの第 1 階層にしか届きません。より深い階層まで
+        届かせる必要がある場合は <code>inject-host</code> プラグインを使います。
+      </p>
+
+      <h2>命名の制約</h2>
+      <p>
+        <code>tag</code> は既存のコンポーネントと重複してはいけません。<code>data</code>/<code>proto</code>
+        では <code>back</code>、<code>goto</code>、<code>replace</code>、<code>src</code>、<code>on</code>、
+        <code>emit</code> などの組み込み予約名を使用できません。
+        名前が重複すると登録は即座に失敗します。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./first-page.html">はじめてのページ →</a>
+        · 次へ: <a olink href="./page.html">ページ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

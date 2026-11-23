@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 06</p>
+      <h1>双方向バインディング</h1>
+      <p class="doc-lead">sync: はフォームフィールドとデータを双方向に同期させます。スカラー値に最適です。</p>
+
+      <p>
+  <code>sync:</code> は 2 つのことを同時に行います。データが変わるとフォームを更新し、
+  ユーザーの入力をデータに書き戻します。文字列、数値、真偽値などの
+  スカラー値に適しています。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-6" fold-styles="true"></docs-playground>
+<h2>よく使うフォームフィールド</h2>
+<ul>
+  <li><code>sync:value="name"</code>: テキスト入力、textarea、select に使います。</li>
+  <li><code>sync:checked="subscribe"</code>: チェックボックスのチェック状態に使います。</li>
+  <li>下のプレビューは入力に合わせて更新されるので、値が <code>data</code> に
+    書き戻されたことがわかります。</li>
+</ul>
+<div class="doc-note">
+  <strong>オブジェクトは同期しない:</strong> オブジェクトを双方向バインドすると
+  参照がわかりにくくなります。オブジェクトや配列を編集する場合は、
+  <code>sync:value="$data.field"</code> で特定のフィールドにバインドするか、
+  <code>on:input</code> メソッドで入力を処理してください。
+</div>
+<h2>やってみよう</h2>
+<p>
+  「年齢」の数値入力（<code>type="number"</code>）を追加し、<code>sync:value</code> で
+  バインドして、来年の年齢をプレビューに表示しましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-5.html">05 · イベント →</a> · 次へ: <a olink href="./lesson-7.html">07 · 条件付きレンダリング →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

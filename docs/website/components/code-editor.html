@@ -259,6 +259,7 @@
 
     const IS_EN = document.documentElement.lang.startsWith("en");
     const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
+    const IS_JA = document.documentElement.lang.startsWith("ja");
     const UI = IS_EN
       ? {
           editorAria: "Code editor",
@@ -276,6 +277,15 @@
           foldHint: "點擊行號左側的 ▸ 展開，或",
           expandAll: "展開全部並編輯",
           foldToggle: "摺疊或展開",
+        }
+      : IS_JA
+      ? {
+          editorAria: "コードエディタ",
+          foldedPrefix: "折りたたみ: ",
+          foldedSuffix: " 件",
+          foldHint: "行番号左の ▸ をクリックして展開、または",
+          expandAll: "すべて展開して編集",
+          foldToggle: "折りたたみ／展開",
         }
       : {
           editorAria: "代码编辑器",

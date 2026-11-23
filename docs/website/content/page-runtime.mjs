@@ -52,7 +52,9 @@ const getNavUrls = (url, docs = false) => {
 
 export const createLandingPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
-  const isEnglish = document.documentElement.lang.startsWith("en");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") ||
+    document.documentElement.lang.startsWith("ja");
 
   const codeZh = {
     hero: `<template component>

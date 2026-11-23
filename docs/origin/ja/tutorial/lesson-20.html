@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 20</p>
+      <h1>まとめ：Todo リスト</h1>
+      <p class="doc-lead">リスト、フォーム、条件分岐、算出プロパティ、監視、localStorage を1つの完全なアプリに組み合わせます。</p>
+
+      <p>
+  最後のレッスンでは、これまでの機能を組み合わせます。入力から Todo を追加し、リスト項目をチェック・削除し、
+  状態でフィルタリングし、データをブラウザに自動保存します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-20" fold-styles="true"></docs-playground>
+<h2>このレッスンで使うもの</h2>
+<ul>
+  <li><code>sync:value</code> / <code>sync:checked</code>: フォームとリスト項目の編集。</li>
+  <li><code>o-fill</code> + <code>fill-key</code>: リストの描画と再利用。</li>
+  <li><code>get visibleItems()</code> / <code>get remaining()</code>: フィルタリングと件数。</li>
+  <li><code>watch.items</code>: データが変わったときに localStorage へ書き込みます。</li>
+</ul>
+<p>
+  右側のプレビューを更新してみてください。データが変わったときに <code>watch</code> が
+  ブラウザストレージへ書き込んでいるので、Todo は復元されます。
+</p>
+<div class="doc-note">
+  <strong>次のステップ:</strong> Todo をコンポーネントに分割し（レッスン12〜14）、
+  <code>$.stanz</code> でページ間で共有し（レッスン16）、レイアウトで全体を包みましょう（レッスン18）。
+  それで完全なアプリになります。
+</div>
+<h2>自分で試してみよう</h2>
+<p>
+  「完了をクリア」ボタンを追加しましょう。次に、各 Todo に編集ボタンを追加し、テキスト行を入力欄に切り替えられるようにしてください。
+</p>
+
+      <p class="doc-end">前: <a olink href="./lesson-19.html">19 · 非同期と読み込み状態 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

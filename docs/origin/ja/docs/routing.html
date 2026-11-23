@@ -1,0 +1,110 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">アプリケーション</p>
+      <h1>ルーティングとナビゲーション</h1>
+      <p class="doc-lead">
+        ofa.js のページは、ハッシュルーティング（o-router）と scsr の 2 つの
+        モードのいずれかでナビゲートします。ハッシュルーティングはフロントエンド
+        アプリの内部だけで切り替わり、scsr ではすべての URL が実際のドキュメントに
+        なります。ページナビゲーション API はどちらのモードでも同じです。
+      </p>
+
+      <h2>ページナビゲーション API</h2>
+      <pre><code>// ページモジュール内では、`this` がページインスタンス
+this.goto("./detail.html?id=42"); // ページスタックにプッシュ
+this.replace("./detail.html");    // 履歴を追加せずに現在のページを置き換える
+this.back();                      // 戻る
+this.forward();                   // アプリ設定で allowForward: true が必要</code></pre>
+      <p>宣言的なナビゲーションには <code>olink</code> を使います:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;詳細を見る&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> は <code>o-app</code> の内部でのみ有効です。ページ全体を
+        リロードせずに、アプリ内ルーティングとトランジションアニメーションを
+        経由します。外部リンクに <code>olink</code> を付けないでください。
+      </p>
+
+      <h2>クエリでパラメータを渡す</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query はページモジュール関数の引数であり、
+        <code>this.$route</code> ではありません。クエリの変更に反応するには
+        ページモジュール関数で読み取ってください。同じページのアドレスを変更
+        すると、モジュールがリロードされます。
+      </p>
+
+      <h2>o-router: ハッシュルーティング</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router はブリッジパッケージで、ofa.js の後に読み込む必要があります。</li>
+        <li><code>fix-body</code> は html/body をフルサイズにします。削除すると元に戻ります。</li>
+        <li>ページスタックはハッシュに同期されます（例: <code>#/pages/detail.html?id=42</code>）。</li>
+        <li>リロード、ディープリンク、共有、進む/戻るは、サーバー側のリライトなしでページを復元します。</li>
+        <li>ページは 1 つの o-app でのみ動作します。</li>
+      </ul>
+
+      <h2>ハッシュ URL の形式</h2>
+      <pre><code>// 正しい
+location.origin + "/#/pages/detail.html?id=42"
+
+// 誤り: 余分な pathname や ./ がある
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>ルーティングの変更を監視する</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> は <code>goto</code>、<code>replace</code>、
+        <code>back</code>、<code>forward</code> のいずれかで、<code>src</code> は
+        対象ページのアドレスです。ページモジュールの <code>routerChange</code>
+        フックは親レイアウトページでのみ発生し、現在の記事のハイライトに
+        使用されます。
+      </p>
+
+      <h2>実パスが必要な場合</h2>
+      <p>
+        ハッシュルーティングは純粋なフロントエンドアプリに適しています。すべての
+        URL がクロール可能で、直接アクセスでき、共有可能である必要がある場合は、
+        <a olink href="./scsr.html">scsr の実パスルーティング</a> を使用してください。
+        ページ API、ネストしたレイアウト、アニメーションの動作はどちらも同じです。
+      </p>
+
+      <p class="doc-end">
+        前: <a olink href="./app.html">o-app アプリ →</a>
+         · 次: <a olink href="./nested-routing.html">ネストしたルーティング →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

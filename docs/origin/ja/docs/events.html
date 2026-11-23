@@ -1,0 +1,137 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">テンプレート</p>
+      <h1>イベントとフォーム</h1>
+      <p class="doc-lead">
+        イベントは <code>on:</code> で、一度だけのイベントは <code>one:</code> でバインドします。
+        フォームコントロールの値は <code>sync:</code> によってデータと双方向に同期します。
+      </p>
+
+      <h2>メソッドのバインド</h2>
+      <pre><code>&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="add(5)"&gt;5 を追加&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;</code></pre>
+      <p>
+        単独の識別子（<code>save</code>）は <code>proto</code> メソッドとして解決され、
+        自動的に <code>this</code> にバインドされます。複雑な式はそのまま実行されます。
+        式内の文字列リテラルは引用符で囲む必要があり、そうしないと変数名として扱われます。
+      </p>
+
+      <h2>イベントオブジェクト</h2>
+      <pre><code>&lt;input on:keydown="onKeydown($event)" /&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { draft: "" },
+    proto: {
+      onKeydown(event) {
+        if (event.key !== "Enter") return;
+        this.submit();
+      },
+      submit() {
+        console.log(this.draft);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        <code>$event</code> はネイティブのイベントオブジェクトです。カスタムイベントの
+        データは <code>event.data</code> にあり、元の DOM イベントのフィールドも引き続き
+        利用できます。
+      </p>
+
+      <h2>一度だけのイベント</h2>
+      <pre><code>&lt;img one:load="onImageReady" src="./cover.jpg" /&gt;
+&lt;div one:click="dismiss"&gt;クリックで解除&lt;/div&gt;</code></pre>
+      <p>
+        <code>one:</code> は最初の発火後に自動的に解除されるため、初期化や通知の消去
+        などに適しています。
+      </p>
+
+      <h2>フォームの双方向バインディング</h2>
+      <pre><code>&lt;input type="text" sync:value="form.name" placeholder="名前" /&gt;
+&lt;input type="checkbox" sync:checked="form.agree" /&gt;
+&lt;select sync:value="form.city"&gt;
+  &lt;option value="shanghai"&gt;上海&lt;/option&gt;
+  &lt;option value="beijing"&gt;北京&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      <p>
+        <code>sync:</code> はスカラー専用です。フォームオブジェクトを <code>data</code> に
+        まとめて持つことはできますが、各フィールドのバインディングは個別のスカラーを
+        対象にする必要があります。
+      </p>
+
+      <h2>フォームの送信</h2>
+      <pre><code>&lt;form on:submit="onSubmit($event)"&gt;
+  &lt;input sync:value="form.name" required /&gt;
+  &lt;button type="submit"&gt;保存&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { form: { name: "" } },
+    proto: {
+      onSubmit(event) {
+        event.preventDefault();
+        if (!this.form.name.trim()) return;
+        console.log("送信", this.form.name);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+
+      <h2>カスタムイベント</h2>
+      <p>コンポーネントやページは自身でイベントを発火できます：</p>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "山田 太郎" },
+  bubbles: true,   // デフォルトで true
+  composed: true,  // イベントが Shadow DOM の境界を越える必要がある場合に設定
+});</code></pre>
+      <p>利用側はそれをリッスンし、<code>event.data</code> を読み取ります：</p>
+      <pre><code>&lt;user-form on:save="onSaved"&gt;&lt;/user-form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { savedName: "" },
+    proto: {
+      onSaved(event) {
+        this.savedName = event.data.name;
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        ホストの Shadow DOM に埋め込まれた <code>o-page</code> がイベントを上位へ送る場合、
+        <code>bubbles: true</code> と <code>composed: true</code> の両方が必要です。
+        そうでないとホストはイベントを受け取れません。
+      </p>
+
+      <h2>命名の推奨</h2>
+      <ul>
+        <li>イベント名は小文字のケバブケースを使います：<code>data-changed</code>、<code>form-save</code>。</li>
+        <li><code>click</code>、<code>input</code>、<code>submit</code> などのネイティブイベント名は再利用して構いません。</li>
+        <li>イベント名に <code>on</code> を付けないでください。テンプレートの <code>on:</code> がすでにそれを表現しています。</li>
+      </ul>
+
+      <p class="doc-end">
+        前へ：<a olink href="./binding.html">バインディングとスタイル →</a>
+         · 次へ：<a olink href="./render.html">条件分岐とリスト →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

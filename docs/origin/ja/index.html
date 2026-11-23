@@ -1,0 +1,661 @@
+<!--
+  docs/origin/ja/index.html — ページモジュールのソース（最終的な HTML ドキュメントではない）。
+  npm run build:website が template[page] の内容を SCSR ドキュメント
+  docs/website/ja/index.html にインライン展開する。
+-->
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <l-m src="{{SITE}}/components/demo-counter.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/button/icon-button.html"></l-m>
+  <l-m src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/code/code.html"></l-m>
+
+  <main class="main">
+      <!-- ============ ヒーロー ============ -->
+      <section class="hero" id="top">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <div class="hero-badges">
+              <span class="eyebrow">
+                <i class="pulse"></i>
+                v5 · ゼロビルドの Web Components フレームワーク
+              </span>
+              <a
+                class="legacy-docs"
+                href="https://v4.ofajs.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="旧 v4 ドキュメントを開く（新しいタブ）"
+              >
+                旧 v4 ドキュメント
+                <span class="arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+  
+            <h1>コンポーネントは<br /><span class="grad">素の HTML で書く。</span></h1>
+  
+            <p class="lead">
+              ofa.js は<b>ゼロビルド・ゼロ依存</b>のフロントエンドフレームワークです。<b>1 つの .html ファイルが 1 つのコンポーネント</b>で、
+              ブラウザがそのまま実行します。スキャフォールディングも、ビルダーというブラックボックスもなく、すでに知っている HTML・CSS・JavaScript だけで完結します。
+            </p>
+  
+            <div class="actions">
+              <st-button class="btn btn-primary" on:click="jump('start')">
+                5 分で始める
+                <svg class="icon" slot="suffix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6"></path>
+                </svg>
+              </st-button>
+              <st-button
+                class="btn btn-ghost"
+                variant="outlined"
+                on:click="openExternal(githubUrl)"
+              >
+                GitHub で見る
+              </st-button>
+            </div>
+  
+            <div class="cdn-box">
+              <div class="cdn-top">
+                <span class="cdn-tag">CDN · v5</span>
+                <span class="cdn-label">ESM</span>
+                <st-icon-button
+                  class="copy-btn"
+                  on:click="copySnippet(cdnUrl)"
+                  aria-label="v5 ESM の URL をコピー"
+                  title="v5 ESM の URL をコピー"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                  </svg>
+                </st-icon-button>
+              </div>
+              <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+              <p class="cdn-hint">URL をコピーして、&lt;script type="module"&gt; タグか import に貼り付けてください。</p>
+            </div>
+  
+            <div class="stats">
+              <div class="stat">
+                <b>0</b>
+                <span>実行時依存</span>
+              </div>
+              <div class="stat">
+                <b>24 KB</b>
+                <span>gzip 圧縮後サイズ</span>
+              </div>
+              <div class="stat">
+                <b>100%</b>
+                <span>ネイティブ標準</span>
+              </div>
+              <div class="stat">
+                <b>2018</b>
+                <span>オープンソース開始</span>
+              </div>
+            </div>
+          </div>
+  
+          <div class="hero-visual" data-reveal style="--d: 120ms">
+            <st-code
+              frame
+              lang="html"
+              title="components/hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-xl);"
+              :code="codeHero"
+            ></st-code>
+  
+            <div class="window-status">
+              <span class="ok"><i></i>ビルド不要</span>
+              <span>HTML → ブラウザ</span>
+            </div>
+  
+            <div class="hero-float">
+              <span class="float-label"><i></i>本物のコンポーネント · いま動作中</span>
+              <demo-counter start="12" attr:reset-label="site.demo.reset"></demo-counter>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ ティッカー ============ -->
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Proxy リアクティブ</span><i></i>
+          <span>ゼロビルド</span><i></i>
+          <span>ゼロ依存</span><i></i>
+          <span>ハッシュルーター</span><i></i>
+          <span>SEO 対応</span><i></i>
+          <span>マイクロフロントエンド</span><i></i>
+          <span>AI フレンドリー</span><i></i>
+          <span>Custom Elements</span><i></i>
+          <span>Shadow DOM</span><i></i>
+          <span>ES Modules</span><i></i>
+          <span>Proxy リアクティブ</span><i></i>
+          <span>ゼロビルド</span><i></i>
+          <span>ゼロ依存</span><i></i>
+          <span>ハッシュルーター</span><i></i>
+          <span>SEO 対応</span><i></i>
+          <span>マイクロフロントエンド</span><i></i>
+          <span>AI フレンドリー</span><i></i>
+        </div>
+      </div>
+  
+      <!-- ============ 機能 ============ -->
+      <section class="section" id="features">
+        <div class="section-head" data-reveal>
+          <span class="kicker">ofa.js を選ぶ理由</span>
+          <h2>次のウェブのために、<br />余分なものはすべて削ぎ落として。</h2>
+          <p>
+            npm も Node.js も webpack も不要。新しいコンパイル規則を覚える必要もありません。
+            ブラウザはすでにコンポーネントをサポートしています。ofa.js はそれを、使えるくらい手軽にするだけです。
+          </p>
+        </div>
+  
+        <div class="bento">
+          <article class="card card-split span-4" data-reveal>
+            <div class="card-copy">
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                  <path d="M14 2v6h6"></path>
+                </svg>
+              </span>
+              <h3>1 つの HTML ファイル、1 つのコンポーネント</h3>
+              <p>
+                テンプレート、スタイル、ロジックが同じファイルに収まります。タグ名がそのままコンポーネント名になり、
+                ブラウザが直接読み込みます。ビルド成果物も、隠れた魔法もありません。
+              </p>
+              <div class="file-flow">
+                <span class="file-pill">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                    <path d="M14 2v6h6"></path>
+                  </svg>
+                  hello-ofa.html
+                </span>
+                <span class="flow-arrow">→</span>
+                <span class="tag-pill">&lt;hello-ofa&gt;</span>
+              </div>
+            </div>
+  
+            <st-code
+              aria-hidden="true"
+              frame
+              lang="html"
+              title="hello-ofa.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeMini"
+            ></st-code>
+          </article>
+  
+          <article class="card span-2 card-counter" data-reveal style="--d: 80ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"></path>
+              </svg>
+            </span>
+            <h3>きめ細かなリアクティブ性</h3>
+            <p>Proxy がデータを追跡します。データを変えれば UI が追従します。クリックしてみてください。</p>
+            <demo-counter start="7" attr:reset-label="site.demo.reset"></demo-counter>
+          </article>
+  
+          <article class="card span-2" data-reveal>
+            <span class="icon-chip amber">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m21 8-9-5-9 5v8l9 5 9-5Z"></path>
+                <path d="m3 8 9 5 9-5"></path>
+                <path d="M12 13v8"></path>
+              </svg>
+            </span>
+            <h3>ゼロビルド、ブラックボックスなし</h3>
+            <p>インストールも設定も、ビルド待ちの行列もありません。書いて、保存して、更新するだけ。AI が生成したコードもそのまま検証できます。</p>
+            <div class="zero-pills">
+              <span>npm</span>
+              <span>webpack</span>
+              <span>vite</span>
+              <span>babel</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 60ms">
+            <span class="icon-chip">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="6" cy="19" r="2.5"></circle>
+                <circle cx="18" cy="5" r="2.5"></circle>
+                <path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"></path>
+              </svg>
+            </span>
+            <h3>ページのために作られたルーター</h3>
+            <p>o-app がアプリを管理し、o-router がアドレスバーを担い、scsr が実際のパスを出力します。戻る・進む・再読み込みも、あるべき場所にきちんと着地します。</p>
+            <div class="routes" aria-hidden="true">
+              <span class="route active"><i class="dot"></i>#/pages/home.html</span>
+              <span class="route"><i class="dot"></i>#/pages/detail.html?id=42</span>
+              <span class="route"><i class="dot"></i>/posts/hello-world</span>
+            </div>
+          </article>
+  
+          <article class="card span-2" data-reveal style="--d: 120ms">
+            <span class="icon-chip cyan">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"></path>
+              </svg>
+            </span>
+            <h3>1 回のリクエストで全部入り</h3>
+            <p>gzip で約 24 KB、実行時依存はゼロ。どのページにも気軽に組み込めるサイズです。</p>
+            <div class="bundle">
+              <div class="bundle-num">24<small>KB · gzip</small></div>
+              <div class="bar"><i></i></div>
+              <div class="bar-label"><span>ofa.min.mjs</span><span>≈ 70 KB min</span></div>
+            </div>
+          </article>
+  
+          <article class="card card-wide span-6" data-reveal>
+            <div>
+              <span class="icon-chip">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+                  <path d="m3 13 9 5 9-5"></path>
+                </svg>
+              </span>
+              <h3>ネイティブ標準であって、孤島ではない</h3>
+              <p>
+                コンポーネントは Custom Elements、スタイルは Shadow DOM の中で分離され、モジュールは ES Modules を使います。
+                ofa.js で書いたコンポーネントはどんなページにも埋め込め、React や Vue とも共存できます。もうひとつのランタイムではなく、ネイティブ機能に薄くかぶせたラッパーにすぎません。
+              </p>
+            </div>
+            <div class="standard-grid">
+              <div class="standard">
+                <b><i></i>Custom Elements</b>
+                <span>コンポーネントはただのタグで、ブラウザがネイティブに登録します</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Shadow DOM</b>
+                <span>スタイルはデフォルトでスコープ化されます</span>
+              </div>
+              <div class="standard">
+                <b><i></i>ES Modules</b>
+                <span>バンドラーなしでモジュールを読み込み</span>
+              </div>
+              <div class="standard">
+                <b><i></i>Proxy</b>
+                <span>データの変更を自動で追跡</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+  
+      <!-- ============ ライブデモ ============ -->
+      <section class="section" id="demo">
+        <div class="demo-grid">
+          <div class="demo-copy" data-reveal>
+            <span class="kicker">ライブプレイグラウンド</span>
+            <h2>スクリーンショットを眺めるだけでは<br />もったいない。いま触ってみてください。</h2>
+            <p>
+              右側の ToDo アプリは、ごく普通の HTML ファイル 1 つだけです。リスト、双方向バインディング、
+              集計表示は、すべて ofa.js がブラウザ上で処理しています。
+            </p>
+  
+            <ul class="check-list">
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>追加・チェック・削除、すべてが即座に反映されます</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>リストは <b>o-fill</b> + <b>fill-key</b> で、追加と削除を自動的に整合させます</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>スタイルは Shadow DOM 内に分離され、ページに漏れません</span>
+              </li>
+              <li>
+                <span class="tick">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>デモ全体で、手作業の DOM 操作は 1 行もありません</span>
+              </li>
+            </ul>
+  
+            <span class="demo-meta"><i></i>ライブ実行中 · 録画ではありません</span>
+          </div>
+  
+          <div class="app-window" data-reveal style="--d: 100ms">
+            <div class="app-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="app-url">demo / todo.html</span>
+              <span class="live-pill"><i></i>ライブ</span>
+            </div>
+  
+            <div class="todo">
+              <div class="todo-head">
+                <div>
+                  <span class="todo-kicker">{{site.demo.kicker}}</span>
+                  <h3>{{site.demo.heading}}</h3>
+                </div>
+                <span class="todo-count">{{remaining}} {{site.demo.remainingSuffix}}</span>
+              </div>
+  
+              <div class="todo-input">
+                <input
+                  sync:value="draft"
+                  on:keydown="addOnEnter($event)"
+                  attr:placeholder="site.demo.placeholder"
+                  attr:aria-label="site.demo.inputAria"
+                />
+                <st-button
+                  class="todo-add"
+                  on:click="addTodo"
+                  attr:disabled="!draft.trim()"
+                >{{site.demo.add}}</st-button>
+              </div>
+  
+              <ul class="todo-list">
+                <o-fill :value="todos" fill-key="id">
+                  <li class:done="$data.done">
+                    <input
+                      class="todo-check"
+                      type="checkbox"
+                      sync:checked="$data.done"
+                      on:change="$host.refreshStats()"
+                      attr:aria-label="$host.site.demo.checkAria"
+                    />
+                    <span class="todo-text">{{$data.text}}</span>
+                    <st-icon-button
+                      class="todo-del"
+                      on:click="$host.removeTodo($data.id)"
+                      attr:aria-label="$host.site.demo.deleteAria"
+                    >×</st-icon-button>
+                  </li>
+                </o-fill>
+              </ul>
+  
+              <div class="todo-foot">
+                <st-button
+                  class="todo-clear"
+                  variant="text"
+                  on:click="clearDone"
+                  attr:disabled="doneCount === 0"
+                >{{site.demo.clear}}</st-button>
+                <span>{{doneCount}} / {{todos.length}} {{site.demo.doneSuffix}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- ============ クイックスタート ============ -->
+      <section class="section" id="start">
+        <div class="section-head center" data-reveal>
+          <span class="kicker">クイックスタート</span>
+          <h2>ゼロから最初のページまで、3 ステップ。</h2>
+          <p>インストールも設定ファイルも不要。エディタを開いて HTML ファイルを 1 つ書くだけです。</p>
+        </div>
+  
+        <div class="steps">
+          <article class="step" data-reveal>
+            <span class="step-no">ステップ 01</span>
+            <h3>ofa.js を読み込む</h3>
+            <p>v5 の .mjs URL をコピーするだけ。依存もビルドもありません。</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+            >
+              <textarea hidden>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+></script>
+              </textarea>
+            </st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 70ms">
+            <span class="step-no">ステップ 02</span>
+            <h3>ページを書く</h3>
+            <p>テンプレート、スタイル、ロジックを 1 ファイルに。保存すればそのまま動きます。</p>
+            <st-code
+              frame
+              lang="html"
+              title="index.html"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codePage"
+            ></st-code>
+          </article>
+  
+          <article class="step" data-reveal style="--d: 140ms">
+            <span class="step-no">ステップ 03</span>
+            <h3>ブラウザで開く</h3>
+            <p>ファイルを任意の静的ディレクトリに置いて、ブラウザで開けば完了です。</p>
+            <st-code
+              frame
+              lang="js"
+              format="off"
+              title="terminal"
+              style="--st-code-radius: var(--md-sys-shape-corner-lg);"
+              :code="codeTerminal"
+            ></st-code>
+          </article>
+        </div>
+  
+        <div class="start-note" data-reveal>
+          <span>コンポーネント、ルーティング、状態管理の全体像を知りたいですか？ ドキュメントには、ゼロから始める完全なガイドがあります。</span>
+          <a olink attr:href="navUrls.docs">
+            ドキュメントを読む
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
+  
+      <!-- ============ エコシステム ============ -->
+      <section class="section" id="ecosystem">
+        <div class="section-head" data-reveal>
+          <span class="kicker">エコシステム</span>
+          <h2>1 つのコア、4 つのレイヤー。</h2>
+          <p>
+            フレームワーク本体と 3 つの基盤ライブラリは、同じリポジトリで一緒に進化します。各レイヤーは薄く、
+            それぞれ単体でも使えます。
+          </p>
+        </div>
+  
+        <div class="eco-grid">
+          <div class="stack" data-reveal>
+            <div class="stack-head"><i></i>モノレポ · 一緒に進化</div>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>ofa.js</b><em>アプリケーションレイヤー</em></span>
+              <span class="layer-desc">コンポーネント · ページ · ルーティング · コンテキスト</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>xhear</b><em>コンポーネントの基盤</em></span>
+              <span class="layer-desc">Web Components とテンプレートレンダリング</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>stanz</b><em>リアクティブ</em></span>
+              <span class="layer-desc">Proxy によるデータ監視</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+  
+            <a
+              class="layer"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i class="layer-dot"></i>
+              <span class="layer-head"><b>drill</b><em>モジュール読み込み</em></span>
+              <span class="layer-desc">ブラウザ向けの ESM ローダー</span>
+              <span class="layer-arrow">↗</span>
+            </a>
+          </div>
+  
+          <div class="eco-list" data-reveal style="--d: 80ms">
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/ofajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>ofa.js</code><span class="eco-arrow">↗</span></span>
+              <p>アプリケーションフレームワーク。コンポーネント、ページ、o-app ルーティング、コンテキスト、テンプレート構文。</p>
+              <span class="eco-tag">フレームワーク</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/xhear"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>xhear</code><span class="eco-arrow">↗</span></span>
+              <p>Web Components の基盤。要素のカプセル化、テンプレートレンダリング、データバインディングのための薄いレイヤー。</p>
+              <span class="eco-tag">Web Components</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/stanz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>stanz</code><span class="eco-arrow">↗</span></span>
+              <p>Proxy ベースのリアクティブコア。オブジェクト、配列、深い階層の変更まで、すべて監視できます。</p>
+              <span class="eco-tag">リアクティブ</span>
+            </a>
+  
+            <a
+              class="eco-card"
+              href="https://github.com/ofajs/ofa.js/tree/main/packages/drill"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span class="eco-top"><code>drill</code><span class="eco-arrow">↗</span></span>
+              <p>ブラウザ側のモジュールローダー。HTML も CSS も JS も、すべてモジュールにできます。</p>
+              <span class="eco-tag">モジュールローダー</span>
+            </a>
+          </div>
+        </div>
+  
+        <div class="eco-more" data-reveal>
+          <span>オプションの拡張</span>
+          <code>o-router</code>
+          <code>scsr</code>
+          <code>formdata</code>
+          <code>inject-host</code>
+          <code>body-ghost</code>
+          <code>global-link</code>
+          <span>import するだけで使えます。デフォルトのビルドには含まれません。</span>
+        </div>
+      </section>
+  
+      <!-- ============ CTA ============ -->
+      <section class="cta">
+        <div class="cta-inner" data-reveal>
+          <span class="kicker">準備ができたら</span>
+          <h2>さあ、アイデアを<br />HTML ファイルに変えよう。</h2>
+          <p>
+            環境構築も、ビルド待ちもありません。ファイルを作ってタグを書き、
+            ブラウザを更新すれば、アプリはもう動き始めています。
+          </p>
+  
+          <div class="actions">
+            <a
+              class="btn btn-primary"
+              olink
+              attr:href="navUrls.firstLesson"
+            >
+              レッスン 1 を始める
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/ofajs/ofa.js"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub リポジトリ
+            </a>
+          </div>
+  
+          <div class="cdn-box">
+            <div class="cdn-top">
+              <span class="cdn-tag">CDN · v5</span>
+              <span class="cdn-label">ESM</span>
+              <button
+                class="copy-btn"
+                type="button"
+                on:click="copySnippet(cdnUrl)"
+                aria-label="v5 ESM の URL をコピー"
+                title="v5 ESM の URL をコピー"
+              >
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                  <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                </svg>
+              </button>
+            </div>
+            <span class="cdn-url" attr:title="cdnUrl">{{cdnUrl}}</span>
+            <p class="cdn-hint">URL をコピーして、&lt;script type="module"&gt; タグか import に貼り付けてください。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  <div class="toast" class:show="toastVisible" role="status" aria-live="polite">
+    {{toastText}}
+  </div>
+
+  <script>
+    import { createLandingPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createLandingPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

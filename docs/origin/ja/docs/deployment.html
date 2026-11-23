@@ -1,0 +1,113 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">リファレンス</p>
+      <h1>デプロイ</h1>
+      <p class="doc-lead">
+        ofa.js アプリにはビルド手順がないため、デプロイは実質的にソース
+        ディレクトリを任意の静的サーバーに置くだけです。Node.js のランタイム依存も
+        バンドラもありません。
+      </p>
+
+      <h2>最小構成のデプロイ</h2>
+      <p>エントリ HTML、ページモジュール、コンポーネント、アセットを元のディレクトリ構造のままアップロードします:</p>
+      <pre><code>site/
+├── index.html
+├── app-config.js
+├── pages/
+│   ├── home.html
+│   └── detail.html
+├── components/
+│   └── user-card.html
+└── assets/</code></pre>
+      <p>静的サーバーは正しい MIME タイプを返すだけで十分です。特に次の点に注意してください:</p>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>拡張子</th><th>Content-Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.html</code></td><td><code>text/html; charset=utf-8</code></td></tr>
+          <tr><td><code>.mjs</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.js</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.css</code></td><td><code>text/css; charset=utf-8</code></td></tr>
+          <tr><td><code>.json</code></td><td><code>application/json; charset=utf-8</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>CDN からフレームワークを読み込む</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+      <p>
+        dist ファイルを自分の静的ディレクトリにダウンロードして、サードパーティ
+        CDN への依存を避けることもできます。router / scsr を使う場合は、それらも
+        デプロイし、ofa.js を先に読み込むようにしてください。
+      </p>
+
+      <h2>サブディレクトリへのデプロイ</h2>
+      <p>
+        すべてのアセットパスは相対パスをサポートします。アプリが
+        <code>https://example.com/app/</code> にある場合、ページモジュール内の
+        <code>./detail.html</code> はベースパス設定なしで
+        <code>/app/detail.html</code> に解決されます。コード内で <code>/</code>
+        で始まる絶対パスをハードコードしないでください。
+      </p>
+
+      <h2>キャッシュ戦略</h2>
+      <ul>
+        <li>HTML エントリはキャッシュしない、または短時間だけキャッシュして、リリース後に新しいバージョンが反映されるようにします。</li>
+        <li><code>.mjs</code> / <code>.js</code> ファイルはハッシュ付きファイル名で長期的なキャッシュが可能です。</li>
+        <li>開発中はキャッシュを無効にして、編集後に古いモジュールが読み込まれ続けないようにします（<a olink href="./pitfalls.html">よくある落とし穴</a> を参照）。</li>
+      </ul>
+
+      <h2>o-router と scsr</h2>
+      <p>
+        <strong>o-router</strong> はハッシュ URL を使い、デプロイ時にサーバー側の
+        リライトを必要としません:
+      </p>
+      <pre><code>&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <p>
+        <strong>scsr</strong> はすべての URL が対応する HTML を返すことを要求します。
+        静的デプロイでは各パスに実際のファイルが必要で、サーバーデプロイでは
+        パスごとにテンプレートから HTML を生成して出力します。すべてのパスを同じ
+        空のシェルにフォールバックさせないでください。ファーストスクリーンの
+        コンテンツが失われます。
+      </p>
+
+      <h2>CORS とローカルファイル</h2>
+      <p>
+        ページモジュールは fetch で読み込まれ、コンポーネントはモジュールスクリプト
+        として読み込まれるため、どちらも HTTP 経由である必要があります。HTML
+        ファイルを直接開くと（<code>file://</code>）、ブラウザの CORS ポリシーに
+        よってブロックされます。ローカルプレビューには任意の静的サーバーを
+        使ってください:
+      </p>
+      <pre><code>$ npx serve .
+# または
+$ python3 -m http.server 3000</code></pre>
+
+      <p class="doc-end">
+        前: <a olink href="./examples.html">完全なサンプル →</a>
+         · 戻る: <a olink href="./">ドキュメント概要 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

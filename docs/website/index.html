@@ -210,7 +210,7 @@
             return;
           }
 
-          const supported = ["cn", "t-cn", "en"];
+          const supported = ["cn", "t-cn", "en", "ja"];
           const forced = params.get("lang");
           let locale = "";
 
@@ -234,11 +234,16 @@
               const hasEnglish = languages.some((lang) =>
                 /^en(?:-|$)/i.test(lang),
               );
+              const hasJapanese = languages.some((lang) =>
+                /^ja(?:-|$)/i.test(lang),
+              );
 
               if (hasTraditional) {
                 locale = "t-cn";
               } else if (hasChinese) {
                 locale = "cn";
+              } else if (hasJapanese) {
+                locale = "ja";
               } else if (hasEnglish) {
                 locale = "en";
               } else {
@@ -247,11 +252,13 @@
                 locale =
                   /^(Asia\/(Taipei|Hong_Kong|Macau))$/.test(zone)
                     ? "t-cn"
-                    : /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi)|Asia\/Singapore)$/.test(
-                          zone,
-                        )
-                      ? "cn"
-                      : "en";
+                    : /^(Asia\/Tokyo)$/.test(zone)
+                      ? "ja"
+                      : /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi)|Asia\/Singapore)$/.test(
+                            zone,
+                          )
+                        ? "cn"
+                        : "en";
               }
             }
           }
@@ -268,7 +275,7 @@
       document.addEventListener("click", (event) => {
         const card = event.target.closest && event.target.closest(".lang-card");
         if (!card) return;
-        const match = (card.getAttribute("href") || "").match(/\/(cn|t-cn|en)\/?$/);
+        const match = (card.getAttribute("href") || "").match(/\/(cn|t-cn|en|ja)\/?$/);
         if (!match) return;
         try {
           localStorage.setItem("ofa-site-locale", match[1]);
@@ -310,6 +317,14 @@
           <span class="lang-main">
             <span class="lang-native">English</span>
             <span class="lang-title">ofa.js — Write Components as HTML</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="lang-card" href="./ja/" hreflang="ja">
+          <span class="lang-mark">ja</span>
+          <span class="lang-main">
+            <span class="lang-native">日本語</span>
+            <span class="lang-title">ofa.js — コンポーネントをHTMLで書く</span>
           </span>
           <span class="lang-arrow" aria-hidden="true">→</span>
         </a></div>

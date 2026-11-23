@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 選択とトラバーサル</p>
+      <h1>選択とトラバーサル</h1>
+      <p class="doc-lead">インスタンス内部の要素を検索し、DOM と shadow の境界をまたいで前後に移動します。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="traverse"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.$(expr)</code></td><td>自身の内部で最初に一致する要素を検索。コンポーネント内部では this.shadow.$() を使います</td></tr>
+          <tr><td><code>el.all(expr)</code></td><td>自身の内部で一致するすべての要素を検索し、インスタンスの配列を返します</td></tr>
+          <tr><td><code>el.parent</code></td><td>親要素インスタンス。親が document の場合は null</td></tr>
+          <tr><td><code>el.parents</code></td><td>すべての祖先インスタンスの配列</td></tr>
+          <tr><td><code>el.parentsUntil(expr)</code></td><td>expr に一致するまで祖先をさかのぼって収集（一致したノードは含まない）</td></tr>
+          <tr><td><code>el.hosts</code></td><td>shadow ホストのチェーン（階層ごと）</td></tr>
+          <tr><td><code>el.next / el.nexts</code></td><td>次の兄弟 / それ以降のすべての兄弟要素</td></tr>
+          <tr><td><code>el.prev / el.prevs</code></td><td>前の兄弟 / それ以前のすべての兄弟要素</td></tr>
+          <tr><td><code>el.siblings</code></td><td>自身を除くすべての兄弟要素</td></tr>
+          <tr><td><code>el.is(expr)</code></td><td>セレクターに一致するか、またはインスタンス・ネイティブ要素と等しいか</td></tr>
+          <tr><td><code>el.contains(expr)</code></td><td>指定したセレクター・インスタンス・ネイティブ要素を含むか</td></tr>
+          <tr><td><code>el.composedPath()</code></td><td>イベントシステムの完全なパス（shadow 境界をまたぐ）。ネイティブノードの配列で返します</td></tr>
+          <tr><td><code>el.get("a.b.c")</code></td><td>ドットパスで値を取得。単一キーは直接アクセスと同じ</td></tr>
+          <tr><td><code>el.set("a.b.c", value)</code></td><td>ドットパスで値を代入。単一キーは直接代入と同じ</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>サンプル内の second.prev / second.next は兄弟インスタンスです。class() はクラス名を付け外しします。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

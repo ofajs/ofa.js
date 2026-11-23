@@ -1,0 +1,113 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">アプリケーション</p>
+      <h1>ネストしたルーティング</h1>
+      <p class="doc-lead">
+        複数のページが同じナビゲーションとサイドバーを共有する場合は、共通の構造を
+        親ページに置き、子ページを <code>export const parent</code> によって親の
+        <code>&lt;slot&gt;</code> の下にマウントします。
+      </p>
+
+      <h2>親ページ: レイアウト</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;ホーム&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;ドキュメント&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>子ページ: parent を宣言する</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;メインコンテンツ&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> は子ページ自身のアドレスを基準に解決されます。子ページは
+        <code>slot</code> 内のコンテンツだけを担当し、共有のヘッダー/フッターと
+        サイドバーは親に残ります。
+      </p>
+
+      <h2>切り替え時の動作</h2>
+      <ul>
+        <li>同じ親の下で子ページを切り替えても、親は<strong>破棄されません</strong> — 置き換わるのはスロットの内容だけです。</li>
+        <li>親のデータ、スクロール位置、読み込み済みのコンポーネントは保持されます。</li>
+        <li>親を通って子ページに出入りすると、親の <code>routerChange</code> が発生します。</li>
+        <li>親も <code>parent</code> を宣言でき、多段のネストを構成できます。</li>
+      </ul>
+
+      <h2>このサイトが使っている構造</h2>
+      <p>
+        このサイト自体がこのパターンの実例です:
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← サイトレイアウト（ナビ、フッター、ドキュメントサイドバー）
+docs/origin/cn/index.html         ← ホームページ。レイアウト上にマウント
+docs/origin/cn/docs/*.html        ← ドキュメントページ。同じレイアウト上にマウント</code></pre>
+      <p>
+        すべてのドキュメントページは次のように終わります:
+      </p>
+      <pre><code>export const parent = "{{LOCALE}}/layout.html";</code></pre>
+      <p>
+        その結果、ドキュメントの記事を切り替えてもヘッダー/フッターや左側の目次は
+        再構築されず、本文領域だけが更新されます。
+      </p>
+
+      <h2>よくある落とし穴</h2>
+      <ul>
+        <li>親に <code>&lt;slot&gt;&lt;/slot&gt;</code> を書き忘れると、子ページの内容が表示されません。</li>
+        <li><code>parent</code> のパスが間違っていると、ページが単独で読み込まれ、レイアウトが失われます。</li>
+        <li><code>routerChange</code> を子ページに置いても、親でしか発生しません。</li>
+        <li>親のデータで <code>back</code>、<code>goto</code>、<code>src</code> などの予約名を使うと、登録に失敗します。</li>
+      </ul>
+
+      <p class="doc-end">
+        前: <a olink href="./routing.html">ルーティングとナビゲーション →</a>
+         · 次: <a olink href="./scsr.html">実パス scsr →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

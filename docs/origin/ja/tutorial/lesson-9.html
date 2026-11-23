@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 09</p>
+      <h1>リストの編集</h1>
+      <p class="doc-lead">配列の push/splice はビューを自動的に更新します。インライン編集は $data のフィールドに直接同期されます。</p>
+
+      <p>
+  ofa.js の配列はリアクティブです。<code>push</code> や <code>splice</code> などの
+  インプレース操作が更新をトリガーするため、配列全体を再代入する必要はありません。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9" fold-styles="true"></docs-playground>
+<h2>インライン編集</h2>
+<p>
+  各項目の入力は <code>$data.name</code> にバインドされているため、ユーザーの入力は
+  配列内のオブジェクトに直接書き込まれます。<code>fill-key="id"</code> と組み合わせると、
+  リストを並べ替えたり他の項目を削除したりしても、この項目は再構築されません。
+</p>
+<div class="doc-note">
+  <strong>配列を置き換えるべき場合:</strong> API からまったく新しいリストを取得したときは
+  <code>this.items = newList</code> のほうが明確です。ページ上で項目を少し追加・削除・
+  編集する場合は <code>push</code> / <code>splice</code> を使います。
+</div>
+<h2>やってみよう</h2>
+<p>
+  各行に「↑」ボタンを追加し、1 つ上の行と入れ替えましょう（ヒント:
+  <code>items.splice($index - 1, 2, currentItem, previousItem)</code> を使います）。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-8.html">08 · リストレンダリング →</a> · 次へ: <a olink href="./lesson-10.html">10 · 算出プロパティと監視 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

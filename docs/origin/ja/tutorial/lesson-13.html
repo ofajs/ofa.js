@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 13</p>
+      <h1>コンポーネントのパラメータ</h1>
+      <p class="doc-lead">外部データは attrs を通じてコンポーネントに渡り、コンポーネント自身の状態は data に保持します。</p>
+
+      <p>
+  コンポーネントが外部から受け取る属性は <code>attrs</code> でデフォルト値とともに宣言します。
+  コンポーネント内部で変化する状態は <code>data</code> に置きます。この 2 つは名前を共有してはいけません。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-13" fold-styles="true"></docs-playground>
+<h2>attrs と data</h2>
+<ul>
+  <li><code>attrs</code>: 外部から渡されるスカラー値（名前、役割、開始レベル）。
+    HTML 属性に反映されます。</li>
+  <li><code>data</code>: コンポーネント自身のリアクティブな状態。外部コードが直接変更することはありません。</li>
+  <li>サンプルでは <code>startLevel</code> は文字列で、コンポーネントが
+    <code>Number()</code> で数値に変換します。</li>
+</ul>
+<div class="doc-note">
+  <strong>attrs を直接変更しない:</strong> 子コンポーネントは <code>attrs</code> を読み取り専用の入力として扱います。
+  派生した状態が必要な場合は <code>data</code> にコピーしてください。そうすることでデータの出所が明確になり、
+  親と子が互いに上書きするのを防げます。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  ページに <code>level</code> データフィールドと入力欄を追加し、<code>attr:start-level="level"</code> で
+  2 つ目のコンポーネントに動的に渡してみましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-12.html">12 · はじめてのコンポーネント →</a> · 次へ: <a olink href="./lesson-14.html">14 · スロットとイベント →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

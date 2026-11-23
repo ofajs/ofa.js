@@ -1,0 +1,166 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">コアコンセプト</p>
+      <h1>ページ</h1>
+      <p class="doc-lead">
+        ページモジュールは、アプリのルーティングにおける1画面分のコンテンツです。
+        <code>tag</code> を持たず、<code>o-page</code> または <code>o-app</code> によって
+        読み込まれ、モジュール関数を通じて URL のクエリパラメータを受け取ります。
+      </p>
+
+      <h2>ページモジュールの構造</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "無題のページ",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> はパース済みのクエリパラメータオブジェクトです。
+        <code>./detail.html?id=42&amp;tab=info</code> を訪れると、
+        <code>query.id</code> は <code>"42"</code> になります。
+      </p>
+
+      <h2>ページ内でのナビゲーション</h2>
+      <p>
+        すべてのページインスタンスは <code>goto</code>、<code>replace</code>、
+        <code>back</code> を提供します：
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;詳細へ移動&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;戻る&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> は新しいページをプッシュし、<code>replace</code> は現在のページを
+        置き換え、<code>back</code> は前のページに戻ります。ページスタックと
+        ハッシュルーティングの詳細は<a olink href="./routing.html">ルーティングとナビゲーション</a>を参照してください。
+      </p>
+
+      <h2>相対アセットと相対インポート</h2>
+      <p>
+        ページ内の相対 URL は<strong>エントリ HTML ではなく、ページファイル自身</strong>を
+        基準に解決されます。フレームワークは <code>img src</code> や <code>style</code> 内の
+        <code>url()</code> などの相対アセットを自動的に書き換えます。
+        <code>.mjs</code> ページの <code>import</code> 文は、モジュール自身の URL を基準に解決されます。
+      </p>
+      <pre><code>&lt;!-- page.html は /pages/detail/ にある --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- 同じディレクトリの detail.mjs --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        つまり、アセットパスをサイトルートの絶対 URL に書き換えることなく、
+        ページを任意のサブディレクトリに置けます。
+      </p>
+
+      <h2>応用: .mjs ページモジュール</h2>
+      <p>
+        ページは通常 <code>&lt;template page&gt;</code> の HTML モジュールとして書きます。
+        テンプレートとロジックを分けたい場合は <code>.mjs</code> でも書け、
+        <code>$.PAGE</code> 型を宣言して <code>temp</code> で外部テンプレートを指定します：
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "こんにちは" };
+export const proto = {};</code></pre>
+      <p>
+        エントリは引き続き <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code> です。
+        ほとんどの場合は HTML モジュールを推奨します。<code>.mjs</code> は、テンプレートを
+        分離する必要がある、または既存モジュールを再利用するようなロジックの重い
+        プロジェクトに向いています。
+      </p>
+
+      <h2>子ページの埋め込み</h2>
+      <p>
+        1つのページでリスト、フォーム、ダイアログをまとめて持つ必要がある場合、
+        独立した単位を子ページに分割し、常駐する <code>&lt;o-page&gt;</code> で
+        埋め込めます：
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;追加&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        子ページはホストから呼び出せるメソッドを公開し、完了時にはイベントで
+        結果をホストへ返します：
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong><code>o-page</code> の src は初期化後に変更できません。</strong>
+        実行時に <code>src</code> を変更すると（<code>:src</code> バインディングを含む）、
+        例外が発生します。引数は子ページのメソッドを呼び出して渡してください。
+        どうしても新しいインスタンスが必要な場合は、<code>o-page</code> を
+        <code>o-if</code> で包んで破棄・再生成します。
+      </div>
+
+      <h2>ページの分割</h2>
+      <ul>
+        <li>子ページは自身のフォーム状態とインタラクションの整合性を持ちます。</li>
+        <li>データの正規化、永続化、モジュール間の調整はホストページの役割です。</li>
+        <li>結果を上位へ送るときは <code>bubbles: true, composed: true</code> の両方を設定する必要があります。</li>
+        <li>子ページは破棄・再生成するより、マウントしたままメソッドで状態をリセットする方が望ましいです。</li>
+      </ul>
+
+      <p class="doc-end">
+        前へ：<a olink href="./component.html">コンポーネント →</a>
+         · 次へ：<a olink href="./lifecycle.html">ライフサイクル →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

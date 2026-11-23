@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 05</p>
+      <h1>イベント</h1>
+      <p class="doc-lead">イベントは on: プレフィックスで監視します。簡単なロジックは式で、複雑なロジックは proto メソッドで書きます。</p>
+
+      <p>
+  イベントバインディングは常に <code>on:event-name</code> と書きます。値には単一の式、または
+  <code>proto</code> のメソッド名を指定できます。メソッドは現在のページインスタンスに
+  自動的にバインドされます。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5" fold-styles="true"></docs-playground>
+<h2>2 つの書き方</h2>
+<ul>
+  <li><code>on:click="count++"</code>: 1 行に収まるロジックに最適です。</li>
+  <li><code>on:click="decrement"</code>: 複数ステップのロジックや再利用するロジックに最適です。</li>
+  <li><code>on:input="onNameInput($event)"</code>: ネイティブのイベントオブジェクトが
+    必要な場合は <code>$event</code> を渡します。</li>
+</ul>
+<div class="doc-note">
+  <strong>DOM に直接触らない:</strong> ハンドラーでは
+  <code>this.count</code> を変更するだけで、ページは自動的に更新されます。実際の DOM
+  アクセスが必要なのは、サイズの測定、要素へのフォーカス、サードパーティ
+  ライブラリの初期化などだけです。
+</div>
+<h2>やってみよう</h2>
+<p>
+  <code>decrement</code> に下限を追加しましょう。カウントが 0 を下回らないようにします。
+  次に、カウントを 2 倍にするボタンを追加してください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-4.html">04 · スタイルとクラス →</a> · 次へ: <a olink href="./lesson-6.html">06 · 双方向バインディング →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

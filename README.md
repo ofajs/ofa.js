@@ -5,6 +5,7 @@
 [![中文文档](https://img.shields.io/badge/docs-中文-2f81f7)](https://ofajs.com/cn/)
 [![繁體中文文件](https://img.shields.io/badge/docs-繁體中文-2f81f7)](https://ofajs.com/t-cn/)
 [![English docs](https://img.shields.io/badge/docs-English-2f81f7)](https://ofajs.com/en/)
+[![日本語ドキュメント](https://img.shields.io/badge/docs-日本語-2f81f7)](https://ofajs.com/ja/)
 
 **Write components as plain HTML.**
 
@@ -15,6 +16,7 @@ npm, Node.js, bundler, or compilation step required.
 - [English documentation](https://ofajs.com/en/)
 - [中文文档](https://ofajs.com/cn/)
 - [繁體中文文件](https://ofajs.com/t-cn/)
+- [日本語ドキュメント](https://ofajs.com/ja/)
 - [v4 documentation](https://v4.ofajs.com/)
 - [GitHub Discussions](https://github.com/ofajs/discussion/discussions)
 
@@ -126,10 +128,12 @@ Open:
 - Simplified Chinese: <http://localhost:3348/cn/>
 - Traditional Chinese: <http://localhost:3348/t-cn/>
 - English: <http://localhost:3348/en/>
+- 日本語: <http://localhost:3348/ja/>
 
 Each language includes guides, API reference, a 20-lesson interactive tutorial,
 and a blog. The Traditional Chinese version is converted from the Simplified
-source with `opencc-js` (see `scripts/sync-t-cn.mjs`). The playground edits and runs real ofa.js examples in the browser.
+source with `opencc-js` (see `scripts/sync-t-cn.mjs`); the Japanese version is
+an AI-assisted translation. The playground edits and runs real ofa.js examples in the browser.
 
 Sources live in [`docs/origin`](./docs/origin); generated pages live in
 [`docs/website`](./docs/website). See [`docs/website/README.md`](./docs/website/README.md)

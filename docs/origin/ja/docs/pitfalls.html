@@ -1,0 +1,164 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">リファレンス</p>
+      <h1>よくある落とし穴とトラブルシューティング</h1>
+      <p class="doc-lead">
+        ページが表示されない、途中までしか描画されない、コードの変更が無視される
+        ——こうした問題の多くは、いくつかの決まった原因にたどり着きます。まずは
+        エラーメッセージを照合し、次にテンプレートの式を確認してください。
+      </p>
+
+      <h2>ReferenceError：テンプレートが未宣言のキーを参照している</h2>
+      <p>
+        テンプレート内の式は初期化時にすべて評価されるため、参照するキーは
+        あらかじめ <code>data</code> か <code>attrs</code> で宣言しておく必要が
+        あります。未宣言のキーは即座に例外を投げ、ページ全体の描画を中断します：
+      </p>
+      <pre><code>Error evaluating element expression: ':value="flag"'
+Caused by: ReferenceError: flag is not defined</code></pre>
+      <p>
+        対処：安全な初期値とともにそのフィールドを data に追加します。たとえば
+        <code>data: { flag: false }</code> です。
+      </p>
+
+      <h2>TypeError：getter がまだ届いていないデータに依存している</h2>
+      <p>
+        算出プロパティの getter は、<code>ready</code> より前のテンプレート初期化時に
+        実行されます。getter が非同期データの深いフィールドへ到達すると、
+        <code>TypeError</code> を投げてページ全体をクラッシュさせることがあります。
+      </p>
+      <pre><code>// 誤り: user はまだ空オブジェクト
+get roleText() {
+  return ROLE_TEXT[this.user.role];
+}</code></pre>
+      <p>
+        data のフィールドに切り替え、非同期コールバックの中で代入します：
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = ROLE_TEXT[user.role] || "";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+
+      <h2>SyntaxError：ディレクティブの値にクォートなしの文字列がある</h2>
+      <p>
+        <code>attr:</code>、<code>:prop</code>、<code>sync:</code>、
+        <code>class:</code> の値は、すべて JavaScript の式として解析されます：
+      </p>
+      <pre><code>&lt;!-- 誤り --&gt;
+&lt;button attr:data-type="in"&gt;
+&lt;button attr:title="クリックして選択"&gt;
+&lt;button attr:title="1 つ選択"&gt;
+
+&lt;!-- 正しい --&gt;
+&lt;button title="クリックして選択"&gt;
+&lt;button attr:title="'クリックして選択'"&gt;
+&lt;button attr:title="locked ? 'ロック中' : ''"&gt;</code></pre>
+      <p>
+        連鎖する症状：テンプレートの HTML はすでに Shadow DOM にあるのに、
+        <code>ready</code> が実行されず、<code>o-fill</code> も展開されず、
+        データが空のままになります。この組み合わせを見たら、まずディレクティブの
+        値にクォートされていないテキストがないかを grep で探してください。
+      </p>
+
+      <h2>予約名との衝突</h2>
+      <p>
+        <code>data</code> と <code>proto</code> では、ページ / アプリの組み込み
+        メンバー（<code>back</code>、<code>goto</code>、<code>replace</code>、
+        <code>src</code>、<code>pageAnime</code>、<code>pageIsReady</code>）や、
+        <code>on</code>、<code>off</code>、<code>emit</code>、<code>$</code>、
+        <code>text</code>、<code>html</code>、<code>css</code>、<code>data</code>
+        などの一般的なメソッドを使ってはいけません。衝突すると登録に失敗するか、
+        ページ全体がエラーになります。
+      </p>
+
+      <h2>$host / $data は o-fill の中にだけ存在する</h2>
+      <pre><code>&lt;!-- 誤り: ルート階層に $host は存在しない --&gt;
+&lt;button on:click="$host.openHelp()"&gt;?&lt;/button&gt;
+
+&lt;!-- 正しい: ルート階層ではメソッド名を直接呼び出す --&gt;
+&lt;button on:click="openHelp()"&gt;?&lt;/button&gt;</code></pre>
+      <p>
+        トップレベルの <code>o-if</code> から <code>$host</code> を参照すると
+        何も起きないことがあり、トップレベルの <code>attr:</code> から
+        <code>$host</code> を参照するとエラーにならないまま何も設定されません。
+        ルート階層では常に data のフィールドと proto のメソッドを使ってください。
+      </p>
+
+      <h2>真偽属性には attr: を使う</h2>
+      <pre><code>&lt;!-- 誤り: false のときも disabled="false" として描画される --&gt;
+&lt;button :disabled="loading"&gt;送信&lt;/button&gt;
+
+&lt;!-- 正しい --&gt;
+&lt;button attr:disabled="loading"&gt;送信&lt;/button&gt;</code></pre>
+
+      <h2>属性値の中に {{ }} を書かない</h2>
+      <pre><code>&lt;!-- 誤り --&gt;
+&lt;a href="{{url}}"&gt;リンク&lt;/a&gt;
+
+&lt;!-- 正しい --&gt;
+&lt;a attr:href="url"&gt;リンク&lt;/a&gt;</code></pre>
+
+      <h2>o-page の src は変更できない</h2>
+      <pre><code>&lt;!-- 実行時に例外を投げる --&gt;
+&lt;o-page :src="'./form.html?id=' + editingId"&gt;&lt;/o-page&gt;</code></pre>
+      <p>
+        o-page はマウントしたままにして、子ページのメソッド経由でパラメータを
+        渡してください。再構築が必要なときは <code>o-if</code> で包み、
+        破棄と再生成を行います。
+      </p>
+
+      <h2>ハッシュルーティングの形式</h2>
+      <pre><code>// 誤り
+location.origin + location.pathname + "#./pages/set.html"
+
+// 正しい
+location.origin + "/#/pages/set.html"</code></pre>
+
+      <h2>変更が反映されないときはまずキャッシュを確認</h2>
+      <p>
+        ofa.js は読み込んだページモジュールをキャッシュし、静的サーバーも HTML を
+        キャッシュすることがあります。ファイルを編集してもハッシュナビゲーションが
+        古い内容を表示し続け、コンソールにエラーが出ない場合は：
+      </p>
+      <ul>
+        <li>開発サーバーで HTTP キャッシュを無効にします（例：<code>http-server -c-1</code>）。</li>
+        <li>新しいクエリを付けた完全な URL で、ページ全体を再読み込みします。</li>
+        <li>自動テストではハッシュナビゲーションに頼らず、<code>page.goto(url)</code> でページ全体を読み込みます。</li>
+      </ul>
+
+      <h2>ラッパーオブジェクトと .ele</h2>
+      <pre><code>// 誤り
+$("o-app").current.shadowRoot
+
+// 正しい
+$("o-app").current.ele.shadowRoot.querySelector(".item")
+$("o-app").current.src</code></pre>
+
+      <p class="doc-end">
+        前へ: <a olink href="./plugins.html">プラグインと拡張 →</a>
+         · 次へ: <a olink href="./examples.html">完全なサンプル →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

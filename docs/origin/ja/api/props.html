@@ -1,0 +1,52 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · コンテンツ・属性・スタイル</p>
+      <h1>コンテンツ・属性・スタイル</h1>
+      <p class="doc-lead">テキスト、HTML、属性、クラス、インラインスタイルを読み書きします。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="props"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.text</code></td><td>textContent の読み書き（リアクティブ）</td></tr>
+          <tr><td><code>el.html</code></td><td>innerHTML の読み書き（リアクティブ）</td></tr>
+          <tr><td><code>el.attr(name[, value])</code></td><td>HTML 属性の読み書き。コンポーネント内の相対 href/src は自動的に PATH を基準に解決されます</td></tr>
+          <tr><td><code>el.prop(name[, value])</code></td><td>データプロパティの読み書き（el[name] と同じ）。ドットパスに対応します</td></tr>
+          <tr><td><code>el.class(name[, bool])</code></td><td>クラスの読み取り / 付け外し</td></tr>
+          <tr><td><code>el.classList</code></td><td>ネイティブな DOMTokenList</td></tr>
+          <tr><td><code>el.data</code></td><td>ネイティブな dataset（リアクティブではありません）</td></tr>
+          <tr><td><code>el.style</code></td><td>ネイティブなインラインスタイルオブジェクト（リアクティブではありません）</td></tr>
+          <tr><td><code>el.css</code></td><td>スタイルプロキシ。インライン値がない場合は計算済みスタイルにフォールバックし、--変数にも対応します</td></tr>
+          <tr><td><code>el.refresh()</code></td><td>更新イベントを手動で 1 回発行します</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>el.css はプロパティ単位（el.css.color）での書き込み、オブジェクトとしての一括置換、文字列としての一括置換のいずれも可能です。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

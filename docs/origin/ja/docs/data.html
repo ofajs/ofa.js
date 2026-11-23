@@ -1,0 +1,128 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">データ</p>
+      <h1>データと監視</h1>
+      <p class="doc-lead">
+        <code>data</code> はコンポーネントやページのリアクティブな状態です。stanz によって動作するため、
+        オブジェクトや配列への深い変更が自動的にビューの更新を引き起こします。
+      </p>
+
+      <h2>data は関数ではなくオブジェクト</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "Alice", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        各コンポーネントインスタンスは独自の data を持ちます。ネストしたオブジェクトへの代入や配列の
+        <code>push</code>/<code>splice</code>/<code>sort</code> はすべて更新を引き起こします。
+      </p>
+      <pre><code>this.user.name = "Bob";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>算出プロパティ</h2>
+      <p><code>proto</code> 内の getter を使用してください。Vue スタイルの computed は使用しません。</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>テンプレートでは通常のフィールドと同様に使用できます: <code>{{double}}</code>、<code>{{fullName}}</code>。</p>
+      <div class="doc-note">
+        <strong>getter はテンプレートの初期化時、ready より前に評価されます。</strong>
+        同期的な初期値に依存する単純な計算にのみ適しています。非同期データに依存する計算を
+        getter に記述しないでください。代わりにデータフィールドを使い、非同期コールバック内で代入してください。
+        そうしないと <code>TypeError</code> が発生し、ページ全体のレンダリングが壊れる可能性があります。
+      </div>
+
+      <h2>監視</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // 初期化時の最初の呼び出し
+    console.log("count が次の値に変更されました", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // オブジェクトと配列は深く監視される
+    console.log("user が変更されました");
+  },
+},</code></pre>
+      <p>
+        コールバックの第 2 引数は <code>{ watchers }</code> で、現在のデバウンス周期中にマージされた
+        変更の集合です。<code>watchers[0]</code> には
+        <code>name</code>、<code>oldValue</code>、<code>value</code>、
+        <code>type</code>、<code>target</code>、<code>args</code> が含まれます。
+      </p>
+      <p>
+        watch 関数はコンポーネントの初期化完了時に一度実行されます。その時点では
+        <code>watchers</code> は空で、この呼び出しは監視を確立するために使われます。初期化時に
+        ビジネスロジックを実行する必要がない場合は、先に
+        <code>if (!watchers) return;</code> で確認してください。
+      </p>
+
+      <h2>書き戻しループの回避</h2>
+      <pre><code>// 誤り: count を監視しながらコールバック内で count を変更している
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        派生値が必要な場合は算出プロパティを使用するか、明示的な発火条件を追加してください。
+        watch の内部で監視対象のデータに無条件に書き戻さないでください。
+      </p>
+
+      <h2>watch と非同期データ</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        watch コールバックは async 関数にできます。並行リクエストが発生する場合は、リクエストの
+        シーケンス番号を追跡するか <code>AbortController</code> を使用して、古いリクエストが
+        新しい結果を上書きしないようにしてください。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./render.html">条件分岐とリスト →</a>
+         · 次へ: <a olink href="./state.html">グローバル状態 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

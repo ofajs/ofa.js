@@ -1,0 +1,108 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">データ</p>
+      <h1>コンポーネント間のコンテキスト</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> はデータをサブツリーに配置し、<code>o-consumer</code> は
+        最も近いプロバイダーからそれを受け取ります。ユーザー情報、テーマ、ビジネスコンテキストを
+        複数のコンポーネント階層にまたがって渡すのに適しており、prop drilling を避けられます。
+      </p>
+
+      <h2>プロバイダーとコンシューマー</h2>
+      <pre><code>&lt;!-- プロバイダー: name がコンテキストを識別し、残りの属性が共有データになる --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="Alice"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- コンシューマー: コンテキストの属性を自身のデータフィールドに同期する --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        コンシューマーは DOM を上方にたどり、同じ name を持つ<strong>最も近い</strong>プロバイダーを探します。
+        プロバイダーはコンシューマーの祖先である必要があり、兄弟要素は見つかりません。
+      </p>
+
+      <h2>実行時の更新</h2>
+      <p>
+        プロバイダーの HTML 属性は初期化時に一度だけ読み取られます。実行時に更新するには、
+        そのデータプロパティを直接変更する必要があり、<code>setAttribute</code> は
+        機能しません。
+      </p>
+      <pre><code>// 正しい: プロバイダーのデータを変更する
+const provider = $("#userProvider");
+provider.userName = "Bob";
+
+// 誤り: setAttribute はコンシューマーにブロードキャストされない
+provider.ele.setAttribute("user-name", "Bob");</code></pre>
+
+      <h2>ネストと再接続</h2>
+      <p>
+        同じ name を持つ複数のプロバイダーがネストしている場合、それらのデータはフィールド単位で
+        マージされ、コンシューマーに近いプロバイダーが遠いプロバイダーのフィールドを上書きします。
+        コンシューマーの <code>name</code> も動的に変更でき、変更後は新しい name を持つ
+        最も近いプロバイダーを再び探します。
+      </p>
+
+      <h2>デフォルト: o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        同じ name を持つプロバイダーが存在しない場合、コンシューマーはドキュメントレベルの
+        root-provider にフォールバックします。両方が存在する場合は、コンシューマーに近いプロバイダーが優先されます。
+      </p>
+
+      <h2>プロバイダーを明示的に検索する</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "Carol"; // コンシューマーは自動的に更新される
+
+// 任意の要素からプロバイダーを検索できる
+$(".profile").getProvider("userInfo");
+
+// グローバルのルートプロバイダー
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>プロバイダーからコンシューマーへのイベント送信</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "こんにちは" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>使用すべきでない場面</h2>
+      <ul>
+        <li>親子間でのみ値を受け渡す場合: <code>:prop</code> / <code>sync:</code> を使用します。</li>
+        <li>ページをまたいでビジネス状態を共有する場合: <code>$.stanz()</code> を使用します。</li>
+        <li>テーマの色やサイズなど、純粋にスタイルに関するコンテキスト: CSS 変数や <code>match-var</code> を優先します。</li>
+      </ul>
+
+      <p class="doc-end">
+        前へ: <a olink href="./state.html">グローバル状態 →</a>
+         · 次へ: <a olink href="./app.html">o-app アプリ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

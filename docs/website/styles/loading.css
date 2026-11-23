@@ -136,18 +136,28 @@
 
 
 .site-loading-label-en,
-.site-loading-label-tcn {
+.site-loading-label-tcn,
+.site-loading-label-ja {
   display: none;
 }
 
 html[lang^="en"] .site-loading-label-zh,
 html[lang^="en"] .site-loading-label-tcn,
+html[lang^="en"] .site-loading-label-ja,
 html[lang^="zh-Hant"] .site-loading-label-zh,
-html[lang^="zh-Hant"] .site-loading-label-en {
+html[lang^="zh-Hant"] .site-loading-label-en,
+html[lang^="zh-Hant"] .site-loading-label-ja,
+html[lang^="ja"] .site-loading-label-zh,
+html[lang^="ja"] .site-loading-label-tcn,
+html[lang^="ja"] .site-loading-label-en {
   display: none;
 }
 
 html[lang^="zh-Hant"] .site-loading-label-tcn {
+  display: inline;
+}
+
+html[lang^="ja"] .site-loading-label-ja {
   display: inline;
 }
 

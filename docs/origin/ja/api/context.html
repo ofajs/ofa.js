@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · コンテキストのやり取り</p>
+      <h1>コンテキストのやり取り</h1>
+      <p class="doc-lead">o-provider はデータをサブツリーに置き、o-consumer は最も近いものを消費します。インスタンスメソッドを使えば、プロバイダーを能動的に探すこともできます。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="context"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.getProvider(name)</code></td><td>Shadow DOM の境界を越えて上方向に、同じ name を持つ o-provider を検索します。見つからない場合は o-root-provider にフォールバックし、どちらもなければ null を返します</td></tr>
+          <tr><td><code>provider.dispatch(name, { data })</code></td><td>そのプロバイダーのコンシューマーにカスタムイベントをディスパッチします</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>アプリレベルのルートプロバイダーインスタンスを取得します</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>プロバイダーの HTML 属性は初期化時に一度だけ読み取られます。実行時に更新するには、プロバイダーの data プロパティを直接変更してください。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

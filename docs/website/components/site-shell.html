@@ -33,6 +33,7 @@
           >
             <option value="cn">中文</option>
             <option value="t-cn">繁體中文</option>
+            <option value="ja">日本語</option>
             <option value="en">English</option>
           </st-select>
         </div>
@@ -300,15 +301,19 @@
       return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
     };
 
-    const resultKind = (url, english = false, traditional = false) => {
+    const resultKind = (url, english = false, traditional = false, japanese = false) => {
       if (url.startsWith("api/")) return "API";
-      if (url.startsWith("blog/")) return english ? "Blog" : "博客";
-      if (url.startsWith("tutorial/")) return english ? "Tutorial" : "教程";
+      if (url.startsWith("blog/")) return english ? "Blog" : japanese ? "ブログ" : "博客";
+      if (url.startsWith("tutorial/")) {
+        return english ? "Tutorial" : japanese ? "チュートリアル" : "教程";
+      }
       if (url.startsWith("docs/")) {
         if (english) return "Docs";
+        if (japanese) return "ドキュメント";
         return traditional ? "文檔" : "文档";
       }
       if (english) return "Home";
+      if (japanese) return "ホーム";
       return traditional ? "首頁" : "首页";
     };
 
@@ -351,11 +356,14 @@
         footerNote: "This page is built with ofa.js itself.",
       },
       data: {
-        lang: ["cn", "t-cn", "en"].includes(location.pathname.split("/")[1])
+        lang: ["cn", "t-cn", "en", "ja"].includes(
+          location.pathname.split("/")[1],
+        )
           ? location.pathname.split("/")[1]
           : "cn",
         isEnglish: document.documentElement.lang.startsWith("en"),
         isTraditional: document.documentElement.lang.startsWith("zh-Hant"),
+        isJapanese: document.documentElement.lang.startsWith("ja"),
         menuOpen: false,
         searchOpen: false,
         searchQuery: "",
@@ -375,7 +383,7 @@
 
           const url = new URL(location.href);
           const parts = url.pathname.split("/");
-          if (["cn", "t-cn", "en"].includes(parts[1])) {
+          if (["cn", "t-cn", "en", "ja"].includes(parts[1])) {
             parts[1] = next;
           } else {
             parts.splice(1, 0, next);
@@ -510,7 +518,12 @@
             .slice(0, 8)
             .map(({ entry }) => ({
               ...entry,
-              kind: resultKind(entry.url, this.isEnglish, this.isTraditional),
+              kind: resultKind(
+                entry.url,
+                this.isEnglish,
+                this.isTraditional,
+                this.isJapanese,
+              ),
               snippet: makeSnippet(entry, terms),
             }));
 

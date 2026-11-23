@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · o-app と o-page</p>
+      <h1>o-app と o-page</h1>
+      <p class="doc-lead">アプリコンテナはページスタックとナビゲーションを管理し、ページインスタンスは自分自身の画面コンテンツを管理します。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="app"></docs-playground>
+
+      <h2>o-app インスタンス</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>app.src</code></td><td>アプリ設定モジュールの URL</td></tr>
+          <tr><td><code>app.current</code></td><td>現在のページインスタンス（読み取り専用）</td></tr>
+          <tr><td><code>app.routers</code></td><td>ルート履歴の配列。読み書き可能</td></tr>
+          <tr><td><code>app.goto(src)</code></td><td>ナビゲートしてスタックにプッシュします</td></tr>
+          <tr><td><code>app.replace(src)</code></td><td>スタックにプッシュせずに現在のページを置き換えます</td></tr>
+          <tr><td><code>app.back(delta = 1)</code></td><td>戻ります</td></tr>
+          <tr><td><code>app.forward(delta = 1)</code></td><td>進みます（allowForward が必要）</td></tr>
+          <tr><td><code>app.appIsReady</code></td><td>最初のページのレンダリングが完了しているか（読み取り専用）</td></tr>
+          <tr><td><code>app._module</code></td><td>アプリ設定：home、loading、fail、access、allowForward、pageAnime</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <h2>o-page インスタンス</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>page.src</code></td><td>ページモジュールの URL。初期化後は不変です</td></tr>
+          <tr><td><code>page.pageIsReady</code></td><td>ページのレンダリング完了を示すフラグ（読み取り専用）</td></tr>
+          <tr><td><code>page.goto(src) / page.replace(src)</code></td><td>現在のページを基準に URL を解決してからナビゲートします</td></tr>
+          <tr><td><code>page.back()</code></td><td>戻ります</td></tr>
+          <tr><td><code>page.pageAnime</code></td><td>このページのアニメーション設定。読み書き可能</td></tr>
+          <tr><td><code>page._rendered</code></td><td>ページのレンダリング完了時に解決される Promise</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

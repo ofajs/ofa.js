@@ -475,7 +475,9 @@ export const API_EXAMPLES = {
 
 export const getApiExample = (
   key,
-  english = document.documentElement.lang.startsWith("en"),
+  english =
+    document.documentElement.lang.startsWith("en") ||
+    document.documentElement.lang.startsWith("ja"),
   traditional = document.documentElement.lang.startsWith("zh-Hant"),
 ) =>
   (english

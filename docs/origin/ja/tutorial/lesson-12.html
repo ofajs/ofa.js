@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 12</p>
+      <h1>はじめてのコンポーネント</h1>
+      <p class="doc-lead">再利用可能な UI を &lt;template component&gt; に切り出し、l-m で読み込みます。</p>
+
+      <p>
+  ページはコンテンツを整理し、コンポーネントは再利用可能な UI の一部分を担います。コンポーネントも HTML ファイルですが、
+  ルートノードが <code>&lt;template component&gt;</code> であり、一意の
+  <code>tag</code> を宣言します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12" fold-styles="true"></docs-playground>
+<h2>2 つのファイル、2 つのタブ</h2>
+<p>
+  エディタ上部のタブで <code>page.html</code> と
+  <code>hello-card.html</code> を切り替えられます。ページは
+  <code>&lt;l-m src="./hello-card.html"&gt;</code> でコンポーネントを読み込み、その後は
+  <code>&lt;hello-card&gt;</code> を通常の HTML タグのように使えます。
+</p>
+<ul>
+  <li><code>tag</code>: コンポーネントのタグ名。呼び出し側で使う名前と一致している必要があります。</li>
+  <li>コンポーネントの <code>data</code> は分離されているため、2 枚のカードはそれぞれ独自のカウントを保持します。</li>
+  <li>コンポーネントの <code>&lt;style&gt;</code> はそのコンポーネントにのみ適用されます。</li>
+</ul>
+<div class="doc-note">
+  <strong>ファイル名はタグ名ではありません:</strong> タグ名はコンポーネントで宣言された
+  <code>tag</code> に由来し、省略された場合にのみファイル名から推測されます。
+  推測に頼らず、明示的に宣言してください。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  コンポーネントの見出しとボタンのテキストを変更し、ページに 3 枚目のカードを追加して、
+  3 枚のカードがそれぞれ独立してカウントするか確認してみましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-11.html">11 · ライフサイクル →</a> · 次へ: <a olink href="./lesson-13.html">13 · コンポーネントのパラメータ →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

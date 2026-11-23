@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · インスタンスの拡張</p>
+      <h1>インスタンスの拡張</h1>
+      <p class="doc-lead">単一のインスタンス、またはすべてのインスタンスに、メソッド・ゲッター・新しいディレクティブを追加します。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="extend"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.extend(obj, options)</code></td><td>現在のインスタンスだけを拡張します。デフォルトでは非列挙です</td></tr>
+          <tr><td><code>$.fn.extend(obj)</code></td><td>すべてのインスタンスを拡張します。ゲッター / セッターを新しいディレクティブとして定義できます</td></tr>
+          <tr><td><code>enumerable: true</code></td><td>拡張を明示的に列挙可能にします（Object.keys / toJSON に影響）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>拡張名が組み込みメンバー（attr、class、text、html、watch など）と衝突しないようにしてください。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

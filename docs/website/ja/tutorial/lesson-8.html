@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>08 · リストレンダリング — ofa.js チュートリアル</title>
+    <meta name="description" content="o-fill は配列を描画します。リスト項目内では $data、$index、$host を使用できます。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="08 · リストレンダリング — ofa.js チュートリアル" />
+    <meta property="og:description" content="o-fill は配列を描画します。リスト項目内では $data、$index、$host を使用できます。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 08</p>
+      <h1>リストレンダリング</h1>
+      <p class="doc-lead">o-fill は配列を描画します。各項目内では $data、$index、$host を使えます。</p>
+
+      <p>
+  配列をループで描画するには <code>&lt;o-fill :value="items"&gt;</code> を使います。項目内で
+  <code>item.text</code> と直接書くことはできず、フレームワークが提供する
+  <code>$data</code> などのスコープ変数を使います。
+</p>
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8" fold-styles="true"></docs-playground>
+<h2>項目のスコープ</h2>
+<ul>
+  <li><code>$data</code>: 現在の項目のデータ。例: <code>$data.text</code></li>
+  <li><code>$index</code>: 現在のインデックス（0 始まり）</li>
+  <li><code>$host</code>: ページインスタンス。<code>$host.removeItem(id)</code> などのメソッドを呼べます。</li>
+  <li><code>fill-key="id"</code>: 一意なフィールドがある場合は必ず付けます。項目の追加・削除時に
+    要素を再利用できます。</li>
+</ul>
+<div class="doc-note">
+  <strong>fill-key が重要な理由:</strong> キーがないと、途中の項目を削除したときに
+  それ以降の項目がすべて再構築されます。項目に入力やローカル状態がある場合、その状態は
+  失われます。<code>id</code> を使って「これは同じ項目だ」とフレームワークに伝えましょう。
+</div>
+<div class="doc-note">
+  <strong>さらに進んだ使い方:</strong> ネストしたリストでは <code>$parent</code> で
+  外側のデータにアクセスできます。テーブル行や <code>&lt;select&gt;</code> 内で
+  <code>o-fill</code> を使うには <code>&lt;template is="replace-temp"&gt;</code> が必要で、
+  複雑な構造は名前付きテンプレートにまとめられます。完全な例は
+  <a olink href="../docs/render.html">条件分岐とリスト</a> を参照してください。
+</div>
+<h2>やってみよう</h2>
+<p>
+  各項目の後に「完了」ボタンを追加し、クリックで項目の完了状態を切り替えましょう
+  （まずデータに <code>done</code> フィールドを追加します）。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-7.html">07 · 条件付きレンダリング →</a> · 次へ: <a olink href="./lesson-9.html">09 · リストの編集 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

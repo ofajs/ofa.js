@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 構造操作</p>
+      <h1>構造操作</h1>
+      <p class="doc-lead">子要素は配列と同じセマンティクスで扱えます。変更メソッドは実際に DOM ノードを移動し、更新をトリガーします。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="structure"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>push(...items)</code></td><td>末尾に子要素を追加。新しい子要素数を返します</td></tr>
+          <tr><td><code>unshift(...items)</code></td><td>先頭に子要素を挿入。新しい子要素数を返します</td></tr>
+          <tr><td><code>pop() / shift()</code></td><td>最後 / 最初の子要素を削除し、そのインスタンスを返します</td></tr>
+          <tr><td><code>splice(start, count, ...items)</code></td><td>削除と挿入を行い、削除されたインスタンスの配列を返します</td></tr>
+          <tr><td><code>reverse() / sort(fn)</code></td><td>子要素をその場で反転 / 並べ替え</td></tr>
+          <tr><td><code>map / filter / slice / forEach</code></td><td>非破壊の配列メソッド。まずインスタンス配列を実体化してから実行します</td></tr>
+          <tr><td><code>el.before(content) / el.after(content)</code></td><td>要素自体の前 / 後にコンテンツを挿入</td></tr>
+          <tr><td><code>el.remove()</code></td><td>親から要素を削除（内部は splice 経由のため、イベントのセマンティクスは保たれます）</td></tr>
+          <tr><td><code>el.wrap(content)</code></td><td>要素をコンテンツでラップ。親がない場合は例外をスロー</td></tr>
+          <tr><td><code>el.unwrap()</code></td><td>要素自身のラッパーを削除。兄弟が複数ある場合は例外をスロー</td></tr>
+          <tr><td><code>el.clone(bool = true)</code></td><td>要素を複製。既定では子要素も含みます</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>子要素を直接操作しても data 内の配列は更新されません。テンプレートのリストには o-fill を使ってください。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

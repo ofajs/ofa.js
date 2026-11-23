@@ -514,6 +514,7 @@
 
     const IS_EN = document.documentElement.lang.startsWith("en");
     const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
+    const IS_JA = document.documentElement.lang.startsWith("ja");
     const UI = IS_EN
       ? {
           starting: "Starting virtual container…",
@@ -557,6 +558,28 @@
           writing: "正在寫入虛擬檔案…",
           ran: "已執行，可繼續編輯後按 Ctrl/⌘+S 重新執行",
           runFailed: "執行失敗：",
+        }
+      : IS_JA
+      ? {
+          starting: "仮想コンテナを起動中…",
+          resetTitle: "このレッスンのサンプルコードを復元",
+          reset: "↺ リセット",
+          runTitle: "コードを実行（Ctrl+S / ⌘S）",
+          run: "▶ コードを実行",
+          editorAria: "ofa.js コードエディタ",
+          splitterAria: "エディタとプレビューの幅を調整",
+          previewAria: "サンプルプレビュー",
+          preview: "プレビュー",
+          newTabTitle: "新しいタブでプレビューを開く",
+          newTab: "新しいタブで開く ↗",
+          iframeTitle: "ofa.js サンプルプレビュー",
+          restored: "サンプルコードを復元しました。Ctrl/⌘+S で実行できます。",
+          ready: "仮想コンテナの準備ができました",
+          initFailed: "仮想コンテナの初期化に失敗しました：",
+          unsupported: "このブラウザは Service Worker に対応していません",
+          writing: "仮想ファイルを書き込み中…",
+          ran: "実行済みです。編集後は Ctrl/⌘+S で再実行できます。",
+          runFailed: "実行に失敗しました：",
         }
       : {
           starting: "正在启动虚拟容器…",

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ルーティングとナビゲーション — ofa.js ドキュメント</title>
+    <meta name="description" content="goto/replace/back、olink、クエリパラメータ、o-router のハッシュルーティング、router-change。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ルーティングとナビゲーション — ofa.js ドキュメント" />
+    <meta property="og:description" content="goto/replace/back、olink、クエリパラメータ、o-router のハッシュルーティング、router-change。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">アプリケーション</p>
+      <h1>ルーティングとナビゲーション</h1>
+      <p class="doc-lead">
+        ofa.js のページは、ハッシュルーティング（o-router）と scsr の 2 つの
+        モードのいずれかでナビゲートします。ハッシュルーティングはフロントエンド
+        アプリの内部だけで切り替わり、scsr ではすべての URL が実際のドキュメントに
+        なります。ページナビゲーション API はどちらのモードでも同じです。
+      </p>
+
+      <h2>ページナビゲーション API</h2>
+      <pre><code>// ページモジュール内では、`this` がページインスタンス
+this.goto("./detail.html?id=42"); // ページスタックにプッシュ
+this.replace("./detail.html");    // 履歴を追加せずに現在のページを置き換える
+this.back();                      // 戻る
+this.forward();                   // アプリ設定で allowForward: true が必要</code></pre>
+      <p>宣言的なナビゲーションには <code>olink</code> を使います:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;詳細を見る&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> は <code>o-app</code> の内部でのみ有効です。ページ全体を
+        リロードせずに、アプリ内ルーティングとトランジションアニメーションを
+        経由します。外部リンクに <code>olink</code> を付けないでください。
+      </p>
+
+      <h2>クエリでパラメータを渡す</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query はページモジュール関数の引数であり、
+        <code>this.$route</code> ではありません。クエリの変更に反応するには
+        ページモジュール関数で読み取ってください。同じページのアドレスを変更
+        すると、モジュールがリロードされます。
+      </p>
+
+      <h2>o-router: ハッシュルーティング</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router はブリッジパッケージで、ofa.js の後に読み込む必要があります。</li>
+        <li><code>fix-body</code> は html/body をフルサイズにします。削除すると元に戻ります。</li>
+        <li>ページスタックはハッシュに同期されます（例: <code>#/pages/detail.html?id=42</code>）。</li>
+        <li>リロード、ディープリンク、共有、進む/戻るは、サーバー側のリライトなしでページを復元します。</li>
+        <li>ページは 1 つの o-app でのみ動作します。</li>
+      </ul>
+
+      <h2>ハッシュ URL の形式</h2>
+      <pre><code>// 正しい
+location.origin + "/#/pages/detail.html?id=42"
+
+// 誤り: 余分な pathname や ./ がある
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>ルーティングの変更を監視する</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> は <code>goto</code>、<code>replace</code>、
+        <code>back</code>、<code>forward</code> のいずれかで、<code>src</code> は
+        対象ページのアドレスです。ページモジュールの <code>routerChange</code>
+        フックは親レイアウトページでのみ発生し、現在の記事のハイライトに
+        使用されます。
+      </p>
+
+      <h2>実パスが必要な場合</h2>
+      <p>
+        ハッシュルーティングは純粋なフロントエンドアプリに適しています。すべての
+        URL がクロール可能で、直接アクセスでき、共有可能である必要がある場合は、
+        <a olink href="./scsr.html">scsr の実パスルーティング</a> を使用してください。
+        ページ API、ネストしたレイアウト、アニメーションの動作はどちらも同じです。
+      </p>
+
+      <p class="doc-end">
+        前: <a olink href="./app.html">o-app アプリ →</a>
+         · 次: <a olink href="./nested-routing.html">ネストしたルーティング →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

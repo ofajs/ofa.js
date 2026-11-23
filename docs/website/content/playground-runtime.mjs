@@ -48,18 +48,20 @@ export const DEFAULT_CODE = `<template page>
 </template>`;
 
 export const buildIndex = (version, entry = "page") => {
-  const isEnglish = document.documentElement.lang.startsWith("en");
+  const isJapanese = document.documentElement.lang.startsWith("ja");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") || isJapanese;
   const body =
     entry === "app"
       ? `<o-app src="./app.mjs?v=${version}"></o-app>`
       : `<o-page src="./page.html?v=${version}"></o-page>`;
 
   return `<!doctype html>
-<html lang="${isEnglish ? "en" : "zh-CN"}">
+<html lang="${isJapanese ? "ja" : isEnglish ? "en" : "zh-CN"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${isEnglish ? "ofa.js Example Preview" : "ofa.js 案例预览"}</title>
+    <title>${isJapanese ? "ofa.js サンプルプレビュー" : isEnglish ? "ofa.js Example Preview" : "ofa.js 案例预览"}</title>
     <script type="module" src="${OFA_CDN}"><\/script>
     <style>
       html, body { margin: 0; min-height: 100%; }
@@ -77,7 +79,9 @@ export const buildIndex = (version, entry = "page") => {
 // { entry: "page" | "app", files: { "page.html": "..." } }。
 // entry="app" 时入口写 app.mjs，用 <o-app> 跑多页面/路由课程。
 export const getLesson = (lesson) => {
-  const isEnglish = document.documentElement.lang.startsWith("en");
+  const isJapanese = document.documentElement.lang.startsWith("ja");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") || isJapanese;
   const isTraditional = document.documentElement.lang.startsWith("zh-Hant");
   const lessons = isEnglish ? LESSONS_EN : isTraditional ? LESSONS_TCN : LESSONS;
   const fallback = isEnglish

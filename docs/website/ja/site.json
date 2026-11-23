@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "lang": "ja",
+    "language": "日本語",
+    "title": "ofa.js — コンポーネントをHTMLで書く",
+    "description": "ofa.js は Web Components をベースにしたゼロビルド・ゼロ依存のフロントエンドフレームワークです。1つの HTML ファイルがそのまま1つのコンポーネントとなり、ブラウザで直接動作します。npm も Node.js もバンドラーも不要です。",
+    "noscript": "このページで ofa.js を実行するには JavaScript が必要です。",
+    "order": 25
+  },
+  "shell": {
+    "nav": {
+      "tutorial": "チュートリアル",
+      "docs": "ドキュメント",
+      "api": "API",
+      "blog": "ブログ"
+    },
+    "actions": {
+      "nav": "メインナビゲーション",
+      "home": "ホーム",
+      "github": "GitHub",
+      "githubRepo": "GitHub リポジトリ",
+      "menu": "メニューを切り替え",
+      "languages": "言語"
+    },
+    "footer": {
+      "tagline": "ゼロビルド・ゼロ依存の Web Components フレームワーク。コンポーネントを HTML として書き、開発をブラウザに取り戻します。",
+      "resources": "リソース",
+      "ecosystem": "エコシステム",
+      "community": "コミュニティ",
+      "docs": "ドキュメント",
+      "plugins": "プラグイン",
+      "note": "このページ自体が ofa.js で作られています。"
+    },
+    "search": {
+      "label": "サイト内を検索",
+      "placeholder": "ドキュメントやチュートリアルを検索…",
+      "empty": "一致するコンテンツがありません",
+      "loading": "検索インデックスを読み込み中…"
+    },
+    "theme": {
+      "label": "テーマを切り替え",
+      "light": "ライトモード",
+      "dark": "ダークモード",
+      "system": "システムに合わせる"
+    }
+  },
+  "demo": {
+    "reset": "リセット",
+    "kicker": "今日",
+    "heading": "やること",
+    "remainingSuffix": "件のタスクが残っています",
+    "placeholder": "今日は何を達成したいですか？",
+    "inputAria": "新しいタスク",
+    "add": "追加",
+    "clear": "完了したタスクを削除",
+    "doneSuffix": "完了",
+    "checkAria": "完了にする",
+    "deleteAria": "削除",
+    "todos": [
+      "1つの HTML ファイルで最初のコンポーネントを書いてみる",
+      "o-fill でタスクリストを描画する",
+      "ページを任意の静的サーバーに配置する"
+    ]
+  },
+  "toast": {
+    "copied": "クリップボードにコピーしました",
+    "failed": "コピーに失敗しました — テキストを手動で選択してください"
+  },
+  "docs": {
+    "label": "ドキュメント",
+    "overview": "ドキュメント概要",
+    "onThisPage": "このページの内容",
+    "nav": {
+      "start": {
+        "label": "はじめに",
+        "items": {
+          "gettingStarted": "インストールとセットアップ",
+          "firstComponent": "最初のコンポーネント",
+          "firstPage": "最初のページ"
+        }
+      },
+      "basics": {
+        "label": "コンポーネントとページ",
+        "items": {
+          "component": "コンポーネント",
+          "page": "ページ",
+          "lifecycle": "ライフサイクル"
+        }
+      },
+      "template": {
+        "label": "テンプレート構文",
+        "items": {
+          "template": "ディレクティブの概要",
+          "binding": "バインディングとスタイル",
+          "events": "イベントとフォーム",
+          "render": "条件分岐とリスト"
+        }
+      },
+      "data": {
+        "label": "データと状態",
+        "items": {
+          "data": "データと監視",
+          "state": "グローバル状態",
+          "context": "コンポーネント間のコンテキスト"
+        }
+      },
+      "app": {
+        "label": "アプリとルーティング",
+        "items": {
+          "app": "o-app アプリ",
+          "routing": "ルーティングとナビゲーション",
+          "nestedRouting": "ネストされたルーティング",
+          "scsr": "実パスの scsr"
+        }
+      },
+      "reference": {
+        "label": "リファレンス",
+        "items": {
+          "api": "$.fn とラップされたオブジェクト",
+          "plugins": "プラグインと拡張",
+          "pitfalls": "よくある落とし穴",
+          "examples": "完全なサンプル",
+          "playground": "ライブプレイグラウンド",
+          "deployment": "デプロイ"
+        }
+      }
+    }
+  },
+  "pages": {
+    "docs/index.html": {
+      "title": "ofa.js ドキュメント",
+      "description": "ofa.js v5 ドキュメントの概要：インストール、コンポーネント、ページ、ルーティング、状態、API リファレンス。"
+    },
+    "docs/getting-started.html": {
+      "title": "インストールとセットアップ — ofa.js ドキュメント",
+      "description": "CDN またはローカルファイルから ofa.js v5 を読み込み、最初のページを実行します。"
+    },
+    "docs/first-component.html": {
+      "title": "最初のコンポーネント — ofa.js ドキュメント",
+      "description": "最初のカスタム Web Component を作成し、タグ、データ、attrs、スロットを理解します。"
+    },
+    "docs/first-page.html": {
+      "title": "最初のページ — ofa.js ドキュメント",
+      "description": "template[page] を使ってページモジュールを作成し、o-page または o-app で実行します。"
+    },
+    "docs/component.html": {
+      "title": "コンポーネント — ofa.js ドキュメント",
+      "description": "ofa.js のコンポーネント構造、attrs/data、プロパティの受け渡し、スロット、カスタムイベント、コンポーネントの再利用。"
+    },
+    "docs/page.html": {
+      "title": "ページ — ofa.js ドキュメント",
+      "description": "ページモジュール、クエリパラメータ、o-page 内のネストされた子ページ、ページの分割。"
+    },
+    "docs/lifecycle.html": {
+      "title": "ライフサイクル — ofa.js ドキュメント",
+      "description": "ready、attached、loaded、detached の実行タイミング、順序、リソースのクリーンアップ。"
+    },
+    "docs/template.html": {
+      "title": "テンプレートディレクティブの概要 — ofa.js ドキュメント",
+      "description": "ofa.js のテンプレートディレクティブ一覧：補間、属性、イベント、双方向バインディング、条件分岐、リスト。"
+    },
+    "docs/binding.html": {
+      "title": "バインディングとスタイル — ofa.js ドキュメント",
+      "description": "attr:、:prop、sync:、class:、:style、真偽値属性の正しい構文。"
+    },
+    "docs/events.html": {
+      "title": "イベントとフォーム — ofa.js ドキュメント",
+      "description": "on:、one:、$event、フォームの双方向バインディング、カスタムイベント、イベントのバブリング。"
+    },
+    "docs/render.html": {
+      "title": "条件分岐とリスト — ofa.js ドキュメント",
+      "description": "o-if/o-else-if/o-else による条件付きレンダリング、o-fill のリスト、$data スコープ。"
+    },
+    "docs/data.html": {
+      "title": "データと監視 — ofa.js ドキュメント",
+      "description": "リアクティブなデータ、算出ゲッター、watch リスナー、よくあるエッジケース。"
+    },
+    "docs/state.html": {
+      "title": "グローバル状態 — ofa.js ドキュメント",
+      "description": "$.stanz() を使ってページ間で共有されるリアクティブな状態を作成し、正しくマウント・クリーンアップします。"
+    },
+    "docs/context.html": {
+      "title": "コンポーネント間のコンテキスト — ofa.js ドキュメント",
+      "description": "o-provider、o-consumer、o-root-provider、getProvider、dispatch。"
+    },
+    "docs/app.html": {
+      "title": "o-app アプリ — ofa.js ドキュメント",
+      "description": "o-app の設定、ページスタック、トランジションアニメーション、読み込み/失敗状態、proto の拡張。"
+    },
+    "docs/routing.html": {
+      "title": "ルーティングとナビゲーション — ofa.js ドキュメント",
+      "description": "goto/replace/back、olink、クエリパラメータ、o-router のハッシュルーティング、router-change。"
+    },
+    "docs/nested-routing.html": {
+      "title": "ネストされたルーティング — ofa.js ドキュメント",
+      "description": "export const parent とスロットによる、共有レイアウトを使った多階層のネストルーティング。"
+    },
+    "docs/scsr.html": {
+      "title": "scsr による実パスルーティング — ofa.js ドキュメント",
+      "description": "scsr を使えば、すべての URL が完全で直接アクセス可能なドキュメントになります。SEO や共有に最適です。"
+    },
+    "docs/api.html": {
+      "title": "$.fn とラップされたオブジェクト — ofa.js ドキュメント",
+      "description": "ofa.js のラップオブジェクト API：選択、ツリー走査、DOM 操作、イベント、プロパティ、拡張。"
+    },
+    "docs/plugins.html": {
+      "title": "プラグインと拡張 — ofa.js ドキュメント",
+      "description": "オプションの ofa.js プラグイン（formData、inject-host、body-ghost、global-link）の読み込み方法と使いどころ。"
+    },
+    "docs/pitfalls.html": {
+      "title": "よくある落とし穴とトラブルシューティング — ofa.js ドキュメント",
+      "description": "ReferenceError、予約名の衝突、真偽値属性、o-page の src、キャッシュの問題のトラブルシューティング。"
+    },
+    "docs/examples.html": {
+      "title": "完全なサンプル — ofa.js ドキュメント",
+      "description": "4つの完全なサンプル：最小構成のアプリ、カスタムコンポーネント、Todo リスト、ルーティングアプリ。"
+    },
+    "docs/playground.html": {
+      "title": "ライブプレイグラウンド — ofa.js ドキュメント",
+      "description": "NoneOS Core の仮想コンテナ上で ofa.js のページモジュールをオンラインで編集・実行します。"
+    },
+    "docs/deployment.html": {
+      "title": "デプロイ — ofa.js ドキュメント",
+      "description": "ofa.js アプリを任意の静的サーバー、CDN、サブディレクトリにデプロイする際の注意点。"
+    },
+    "tutorial/index.html": {
+      "title": "ofa.js チュートリアル",
+      "description": "全20回の段階的な ofa.js チュートリアル。最初のページからコンポーネント、コンテキスト、状態、ルーティング、そして完全なプロジェクトまで。"
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · 最初のページ — ofa.js チュートリアル",
+      "description": "ofa.js のページはただの HTML ファイルです。構造、スタイル、ロジックがすべて1つのファイルに収まります。"
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · データと補間 — ofa.js チュートリアル",
+      "description": "data には文字列、数値、真偽値、オブジェクト、配列を保持できます。{{ }} は簡単な式にも対応しています。"
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · 動的な属性 — ofa.js チュートリアル",
+      "description": "HTML 属性には attr: を、DOM プロパティには :prop を使います。真偽値属性には必ず attr: を使います。"
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · スタイルとクラス — ofa.js チュートリアル",
+      "description": "ページ内の <style> はそのページにのみ適用されます。class: と :style を使えばデータの変化にスタイルを追従させられます。"
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · イベント — ofa.js チュートリアル",
+      "description": "イベントは on: で監視します。簡単なロジックは式で、複雑なロジックは proto メソッドで書きます。"
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · 双方向バインディング — ofa.js チュートリアル",
+      "description": "sync: はフォームとデータを双方向に同期させます。スカラー値との組み合わせが最適です。"
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · 条件付きレンダリング — ofa.js チュートリアル",
+      "description": "o-if / o-else-if / o-else はコンテンツの存在自体を制御します。"
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · リストレンダリング — ofa.js チュートリアル",
+      "description": "o-fill は配列を描画します。リスト項目内では $data、$index、$host を使用できます。"
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · リストの編集 — ofa.js チュートリアル",
+      "description": "配列の push/splice はビューを自動的に更新します。インライン編集は $data のフィールドに直接同期されます。"
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · 算出プロパティと監視 — ofa.js チュートリアル",
+      "description": "proto ゲッターは同期的に計算します。watch は変更を監視し、副作用を処理します。"
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · ライフサイクル — ofa.js チュートリアル",
+      "description": "ready → attached → loaded と進み、削除時に detached が呼ばれます。タイマーとリスナーは detached でクリーンアップします。"
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · 最初のコンポーネント — ofa.js チュートリアル",
+      "description": "再利用可能な UI を <template component> に分割し、l-m で読み込みます。"
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · コンポーネントのパラメータ — ofa.js チュートリアル",
+      "description": "外部データは attrs を通じてコンポーネントに渡し、内部状態は data に保持します。"
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · スロットとイベント — ofa.js チュートリアル",
+      "description": "スロットを使うとコンポーネントが外部コンテンツを受け取れます。emit は内部で起きたことを外部に伝えます。"
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · 階層をまたぐコンテキスト — ofa.js チュートリアル",
+      "description": "o-provider / o-consumer を使ってコンポーネントのサブツリー全体でデータを共有します。"
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · グローバル状態 — ofa.js チュートリアル",
+      "description": "複数のコンポーネントが状態を共有する場合、$.stanz でモジュールレベルのストアを作成し、attached/detached でマウント・クリーンアップします。"
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · ページとルーティング — ofa.js チュートリアル",
+      "description": "o-app はページスタックを管理します。olink / goto でページを切り替え、クエリパラメータを渡し、back で戻ります。"
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · ネストされたレイアウト — ofa.js チュートリアル",
+      "description": "子ページは parent を宣言し、親はスロットで子ページを配置します。親は子ページの切り替えをまたいで維持されます。"
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · 非同期と読み込み状態 — ofa.js チュートリアル",
+      "description": "非同期リクエストでは loading / error / success の状態で UI を制御します。非同期の結果をゲッターに入れてはいけません。"
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · まとめ：Todo リスト — ofa.js チュートリアル",
+      "description": "リスト、フォーム、条件分岐、算出プロパティ、監視、localStorage を組み合わせて完全なアプリに仕上げます。"
+    },
+    "api/index.html": {
+      "title": "API リファレンス — ofa.js API",
+      "description": "すべてのインスタンスメンバー、グローバルな静的メンバー、ライブサンプル。"
+    },
+    "api/instance.html": {
+      "title": "インスタンスの基本 — ofa.js API",
+      "description": "インスタンスは DOM ラッパー、リアクティブなデータ、子要素コレクションを兼ねています。まずは基本プロパティから。"
+    },
+    "api/traverse.html": {
+      "title": "選択と走査 — ofa.js API",
+      "description": "インスタンス内の要素を検索し、DOM とシャドウの境界をまたいで移動します。"
+    },
+    "api/structure.html": {
+      "title": "構造操作 — ofa.js API",
+      "description": "配列のようなセマンティクスで子要素を操作します。変更メソッドは実際に DOM ノードを移動し、更新をトリガーします。"
+    },
+    "api/props.html": {
+      "title": "コンテンツ、属性、スタイル — ofa.js API",
+      "description": "テキスト、HTML、属性、クラス、インラインスタイルの読み書き。"
+    },
+    "api/events.html": {
+      "title": "イベント — ofa.js API",
+      "description": "インスタンスメソッドでイベントをバインド、アンバインド、ディスパッチします。イベントはペイロードデータを運び、シャドウ境界を越えられます。"
+    },
+    "api/reactive.html": {
+      "title": "データと監視 — ofa.js API",
+      "description": "インスタンスのデータは stanz に由来します。フィールドの読み書きはリアクティブで、監視とクリーンアップ専用のメソッドも用意されています。"
+    },
+    "api/context.html": {
+      "title": "コンテキストの通信 — ofa.js API",
+      "description": "o-provider はデータをサブツリーに置き、o-consumer は最も近いものを受け取ります。インスタンスメソッドからもプロバイダーを探せます。"
+    },
+    "api/global.html": {
+      "title": "グローバル $ の静的メンバー — ofa.js API",
+      "description": "グローバル $ のセレクター、登録、リアクティブ、レンダリング、バージョン情報。"
+    },
+    "api/extend.html": {
+      "title": "インスタンスの拡張 — ofa.js API",
+      "description": "単一のインスタンスまたはすべてのインスタンスに、メソッド、ゲッター、新しいディレクティブを追加します。"
+    },
+    "api/app.html": {
+      "title": "o-app と o-page — ofa.js API",
+      "description": "アプリコンテナはページスタックとナビゲーションを管理し、ページインスタンスは自身の画面のコンテンツを管理します。"
+    },
+    "blog/index.html": {
+      "title": "ブログ — ofa.js",
+      "description": "ofa.js のエンジニアリングノート：リリース、パフォーマンス、アーキテクチャ、実践。"
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "ofa.js v5 は v4 よりどれだけ良くなったか — ofa.js",
+      "description": "ofa.js v4 から v5 で何が変わったかを、アーキテクチャ、レンダリング、リストのパフォーマンス、ルーティング、開発者体験の観点から具体的に見ていきます。"
+    }
+  },
+  "tutorial": {
+    "label": "チュートリアル",
+    "overview": "チュートリアル概要",
+    "groups": {
+      "start": {
+        "label": "はじめに",
+        "lessons": {
+          "lesson1": "01 · 最初のページ",
+          "lesson2": "02 · データと補間",
+          "lesson3": "03 · 動的な属性",
+          "lesson4": "04 · スタイルとクラス"
+        }
+      },
+      "interact": {
+        "label": "インタラクションと状態",
+        "lessons": {
+          "lesson5": "05 · イベント",
+          "lesson6": "06 · 双方向バインディング",
+          "lesson7": "07 · 条件付きレンダリング",
+          "lesson8": "08 · リストレンダリング",
+          "lesson9": "09 · リストの編集",
+          "lesson10": "10 · 算出プロパティと監視",
+          "lesson11": "11 · ライフサイクル"
+        }
+      },
+      "component": {
+        "label": "コンポーネント",
+        "lessons": {
+          "lesson12": "12 · 最初のコンポーネント",
+          "lesson13": "13 · コンポーネントのパラメータ",
+          "lesson14": "14 · スロットとイベント"
+        }
+      },
+      "app": {
+        "label": "実践的なアプリ",
+        "lessons": {
+          "lesson15": "15 · 階層をまたぐコンテキスト",
+          "lesson16": "16 · グローバル状態",
+          "lesson17": "17 · ページとルーティング",
+          "lesson18": "18 · ネストされたレイアウト",
+          "lesson19": "19 · 非同期と読み込み状態",
+          "lesson20": "20 · まとめ：Todo リスト"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "API リファレンス",
+    "overview": "API 概要",
+    "groups": {
+      "instance": {
+        "label": "インスタンス",
+        "items": {
+          "instance": "インスタンスの基本",
+          "traverse": "選択と走査",
+          "structure": "構造操作"
+        }
+      },
+      "props": {
+        "label": "プロパティとイベント",
+        "items": {
+          "props": "コンテンツ、プロパティ、スタイル",
+          "events": "イベント"
+        }
+      },
+      "data": {
+        "label": "データと拡張",
+        "items": {
+          "reactive": "データと監視",
+          "context": "コンテキストの通信",
+          "global": "グローバル $ の静的メンバー",
+          "extend": "インスタンスの拡張"
+        }
+      },
+      "app": {
+        "label": "アプリとページ",
+        "items": {
+          "app": "o-app と o-page"
+        }
+      }
+    }
+  }
+}

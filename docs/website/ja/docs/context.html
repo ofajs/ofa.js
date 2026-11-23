@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>コンポーネント間のコンテキスト — ofa.js ドキュメント</title>
+    <meta name="description" content="o-provider、o-consumer、o-root-provider、getProvider、dispatch。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="コンポーネント間のコンテキスト — ofa.js ドキュメント" />
+    <meta property="og:description" content="o-provider、o-consumer、o-root-provider、getProvider、dispatch。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">データ</p>
+      <h1>コンポーネント間のコンテキスト</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> はデータをサブツリーに配置し、<code>o-consumer</code> は
+        最も近いプロバイダーからそれを受け取ります。ユーザー情報、テーマ、ビジネスコンテキストを
+        複数のコンポーネント階層にまたがって渡すのに適しており、prop drilling を避けられます。
+      </p>
+
+      <h2>プロバイダーとコンシューマー</h2>
+      <pre><code>&lt;!-- プロバイダー: name がコンテキストを識別し、残りの属性が共有データになる --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="Alice"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- コンシューマー: コンテキストの属性を自身のデータフィールドに同期する --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        コンシューマーは DOM を上方にたどり、同じ name を持つ<strong>最も近い</strong>プロバイダーを探します。
+        プロバイダーはコンシューマーの祖先である必要があり、兄弟要素は見つかりません。
+      </p>
+
+      <h2>実行時の更新</h2>
+      <p>
+        プロバイダーの HTML 属性は初期化時に一度だけ読み取られます。実行時に更新するには、
+        そのデータプロパティを直接変更する必要があり、<code>setAttribute</code> は
+        機能しません。
+      </p>
+      <pre><code>// 正しい: プロバイダーのデータを変更する
+const provider = $("#userProvider");
+provider.userName = "Bob";
+
+// 誤り: setAttribute はコンシューマーにブロードキャストされない
+provider.ele.setAttribute("user-name", "Bob");</code></pre>
+
+      <h2>ネストと再接続</h2>
+      <p>
+        同じ name を持つ複数のプロバイダーがネストしている場合、それらのデータはフィールド単位で
+        マージされ、コンシューマーに近いプロバイダーが遠いプロバイダーのフィールドを上書きします。
+        コンシューマーの <code>name</code> も動的に変更でき、変更後は新しい name を持つ
+        最も近いプロバイダーを再び探します。
+      </p>
+
+      <h2>デフォルト: o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        同じ name を持つプロバイダーが存在しない場合、コンシューマーはドキュメントレベルの
+        root-provider にフォールバックします。両方が存在する場合は、コンシューマーに近いプロバイダーが優先されます。
+      </p>
+
+      <h2>プロバイダーを明示的に検索する</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "Carol"; // コンシューマーは自動的に更新される
+
+// 任意の要素からプロバイダーを検索できる
+$(".profile").getProvider("userInfo");
+
+// グローバルのルートプロバイダー
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>プロバイダーからコンシューマーへのイベント送信</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "こんにちは" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>使用すべきでない場面</h2>
+      <ul>
+        <li>親子間でのみ値を受け渡す場合: <code>:prop</code> / <code>sync:</code> を使用します。</li>
+        <li>ページをまたいでビジネス状態を共有する場合: <code>$.stanz()</code> を使用します。</li>
+        <li>テーマの色やサイズなど、純粋にスタイルに関するコンテキスト: CSS 変数や <code>match-var</code> を優先します。</li>
+      </ul>
+
+      <p class="doc-end">
+        前へ: <a olink href="./state.html">グローバル状態 →</a>
+         · 次へ: <a olink href="./app.html">o-app アプリ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

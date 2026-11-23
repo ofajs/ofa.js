@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · インスタンスの基本</p>
+      <h1>インスタンスの基本</h1>
+      <p class="doc-lead">インスタンスオブジェクトは、DOM ラッパーであり、リアクティブなデータであり、子要素のコレクションでもあります。まずは基本プロパティから見ていきましょう。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="instance"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.ele</code></td><td>ネイティブな DOM 要素。あらゆるブラウザ API はここを経由して利用します</td></tr>
+          <tr><td><code>el.tag</code></td><td>小文字のタグ名（読み取り専用）</td></tr>
+          <tr><td><code>el.owner</code></td><td>データの所有チェーン（Set）。リアクティブな更新はこれをさかのぼって伝播します（読み取り専用）</td></tr>
+          <tr><td><code>el.length</code></td><td>子要素の数。ele.children.length と一致します（読み取り専用）</td></tr>
+          <tr><td><code>el[0], el[1]</code></td><td>インデックスで子要素インスタンスを取得（読み取り専用）</td></tr>
+          <tr><td><code>el.index</code></td><td>親の中での位置。親がない場合は null（読み取り専用）</td></tr>
+          <tr><td><code>el.PATH</code></td><td>コンポーネント / ページファイルの位置。相対リソースはこれを基準に解決されます（読み取り専用）</td></tr>
+          <tr><td><code>el.app</code></td><td>最も近い o-app インスタンス。アプリ外では undefined（読み取り専用）</td></tr>
+          <tr><td><code>el.shadow</code></td><td>この要素自身の shadow root インスタンス（読み取り専用）</td></tr>
+          <tr><td><code>el.root</code></td><td>この要素が属するルートノード。document またはいずれかの shadow root（読み取り専用）</td></tr>
+          <tr><td><code>el.host</code></td><td>最も近い shadow ホストのコンポーネントインスタンス（読み取り専用）</td></tr>
+          <tr><td><code>el.xid</code></td><td>インスタンスの一意な識別子。同じタグのインスタンスを区別するために使います（読み取り専用）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>注意：</strong>「読み取り専用」と記されたメンバーはインスタンスが内部で維持しているもので、値を代入しても構造は変わりません。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

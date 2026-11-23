@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>テンプレートディレクティブの概要 — ofa.js ドキュメント</title>
+    <meta name="description" content="ofa.js のテンプレートディレクティブ一覧：補間、属性、イベント、双方向バインディング、条件分岐、リスト。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="テンプレートディレクティブの概要 — ofa.js ドキュメント" />
+    <meta property="og:description" content="ofa.js のテンプレートディレクティブ一覧：補間、属性、イベント、双方向バインディング、条件分岐、リスト。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">テンプレート</p>
+      <h1>テンプレートディレクティブの概要</h1>
+      <p class="doc-lead">
+        ofa.js のテンプレート構文は HTML に直接書きます。ディレクティブがデータ、イベント、
+        レンダリングロジックを結びつけます。JSX も、コンパイルが必要なテンプレートファイルも
+        ありません。
+      </p>
+
+      <h2>ディレクティブ一覧</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>構文</th><th>用途</th><th>例</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>テキスト補間。要素のテキストコンテンツに限る</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>HTML コンテンツをレンダリング</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>単方向プロパティバインディング</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>双方向プロパティバインディング</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>HTML 属性バインディング</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>条件付きクラス名</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>インラインスタイルバインディング</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>イベントバインディング</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>一度だけ発火するイベント</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>イベントオブジェクト</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>テキスト補間</h2>
+      <pre><code>&lt;p&gt;こんにちは、{{name}}&lt;/p&gt;
+&lt;p&gt;件数: {{count}}、2倍: {{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> は要素のテキストコンテンツでのみ機能します。属性値、イベント引数、
+        スタイル値は常にディレクティブ式を使います。HTML をレンダリングするには
+        <code>:html</code> を使い、その内容が信頼できるものであることを確認してください。
+      </p>
+
+      <h2>プロパティと双方向バインディング</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;リンク&lt;/a&gt;
+&lt;!-- 真偽値属性は必ず attr: を使う --&gt;
+&lt;button attr:disabled="loading"&gt;送信&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> は単方向バインディング、<code>sync:</code> は双方向です。
+        <code>attr:</code> は <code>true</code> のとき空の属性を設定し、<code>false</code> の
+        とき属性を削除します。だからこそ真偽値属性にはこれを使う必要があります。
+      </p>
+
+      <h2>クラス名とスタイル</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> は真偽値式に基づいてクラスを追加・削除します。
+        <code>:style.prop</code> は camelCase のプロパティ名を使います。詳しいルールは
+        <a olink href="./binding.html">バインディングとスタイル</a>を参照してください。
+      </p>
+
+      <h2>イベント</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        メソッド名だけを書くと自動的に <code>this</code> にバインドされ、式を直接書くことも
+        できます。カスタムイベントのデータは <code>event.data</code> から読み取ります。
+        <a olink href="./events.html">イベントとフォーム</a>を参照してください。
+      </p>
+
+      <h2>条件分岐とリスト</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;10 より大きい&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;5 より大きい&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 以下&lt;/p&gt;
+&lt;/o-else&gt;
+
+&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        条件系のタグは連続して書く必要があります。<code>o-fill</code> の内部では
+        <code>$data</code>、<code>$index</code>、<code>$host</code>、
+        <code>$parent</code>、<code>$ele</code> のみ使用できます。
+        <a olink href="./render.html">条件分岐とリスト</a>を参照してください。
+      </p>
+
+      <h2>データの定義元</h2>
+      <p>
+        テンプレートで使うすべての変数は、まず <code>data</code> または <code>attrs</code> で
+        宣言する必要があります。宣言していない変数は <code>undefined</code> ではなく、
+        <code>ReferenceError</code> をスローし、ページ全体のレンダリングを中断します。
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
+
+      <p class="doc-end">
+        前へ：<a olink href="./lifecycle.html">ライフサイクル →</a>
+         · 次へ：<a olink href="./binding.html">バインディングとスタイル →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

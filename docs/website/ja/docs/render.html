@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>条件分岐とリスト — ofa.js ドキュメント</title>
+    <meta name="description" content="o-if/o-else-if/o-else による条件付きレンダリング、o-fill のリスト、$data スコープ。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="条件分岐とリスト — ofa.js ドキュメント" />
+    <meta property="og:description" content="o-if/o-else-if/o-else による条件付きレンダリング、o-fill のリスト、$data スコープ。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">テンプレート</p>
+      <h1>条件分岐とリスト</h1>
+      <p class="doc-lead">
+        <code>o-if</code> はコンテンツを存在させるかどうかを制御し、<code>o-fill</code> は配列からリストをレンダリングします。
+        どちらも要素に紐づく実装なので、スコープと DOM 構造を理解することが重要です。
+      </p>
+
+      <h2>条件付きレンダリング</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;10 より大きい&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;5 より大きい&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 以下&lt;/p&gt;
+&lt;/o-else&gt;</code></pre>
+      <ul>
+        <li>3 つのタグは<strong>連続して</strong>記述する必要があり、間に他の要素を挟むことはできません。</li>
+        <li><code>o-else</code> は <code>value</code> を取りません。</li>
+        <li>条件が偽のときコンテンツは削除され、真のときは再生成されます。</li>
+        <li>表示と非表示を頻繁に切り替え、DOM の状態を保持したい場合は <code>class:</code> による切り替えが適しています。</li>
+      </ul>
+
+      <h2>o-fill の基本</h2>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+      &lt;span&gt;{{$data.text}}&lt;/span&gt;
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        <code>fill-key</code> はリスト項目の一意なフィールドを指定します。これを指定すると、
+        項目の追加・削除・並べ替えの際にキーに基づいてノードが再利用され、
+        項目内の入力状態が失われません。一意なフィールドがない場合にのみ省略してください。
+      </p>
+
+      <h2>リスト項目のスコープ</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>変数</th><th>意味</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$data</code></td><td>現在の項目のデータ</td></tr>
+          <tr><td><code>$index</code></td><td>現在の項目のインデックス（0 から始まる）</td></tr>
+          <tr><td><code>$host</code></td><td>ホストとなるページ/コンポーネントのインスタンス。proto メソッドの呼び出しに使用する</td></tr>
+          <tr><td><code>$parent</code></td><td>ネストした o-fill における外側の項目のデータ</td></tr>
+          <tr><td><code>$ele</code></td><td>現在の項目の要素</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>o-fill の内部では独自の項目名を使用できません。</strong>
+        リスト項目内では <code>$data.text</code> しか使用でき、<code>item.text</code>
+        や <code>row.text</code> は記述できません。ルートレベル（o-fill の外）ではこれらの変数は存在しないため、
+        データフィールドと proto メソッド名を直接使用してください。
+      </div>
+
+      <h2>ネストしたリスト</h2>
+      <pre><code>&lt;o-fill :value="groups" fill-key="id"&gt;
+  &lt;section&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;o-fill :value="$data.items" fill-key="id"&gt;
+      &lt;p&gt;{{$parent.name}} / {{$data.name}}&lt;/p&gt;
+    &lt;/o-fill&gt;
+  &lt;/section&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        内側の <code>$data</code> は子項目、<code>$parent</code> は外側のグループです。
+      </p>
+
+      <h2>名前付きテンプレート</h2>
+      <p>
+        構造が複雑な場合や再利用が必要な場合は、リスト項目をトップレベルの
+        <code>&lt;template name&gt;</code> に記述し、<code>o-fill name</code> で参照します。
+      </p>
+      <pre><code>&lt;o-fill :value="products" name="product-card" fill-key="id"&gt;&lt;/o-fill&gt;
+
+&lt;template name="product-card"&gt;
+  &lt;article class="card"&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;p&gt;¥{{$data.price}}&lt;/p&gt;
+    &lt;button on:click="$host.addToCart($data.id)"&gt;カートに追加&lt;/button&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+      <p>名前付きテンプレートは <code>o-fill</code> の外側、通常はページテンプレートのトップレベルに配置する必要があります。</p>
+      <p>
+        名前付きテンプレートは自身を参照することもでき、ツリー構造のレンダリングに便利です。
+      </p>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="tree" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+&lt;/ul&gt;
+
+&lt;template name="tree-node"&gt;
+  &lt;li&gt;
+    {{$data.name}}
+    &lt;ul&gt;
+      &lt;o-fill :value="$data.children" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>select と table での replace-temp</h2>
+      <p>
+        ブラウザのパーサーは、<code>&lt;select&gt;</code> や <code>&lt;table&gt;</code> の内部にある
+        ホワイトリスト外の要素を修正します。その内部に <code>o-fill</code> を直接記述すると
+        レンダリングに失敗します。<code>&lt;template is="replace-temp"&gt;</code> が必要です。
+      </p>
+      <pre><code>&lt;select&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="cities"&gt;
+      &lt;option&gt;{{$data}}&lt;/option&gt;
+    &lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/select&gt;</code></pre>
+      <p>テーブルの行は名前付きテンプレートと組み合わせる必要があります。</p>
+      <pre><code>&lt;tbody&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="rows" name="table-row"&gt;&lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/tbody&gt;
+
+&lt;template name="table-row"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;{{$data.name}}&lt;/td&gt;
+    &lt;td&gt;{{$data.desc}}&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>DOM 構造の注意点</h2>
+      <p>
+        <code>o-if</code> と <code>o-fill</code> は
+        <code>display: contents</code> を使用するため、要素自体は DOM に残ります。
+        その結果、CSS の子セレクターはそれらを透過して評価します。<code>.container &gt; .item</code>
+        は <code>o-if</code> 内の項目にマッチせず、<code>table.rows</code>
+        は <code>o-fill</code> が生成した行を数えません。セレクターが機能しなくなった場合は、
+        子孫セレクターに切り替えるか、構造を調整してください。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./events.html">イベントとフォーム →</a>
+         · 次へ: <a olink href="./data.html">データと監視 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

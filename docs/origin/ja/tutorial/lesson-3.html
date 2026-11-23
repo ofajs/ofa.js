@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 03</p>
+      <h1>動的な属性</h1>
+      <p class="doc-lead">HTML 属性には attr: を、DOM プロパティには :prop を使います。真偽値属性には必ず attr: を使います。</p>
+
+      <p>
+  テンプレートの属性には2種類あります。<code>attr:</code> は HTML 属性をバインドし、
+  <code>:prop</code> は要素の DOM プロパティをバインドします。動的な値を
+  <code>href="{{url}}"</code> のように書いてはいけません。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-3" fold-styles="true"></docs-playground>
+<h2>なぜ2種類の構文があるのか</h2>
+<ul>
+  <li><code>attr:href</code>、<code>attr:title</code>：最終的に HTML 属性になります。</li>
+  <li><code>:value</code>：DOM の <code>value</code> プロパティを設定します。フォーム要素に適しています。</li>
+  <li><code>attr:disabled="!ready"</code>：真偽値属性には <code>attr:</code> を使います。
+    条件が false のとき、属性は実際に削除されます。</li>
+</ul>
+<div class="doc-note">
+  <strong>真偽値属性に :prop を使えない理由：</strong><code>:disabled="false"</code> は
+  <code>disabled="false"</code> を残してしまうため、属性は存在したままになり、ボタンは無効のままです。
+  正しい書き方は <code>attr:disabled="false"</code> です。
+</div>
+<h2>自分で試してみる</h2>
+<p>
+  <code>ready</code> の初期値を <code>true</code> に変えて、ボタンが最初から有効になっていることを確認してみてください。
+  そのあと元に戻し、ボタンをクリックして有効にしてみましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-2.html">02 · データと補間 →</a> · 次へ: <a olink href="./lesson-4.html">04 · スタイルとクラス →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,193 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">チュートリアル</p>
+      <h1>ofa.js をゼロからはじめる</h1>
+      <p class="doc-lead">
+        全20回の短いレッスンを「はじめに → インタラクションと状態 →
+        コンポーネント → 実践的なアプリ」の順に構成しています。どのレッスンも小さな課題から始まります。
+        コードを書き換えて Ctrl/⌘+S を押せば、結果をすぐに確認できます。
+      </p>
+
+      <h2>はじめに</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>最初のページ</h2>
+          <p>ofa.js のページはただの HTML ファイルです。構造、スタイル、ロジックがすべて1つのファイルに収まります。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>データと補間</h2>
+          <p>data には文字列、数値、真偽値、オブジェクト、配列を保持でき、{{ }} では簡単な式も評価できます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>動的な属性</h2>
+          <p>HTML 属性には attr: を、DOM プロパティには :prop を使います。真偽値属性には必ず attr: を使います。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>スタイルとクラス</h2>
+          <p>ページの &lt;style&gt; はそのページにのみ適用されます。class: と :style を使えば、スタイルをデータの変化に追従させられます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+      </div>
+
+      <h2>インタラクションと状態</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>イベント</h2>
+          <p>イベントは on: で監視します。簡単なロジックは式で、複雑なロジックは proto メソッドで書きます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>双方向バインディング</h2>
+          <p>sync: はフォーム項目とデータを双方向に同期させます。スカラー値に最適です。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>条件付きレンダリング</h2>
+          <p>o-if / o-else-if / o-else はコンテンツの存在自体を制御します。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>リストレンダリング</h2>
+          <p>o-fill は配列を描画します。各リスト項目内では $data、$index、$host を使用できます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>リストの編集</h2>
+          <p>配列の push/splice はビューを自動的に更新します。インライン編集は $data のフィールドへ直接同期されます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>算出プロパティと監視</h2>
+          <p>proto のゲッターは同期的に計算します。watch は変更を監視し、副作用を処理します。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>ライフサイクル</h2>
+          <p>ready → attached → loaded と進み、削除時には detached が呼ばれます。タイマーとリスナーは detached でクリーンアップします。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+      </div>
+
+      <h2>コンポーネント</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>最初のコンポーネント</h2>
+          <p>再利用可能な UI を &lt;template component&gt; に分割し、l-m で読み込みます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>コンポーネントのパラメータ</h2>
+          <p>外部データは attrs を通じてコンポーネントに届きます。内部では、コンポーネントが自身の状態を data に保持します。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>スロットとイベント</h2>
+          <p>slot はコンポーネントが外部のコンテンツを受け取れるようにします。emit は内部で起きたことを外部に伝えます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+      </div>
+
+      <h2>実践的なアプリ</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>階層をまたぐコンテキスト</h2>
+          <p>o-provider / o-consumer を使って、コンポーネントのサブツリー全体でデータを共有します。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>グローバル状態</h2>
+          <p>複数のコンポーネントが1つの状態を共有する場合は、$.stanz でモジュールレベルのストアを作り、attached/detached でマウント・クリーンアップします。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>ページとルーティング</h2>
+          <p>o-app はページスタックを管理します。olink / goto でページを切り替え、query でパラメータを渡し、back で戻ります。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>ネストされたレイアウト</h2>
+          <p>子ページは parent を宣言し、親ページはスロットを通じてそれを受け取ります。子ページを切り替えても親は破棄されません。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>非同期と読み込み状態</h2>
+          <p>非同期リクエストでは loading / error / success の状態で UI を制御します。非同期の結果をゲッターに入れてはいけません。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>まとめ：Todo リスト</h2>
+          <p>リスト、フォーム、条件分岐、算出プロパティ、監視、localStorage を組み合わせて、1つの完全なアプリに仕上げます。</p>
+          <span class="more">学習をはじめる →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>学習の進め方</strong>
+        まず解説を読み、次に右側のコードを編集して <kbd>Ctrl</kbd>+<kbd>S</kbd>
+        （Mac では <kbd>⌘</kbd>+<kbd>S</kbd>）を押して実行してください。壊してしまった場合は、
+        エディタの「リセット」をクリックするとこのレッスンのサンプルに戻せます。
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

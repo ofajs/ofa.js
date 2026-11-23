@@ -57,6 +57,7 @@ docs/
 │       └── blog/                    博客（2 页）
 │           ├── index.html           博客列表
 │           └── v5-vs-v4.html        首篇：v5 相对 v4 的进步
+│   ├── t-cn/                        繁体中文（由 cn/ 经 opencc-js 自动转换）
 │   └── en/                          英文翻译，目录结构与 cn/ 一一对应
 └── website/                         共享资源 + 构建产物
     ├── index.html                   构建生成的根语言选择页
@@ -204,18 +205,21 @@ npm run server:website
 站点当前提供两种语言：
 
 - `docs/origin/cn/` → `docs/website/cn/`（简体中文）
+- `docs/origin/t-cn/` → `docs/website/t-cn/`（繁體中文，由 `sync:t-cn` 自动生成）
 - `docs/origin/en/` → `docs/website/en/`（English）
 
 顶部导航的语言下拉使用 senti-ui 的 `<st-select>`，切换时保留当前路径，
-例如 `/cn/docs/routing.html` ↔ `/en/docs/routing.html`。手动选择会写入
+例如 `/cn/docs/routing.html` ↔ `/t-cn/docs/routing.html` ↔ `/en/docs/routing.html`。手动选择会写入
 `localStorage["ofa-site-locale"]`，根路径 `/` 会优先用它。
 
 根路径 `/` 还会做一次轻量语言判断：有手动选择时直接进入对应语言；
-否则读取 `navigator.languages`，中文浏览器进入 `/cn/`，其他语言默认
-`/en/`；没有明确语言时再按 `Intl.DateTimeFormat().resolvedOptions().timeZone`
-的亚洲中文时区兜底。要停留在语言选择页，访问 `/?choose=1`；要强制
-指定语言，访问 `/?lang=cn` 或 `/?lang=en`。`footer` 的语言入口使用
-`?choose=1`，不会被自动跳转覆盖。
+否则读取 `navigator.languages`，繁体中文（`zh-TW` / `zh-HK` / `zh-Hant`）
+进入 `/t-cn/`，简体中文进入 `/cn/`，英文进入 `/en/`；没有明确语言时再按
+`Intl.DateTimeFormat().resolvedOptions().timeZone` 的台北 / 香港 / 澳门时区
+兜底到 `/t-cn/`，上海等时区兜底到 `/cn/`，其他默认 `/en/`。要停留在
+语言选择页，访问 `/?choose=1`；要强制指定语言，访问 `/?lang=cn`、
+`/?lang=t-cn` 或 `/?lang=en`。`footer` 的语言入口使用 `?choose=1`，
+不会被自动跳转覆盖。
 
 ## 新增 / 翻译语言
 
@@ -226,6 +230,11 @@ npm run server:website
    `toast` 文案，并把 `meta.lang`、`meta.language` 改成对应语言；
 4. 可选的 `meta.order` 控制语言在根选择页和顶部下拉中的排序；
 5. 执行 `npm run build:website`。
+
+繁体中文不需要手工翻译：`docs/origin/t-cn/` 由 `npm run sync:t-cn`
+（`scripts/sync-t-cn.mjs`，基于 `opencc-js`）从 `docs/origin/cn/` 直接转换；
+`npm run build:website` 会先自动执行这一步。转换只改文字，不改标签、代码、
+URL 和占位符。
 
 构建会生成 `docs/website/<locale>/`，并把根语言选择页更新为全部语言。
 删除 `docs/origin/<locale>/` 后重新构建，旧的 `docs/website/<locale>/` 会被清理。
@@ -268,7 +277,7 @@ npm run server:website
 - scsr 接管后会移除内联 `<template page>`（服务器上的同一份 HTML 不受影响），
   地址保持真实路径；
 - 站内跳转用 `olink` 或 `goto()`，刷新、分享、直接粘贴地址都能直达；
-- 每种语言有首页 1 页 + 文档 24 页 + API 11 页 + 教程 21 页 + 博客 2 页，共 59 份内容页 HTML（当前 cn / en 各一套），另有共享的
+- 每种语言有首页 1 页 + 文档 24 页 + API 11 页 + 教程 21 页 + 博客 2 页，共 59 份内容页 HTML（当前 cn / t-cn / en 各一套），另有共享的
   `layout.html`；站内跳转不会整页刷新；
 - `layout.html` 常驻 header/footer；进入文档路由时再展开左侧文档目录
   （同一 layout 的 docs 区域），文章页与文档首页只负责 slot 内容；

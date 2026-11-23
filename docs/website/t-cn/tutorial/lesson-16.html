@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>16 · 全局狀態 — ofa.js 教程</title>
+    <meta name="description" content="多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="16 · 全局狀態 — ofa.js 教程" />
+    <meta property="og:description" content="多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 16</p>
+      <h1>全局狀態</h1>
+      <p class="doc-lead">多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。</p>
+
+      <p>
+  組件自己的 <code>data</code> 只屬於自己。多個組件要讀寫同一份數據時，
+  用 <code>$.stanz()</code> 創建一個響應式 store，放在獨立模塊裡共享。
+</p>
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
+<h2>三個文件</h2>
+<ul>
+  <li><code>store.mjs</code>：只導出 <code>$.stanz({ count: 0 })</code>；</li>
+  <li><code>counter-panel.html</code>：兩個組件實例都引用同一個 store；</li>
+  <li><code>page.html</code>：放兩個面板和加減按鈕。</li>
+</ul>
+<p>
+  組件在 <code>attached</code> 裡直接執行 <code>this.sharedState = store</code>，
+  在 <code>detached</code> 裡執行 <code>this.sharedState = {}</code> 清除引用。
+  模板裡直接讀 <code>sharedState.label</code> 和 <code>sharedState.count</code>；
+  store 發生變化時，兩個面板會自動同步。
+</p>
+<div class="doc-note">
+  <strong>約定：</strong>先在 <code>data</code> 裡聲明 <code>sharedState: {}</code> 佔位，
+  再在 <code>attached</code> 階段掛載 store、<code>detached</code> 階段置空，
+  才能避免內存洩漏和組件銷燬後繼續持有舊引用。
+</div>
+<div class="doc-note">
+  <strong>怎麼選：</strong>如果數據只屬於某棵組件子樹，而不是整個應用，
+  用上一課的 <code>o-provider</code> / <code>o-consumer</code> 更合適；
+  見 <a olink href="./lesson-15.html">跨層上下文</a>。
+</div>
+<h2>動手改</h2>
+<p>
+  在 store 裡增加 <code>step</code>，讓頁面上的「+1」按鈕每次加
+  <code>store.step</code>；再加一個按鈕把 step 改成 5。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-15.html">15 · 跨層上下文 →</a>　·　下一篇：<a olink href="./lesson-17.html">17 · 頁面與路由 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

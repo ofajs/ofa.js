@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 04</p>
+      <h1>樣式與 class</h1>
+      <p class="doc-lead">頁面裡的 &lt;style&gt; 只作用於當前頁面，class: 和 :style 讓樣式跟隨數據變化。</p>
+
+      <p>
+  頁面模板裡的 <code>&lt;style&gt;</code> 會被收進頁面的 Shadow DOM，
+  不會汙染其他組件。<code>:host</code> 選中頁面/組件本身。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+<h2>三種常用寫法</h2>
+<ul>
+  <li><code>:host</code>：設置頁面容器的樣式，例如 <code>display:block</code>；</li>
+  <li><code>class:active="active"</code>：條件為真時加類名，為假時移除；</li>
+  <li><code>:style.background="..."</code>：內聯樣式，屬性名用駝峰寫法。</li>
+</ul>
+<div class="doc-note">
+  <strong>選擇建議：</strong>結構性狀態（選中、完成）用 <code>class:</code>，
+  顏色、尺寸等單個值用 <code>:style</code>。不要在模板裡拼大段
+  <code>style</code> 字符串。
+</div>
+<h2>動手改</h2>
+<p>
+  再加一個 <code>class:highlight="active"</code> 的類名，並在
+  <code>&lt;style&gt;</code> 裡給它一個背景色，觀察切換狀態時的變化。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-3.html">03 · 動態屬性 →</a>　·　下一篇：<a olink href="./lesson-5.html">05 · 事件 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

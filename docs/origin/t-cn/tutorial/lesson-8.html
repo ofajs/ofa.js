@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 08</p>
+      <h1>列表渲染</h1>
+      <p class="doc-lead">o-fill 渲染數組；列表項內用 $data、$index、$host。</p>
+
+      <p>
+  數組用 <code>&lt;o-fill :value="items"&gt;</code> 循環渲染。項內不能直接寫
+  <code>item.text</code>，要用框架提供的 <code>$data</code> 等作用域變量。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8" fold-styles="true"></docs-playground>
+<h2>列表項的作用域</h2>
+<ul>
+  <li><code>$data</code>：當前項數據；<code>$data.text</code>；</li>
+  <li><code>$index</code>：當前索引，從 0 開始；</li>
+  <li><code>$host</code>：頁面實例，用 <code>$host.removeItem(id)</code> 調方法；</li>
+  <li><code>fill-key="id"</code>：有唯一字段時始終加上，增刪時才能複用列表項。</li>
+</ul>
+<div class="doc-note">
+  <strong>為什麼需要 fill-key：</strong>沒有 key 時，刪除中間一項會讓後面的項被
+  整體重建；如果項裡有輸入框或局部狀態，就會丟失。用 <code>id</code> 告訴
+  框架「這一項還是原來那一項」。
+</div>
+<div class="doc-note">
+  <strong>再進一步：</strong>嵌套列表用 <code>$parent</code> 取外層數據；
+  表格行、<code>&lt;select&gt;</code> 裡的 <code>o-fill</code> 需要
+  <code>&lt;template is="replace-temp"&gt;</code>，複雜結構可以放進命名模板。
+  這些寫法在 <a olink href="../docs/render.html">條件與列表</a> 裡有完整示例。
+</div>
+<h2>動手改</h2>
+<p>
+  在每一項後面加上「完成」按鈕，點擊後切換該項的完成狀態（先給數據加
+  <code>done</code> 字段）。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-7.html">07 · 條件渲染 →</a>　·　下一篇：<a olink href="./lesson-9.html">09 · 編輯列表 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

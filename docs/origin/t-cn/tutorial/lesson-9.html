@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 09</p>
+      <h1>編輯列表</h1>
+      <p class="doc-lead">數組的 push/splice 會自動更新視圖；行內編輯直接 sync 到 $data 字段。</p>
+
+      <p>
+  ofa.js 的數組是響應式的：<code>push</code>、<code>splice</code> 等原地操作
+  都會觸發更新，不需要重新賦值整個數組。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9" fold-styles="true"></docs-playground>
+<h2>行內編輯</h2>
+<p>
+  每一項的輸入框綁定到 <code>$data.name</code>，用戶輸入會直接改到數組對象上。
+  配合 <code>fill-key="id"</code>，切換順序或刪除其他項時，這一項不會被重建。
+</p>
+<div class="doc-note">
+  <strong>什麼時候替換數組：</strong>從接口拿到一份全新列表時，直接
+  <code>this.items = newList</code> 更清晰；頁面上增刪改某幾項時，
+  用 <code>push</code> / <code>splice</code> 即可。
+</div>
+<h2>動手改</h2>
+<p>
+  給每一行加一個「↑」按鈕，和上一行交換位置（提示：用
+  <code>items.splice($index - 1, 2, 當前項, 上一項)</code>）。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-8.html">08 · 列表渲染 →</a>　·　下一篇：<a olink href="./lesson-10.html">10 · 計算屬性與偵聽 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

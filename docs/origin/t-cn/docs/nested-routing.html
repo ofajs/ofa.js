@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>嵌套路由</h1>
+      <p class="doc-lead">
+        多個頁面共享同一套導航和側欄時，把公共結構放進父頁面，
+        子頁面通過 <code>export const parent</code> 掛到父頁的
+        <code>&lt;slot&gt;</code> 下。
+      </p>
+
+      <h2>父頁面：佈局</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;首頁&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;文檔&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>子頁面：聲明 parent</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;正文&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> 相對於子頁面自身地址解析。子頁面只負責
+        <code>slot</code> 裡的內容，公共 header/footer 和側欄保留在父頁。
+      </p>
+
+      <h2>切換時的行為</h2>
+      <ul>
+        <li>同一個父頁下的子頁互相切換時，父頁<strong>不銷燬</strong>，只替換 slot 內容；</li>
+        <li>父頁的 data、滾動位置和已加載的組件都會保留；</li>
+        <li>子頁從父頁進入/離開時觸發父頁的 <code>routerChange</code>；</li>
+        <li>父頁也可以再聲明 <code>parent</code>，形成多級嵌套。</li>
+      </ul>
+
+      <h2>本站在用的結構</h2>
+      <p>
+        官網本身就是這個模式的實例：
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← 站點 layout（導航、頁腳、文檔側欄）
+docs/origin/cn/index.html         ← 首頁，掛在 layout
+docs/origin/cn/docs/*.html        ← 文檔頁，掛在同一 layout</code></pre>
+      <p>
+        所有文檔頁的底部腳本都包含：
+      </p>
+      <pre><code>export const parent = "{{LOCALE}}/layout.html";</code></pre>
+      <p>
+        因此切換文檔文章時 header/footer 與左側目錄不會重建，
+        只有正文區域更新。
+      </p>
+
+      <h2>常見錯誤</h2>
+      <ul>
+        <li>父頁忘記寫 <code>&lt;slot&gt;&lt;/slot&gt;</code>，子頁內容不顯示；</li>
+        <li><code>parent</code> 路徑寫錯，頁面會被當作獨立頁加載，佈局消失；</li>
+        <li>把 <code>routerChange</code> 寫在子頁上——它只在父頁觸發；</li>
+        <li>在父頁 data 裡使用 <code>back</code>、<code>goto</code>、<code>src</code> 等保留名，註冊失敗。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./routing.html">路由與導航 →</a>
+        　·　下一篇：<a olink href="./scsr.html">真實路徑 scsr →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

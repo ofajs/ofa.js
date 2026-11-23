@@ -258,6 +258,7 @@
     import { highlightCode } from "../content/highlight.mjs";
 
     const IS_EN = document.documentElement.lang.startsWith("en");
+    const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
     const UI = IS_EN
       ? {
           editorAria: "Code editor",
@@ -266,6 +267,15 @@
           foldHint: "Click ▸ left of a line number to expand, or",
           expandAll: "Expand all and edit",
           foldToggle: "Collapse or expand",
+        }
+      : IS_TRADITIONAL
+      ? {
+          editorAria: "程式碼編輯器",
+          foldedPrefix: "已摺疊 ",
+          foldedSuffix: " 個區塊",
+          foldHint: "點擊行號左側的 ▸ 展開，或",
+          expandAll: "展開全部並編輯",
+          foldToggle: "摺疊或展開",
         }
       : {
           editorAria: "代码编辑器",

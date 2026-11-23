@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 11</p>
+      <h1>生命週期</h1>
+      <p class="doc-lead">ready → attached → loaded，移除時 detached；定時器和監聽要在 detached 清理。</p>
+
+      <p>
+  頁面/組件有一組固定的生命週期鉤子。最常用的是 <code>ready</code>（DOM 已創建）、
+  <code>attached</code>（已掛載到頁面）和 <code>detached</code>（已移除）。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-11" fold-styles="true"></docs-playground>
+<h2>時機與職責</h2>
+<ul>
+  <li><code>ready</code>：模板渲染完成，可以查詢 DOM；</li>
+  <li><code>attached</code>：元素進入文檔，適合啟動定時器、加全局監聽；</li>
+  <li><code>loaded</code>：自身和異步資源都加載完成，適合撤掉 loading；</li>
+  <li><code>detached</code>：從文檔移除，必須清理定時器、監聽器和共享狀態引用。</li>
+</ul>
+<div class="doc-note">
+  <strong>不清理會怎樣：</strong>定時器會繼續跑，頁面已經離開卻還在改數據；
+  監聽器會持有舊頁面引用，造成內存洩漏。這是生命週期裡最容易犯的錯。
+</div>
+<h2>動手改</h2>
+<p>
+  把定時器改成每 0.5 秒更新一次，並在暫停時不增加秒數（示例已經這樣做了）；
+  再試著在 <code>detached</code> 裡把 <code>seconds</code> 歸零，觀察頁面切走再回來時的變化。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-10.html">10 · 計算屬性與偵聽 →</a>　·　下一篇：<a olink href="./lesson-12.html">12 · 第一個組件 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

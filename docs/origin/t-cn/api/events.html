@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 事件</p>
+      <h1>事件</h1>
+      <p class="doc-lead">用實例方法綁定、解綁和派發事件；事件可以帶業務數據並跨 shadow。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="events"></docs-playground>
+
+      <h2>成員</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.on(name, handler)</code></td><td>綁定事件，返回 el 便於鏈式</td></tr>
+          <tr><td><code>el.one(name, handler)</code></td><td>只觸發一次，觸發後自動解綁</td></tr>
+          <tr><td><code>el.off(name, handler)</code></td><td>解綁事件</td></tr>
+          <tr><td><code>el.emit(name, opts)</code></td><td>派發事件；opts.data 掛到 event.data，其餘字段作為 Event 初始化參數</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>模板裡的 on:click="method" 會在組件卸載時自動解綁，不需要手動 off。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

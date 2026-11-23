@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>o-app 應用 — ofa.js 文檔</title>
+    <meta name="description" content="o-app 應用配置、頁面棧、切換動畫、loading/fail 與擴展 proto。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="o-app 應用 — ofa.js 文檔" />
+    <meta property="og:description" content="o-app 應用配置、頁面棧、切換動畫、loading/fail 與擴展 proto。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>o-app 應用</h1>
+      <p class="doc-lead">
+        <code>o-app</code> 是微應用容器。它加載一份應用配置模塊，管理頁面棧、
+        頁面切換動畫和導航事件，但本身不直接加載頁面 HTML。
+      </p>
+
+      <h2>最小應用</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        <code>o-app</code> 的 <code>src</code> 必須是應用配置模塊，
+        不能直接指向頁面。單個頁面需要獨立運行時，用
+        <code>&lt;o-page src="./page.html"&gt;</code>。
+      </p>
+
+      <h2>應用配置</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;加載中...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;加載失敗：${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// 跨域頁面訪問控制：返回 true 放行，false 或 Error 則拒絕
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("應用已就緒", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>導出</th><th>說明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>啟動後加載的首頁地址</td></tr>
+          <tr><td><code>pageAnime</code></td><td>頁面切換三態動畫：current / next / previous</td></tr>
+          <tr><td><code>loading</code></td><td>頁面加載中顯示的 HTML</td></tr>
+          <tr><td><code>fail</code></td><td>加載失敗時顯示的 HTML，接收 <code>{ src, error }</code></td></tr>
+          <tr><td><code>allowForward</code></td><td>是否允許 <code>forward()</code>，默認關閉</td></tr>
+          <tr><td><code>access</code></td><td>跨域頁面訪問控制，返回 true 放行；同源頁面不需要</td></tr>
+          <tr><td><code>proto</code></td><td>擴展 o-app 實例的方法和 getter</td></tr>
+          <tr><td><code>ready</code></td><td>配置加載完成後的回調，<code>this</code> 為應用實例</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> 接收頁面 <code>src</code>，返回
+        <code>true</code> 才允許加載跨域頁面；返回 <code>false</code> 或
+        <code>Error</code> 會被拒絕。目標站點仍需正確配置 CORS，
+        否則瀏覽器會先攔截請求。
+      </p>
+
+      <h2>應用實例</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // 當前頁面實例
+app.appIsReady; // 首個頁面渲染完成（可用 watchUntil 等待）
+app.routers;   // 路由棧，父級佈局頁不會進入棧
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // 需要 allowForward: true</code></pre>
+      <p>
+        頁面模塊內也可以直接用 <code>this.goto</code>、
+        <code>this.replace</code>、<code>this.back</code>，
+        <code>this.app</code> 指向所在應用。
+      </p>
+
+      <h2>監聽路由變化</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // 目標頁面地址
+});</code></pre>
+
+      <h2>頁面動畫</h2>
+      <p>
+        <code>pageAnime.current</code> 是頁面穩定後的狀態，
+        <code>next</code> 是新頁面入場起點，<code>previous</code>
+        是舊頁面離場終點。三個狀態都可以省略，省略時使用默認值。
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./context.html">跨組件上下文 →</a>
+        　·　下一篇：<a olink href="./routing.html">路由與導航 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

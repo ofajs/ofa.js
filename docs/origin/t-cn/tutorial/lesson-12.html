@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>第一個組件</h1>
+      <p class="doc-lead">把可複用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
+
+      <p>
+  頁面負責組織內容，組件負責可複用的一塊 UI。組件也是 HTML 文件，
+  根節點換成 <code>&lt;template component&gt;</code>，並聲明唯一的
+  <code>tag</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12" fold-styles="true"></docs-playground>
+<h2>兩個文件，兩個標籤頁</h2>
+<p>
+  編輯器頂部的標籤頁可以在 <code>page.html</code> 和
+  <code>hello-card.html</code> 之間切換。頁面用
+  <code>&lt;l-m src="./hello-card.html"&gt;</code> 加載組件，之後就能像普通
+  HTML 標籤一樣使用 <code>&lt;hello-card&gt;</code>。
+</p>
+<ul>
+  <li><code>tag</code>：組件的標籤名，必須和使用時一致；</li>
+  <li>組件的 <code>data</code> 是獨立的，兩張卡片各自計數；</li>
+  <li>組件裡的 <code>&lt;style&gt;</code> 只作用於該組件。</li>
+</ul>
+<div class="doc-note">
+  <strong>文件名不等於標籤名：</strong>標籤名以組件裡的
+  <code>tag</code> 為準；未聲明時才按文件名推斷。不要依賴推斷，顯式寫清楚。
+</div>
+<h2>動手改</h2>
+<p>
+  改組件裡的標題和按鈕文案，再在頁面裡放第三張卡片；觀察三張卡片的計數是否
+  互不影響。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-11.html">11 · 生命週期 →</a>　·　下一篇：<a olink href="./lesson-13.html">13 · 組件參數 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

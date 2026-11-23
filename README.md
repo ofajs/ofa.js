@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Discussions](https://img.shields.io/badge/Discussions-join-F7CB53)](https://github.com/ofajs/discussion/discussions)
 [![中文文档](https://img.shields.io/badge/docs-中文-2f81f7)](https://ofajs.com/cn/)
+[![繁體中文文件](https://img.shields.io/badge/docs-繁體中文-2f81f7)](https://ofajs.com/t-cn/)
 [![English docs](https://img.shields.io/badge/docs-English-2f81f7)](https://ofajs.com/en/)
 
 **Write components as plain HTML.**
@@ -13,6 +14,7 @@ npm, Node.js, bundler, or compilation step required.
 
 - [English documentation](https://ofajs.com/en/)
 - [中文文档](https://ofajs.com/cn/)
+- [繁體中文文件](https://ofajs.com/t-cn/)
 - [v4 documentation](https://v4.ofajs.com/)
 - [GitHub Discussions](https://github.com/ofajs/discussion/discussions)
 
@@ -102,27 +104,32 @@ blocks:
 | [`packages/router`](./packages/router) | Hash-routing bridge (`o-router`) |
 | [`packages/scsr`](./packages/scsr) | Real-path routing bridge (SCSR) |
 | [`packages/plugins`](./packages/plugins) | Optional plugins: formData, inject-host, body-ghost, global-link |
-| [`docs/website`](./docs/website) | Bilingual documentation and tutorial site |
+| [`docs/website`](./docs/website) | Multilingual docs, tutorial, API reference and blog |
 
 The runtime packages are source-only ESM. The published ofa.js bundle is built
 with rollup into the root [`dist/`](./dist) directory.
 
 ## Documentation and playground
 
-The documentation site is built from `docs/origin/<locale>`:
+The documentation site is built from `docs/origin/<locale>`. Traditional
+Chinese is generated from the Simplified source with `opencc-js`, not
+hand-translated:
 
 ```bash
-npm run build:website   # build cn + en into docs/website
+npm run sync:t-cn       # optional: regenerate docs/origin/t-cn
+npm run build:website   # build cn + t-cn + en into docs/website
 npm run server:website  # preview at http://localhost:3348
 ```
 
 Open:
 
-- Chinese: <http://localhost:3348/cn/>
+- Simplified Chinese: <http://localhost:3348/cn/>
+- Traditional Chinese: <http://localhost:3348/t-cn/>
 - English: <http://localhost:3348/en/>
 
 Each language includes guides, API reference, a 20-lesson interactive tutorial,
-and a blog. The playground edits and runs real ofa.js examples in the browser.
+and a blog. The Traditional Chinese version is converted from the Simplified
+source with `opencc-js` (see `scripts/sync-t-cn.mjs`). The playground edits and runs real ofa.js examples in the browser.
 
 Sources live in [`docs/origin`](./docs/origin); generated pages live in
 [`docs/website`](./docs/website). See [`docs/website/README.md`](./docs/website/README.md)

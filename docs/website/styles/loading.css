@@ -135,12 +135,20 @@
 }
 
 
-.site-loading-label-en {
+.site-loading-label-en,
+.site-loading-label-tcn {
   display: none;
 }
 
-html[lang^="en"] .site-loading-label-zh {
+html[lang^="en"] .site-loading-label-zh,
+html[lang^="en"] .site-loading-label-tcn,
+html[lang^="zh-Hant"] .site-loading-label-zh,
+html[lang^="zh-Hant"] .site-loading-label-en {
   display: none;
+}
+
+html[lang^="zh-Hant"] .site-loading-label-tcn {
+  display: inline;
 }
 
 html[lang^="en"] .site-loading-label-en {

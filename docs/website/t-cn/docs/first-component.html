@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第一個組件 — ofa.js 文檔</title>
+    <meta name="description" content="創建第一個自定義 Web Component，理解 tag、data、attrs 與 slot。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="第一個組件 — ofa.js 文檔" />
+    <meta property="og:description" content="創建第一個自定義 Web Component，理解 tag、data、attrs 與 slot。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Getting started</p>
+      <h1>第一個組件</h1>
+      <p class="doc-lead">
+        一個 <code>.html</code> 文件就是一個組件。瀏覽器直接加載它，
+        不需要編譯，也不需要註冊到某個打包入口。
+      </p>
+
+      <h2>1. 組件文件</h2>
+      <p>
+        新建 <code>my-counter.html</code>。組件模塊使用
+        <code>&lt;template component&gt;</code>，並通過
+        <code>tag</code> 聲明標籤名：
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{count}}&lt;/strong&gt;
+  &lt;button on:click="decrease"&gt;-&lt;/button&gt;
+  &lt;button on:click="increase"&gt;+&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initial: 0,
+      },
+      data: {
+        count: 0,
+      },
+      watch: {
+        initial(value) {
+          this.count = value;
+        },
+      },
+      ready() {
+        this.count = this.initial;
+      },
+      proto: {
+        increase() {
+          this.count += 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+        decrease() {
+          this.count -= 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <div class="doc-note">
+        <strong>script 必須在 template 內。</strong>
+        ofa.js 只提取 <code>template[component]</code> 或
+        <code>template[page]</code> 內部的腳本，寫在模板外會被忽略。
+      </div>
+
+      <h2>2. 在頁面裡使用</h2>
+      <p>
+        用 <code>&lt;l-m&gt;</code> 引入組件文件，然後像普通 HTML 標籤一樣使用。
+        標籤名必須與 <code>tag</code> 一致：
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter initial="5" on:change="onCountChange"&gt;
+    當前計數
+  &lt;/my-counter&gt;
+
+  &lt;p&gt;最近一次變化：{{lastChange}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { lastChange: "還沒有變化" },
+      proto: {
+        onCountChange(event) {
+          this.lastChange = event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>3. 三件事要分清</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>位置</th><th>用途</th><th>例子</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tag</code></td>
+            <td>組件的 HTML 標籤名，必須聲明</td>
+            <td><code>tag: "my-counter"</code></td>
+          </tr>
+          <tr>
+            <td><code>attrs</code></td>
+            <td>從外部傳入的標量屬性</td>
+            <td><code>initial="5"</code></td>
+          </tr>
+          <tr>
+            <td><code>data</code></td>
+            <td>組件內部響應式狀態</td>
+            <td><code>count: 0</code></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        <code>attrs</code> 與 <code>data</code> 的 key 不能重複。數組、對象等
+        複雜數據放 <code>data</code>，通過 <code>:prop</code> 傳入；
+        <code>attrs</code> 只放字符串、數字等標量。
+      </p>
+
+      <h2>4. 插槽與事件</h2>
+      <p>
+        組件內的 <code>&lt;slot&gt;</code> 會接收使用方寫在標籤裡的內容。
+        上面的 <code>&lt;slot&gt;&lt;/slot&gt;</code> 就渲染了「當前計數」。
+      </p>
+      <p>
+        組件用 <code>this.emit("change", { data })</code> 向外拋事件，
+        使用方用 <code>on:change</code> 監聽，通過 <code>event.data</code>
+        讀取數據。事件默認冒泡，但不會穿出 Shadow DOM；需要跨 shadow
+        邊界時加 <code>composed: true</code>。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./getting-started.html">安裝與引入 →</a>
+        　·　下一篇：<a olink href="./first-page.html">第一個頁面 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -1,0 +1,145 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>模板指令總覽</h1>
+      <p class="doc-lead">
+        ofa.js 的模板語法直接寫在 HTML 上：用指令綁定數據、事件和渲染邏輯，
+        沒有 JSX，也沒有需要編譯的模板文件。
+      </p>
+
+      <h2>指令總表</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>語法</th><th>用途</th><th>示例</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>文本插值，僅限元素文本內容</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>渲染 HTML 內容</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>單向屬性綁定</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>雙向屬性綁定</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>HTML attribute 綁定</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>條件類名</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>內聯樣式綁定</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>事件綁定</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>只觸發一次的事件</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>事件對象</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>文本插值</h2>
+      <pre><code>&lt;p&gt;你好，{{name}}&lt;/p&gt;
+&lt;p&gt;計數：{{count}}，雙倍：{{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> 只在元素文本內容中生效。屬性值、事件參數和樣式值
+        一律使用指令表達式。需要渲染 HTML 時使用 <code>:html</code>，
+        並確保內容可信。
+      </p>
+
+      <h2>屬性與雙向綁定</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;鏈接&lt;/a&gt;
+&lt;!-- 布爾屬性一律用 attr: --&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> 是單向綁定，<code>sync:</code> 是雙向綁定。
+        <code>attr:</code> 對 <code>true</code> 設置空屬性、對
+        <code>false</code> 移除屬性，因此布爾屬性必須用它。
+      </p>
+
+      <h2>類名與樣式</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> 根據布爾表達式加/減類名；
+        <code>:style.prop</code> 使用駝峰屬性名。詳細規則見
+        <a olink href="./binding.html">綁定與樣式</a>。
+      </p>
+
+      <h2>事件</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        純方法名會自動綁定 <code>this</code>，也可以直接寫表達式。
+        自定義事件的數據通過 <code>event.data</code> 讀取。詳見
+        <a olink href="./events.html">事件與表單</a>。
+      </p>
+
+      <h2>條件與列表</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;大於 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;大於 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;小於等於 5&lt;/p&gt;
+&lt;/o-else&gt;
+
+&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        條件標籤必須連續書寫；<code>o-fill</code> 內只能使用
+        <code>$data</code>、<code>$index</code>、<code>$host</code>、
+        <code>$parent</code>、<code>$ele</code>。詳見
+        <a olink href="./render.html">條件與列表</a>。
+      </p>
+
+      <h2>數據來源</h2>
+      <p>
+        模板中的每個變量都必須先在 <code>data</code> 或 <code>attrs</code>
+        中聲明。未聲明不是 <code>undefined</code>，而是直接拋
+        <code>ReferenceError</code> 並中斷整頁渲染。
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./lifecycle.html">生命週期 →</a>
+        　·　下一篇：<a olink href="./binding.html">綁定與樣式 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

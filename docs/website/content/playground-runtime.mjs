@@ -4,6 +4,7 @@
  */
 
 import { DEFAULT_CODE_EN, LESSONS_EN } from "./playground-runtime-en.mjs";
+import { DEFAULT_CODE_TCN, LESSONS_TCN } from "./playground-runtime-t-cn.mjs";
 
 export const SPACE = "ofa-docs-playground";
 
@@ -77,8 +78,13 @@ export const buildIndex = (version, entry = "page") => {
 // entry="app" 时入口写 app.mjs，用 <o-app> 跑多页面/路由课程。
 export const getLesson = (lesson) => {
   const isEnglish = document.documentElement.lang.startsWith("en");
-  const lessons = isEnglish ? LESSONS_EN : LESSONS;
-  const fallback = isEnglish ? DEFAULT_CODE_EN : DEFAULT_CODE;
+  const isTraditional = document.documentElement.lang.startsWith("zh-Hant");
+  const lessons = isEnglish ? LESSONS_EN : isTraditional ? LESSONS_TCN : LESSONS;
+  const fallback = isEnglish
+    ? DEFAULT_CODE_EN
+    : isTraditional
+      ? DEFAULT_CODE_TCN || DEFAULT_CODE
+      : DEFAULT_CODE;
   const raw = lessons[lesson] || fallback;
 
   if (typeof raw === "string") {

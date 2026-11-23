@@ -1,0 +1,31 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/blog.css" />
+
+  <main class="articles-page">
+    <section class="articles-hero">
+      <p class="articles-kicker">Engineering notes</p>
+      <h1>博客</h1>
+      <p class="articles-lead">
+        關於 ofa.js 的版本演進、渲染管線、性能取捨與工程實踐。
+        少一點“新特性清單”，多一點真實的實現細節。
+      </p>
+    </section>
+
+    <div class="article-list">
+      <a class="article-card" olink href="./v5-vs-v4.html">
+        <span class="article-card-meta">2026-11-22 · 9 min read</span>
+        <h2>ofa.js v5 比 v4 進步了多少？</h2>
+        <p>
+          從列表對賬的性能躍升，到多倉庫收攏為 monorepo、o-if / o-fill
+          的重寫與 AI 輔助開發，拆解 v5 相對 v4 的真實進步。
+        </p>
+        <span class="article-card-link">閱讀全文 →</span>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    export const parent = "{{LOCALE}}/layout.html";
+  </script>
+</template>

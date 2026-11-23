@@ -25,11 +25,13 @@
     "server": "node scripts/static-server.mjs",
     "server:website": "node scripts/static-server.mjs docs/website",
     "bench:ofajs": "node packages/ofajs/benchmark/run.mjs",
-    "bench:cross": "node packages/ofajs/benchmark/run-cross.mjs"
+    "bench:cross": "node packages/ofajs/benchmark/run-cross.mjs",
+    "sync:t-cn": "node scripts/sync-t-cn.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@rollup/plugin-terser": "^1.0.0",
+    "opencc-js": "1.4.2",
     "rollup": "^4.64.5"
   },
   "author": {

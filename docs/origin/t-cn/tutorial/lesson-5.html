@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 05</p>
+      <h1>事件</h1>
+      <p class="doc-lead">用 on: 監聽事件：簡單邏輯寫表達式，複雜邏輯寫 proto 方法。</p>
+
+      <p>
+  事件綁定統一寫成 <code>on:事件名</code>。值可以是一句表達式，
+  也可以是 <code>proto</code> 裡的方法名；方法會自動綁定當前頁面實例。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-5" fold-styles="true"></docs-playground>
+<h2>兩種寫法</h2>
+<ul>
+  <li><code>on:click="count++"</code>：適合一行就能表達的邏輯；</li>
+  <li><code>on:click="decrement"</code>：適合需要多步操作或複用的情況；</li>
+  <li><code>on:input="onNameInput($event)"</code>：需要原生事件對象時傳入
+    <code>$event</code>。</li>
+</ul>
+<div class="doc-note">
+  <strong>不要手動找 DOM：</strong>處理函數里直接改 <code>this.count</code>
+  即可，頁面會自動更新。只有測量尺寸、聚焦、第三方庫初始化這類操作才需要
+  操作真實 DOM。
+</div>
+<h2>動手改</h2>
+<p>
+  給 <code>decrement</code> 加一個限制：計數小於 0 時不再減少。
+  再添加一個按鈕，把計數乘以 2。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-4.html">04 · 樣式與 class →</a>　·　下一篇：<a olink href="./lesson-6.html">06 · 雙向綁定 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

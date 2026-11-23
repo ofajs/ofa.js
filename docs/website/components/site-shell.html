@@ -32,6 +32,7 @@
             on:change="switchLanguage"
           >
             <option value="cn">中文</option>
+            <option value="t-cn">繁體中文</option>
             <option value="en">English</option>
           </st-select>
         </div>
@@ -299,12 +300,16 @@
       return (start ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
     };
 
-    const resultKind = (url, english = false) => {
+    const resultKind = (url, english = false, traditional = false) => {
       if (url.startsWith("api/")) return "API";
       if (url.startsWith("blog/")) return english ? "Blog" : "博客";
       if (url.startsWith("tutorial/")) return english ? "Tutorial" : "教程";
-      if (url.startsWith("docs/")) return english ? "Docs" : "文档";
-      return english ? "Home" : "首页";
+      if (url.startsWith("docs/")) {
+        if (english) return "Docs";
+        return traditional ? "文檔" : "文档";
+      }
+      if (english) return "Home";
+      return traditional ? "首頁" : "首页";
     };
 
     export default {
@@ -346,8 +351,11 @@
         footerNote: "This page is built with ofa.js itself.",
       },
       data: {
-        lang: location.pathname.split("/")[1] === "en" ? "en" : "cn",
+        lang: ["cn", "t-cn", "en"].includes(location.pathname.split("/")[1])
+          ? location.pathname.split("/")[1]
+          : "cn",
         isEnglish: document.documentElement.lang.startsWith("en"),
+        isTraditional: document.documentElement.lang.startsWith("zh-Hant"),
         menuOpen: false,
         searchOpen: false,
         searchQuery: "",
@@ -367,7 +375,7 @@
 
           const url = new URL(location.href);
           const parts = url.pathname.split("/");
-          if (parts[1] === "cn" || parts[1] === "en") {
+          if (["cn", "t-cn", "en"].includes(parts[1])) {
             parts[1] = next;
           } else {
             parts.splice(1, 0, next);
@@ -502,7 +510,7 @@
             .slice(0, 8)
             .map(({ entry }) => ({
               ...entry,
-              kind: resultKind(entry.url, this.isEnglish),
+              kind: resultKind(entry.url, this.isEnglish, this.isTraditional),
               snippet: makeSnippet(entry, terms),
             }));
 

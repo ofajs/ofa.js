@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 數據與偵聽</p>
+      <h1>數據與偵聽</h1>
+      <p class="doc-lead">實例數據來自 stanz：讀寫字段就是響應式更新，監聽與清理都有對應方法。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="reactive"></docs-playground>
+
+      <h2>成員</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.watch(cb)</code></td><td>監聽自身及子級變更，返回監聽 id</td></tr>
+          <tr><td><code>el.watchTick(cb)</code></td><td>同 watch，但一輪批量變更只觸發一次</td></tr>
+          <tr><td><code>el.unwatch(id)</code></td><td>註銷監聽</td></tr>
+          <tr><td><code>el.watchUntil(fn, timeout = 30000)</code></td><td>條件成立即兌現的 Promise，自動解綁，超時默認 30 秒</td></tr>
+          <tr><td><code>el.refresh(opts)</code></td><td>不改變數據，手動派發 refresh 事件</td></tr>
+          <tr><td><code>el.sync(prop, path, options)</code></td><td>雙向同步動作，僅模板 sync: 使用，直接調用會報錯</td></tr>
+          <tr><td><code>el.toJSON() / el.toString()</code></td><td>導出純對象（遞歸）/ JSON 字符串</td></tr>
+          <tr><td><code>el.revoke()</code></td><td>註銷實例：清空監聽、斷開數據引用</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>watchUntil 只在數據變更時判定，註冊後不會立即檢查；條件可能已成立時先自行判斷一次。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>全局 $ 靜態成員 — ofa.js API</title>
+    <meta name="description" content="掛在全局 $ 上的選擇器、註冊、響應式、渲染與版本信息。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="全局 $ 靜態成員 — ofa.js API" />
+    <meta property="og:description" content="掛在全局 $ 上的選擇器、註冊、響應式、渲染與版本信息。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 全局 $ 靜態成員</p>
+      <h1>全局 $ 靜態成員</h1>
+      <p class="doc-lead">掛在全局 $ 上的選擇器、註冊、響應式、渲染與版本信息。</p>
+      <p>
+        想先看 <code>$</code> 如何選中 body 上的元素，見
+        <a olink href="./index.html">API 總覽</a>頂部的可運行示例。
+      </p>
+
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground example="global"></docs-playground>
+
+      <h2>成員</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>$(expr)</code></td><td>選擇器 / 元素工廠，返回實例或 null</td></tr>
+          <tr><td><code>$.all(expr)</code></td><td>全局查詢全部匹配，返回實例數組</td></tr>
+          <tr><td><code>$.register(opts)</code></td><td>註冊組件（tag/temp/data/attrs/proto/生命週期）</td></tr>
+          <tr><td><code>$.stanz(data)</code></td><td>創建獨立響應式數據對象</td></tr>
+          <tr><td><code>$.Stanz</code></td><td>stanz 構造類，用於 instanceof 判斷</td></tr>
+          <tr><td><code>$.fn</code></td><td>實例原型，$.fn.extend() 的掛載點</td></tr>
+          <tr><td><code>$.nextTick(cb)</code></td><td>下一微任務執行</td></tr>
+          <tr><td><code>$.frag()</code></td><td>創建 DocumentFragment 實例</td></tr>
+          <tr><td><code>$.render / $.convert</code></td><td>模板渲染 / 編譯底層入口</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>取應用級 root provider</td></tr>
+          <tr><td><code>$.version</code></td><td>框架版本號（只讀）</td></tr>
+          <tr><td><code>$.debugMode</code></td><td>是否帶 #debug 加載（只讀）</td></tr>
+          <tr><td><code>$.showlog</code></td><td>內部診斷日誌開關，運行時可讀寫</td></tr>
+          <tr><td><code>$.COMP / $.PAGE</code></td><td>組件 / 頁面模塊的 type 標記</td></tr>
+          <tr><td><code>$.extensions</code></td><td>生命週期鉤子擴展容器（afterAttached/afterDetached）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>大多數頁面代碼只需要 $、$.all 與 $.stanz；其餘靜態成員用於框架擴展或診斷。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

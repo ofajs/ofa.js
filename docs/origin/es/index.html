@@ -75,6 +75,26 @@
               <p class="cdn-hint">Copia la URL y pégala en una etiqueta &lt;script type="module"&gt; o en un import.</p>
             </div>
   
+            <div class="cdn-box skill-box">
+              <div class="cdn-top">
+                <span class="cdn-tag">AI · SKILL</span>
+                <span class="cdn-label">{{site.skill.label}}</span>
+                <st-icon-button
+                  class="copy-btn"
+                  on:click="copySkill"
+                  attr:aria-label="site.skill.copyAria"
+                  attr:title="site.skill.copyAria"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+                  </svg>
+                </st-icon-button>
+              </div>
+              <span class="cdn-url" attr:title="skillUrl">{{skillUrl}}</span>
+              <p class="cdn-hint">{{site.skill.hint}}</p>
+            </div>
+
             <div class="stats">
               <div class="stat">
                 <b>0</b>

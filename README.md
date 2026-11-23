@@ -210,6 +210,12 @@ npm run build:skill
 # → .agents/skills/ofajs-docs.zip
 ```
 
+Published archive URL (after it is committed to `main`):
+
+```text
+https://raw.githubusercontent.com/ofajs/ofa.js/main/.agents/skills/ofajs-docs.zip
+```
+
 The default archive contains a top-level `ofajs-docs/` directory, matching the
 layout expected by Claude Skills (`<skill-name>/SKILL.md`):
 

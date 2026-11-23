@@ -441,5 +441,10 @@
         }
       }
     }
+  },
+  "skill": {
+    "label": "Agent",
+    "copyAria": "複製 Agent Skill 地址",
+    "hint": "複製技能包地址，交給支持 Agent Skills 的 AI。"
   }
 }

@@ -3115,3 +3115,14 @@ mark.site-search-hit {
   content: "Copiar";
   font-size: 12px;
 }
+
+/* Hero 的 Agent Skill 复制卡片 */
+.cdn-box.skill-box {
+  margin-top: 14px;
+}
+
+.cdn-box.skill-box .cdn-url {
+  color: var(--md-sys-color-on-surface);
+  font-size: 12px;
+  word-break: break-all;
+}

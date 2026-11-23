@@ -441,5 +441,10 @@
         }
       }
     }
+  },
+  "skill": {
+    "label": "Agent",
+    "copyAria": "Copy Agent Skill URL",
+    "hint": "Copy the skill package URL and give it to an agent that supports Agent Skills."
   }
 }

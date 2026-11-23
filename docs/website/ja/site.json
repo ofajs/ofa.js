@@ -441,5 +441,10 @@
         }
       }
     }
+  },
+  "skill": {
+    "label": "エージェント",
+    "copyAria": "Agent Skill の URL をコピー",
+    "hint": "Agent Skills 対応の AI に渡すスキルパッケージの URL をコピーします。"
   }
 }

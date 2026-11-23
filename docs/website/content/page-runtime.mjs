@@ -185,6 +185,8 @@ $ python3 -m http.server
       doneCount: todos.filter((item) => item.done).length,
       cdnUrl: CDN_URL,
       cdnSnippet: `<script type="module" src="${CDN_URL}"><\/script>`,
+      skillUrl:
+        "https://raw.githubusercontent.com/ofajs/ofa.js/main/.agents/skills/ofajs-docs.zip",
       githubUrl: "https://github.com/ofajs/ofa.js",
 
       // st-code 展示用的代码样例（字符串绑定 :code，绕开 ofa 对 {{...}} 的插值编译）
@@ -255,6 +257,10 @@ $ python3 -m http.server
         this._toastTimer = setTimeout(() => {
           this.toastVisible = false;
         }, 1800);
+      },
+
+      copySkill() {
+        return this.copySnippet(this.skillUrl);
       },
 
       async copySnippet(text) {

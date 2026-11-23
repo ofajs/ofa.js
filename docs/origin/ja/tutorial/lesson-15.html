@@ -1,0 +1,64 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 15</p>
+      <h1>階層をまたぐコンテキスト</h1>
+      <p class="doc-lead">コンポーネントの階層が深くなると、attrs を1階層ずつ渡していくのは面倒です。o-provider と o-consumer を使えば、サブツリーにデータを置き、子孫は最も近い祖先から名前でそのデータを受け取れます。</p>
+
+      <p>
+        これまで、データは <code>attrs</code> を使って親から子コンポーネントへ渡してきました。
+        ひとつのデータが多くのコンポーネント階層をまたぐとなると、1階層ずつ転送するのは骨が折れます。
+        <code>o-provider</code> は祖先にデータを付与し、その下の任意の深さにある
+        <code>o-consumer</code> がそれを直接読めます。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-15" fold-styles="true"></docs-playground>
+
+      <h2>3枚のカード</h2>
+      <ul>
+        <li>最初の2枚のカードは <code>o-provider</code> の内側にあり、プロバイダーの Yao / Maintainer を読みます。</li>
+        <li>3枚目のカードはプロバイダーの外側にあるため、<code>o-root-provider</code> のデフォルトユーザーにフォールバックします。</li>
+        <li>コンポーネントの <code>o-consumer</code> は <code>watch:user-name="name"</code> を使い、コンテキストのプロパティを自身のデータに同期します。</li>
+      </ul>
+
+      <div class="doc-note">
+        <strong>3つのよくある落とし穴：</strong>
+        <ul>
+          <li>プロバイダーの HTML 属性は初期化時に一度だけ読まれます。実行中に更新するには、データプロパティを直接変更してください（例では <code>provider.userName = ...</code>）。<code>setAttribute</code> では反映されません。</li>
+          <li>プロバイダーはコンシューマーの祖先である必要があります。兄弟要素や外側の階層からは見つけられません。</li>
+          <li>コンシューマーが同期するフィールドには <code>data</code> でデフォルト値を宣言してください。そうしないと初期化時に <code>ReferenceError</code> が発生します。</li>
+        </ul>
+      </div>
+
+      <h2>グローバル状態との使い分け</h2>
+      <p>
+        1つのコンポーネントサブツリーだけで共有するデータには provider / consumer を使い、
+        ページやアプリ全体で共有する状態には次のレッスンの <code>$.stanz</code> を使ってください。
+        テーマカラーやサイズなどのスタイルコンテキストには、CSS 変数や
+        <code>match-var</code> を優先しましょう。
+      </p>
+
+      <h2>自分で試してみよう</h2>
+      <p>
+        プロバイダーに <code>user-department</code> フィールドを追加し、カードに部署を表示してみましょう。
+        次に、サブツリー全体のユーザーを切り替えるボタンをプロバイダーに追加してください。
+      </p>
+
+      <p class="doc-end">前: <a olink href="./lesson-14.html">14 · スロットとイベント →</a> · 次: <a olink href="./lesson-16.html">16 · グローバル状態 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

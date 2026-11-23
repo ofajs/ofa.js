@@ -1,0 +1,126 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>數據與偵聽</h1>
+      <p class="doc-lead">
+        <code>data</code> 是組件和頁面的響應式狀態。它由 stanz 驅動，
+        對象和數組的深層變化都會自動觸發視圖更新。
+      </p>
+
+      <h2>data 是對象，不是函數</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "張三", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        每個組件實例擁有獨立的 data。嵌套對象賦值、數組
+        <code>push</code>/<code>splice</code>/<code>sort</code> 都會觸發更新：
+      </p>
+      <pre><code>this.user.name = "李四";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>計算屬性</h2>
+      <p>用 <code>proto</code> 的 getter，不要使用 Vue 風格的 computed：</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>模板裡當普通字段使用：<code>{{double}}</code>、<code>{{fullName}}</code>。</p>
+      <div class="doc-note">
+        <strong>getter 會在模板初始化時立即求值，早於 ready。</strong>
+        只適合依賴同步初始值的簡單計算。依賴異步數據的計算不要放 getter，
+        改用 data 字段並在異步回調中賦值，否則可能出現
+        <code>TypeError</code> 並中斷整頁渲染。
+      </div>
+
+      <h2>偵聽器</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // 初始化時的首次調用
+    console.log("count 變為", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // 對象/數組會深度偵聽
+    console.log("user 發生變化");
+  },
+},</code></pre>
+      <p>
+        回調的第二個參數是 <code>{ watchers }</code>，表示本次防抖週期內
+        合併的變更集合。<code>watchers[0]</code> 上有
+        <code>name</code>、<code>oldValue</code>、<code>value</code>、
+        <code>type</code>、<code>target</code>、<code>args</code>。
+      </p>
+      <p>
+        watch 函數在組件初始化完成時會先執行一次，此時
+        <code>watchers</code> 為空，用於建立監聽。如果初始化階段不需要執行
+        業務邏輯，先判斷 <code>if (!watchers) return;</code>。
+      </p>
+
+      <h2>避免回寫死循環</h2>
+      <pre><code>// 錯誤：監聽 count，又在回調裡改 count
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        需要派生值時用計算屬性，或增加一個明確的觸發條件，
+        不要在 watch 裡無條件回寫被監聽的數據。
+      </p>
+
+      <h2>watch 與異步數據</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        watch 回調可以是 async 函數。併發請求時注意記錄請求序號或使用
+        <code>AbortController</code>，避免舊請求覆蓋新結果。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./render.html">條件與列表 →</a>
+        　·　下一篇：<a olink href="./state.html">全局狀態 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

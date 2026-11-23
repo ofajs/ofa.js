@@ -3,6 +3,7 @@
  * 结构与 playground-runtime 的 LESSONS 一致：{ entry, files }。
  */
 import { API_EXAMPLES_EN } from "./api-examples-en.mjs";
+import { API_EXAMPLES_TCN } from "./api-examples-t-cn.mjs";
 
 export const API_EXAMPLES = {
   globalBody: {
@@ -29,7 +30,7 @@ export const API_EXAMPLES = {
 
     <script
       type="module"
-      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
     ></script>
     <script type="module">
       const target = $("#target");
@@ -472,4 +473,16 @@ export const API_EXAMPLES = {
   },
 };
 
-export const getApiExample = (key, english = document.documentElement.lang.startsWith("en")) => (english ? API_EXAMPLES_EN : API_EXAMPLES)[key];
+export const getApiExample = (
+  key,
+  english =
+    document.documentElement.lang.startsWith("en") ||
+    document.documentElement.lang.startsWith("ja") ||
+    document.documentElement.lang.startsWith("es"),
+  traditional = document.documentElement.lang.startsWith("zh-Hant"),
+) =>
+  (english
+    ? API_EXAMPLES_EN
+    : traditional
+      ? API_EXAMPLES_TCN
+      : API_EXAMPLES)[key];

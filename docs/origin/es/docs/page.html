@@ -1,0 +1,167 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos fundamentales</p>
+      <h1>Páginas</h1>
+      <p class="doc-lead">
+        Un módulo de página es una pantalla de contenido dentro del enrutamiento de la
+        aplicación. No tiene <code>tag</code>, lo cargan <code>o-page</code> o
+        <code>o-app</code>, y recibe los parámetros de consulta de la URL a través de
+        su función de módulo.
+      </p>
+
+      <h2>Estructura de un módulo de página</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "Página sin título",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> es el objeto de parámetros de consulta ya analizado. Cuando
+        visitas <code>./detail.html?id=42&amp;tab=info</code>,
+        <code>query.id</code> es <code>"42"</code>.
+      </p>
+
+      <h2>Navegar dentro de una página</h2>
+      <p>
+        Cada instancia de página proporciona <code>goto</code>, <code>replace</code> y <code>back</code>:
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;Ir al detalle&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;Atrás&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> apila una nueva página, <code>replace</code> reemplaza la página actual
+        y <code>back</code> vuelve a la página anterior. Para conocer la pila de páginas completa
+        y el enrutamiento hash, consulta <a olink href="./routing.html">Enrutamiento y navegación</a>.
+      </p>
+
+      <h2>Recursos e importaciones relativos</h2>
+      <p>
+        Las URL relativas dentro de una página se resuelven respecto al
+        <strong>propio archivo de la página</strong>, no al HTML de entrada. El framework
+        reescribe automáticamente los recursos relativos como <code>img src</code> y
+        <code>url()</code> en <code>style</code>; las sentencias <code>import</code> en
+        páginas <code>.mjs</code> se resuelven respecto a la URL del propio módulo.
+      </p>
+      <pre><code>&lt;!-- page.html está en /pages/detail/ --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- detail.mjs en el mismo directorio --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        Esto significa que una página puede residir en cualquier subdirectorio sin tener
+        que reescribir las rutas de los recursos a URL absolutas desde la raíz del sitio.
+      </p>
+
+      <h2>Avanzado: módulos de página .mjs</h2>
+      <p>
+        Normalmente las páginas se escriben como módulos HTML <code>&lt;template page&gt;</code>;
+        cuando quieres separar la plantilla de la lógica, también puedes escribirlas como
+        <code>.mjs</code>, declarando el tipo <code>$.PAGE</code> y apuntando
+        <code>temp</code> a una plantilla externa:
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "Hola" };
+export const proto = {};</code></pre>
+      <p>
+        La entrada sigue siendo <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code>.
+        Los módulos HTML son lo recomendado en la mayoría de los casos; <code>.mjs</code>
+        encaja en proyectos con lógica más pesada que necesitan separar la plantilla o
+        reutilizar módulos existentes.
+      </p>
+
+      <h2>Páginas hijas incrustadas</h2>
+      <p>
+        Cuando una sola página tiene que alojar una lista, un formulario y un diálogo,
+        puedes dividir las unidades independientes en páginas hijas e incrustarlas con un
+        <code>&lt;o-page&gt;</code> persistente:
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;Añadir&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        La página hija expone métodos para que la página anfitriona los llame y, cuando
+        termina, envía el resultado de vuelta al anfitrión mediante un evento:
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong>El src de un <code>o-page</code> es inmutable después de la inicialización.</strong>
+        Cambiar <code>src</code> en tiempo de ejecución (incluido un enlace <code>:src</code>) lanza un error.
+        Pasa argumentos llamando a métodos de la página hija; si realmente necesitas una
+        instancia nueva, envuelve <code>o-page</code> en <code>o-if</code> para destruirla y volver a crearla.
+      </div>
+
+      <h2>División de páginas</h2>
+      <ul>
+        <li>Las páginas hijas son responsables del estado de su formulario y de la integridad de su interacción;</li>
+        <li>La normalización de datos, la persistencia y la coordinación entre módulos corresponden a la página anfitriona;</li>
+        <li>Al enviar resultados hacia arriba, deben establecerse ambos valores <code>bubbles: true, composed: true</code>;</li>
+        <li>Es preferible mantener las páginas hijas montadas y reiniciar su estado mediante métodos, en lugar de destruirlas y volver a crearlas.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./component.html">Componentes →</a>
+         · Siguiente: <a olink href="./lifecycle.html">Ciclo de vida →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

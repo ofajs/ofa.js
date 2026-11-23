@@ -106,6 +106,9 @@
         <div class="site-loading-bar" aria-hidden="true"></div>
         <div class="site-loading-label">
           <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
           <span class="site-loading-label-en">Loading page…</span>
         </div>
       </div>
@@ -139,19 +142,19 @@
         </p>
         <pre><code>&lt;script
   type="module"
-  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
 &gt;&lt;/script&gt;</code></pre>
 
         <p>
           如果你的环境更适合经典脚本，也可以使用 UMD 版本（会暴露全局
           <code>$</code>）：
         </p>
-        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
 
         <div class="doc-note">
-          <strong>版本说明：</strong>v5 分支的 CDN 地址必须写成
-          <code>@refs/heads/v5</code>，不能简写成 <code>@v5</code>，
-          否则 jsDelivr 会把它当成版本标签解析而 404。
+          <strong>版本说明：</strong>CDN 地址建议使用
+          <code>@5</code>，它会跟随最新的 5.x 版本；如果要完全固定，请写完整版本号，例如
+          <code>@5.0.2</code>。
         </div>
 
         <h2>2. 写一个入口</h2>
@@ -165,7 +168,7 @@
     &lt;title&gt;我的第一个 ofa.js 页面&lt;/title&gt;
     &lt;script
       type="module"
-      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
     &gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;

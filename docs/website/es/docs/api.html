@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>$.fn y objetos envueltos — Documentación de ofa.js</title>
+    <meta name="description" content="La API de objetos envueltos de ofa.js: selección, recorrido del árbol, operaciones DOM, eventos, propiedades y extensión." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="$.fn y objetos envueltos — Documentación de ofa.js" />
+    <meta property="og:description" content="La API de objetos envueltos de ofa.js: selección, recorrido del árbol, operaciones DOM, eventos, propiedades y extensión." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Referencia</p>
+      <h1>$.fn y los objetos wrapper</h1>
+      <p class="doc-lead">
+        <code>$</code> es a la vez un selector y una fábrica de elementos. Devuelve un
+        objeto wrapper de ofa.js, que concentra la mayor parte de las capacidades del
+        framework; a las capacidades nativas del navegador se accede mediante
+        <code>.ele</code>.
+      </p>
+
+      <h2>Obtener elementos</h2>
+      <pre><code>$("#target");                       // primera coincidencia
+$("#target").$("h3");               // elemento hijo
+$("my-component").shadow.$("#x");   // consulta dentro del Shadow DOM
+$.all("li");                        // array con todas las instancias wrapper coincidentes
+
+$(document.createElement("div"));   // elemento nativo → objeto wrapper
+$(`&lt;div&gt;nuevo&lt;/div&gt;`);               // cadena HTML → objeto wrapper
+$({ tag: "div", text: "hola" });      // descripción de objeto → objeto wrapper</code></pre>
+
+      <h2>Objetos wrapper frente a elementos nativos</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Caso</th><th>Sintaxis</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Propiedades/métodos de ofa.js</td><td><code>el.src</code>, <code>el.text</code>, <code>el.on()</code>, <code>el.app</code></td></tr>
+          <tr><td>Propiedades nativas del navegador</td><td><code>el.ele.scrollTop</code>, <code>el.ele.shadowRoot</code></td></tr>
+          <tr><td>Campos de datos del componente</td><td><code>el.count</code> (accede directamente al campo)</td></tr>
+          <tr><td>dataset</td><td><code>el.data.role</code></td></tr>
+          <tr><td>Consulta en el shadow</td><td><code>this.shadow.$("#id")</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        Regla general: usa directamente las propiedades de ofa.js y accede a las nativas
+        del navegador mediante <code>.ele</code>.
+      </p>
+
+      <h2>Navegación por el árbol</h2>
+      <pre><code>el.prev;      el.prevs;
+el.next;      el.nexts;
+el.siblings;
+el.parent;    el.parents;
+el.host;      // instancia del componente host
+el.app;       // el o-app al que pertenece
+el.root;      // instancia de document
+el.shadow;    // instancia del shadow root
+el.tag;       // nombre de etiqueta en minúsculas
+el.index;     // posición dentro del padre
+el.PATH;      // ruta del archivo de registro del componente
+el.is("li");  // si coincide con el selector</code></pre>
+
+      <h2>Añadir y eliminar hijos</h2>
+      <pre><code>$("ul").push("&lt;li&gt;nuevo&lt;/li&gt;");
+$("ul").unshift("&lt;li&gt;primero&lt;/li&gt;");
+$("ul").pop();
+$("ul").shift();
+$("ul").splice(1, 2, "&lt;li&gt;reemplazo&lt;/li&gt;");
+
+el.before("&lt;p&gt;antes&lt;/p&gt;");
+el.after("&lt;p&gt;después&lt;/p&gt;");
+el.remove();
+el.wrap("&lt;div class='wrapper'&gt;&lt;/div&gt;");
+el.unwrap();</code></pre>
+
+      <h2>Contenido y atributos</h2>
+      <pre><code>el.text = "nuevo texto";
+el.html = "&lt;b&gt;hola&lt;/b&gt;";
+
+el.attr("data-id");          // leer un atributo
+el.attr("data-id", "42");    // escribir un atributo
+
+el.css.color = "red";
+el.css = { color: "blue", lineHeight: "1.5" };
+el.css = { ...el.css, color: "red" };
+
+el.classList.add("active");
+el.classList.remove("done");
+el.data.role = "admin";
+el.refresh();                // refrescar manualmente el renderizado no reactivo</code></pre>
+      <p>
+        Los equivalentes en la plantilla son <code>:text</code>, <code>:html</code>,
+        <code>attr:data-id</code>, <code>:style.color</code> y
+        <code>class:active</code>.
+      </p>
+
+      <h2>Eventos</h2>
+      <pre><code>el.on("click", handler);
+el.one("load", init);
+el.off("click", handler);
+
+el.emit("save", {
+  data: { id: 1 },
+  bubbles: true,
+  composed: true,
+});</code></pre>
+
+      <h2>o-app y o-page</h2>
+      <pre><code>const app = $("o-app");
+app.src;
+app.current;
+app.routers;
+app.goto("./page.html");
+app.replace("./page.html");
+app.back();
+app.forward();
+
+const page = app.current;
+page.src;
+page.goto("./next.html");
+page.pageIsReady;</code></pre>
+
+      <h2>Capacidades de stanz</h2>
+      <pre><code>const tid = target.watch(() =&gt; {
+  // observación profunda
+});
+target.watchTick(() =&gt; {}); // observación limitada por tiempo
+target.unwatch(tid);
+
+const data = $.stanz({ count: 0 });
+data._internal = "no observado"; // el prefijo de guion bajo omite la reactividad</code></pre>
+      <p>
+        Para esperar hasta que se cumpla una condición sobre los datos, usa
+        <code>watchUntil</code>; devuelve una Promise que se resuelve cuando se cumple la
+        condición y cancela automáticamente la observación:
+      </p>
+      <pre><code>const app = $("o-app");
+await app.watchUntil(() =&gt; app.appIsReady);
+
+// 30 segundos de tiempo de espera predeterminado; pasa un segundo argumento para cambiarlo
+await app.watchUntil(() =&gt; app.current, 5000);</code></pre>
+      <div class="doc-note">
+        <strong>watchUntil solo evalúa cuando cambian los datos; no comprueba de inmediato al registrarse.</strong>
+        Si la condición puede cumplirse ya, compruébala tú mismo una vez antes de decidir
+        si esperar.
+      </div>
+
+      <h2>Extender instancias</h2>
+      <pre><code>// Una sola instancia
+el.extend({
+  say() {
+    return "hola";
+  },
+});
+
+// Todas las instancias
+$.fn.extend({
+  get good() {
+    return "ofa.js es genial";
+  },
+});
+
+// Nueva directiva: :red="count % 3 === 0"
+$.fn.extend({
+  set red(value) {
+    this.css.color = value ? "red" : "";
+  },
+});</code></pre>
+
+      <h2>Complemento formData</h2>
+      <p>
+        <code>formData()</code> no está en la compilación predeterminada del framework.
+        Primero importa <code>packages/plugins/formdata/formdata.mjs</code> (o el script
+        dist) y después llámalo:
+      </p>
+      <pre><code>const data = this.shadow.formData();
+data.username = "Yao";
+console.log(data.username);
+data.revoke(); // liberar el enlace</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./scsr.html">scsr con rutas reales →</a>
+         · Siguiente: <a olink href="./plugins.html">Complementos y extensiones →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

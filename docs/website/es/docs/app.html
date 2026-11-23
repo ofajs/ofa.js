@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aplicaciones o-app — Documentación de ofa.js</title>
+    <meta name="description" content="Configuración de o-app, pila de páginas, animaciones de transición, estados de carga y error, y extensión de proto." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Aplicaciones o-app — Documentación de ofa.js" />
+    <meta property="og:description" content="Configuración de o-app, pila de páginas, animaciones de transición, estados de carga y error, y extensión de proto." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Aplicaciones o-app</h1>
+      <p class="doc-lead">
+        <code>o-app</code> es un contenedor de microaplicaciones. Carga un módulo de configuración de la aplicación
+        y gestiona la pila de páginas, las animaciones de transición entre páginas y los eventos de navegación, pero no
+        carga el HTML de las páginas por sí mismo.
+      </p>
+
+      <h2>Aplicación mínima</h2>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./pages/home.html";</code></pre>
+      <p>
+        El <code>src</code> de <code>o-app</code> debe ser un módulo de configuración de la aplicación;
+        no puede apuntar directamente a una página. Para ejecutar una sola página de forma independiente, usa
+        <code>&lt;o-page src="./page.html"&gt;</code>.
+      </p>
+
+      <h2>Configuración de la aplicación</h2>
+      <pre><code>export const home = "./pages/home.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};
+
+export const loading = () =&gt; "&lt;div class='loading'&gt;Cargando...&lt;/div&gt;";
+
+export const fail = ({ src, error }) =&gt;
+  `&lt;div class='error'&gt;No se pudo cargar: ${src}&lt;/div&gt;`;
+
+export const allowForward = true;
+
+// Control de acceso a páginas de origen cruzado: devuelve true para permitir, false o un Error para denegar
+export const access = (src) =&gt; src.startsWith("https://cdn.example.com/");
+
+export const proto = {
+  goHome() {
+    this.goto("home.html");
+  },
+  get isHome() {
+    return this.current?.src.includes("home.html");
+  },
+};
+
+export const ready = function () {
+  console.log("la aplicación está lista", this.current);
+};</code></pre>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Exportación</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>home</code></td><td>Dirección de la página de inicio que se carga al iniciar</td></tr>
+          <tr><td><code>pageAnime</code></td><td>Animación de transición de página de tres estados: current / next / previous</td></tr>
+          <tr><td><code>loading</code></td><td>HTML que se muestra mientras se carga una página</td></tr>
+          <tr><td><code>fail</code></td><td>HTML que se muestra cuando falla la carga; recibe <code>{ src, error }</code></td></tr>
+          <tr><td><code>allowForward</code></td><td>Si se permite <code>forward()</code>; desactivado de forma predeterminada</td></tr>
+          <tr><td><code>access</code></td><td>Control de acceso a páginas de origen cruzado; devuelve true para permitir. No es necesario para páginas del mismo origen</td></tr>
+          <tr><td><code>proto</code></td><td>Métodos y getters añadidos a la instancia de o-app</td></tr>
+          <tr><td><code>ready</code></td><td>Callback que se ejecuta después de cargar la configuración; <code>this</code> es la instancia de la aplicación</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>access</code> recibe el <code>src</code> de una página y debe devolver
+        <code>true</code> para que se cargue una página de origen cruzado; devolver <code>false</code> o un
+        <code>Error</code> la rechaza. El sitio de destino debe seguir configurando CORS correctamente;
+        de lo contrario, el navegador bloquea la solicitud primero.
+      </p>
+
+      <h2>Instancia de la aplicación</h2>
+      <pre><code>const app = $("o-app");
+
+app.current;   // instancia de la página actual
+app.appIsReady; // la primera página se ha renderizado (espera con watchUntil)
+app.routers;   // pila de enrutamiento; las páginas de diseño padre no entran en ella
+app.goto("./pages/detail.html?id=1");
+app.replace("./pages/detail.html");
+app.back();
+app.forward(); // requiere allowForward: true</code></pre>
+      <p>
+        Dentro de un módulo de página también puedes llamar directamente a <code>this.goto</code>,
+        <code>this.replace</code> y <code>this.back</code>;
+        <code>this.app</code> apunta a la aplicación a la que pertenece la página.
+      </p>
+
+      <h2>Observar los cambios de enrutamiento</h2>
+      <pre><code>const app = $("o-app");
+
+app.on("router-change", (event) =&gt; {
+  console.log(event.data.name); // goto / replace / back / forward
+  console.log(event.data.src);  // URL de la página de destino
+});</code></pre>
+
+      <h2>Animaciones de página</h2>
+      <p>
+        <code>pageAnime.current</code> es el estado de una página asentada,
+        <code>next</code> es el inicio de entrada de la página entrante y <code>previous</code>
+        es el final de salida de la página saliente. Los tres estados pueden omitirse; en ese caso
+        se usan los valores predeterminados.
+      </p>
+      <pre><code>export const pageAnime = {
+  current: { opacity: 1, transform: "translateX(0)" },
+  next: { opacity: 0, transform: "translateX(40px)" },
+  previous: { opacity: 0, transform: "translateX(-40px)" },
+};</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./context.html">Contexto entre componentes →</a>
+         · Siguiente: <a olink href="./routing.html">Enrutamiento y navegación →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

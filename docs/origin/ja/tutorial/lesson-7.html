@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 07</p>
+      <h1>条件付きレンダリング</h1>
+      <p class="doc-lead">o-if / o-else-if / o-else はコンテンツの有無を制御します。</p>
+
+      <p>
+  状態に応じて表示する内容を変えるには、<code>&lt;o-if :value="condition"&gt;</code> を使います。
+  条件が false のときコンテンツは削除され、true になると再び作成されます。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-7" fold-styles="true"></docs-playground>
+<h2>3 つのタグは連続して書く</h2>
+<ul>
+  <li><code>o-if</code> には <code>:value</code> が必要です。</li>
+  <li><code>o-else-if</code> は次の条件を判定します。</li>
+  <li><code>o-else</code> は <code>:value</code> を取らず、最後のフォールバックとして機能します。</li>
+</ul>
+<div class="doc-note">
+  <strong>頻繁な切り替えには class を使う:</strong> 色を変えるだけ、表示/非表示を
+  切り替えるだけなら <code>class:</code> を使い、DOM を保持しましょう。
+  <code>o-if</code> はコンテンツを破棄して再作成するため、めったに変わらない条件や、
+  リソースを確実に解放したい場合に適しています。
+</div>
+<h2>やってみよう</h2>
+<p>
+  60 点未満を「不合格」に変更し、80〜89 点の「良好」段階を追加しましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-6.html">06 · 双方向バインディング →</a> · 次へ: <a olink href="./lesson-8.html">08 · リストレンダリング →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

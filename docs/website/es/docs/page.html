@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Páginas — Documentación de ofa.js</title>
+    <meta name="description" content="Módulos de página, parámetros de consulta, páginas hijas anidadas en o-page y división de páginas." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Páginas — Documentación de ofa.js" />
+    <meta property="og:description" content="Módulos de página, parámetros de consulta, páginas hijas anidadas en o-page y división de páginas." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos fundamentales</p>
+      <h1>Páginas</h1>
+      <p class="doc-lead">
+        Un módulo de página es una pantalla de contenido dentro del enrutamiento de la
+        aplicación. No tiene <code>tag</code>, lo cargan <code>o-page</code> o
+        <code>o-app</code>, y recibe los parámetros de consulta de la URL a través de
+        su función de módulo.
+      </p>
+
+      <h2>Estructura de un módulo de página</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+  &lt;script&gt;
+    export default async ({ query, url }) =&gt; ({
+      data: {
+        title: query.title || "Página sin título",
+        currentUrl: url,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>query</code> es el objeto de parámetros de consulta ya analizado. Cuando
+        visitas <code>./detail.html?id=42&amp;tab=info</code>,
+        <code>query.id</code> es <code>"42"</code>.
+      </p>
+
+      <h2>Navegar dentro de una página</h2>
+      <p>
+        Cada instancia de página proporciona <code>goto</code>, <code>replace</code> y <code>back</code>:
+      </p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;Ir al detalle&lt;/a&gt;
+
+&lt;button on:click="goto('./detail.html?id=42')"&gt;goto&lt;/button&gt;
+&lt;button on:click="replace('./detail.html?id=42')"&gt;replace&lt;/button&gt;
+&lt;button on:click="back()"&gt;Atrás&lt;/button&gt;</code></pre>
+      <p>
+        <code>goto</code> apila una nueva página, <code>replace</code> reemplaza la página actual
+        y <code>back</code> vuelve a la página anterior. Para conocer la pila de páginas completa
+        y el enrutamiento hash, consulta <a olink href="./routing.html">Enrutamiento y navegación</a>.
+      </p>
+
+      <h2>Recursos e importaciones relativos</h2>
+      <p>
+        Las URL relativas dentro de una página se resuelven respecto al
+        <strong>propio archivo de la página</strong>, no al HTML de entrada. El framework
+        reescribe automáticamente los recursos relativos como <code>img src</code> y
+        <code>url()</code> en <code>style</code>; las sentencias <code>import</code> en
+        páginas <code>.mjs</code> se resuelven respecto a la URL del propio módulo.
+      </p>
+      <pre><code>&lt;!-- page.html está en /pages/detail/ --&gt;
+&lt;img src="./cover.png" /&gt;
+&lt;style&gt;
+  .hero { background: url("./bg.png"); }
+&lt;/style&gt;
+
+&lt;!-- detail.mjs en el mismo directorio --&gt;
+import { loadDetail } from "./data.mjs";</code></pre>
+      <p>
+        Esto significa que una página puede residir en cualquier subdirectorio sin tener
+        que reescribir las rutas de los recursos a URL absolutas desde la raíz del sitio.
+      </p>
+
+      <h2>Avanzado: módulos de página .mjs</h2>
+      <p>
+        Normalmente las páginas se escriben como módulos HTML <code>&lt;template page&gt;</code>;
+        cuando quieres separar la plantilla de la lógica, también puedes escribirlas como
+        <code>.mjs</code>, declarando el tipo <code>$.PAGE</code> y apuntando
+        <code>temp</code> a una plantilla externa:
+      </p>
+      <pre><code>// page.mjs
+export const type = $.PAGE;
+export const temp = "./page.html";
+
+export const data = { title: "Hola" };
+export const proto = {};</code></pre>
+      <p>
+        La entrada sigue siendo <code>&lt;o-page src="./page.mjs"&gt;&lt;/o-page&gt;</code>.
+        Los módulos HTML son lo recomendado en la mayoría de los casos; <code>.mjs</code>
+        encaja en proyectos con lógica más pesada que necesitan separar la plantilla o
+        reutilizar módulos existentes.
+      </p>
+
+      <h2>Páginas hijas incrustadas</h2>
+      <p>
+        Cuando una sola página tiene que alojar una lista, un formulario y un diálogo,
+        puedes dividir las unidades independientes en páginas hijas e incrustarlas con un
+        <code>&lt;o-page&gt;</code> persistente:
+      </p>
+      <pre><code>&lt;o-page id="form-page" src="./form.html" on:form-save="onFormSave"&gt;&lt;/o-page&gt;
+
+&lt;button on:click="openForm"&gt;Añadir&lt;/button&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { items: [] },
+    proto: {
+      openForm() {
+        this.shadow.$("#form-page").openForm({ count: this.items.length });
+      },
+      onFormSave(event) {
+        this.items.push(event.data);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        La página hija expone métodos para que la página anfitriona los llame y, cuando
+        termina, envía el resultado de vuelta al anfitrión mediante un evento:
+      </p>
+      <pre><code>// form.html
+export default async () =&gt; ({
+  data: { open: false, name: "" },
+  proto: {
+    openForm() {
+      this.open = true;
+    },
+    save() {
+      this.emit("form-save", {
+        data: { name: this.name },
+        bubbles: true,
+        composed: true,
+      });
+      this.open = false;
+    },
+  },
+});</code></pre>
+
+      <div class="doc-note">
+        <strong>El src de un <code>o-page</code> es inmutable después de la inicialización.</strong>
+        Cambiar <code>src</code> en tiempo de ejecución (incluido un enlace <code>:src</code>) lanza un error.
+        Pasa argumentos llamando a métodos de la página hija; si realmente necesitas una
+        instancia nueva, envuelve <code>o-page</code> en <code>o-if</code> para destruirla y volver a crearla.
+      </div>
+
+      <h2>División de páginas</h2>
+      <ul>
+        <li>Las páginas hijas son responsables del estado de su formulario y de la integridad de su interacción;</li>
+        <li>La normalización de datos, la persistencia y la coordinación entre módulos corresponden a la página anfitriona;</li>
+        <li>Al enviar resultados hacia arriba, deben establecerse ambos valores <code>bubbles: true, composed: true</code>;</li>
+        <li>Es preferible mantener las páginas hijas montadas y reiniciar su estado mediante métodos, en lugar de destruirlas y volver a crearlas.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./component.html">Componentes →</a>
+         · Siguiente: <a olink href="./lifecycle.html">Ciclo de vida →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

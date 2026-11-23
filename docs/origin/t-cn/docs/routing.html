@@ -1,0 +1,106 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>路由與導航</h1>
+      <p class="doc-lead">
+        ofa.js 的頁面跳轉有兩種形態：只在前端應用內切換的 hash 路由
+        （o-router），以及每個 URL 都是真實文檔的 scsr。頁面導航 API
+        在兩種形態下一致。
+      </p>
+
+      <h2>頁面導航 API</h2>
+      <pre><code>// 頁面模塊內，this 是頁面實例
+this.goto("./detail.html?id=42"); // 壓入頁面棧
+this.replace("./detail.html");    // 替換當前頁，不增加歷史
+this.back();                      // 返回上一頁
+this.forward();                   // 需應用配置 allowForward: true</code></pre>
+      <p>聲明式跳轉用 <code>olink</code>：</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;查看詳情&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> 只在 <code>o-app</code> 內生效，會走應用內路由
+        和切換動畫，不刷新整頁。外部鏈接不要加 <code>olink</code>。
+      </p>
+
+      <h2>通過 query 傳參</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query 是頁面模塊函數的入參，不是 <code>this.$route</code>。
+        需要響應 query 變化時，在頁面模塊函數里讀取即可；
+        同一頁面地址變化會重新加載模塊。
+      </p>
+
+      <h2>o-router：hash 路由</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>router 是橋接包，必須在 ofa.js 之後加載；</li>
+        <li><code>fix-body</code> 重置 html/body 的滿尺寸，移除即撤銷；</li>
+        <li>頁面棧同步到 hash，例如 <code>#/pages/detail.html?id=42</code>；</li>
+        <li>刷新、直達、分享、前進後退都能恢復頁面，無需服務器 rewrite；</li>
+        <li>一個頁面只配合一個 o-app。</li>
+      </ul>
+
+      <h2>hash URL 格式</h2>
+      <pre><code>// 正確
+location.origin + "/#/pages/detail.html?id=42"
+
+// 錯誤：多了 pathname 或 ./ 
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>監聽路由變化</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> 是 <code>goto</code>、<code>replace</code>、
+        <code>back</code> 或 <code>forward</code>；<code>src</code>
+        是目標頁面地址。頁面模塊內的 <code>routerChange</code> 鉤子
+        只在佈局父頁觸發，用於高亮當前文章。
+      </p>
+
+      <h2>需要真實路徑時</h2>
+      <p>
+        hash 路由適合純前端應用；如果要求每個 URL 都能被爬蟲抓取、
+        直接訪問和分享，使用
+        <a olink href="./scsr.html">scsr 真實路徑路由</a>。
+        兩者的頁面 API、嵌套佈局和動畫行為一致。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./app.html">o-app 應用 →</a>
+        　·　下一篇：<a olink href="./nested-routing.html">嵌套路由 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

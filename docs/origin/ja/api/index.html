@@ -1,0 +1,142 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · API リファレンス</p>
+      <h1>API リファレンス</h1>
+      <p class="doc-lead">すべてのインスタンスメンバー、グローバル静的メンバー、そして実行可能なサンプルをまとめています。</p>
+
+      <h2>まずは試す：グローバル $ で body 要素を操作する</h2>
+      <p>
+        このサンプルはページモジュールではありません。<code>body</code> には素の
+        <code>&lt;div id="target"&gt;</code> があり、下の <code>&lt;script type="module"&gt;</code>
+        がグローバルな <code>$("#target")</code> でその要素を取得してクリックイベントをバインドし、
+        jQuery のように DOM を直接操作します。コードを編集したら
+        <kbd>Ctrl</kbd>+<kbd>S</kbd> を押すか「コードを実行」をクリックすると、結果を確認できます。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="globalBody"></docs-playground>
+
+      <div class="doc-note">
+        <strong>API はテンプレート構文以外のためのものです：</strong>
+        ここで扱うインスタンスメソッドとグローバル <code>$</code> は、JavaScript から
+        ノードを動的に検索・生成し、データを読み書きし、イベントをバインドし、
+        ページスタックを制御するためのものです。<code>on:</code>、<code>o-if</code>、
+        <code>o-fill</code>、<code>attr:</code> でテンプレートに書けるロジックは、
+        テンプレート側に残すのが適切です。
+      </div>
+
+      <p>
+        API は用途ごとに分類され、各メンバーにはシグネチャと説明を記載しています。
+        ページ上部のエディターでコードを変更すると、右側のプレビューで結果を確認できます。
+      </p>
+
+      <h2>インスタンス</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./instance.html">
+          <span class="num">API</span>
+          <h2>インスタンスの基本</h2>
+          <p>ele / tag / PATH などの基本プロパティ</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./traverse.html">
+          <span class="num">API</span>
+          <h2>選択とトラバーサル</h2>
+          <p>$ / all / parent / siblings</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./structure.html">
+          <span class="num">API</span>
+          <h2>構造操作</h2>
+          <p>push / splice / before / remove</p>
+          <span class="more">見る →</span>
+        </a>
+
+      </div>
+
+      <h2>属性とイベント</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./props.html">
+          <span class="num">API</span>
+          <h2>コンテンツ・属性・スタイル</h2>
+          <p>text / html / attr / css</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./events.html">
+          <span class="num">API</span>
+          <h2>イベント</h2>
+          <p>on / one / off / emit</p>
+          <span class="more">見る →</span>
+        </a>
+
+      </div>
+
+      <h2>データと拡張</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./reactive.html">
+          <span class="num">API</span>
+          <h2>データと監視</h2>
+          <p>watch / watchUntil / refresh</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./context.html">
+          <span class="num">API</span>
+          <h2>コンテキストのやり取り</h2>
+          <p>getProvider / dispatch</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./global.html">
+          <span class="num">API</span>
+          <h2>グローバル $ の静的メンバー</h2>
+          <p>$.all / $.stanz / $.version</p>
+          <span class="more">見る →</span>
+        </a>
+
+        <a class="docs-row" olink href="./extend.html">
+          <span class="num">API</span>
+          <h2>インスタンスの拡張</h2>
+          <p>el.extend / $.fn.extend</p>
+          <span class="more">見る →</span>
+        </a>
+
+      </div>
+
+      <h2>アプリとページ</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./app.html">
+          <span class="num">API</span>
+          <h2>o-app と o-page</h2>
+          <p>ページスタック、goto、pageIsReady</p>
+          <span class="more">見る →</span>
+        </a>
+
+      </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

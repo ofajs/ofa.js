@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · グローバル $ の静的メンバー</p>
+      <h1>グローバル $ の静的メンバー</h1>
+      <p class="doc-lead">グローバル $ に付属するセレクター、登録、リアクティブ、レンダリング、バージョン情報をまとめています。</p>
+      <p>
+        グローバルな <code>$</code> が body 上の要素をどのように選択するかについては、
+        まず<a olink href="./index.html">API リファレンス</a>冒頭の実行可能なサンプルをご覧ください。
+      </p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="global"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>$(expr)</code></td><td>セレクター / 要素ファクトリー。インスタンスまたは null を返します</td></tr>
+          <tr><td><code>$.all(expr)</code></td><td>グローバルにすべての一致を検索し、インスタンスの配列を返します</td></tr>
+          <tr><td><code>$.register(opts)</code></td><td>コンポーネントを登録します（tag/temp/data/attrs/proto/lifecycle）</td></tr>
+          <tr><td><code>$.stanz(data)</code></td><td>独立したリアクティブデータオブジェクトを作成します</td></tr>
+          <tr><td><code>$.Stanz</code></td><td>stanz のコンストラクタークラス。instanceof 判定に使用します</td></tr>
+          <tr><td><code>$.fn</code></td><td>インスタンスのプロトタイプ。$.fn.extend() のマウント先です</td></tr>
+          <tr><td><code>$.nextTick(cb)</code></td><td>次のマイクロタスクで実行します</td></tr>
+          <tr><td><code>$.frag()</code></td><td>DocumentFragment インスタンスを作成します</td></tr>
+          <tr><td><code>$.render / $.convert</code></td><td>テンプレートのレンダリング / コンパイルの低レベルエントリーポイント</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>アプリレベルのルートプロバイダーを取得します</td></tr>
+          <tr><td><code>$.version</code></td><td>フレームワークのバージョン（読み取り専用）</td></tr>
+          <tr><td><code>$.debugMode</code></td><td>#debug 付きで読み込まれたかどうか（読み取り専用）</td></tr>
+          <tr><td><code>$.showlog</code></td><td>内部診断ログのスイッチ。実行時に読み書きできます</td></tr>
+          <tr><td><code>$.COMP / $.PAGE</code></td><td>コンポーネント / ページモジュールの型マーカー</td></tr>
+          <tr><td><code>$.extensions</code></td><td>ライフサイクルフック拡張のコンテナ（afterAttached/afterDetached）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>ほとんどのページコードに必要なのは $、$.all、$.stanz だけです。その他の静的メンバーはフレームワークの拡張や診断用です。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

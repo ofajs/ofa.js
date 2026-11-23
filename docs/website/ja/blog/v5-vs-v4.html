@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js v5 は v4 よりどれだけ良くなったか — ofa.js</title>
+    <meta name="description" content="ofa.js v4 から v5 で何が変わったかを、アーキテクチャ、レンダリング、リストのパフォーマンス、ルーティング、開発者体験の観点から具体的に見ていきます。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js v5 は v4 よりどれだけ良くなったか — ofa.js" />
+    <meta property="og:description" content="ofa.js v4 から v5 で何が変わったかを、アーキテクチャ、レンダリング、リストのパフォーマンス、ルーティング、開発者体験の観点から具体的に見ていきます。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/blog.css" />
+
+  <main class="article-page">
+    <a class="article-back" olink href="./">← ブログに戻る</a>
+
+    <article class="article-body">
+      <p class="article-kicker">エンジニアリング · バージョン比較</p>
+      <h1>ofa.js v5 は v4 より<br />どれだけ良くなったのか？</h1>
+      <p class="article-lead">
+        v5 は API を追加しただけのリリースではありません。ofa.js アプリの書き方はそのままに、
+        テンプレートのレンダリング、リスト差分更新、モジュール境界、ルーティングの
+        エッジケースを内部から作り直しています。
+      </p>
+
+      <div class="article-meta">
+        <span>2026-11-22</span>
+        <span>読了 9 分</span>
+        <span>ofa.js 5.0 と 4.7.7 に基づく</span>
+      </div>
+
+      <div class="article-tags" aria-label="トピック">
+        <span>o-if / o-fill</span>
+        <span>LIS 差分更新</span>
+        <span>モノレポ</span>
+        <span>AI 支援</span>
+      </div>
+
+      <p>
+        最短で正確にまとめるならこうです。
+        <strong>見た目は相変わらず ofa.js ですが、その下のランタイムはよりクリーンな土台の上に作り直されています。</strong>
+        v4 の考え方——コンポーネント、ページ、<code>o-app</code>、<code>o-page</code>、
+        provider/consumer、ゼロビルド——はそのまま残っています。変わったのは、その下で動く仕組みです。
+      </p>
+
+      <h2>1. 手短な答え</h2>
+      <p>
+        ほとんどのアプリケーションコードにとって、v5 への移行コストは高くありません。
+        テンプレート構文はほぼ同じで、ページとコンポーネントの構成方法も変わらず、
+        SCSR の実パスルーティングも継続しています。ただしパフォーマンス、保守性、
+        テンプレートのエッジケースを重視するなら、変更は小さくありません。
+      </p>
+      <ul>
+        <li>リスト差分更新に LIS を採用し、入れ替え・部分更新・バッチ操作が劇的に速くなりました。</li>
+        <li>コアは別々のリポジトリから 1 つのモノレポへ移り、drill・stanz・xhear・ofajs が一緒に進化するようになりました。</li>
+        <li>テンプレートのレンダリングは xhear v9 のパイプラインを使用し、<code>o-if</code> と <code>o-fill</code> は xhear 側へ移されて書き直されました。</li>
+        <li>旧来の <code>x-*</code> 構文は廃止され、<code>o-*</code> が唯一のテンプレート語彙になりました。</li>
+        <li>アプリ層はグローバルな <code>window.lm</code> に依存しなくなり、エラーコードはフレームワーク内へ移動しました。</li>
+        <li>ルーティングは、ページ離脱、ネストしたレイアウトの再フローなどのエッジケースをより確実に処理します。</li>
+        <li>AI 支援開発は、同じリポジトリ内で共有されたテスト・ドキュメント・コンテキストに支えられています。</li>
+      </ul>
+
+      <h2>2. リストのパフォーマンス：今回は測定できる</h2>
+      <p>
+        最も難しい改善はリストランタイムにあります。旧来の差分更新には 2 つの構造的な問題がありました。
+        深い項目の変更がリスト全体の更新を引き起こしうること、そして <code>indexOf</code> を使った
+        インデックスベースの差分更新が、入れ替え時に O(n²) まで劣化し、必要以上の DOM ノードを
+        動かしていたことです。
+      </p>
+      <p>
+        v5 は構造チェック、LIS 差分更新、軽量な行コンテキスト、バインディング単位の依存フィルタリング、
+        バッチ化された undo を使っています。リポジトリのベンチマーク——同一マシン、Chromium 156、
+        3 回実行の中央値——では、数値は次のように動きました。
+      </p>
+
+      <table class="article-table">
+        <thead>
+          <tr><th>シナリオ</th><th>v4 (4.7.7)</th><th>v5 (5.0)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1,000 行のうち 2 項目を入れ替え</td><td class="metric-v4">3020ms</td><td class="metric-v5">120ms</td></tr>
+          <tr><td>部分更新 10 回</td><td class="metric-v4">421ms</td><td class="metric-v5">93ms</td></tr>
+          <tr><td>1,000 行を追加</td><td class="metric-v4">247ms</td><td class="metric-v5">39ms</td></tr>
+          <tr><td>100 行を削除</td><td class="metric-v4">53ms</td><td class="metric-v5">20ms</td></tr>
+          <tr><td>2,000 行をクリア</td><td class="metric-v4">35ms</td><td class="metric-v5">16ms</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        これは内部ベンチマークであり、あらゆるデバイスやデータ形状を約束するものではありません。
+        1,000 行の構築と初回描画の改善幅はもっと小さく（おおよそ 38ms → 34ms、初回描画は約 69ms で変わらず）、
+        このコストはリスト差分更新ではなく、モジュール実行と要素登録が支配しているためです。
+        しかし入れ替え、バッチ削除、部分更新——負担になりがちな操作——では、差はもはや同じ桁ではありません。
+      </p>
+      <p>
+        バンドルサイズについて：v4 の <code>ofa.min.mjs</code> は 75,749 B
+        （gzip 25,327 B、brotli 22,662 B）、v5 のビルドは 69,914 B
+        （gzip 24,168 B、brotli 21,552 B）です。生サイズで約 7.7% 減、gzip で 4.6% 減、
+        brotli で 4.9% 減となります。桁が変わるわけではありませんが、パフォーマンス改善が
+        コードを積み増した結果ではないことは示しています。
+      </p>
+
+      <div class="article-note">
+        <strong>なぜ入れ替えが最大の効果なのか？</strong>
+        <p>
+          旧実装は移動のたびにキーの対応表を再計算していたため、2 項目の入れ替えが
+          一連の DOM 移動へと連鎖していました。新実装はまず LIS で本当に移動が必要な
+          最小のノード集合を求め、そのうえで変更をバッチで反映します。
+        </p>
+      </div>
+
+      <h2>3. 個別リポジトリからモノレポへ：4 パッケージ、1 リポジトリ</h2>
+      <p>
+        v4 の時代、コア機能は別々のリポジトリに分かれていました。
+        <strong>drill</strong> はブラウザのモジュールを読み込み、
+        <strong>stanz</strong> は Proxy ベースのリアクティブデータを提供し、
+        <strong>xhear</strong> は Web Components とテンプレートのコンパイルを担い、
+        <strong>ofajs</strong> がページ、ルーティング、コンテキスト、<code>o-link</code> といった
+        アプリケーション層を加えていました。それぞれ単独では動作しましたが、リポジトリをまたぐ変更、
+        統合テスト、バージョンの揃え方には苦労が伴いました。
+      </p>
+      <p>
+        v5 のコアな変更は「また分割する」ことではありません。それまで別々だったリポジトリを
+        1 つのモノレポにまとめ、一緒に進化させることです。4 つのパッケージは今も明確な境界を持ちますが、
+        パッケージ横断の変更を 1 コミットで入れ、1 回のテスト実行と 1 回のビルドで検証できます。
+      </p>
+      <p>
+        ofa.js 自体の保守も楽になります。マルチリポジトリ時代、ofa.js のアップグレードは
+        しばしばリポジトリをまたいだバージョン、テスト、issue の同期を意味していました。
+        今では変更と、それが drill・stanz・xhear に与える影響が同じリポジトリにあります。
+        検索、定義へのジャンプ、テスト実行、デバッグのためにリポジトリを切り替える必要はありません。
+        再現、修正、リグレッションテストを 1 コミットで入れられます。ofa.js の更新も問題の追跡も、
+        ずっと短い経路で済みます。
+      </p>
+      <p>
+        これはフレームワーク自体にとって重要です。<strong>xhear</strong> のレンダリングパイプラインが
+        変わったとき、<strong>ofajs</strong> のページ／ルーティングのテストを同じ実行で回せます。
+        <strong>stanz</strong> がリアクティブ更新の通知方法を変えたとき、
+        <strong>xhear</strong> のリスト再レンダリングが退行したかどうかが即座に分かります。
+        ofajs はまた、たまたまページ上に存在するグローバルな <code>lm</code> に頼るのではなく、
+        必要なローダーを明示的に <code>imports</code> します。v5 ではエラーコード表もフレームワーク内へ移し、
+        独立した <code>ofa-error</code> パッケージを削除しました。
+      </p>
+      <p>
+        見落としやすいもう 1 つの変更はリリースの形です。
+        <strong>ソースがそのまま成果物</strong>です。ofa.js 本体と rollup を使ういくつかの
+        ブリッジパッケージを除き、パッケージはソースのみの ESM のままです。
+        ブラウザが実行する <code>.mjs</code> はリポジトリ内のソースそのものなので、
+        デバッグ時にソースマップと実際の実装を行き来する必要はありません。
+      </p>
+
+      <h2>4. テンプレートとレンダリング：「動くうちは動く」エッジを修正</h2>
+      <p>
+        v4 のテンプレートシステムはすでに高機能でしたが、古い xtext / x-bind-data パイプラインの上に
+        載っていました。レンダリングを xhear v9 へ移したことで、
+        <code>o-if</code> と <code>o-fill</code> は単なる「テンプレートを包む」ディレクティブではなくなりました。
+        必要時にコンパイルし、コンパイル結果をキャッシュし、ディスクリプタのファストパスを使います。
+      </p>
+      <p>
+        実際の結果として、複雑なテンプレートで黙って失敗しうる組み合わせが、
+        予測どおりに動くようになりました。たとえば：
+      </p>
+      <ul>
+        <li><code>o-if</code> の中の <code>o-fill</code>；</li>
+        <li>各 <code>o-fill</code> の項目の中の <code>o-if</code>；</li>
+        <li><code>replace-temp</code> でレンダリングされるテーブル行；</li>
+        <li>自分自身を再帰的に参照する名前付きテンプレート。</li>
+      </ul>
+      <p>
+        v5 は <code>x-if</code>、<code>x-else-if</code>、<code>x-else</code>、<code>x-fill</code> も
+        明示的に削除しました。これらの要素は登録されなくなり、使うと静かに違う動作をするのではなく
+        非推奨メッセージが出力されます。テンプレートの意味論とドキュメントの語彙は、
+        今や <code>o-*</code> の 1 つだけです。
+      </p>
+      <pre class="code-sample"><code><span class="tok-comment">&lt;!-- v4 --&gt;</span>
+<span class="tok-tag">&lt;x-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/x-fill&gt;</span>
+
+<span class="tok-comment">&lt;!-- v5 --&gt;</span>
+<span class="tok-tag">&lt;o-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/o-fill&gt;</span></code></pre>
+
+      <h2>5. ルーティングとページ：「動く」から「安定」へ</h2>
+      <p>
+        v5 も SCSR の実パスを使い続けます。各 URL は 1 つの HTML ドキュメントに対応し、
+        静的サーバーへデプロイでき、<code>o-app</code> によってネストしたページとして採用できます。
+        v4 はそのモデルを証明しました。v5 はエッジを修正します。
+      </p>
+      <ul>
+        <li>離脱するページは、レイアウト変更の間もサイズと位置を保ち、左上へ飛ばなくなりました。</li>
+        <li>ネストしたルートは <code>export const parent</code> で共通の親を維持するため、子ページの切り替えで親が再構築されません。</li>
+        <li><code>waitPageReaded</code> はポーリングではなく、ページの <code>_rendered</code> プロミスを再利用します。</li>
+        <li><code>o-app</code> は <code>access</code>、<code>allowForward</code>、ページアニメーション、分かりやすい失敗ページをサポートします。</li>
+      </ul>
+      <p>
+        どれも単体では大きくありませんが、合わせることでページ遷移がより予測可能に感じられます。
+        とくにホームからドキュメントへ入って戻るとき、レイアウトの再フロー中に旧ページがちらつくことはなくなりました。
+      </p>
+
+      <h2>6. 状態とコンテキスト：同じ API、より厳密な実装</h2>
+      <p>
+        <code>o-provider</code>、<code>o-consumer</code>、<code>o-root-provider</code> は残っており、
+        シャドウ境界をまたいで <code>composedPath</code> を明示的にたどるようになりました。
+        <code>getProvider</code>、<code>watchUntil</code>、<code>access</code> は v4 の使い勝手を保っています。
+      </p>
+      <p>
+        違いはより規律ある実装です。コンテキストデータはグローバルに依存しなくなり、
+        コンポーネントとページは自分がどのアプリや provider に属するかを把握し、
+        <code>o-consumer</code> のライト DOM の子がコンパイルされないというルールはテストで担保されています。
+        実際には、新しい学習コストではなく、「なぜ更新されないのか？」という場面が減ることを意味します。
+      </p>
+
+      <h2>7. エンジニアリングとエコシステム：ゼロビルドはそのまま</h2>
+      <p>
+        v4 は「バンドラー不要」を決定的な特徴にしましたが、v5 もそれを捨てていません。
+        1 つの HTML ファイルが今もコンポーネントまたはページであり、ブラウザが直接実行し、
+        <code>l-m</code>、<code>olink</code>、SCSR は Node.js を必要としません。
+        変わったのはエコシステムの組織方法です。
+      </p>
+      <ul>
+        <li><code>inject-host</code>、<code>formdata</code> といった機能は、任意で有効化するプラグインに分離されました。</li>
+        <li>テストはコンポーネント、条件分岐／リスト、ルーティング、コンテキスト、名前付きテンプレートをカバーします。</li>
+        <li>ドキュメント、API リファレンス、チュートリアル、プレイグラウンドは同じ実行可能な例を共有します。</li>
+        <li>エラーはより具体的になり、デバッグモード（<code>#debug</code>）でソースマップが有効になります。</li>
+      </ul>
+
+      <h2>8. フィードバックループを短くする AI 支援開発</h2>
+      <p>
+        v5 は AI の支援を大きく活用して作られました。フレームワークのリファクタリング、
+        テストカバレッジ、ドキュメントとチュートリアル、そしてこのウェブサイト自体にも AI が関わっています。
+        価値があるのは「AI がスニペットを少し書く」ことではなく、リポジトリが AI に安定した
+        フィードバックループを与えることです。
+      </p>
+      <ul>
+        <li>各パッケージには、実際の構成、API 契約、よくある落とし穴を記録した <code>CONTEXT.md</code> があります。</li>
+        <li>自己テストページと 3 ブラウザでの Playwright により、一見断続的に見える問題を再現できます。</li>
+        <li>ドキュメント、チュートリアル、プレイグラウンド、ソースが同居するため、挙動と説明を同じコミットで変更できます。</li>
+        <li>モノレポならパッケージ横断の変更でも全スイートを 1 回実行でき、AI がリポジトリをまたいで推測する必要がありません。</li>
+      </ul>
+      <p>
+        ここでの「AI 支援」はマーケティング用語ではありません。将来のデバッグと修正が同じコンテキストを読み、
+        同じテストを実行し、同じ失敗を見て、修正をドキュメントと一緒にコミットできるという意味です。
+        フィードバックループが短いほど、修正が実際の問題から乖離しにくくなります。
+      </p>
+
+      <h2>9. 移行コスト：予想より低いが、ゼロではない</h2>
+      <p>
+        v4 から移行する場合、主に対応すべきことは 3 つです。
+      </p>
+      <ol>
+        <li><code>x-if</code> / <code>x-fill</code> を <code>o-if</code> / <code>o-fill</code> に置き換える。</li>
+        <li>コンポーネントとページの <code>&lt;script&gt;</code> タグが
+          <code>&lt;template&gt;</code> の中にあることを確認する（v4 でも推奨でしたが、v5 は外側のスクリプトを無視します）。</li>
+        <li>サードパーティのコードが旧来のグローバル <code>lm</code> に依存している場合は、明示的なモジュール import に切り替える。</li>
+      </ol>
+      <p>
+        CDN URL にも注意してください。最新の 5.x リリースに追随するなら
+        <code>@5</code> を使い、正確に固定するなら <code>@5.0.2</code> のような完全なバージョンを使います。
+        それ以外では、ページ構造、ルーティング、コンテキスト、状態のコードは通常そのまま移行できます。
+      </p>
+
+      <h2>まとめ</h2>
+      <p>
+        v5 の改善は「機能が 1 つ増えた」ことではありません。v4 の中で
+        <strong>動くけれど壊れやすく、十分速いけれど説明が難しい</strong>部分を作り直したことです。
+        テンプレートの合成はより確実になり、リスト操作は秒からミリ秒へ変わり、
+        モジュール境界とエラーの経路は明確になり、ゼロビルドの手軽さもそのまま残っています。
+      </p>
+      <p>
+        ただ動くページが 1 つあればよいなら、v4 と v5 は似たように感じられるかもしれません。
+        長く維持するプロジェクトを抱えているなら、あるいはリストの並べ替え、ネストした条件分岐、
+        ページ離脱時のちらつきに悩まされたことがあるなら、v5 の価値はとても具体的です。
+      </p>
+
+      <p class="article-end">
+        実装の詳細は、
+        <a olink href="../../docs/">ドキュメント</a> か
+        <a olink href="../../tutorial/">チュートリアル</a> から始めてください。
+      </p>
+    </article>
+  </main>
+
+  <script>
+    export const parent = "../layout.html";
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

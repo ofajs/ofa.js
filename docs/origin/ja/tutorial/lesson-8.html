@@ -1,0 +1,57 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 08</p>
+      <h1>リストレンダリング</h1>
+      <p class="doc-lead">o-fill は配列を描画します。各項目内では $data、$index、$host を使えます。</p>
+
+      <p>
+  配列をループで描画するには <code>&lt;o-fill :value="items"&gt;</code> を使います。項目内で
+  <code>item.text</code> と直接書くことはできず、フレームワークが提供する
+  <code>$data</code> などのスコープ変数を使います。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8" fold-styles="true"></docs-playground>
+<h2>項目のスコープ</h2>
+<ul>
+  <li><code>$data</code>: 現在の項目のデータ。例: <code>$data.text</code></li>
+  <li><code>$index</code>: 現在のインデックス（0 始まり）</li>
+  <li><code>$host</code>: ページインスタンス。<code>$host.removeItem(id)</code> などのメソッドを呼べます。</li>
+  <li><code>fill-key="id"</code>: 一意なフィールドがある場合は必ず付けます。項目の追加・削除時に
+    要素を再利用できます。</li>
+</ul>
+<div class="doc-note">
+  <strong>fill-key が重要な理由:</strong> キーがないと、途中の項目を削除したときに
+  それ以降の項目がすべて再構築されます。項目に入力やローカル状態がある場合、その状態は
+  失われます。<code>id</code> を使って「これは同じ項目だ」とフレームワークに伝えましょう。
+</div>
+<div class="doc-note">
+  <strong>さらに進んだ使い方:</strong> ネストしたリストでは <code>$parent</code> で
+  外側のデータにアクセスできます。テーブル行や <code>&lt;select&gt;</code> 内で
+  <code>o-fill</code> を使うには <code>&lt;template is="replace-temp"&gt;</code> が必要で、
+  複雑な構造は名前付きテンプレートにまとめられます。完全な例は
+  <a olink href="../docs/render.html">条件分岐とリスト</a> を参照してください。
+</div>
+<h2>やってみよう</h2>
+<p>
+  各項目の後に「完了」ボタンを追加し、クリックで項目の完了状態を切り替えましょう
+  （まずデータに <code>done</code> フィールドを追加します）。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-7.html">07 · 条件付きレンダリング →</a> · 次へ: <a olink href="./lesson-9.html">09 · リストの編集 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>數據與偵聽 — ofa.js 文檔</title>
+    <meta name="description" content="響應式 data、computed getter、watch 偵聽器與常見邊界。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="數據與偵聽 — ofa.js 文檔" />
+    <meta property="og:description" content="響應式 data、computed getter、watch 偵聽器與常見邊界。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>數據與偵聽</h1>
+      <p class="doc-lead">
+        <code>data</code> 是組件和頁面的響應式狀態。它由 stanz 驅動，
+        對象和數組的深層變化都會自動觸發視圖更新。
+      </p>
+
+      <h2>data 是對象，不是函數</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "張三", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        每個組件實例擁有獨立的 data。嵌套對象賦值、數組
+        <code>push</code>/<code>splice</code>/<code>sort</code> 都會觸發更新：
+      </p>
+      <pre><code>this.user.name = "李四";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>計算屬性</h2>
+      <p>用 <code>proto</code> 的 getter，不要使用 Vue 風格的 computed：</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>模板裡當普通字段使用：<code>{{double}}</code>、<code>{{fullName}}</code>。</p>
+      <div class="doc-note">
+        <strong>getter 會在模板初始化時立即求值，早於 ready。</strong>
+        只適合依賴同步初始值的簡單計算。依賴異步數據的計算不要放 getter，
+        改用 data 字段並在異步回調中賦值，否則可能出現
+        <code>TypeError</code> 並中斷整頁渲染。
+      </div>
+
+      <h2>偵聽器</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // 初始化時的首次調用
+    console.log("count 變為", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // 對象/數組會深度偵聽
+    console.log("user 發生變化");
+  },
+},</code></pre>
+      <p>
+        回調的第二個參數是 <code>{ watchers }</code>，表示本次防抖週期內
+        合併的變更集合。<code>watchers[0]</code> 上有
+        <code>name</code>、<code>oldValue</code>、<code>value</code>、
+        <code>type</code>、<code>target</code>、<code>args</code>。
+      </p>
+      <p>
+        watch 函數在組件初始化完成時會先執行一次，此時
+        <code>watchers</code> 為空，用於建立監聽。如果初始化階段不需要執行
+        業務邏輯，先判斷 <code>if (!watchers) return;</code>。
+      </p>
+
+      <h2>避免回寫死循環</h2>
+      <pre><code>// 錯誤：監聽 count，又在回調裡改 count
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        需要派生值時用計算屬性，或增加一個明確的觸發條件，
+        不要在 watch 裡無條件回寫被監聽的數據。
+      </p>
+
+      <h2>watch 與異步數據</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        watch 回調可以是 async 函數。併發請求時注意記錄請求序號或使用
+        <code>AbortController</code>，避免舊請求覆蓋新結果。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./render.html">條件與列表 →</a>
+        　·　下一篇：<a olink href="./state.html">全局狀態 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

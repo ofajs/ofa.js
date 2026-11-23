@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 02</p>
+      <h1>Datos e interpolación</h1>
+      <p class="doc-lead">data puede contener cadenas, números, booleanos, objetos y arreglos, y {{ }} puede evaluar expresiones sencillas.</p>
+
+      <p>
+  <code>data</code> es un objeto simple, pero ofa.js lo convierte en datos reactivos.
+  Dentro de la plantilla, <code>{{ }}</code> puede hacer más que leer campos: puede evaluar
+  expresiones y acceder a propiedades anidadas.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-2" fold-styles="true"></docs-playground>
+<h2>Reglas</h2>
+<ul>
+  <li><code>{{user.name}}</code>: accede a un campo anidado de un objeto;</li>
+  <li><code>{{user.age + 1}}</code>: el contenido de {{ }} son expresiones de JavaScript;</li>
+  <li><code>:html="note"</code>: renderiza una cadena como HTML; úsalo solo con contenido de confianza.</li>
+</ul>
+<div class="doc-note">
+  <strong>Recuerda:</strong> <code>{{ }}</code> solo funciona en el contenido de texto de un elemento.
+  Para los valores de atributos usa <code>attr:</code> / <code>:prop</code> de la próxima lección; escribir
+  <code>&lt;a href="{{url}}"&gt;</code> no tiene efecto.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade un campo <code>city</code> a <code>user</code> y muéstralo como
+  «Ciudad: xxx»; después prueba a cambiar <code>note</code> por texto sin formato y observa la
+  diferencia entre <code>:html</code> y <code>{{ }}</code>.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-1.html">01 · Tu primera página →</a> · Siguiente: <a olink href="./lesson-3.html">03 · Atributos dinámicos →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

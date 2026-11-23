@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 13</p>
+      <h1>組件參數</h1>
+      <p class="doc-lead">外部數據通過 attrs 傳給組件；組件內部用 data 保存自己的狀態。</p>
+
+      <p>
+  組件從外部接收的屬性寫在 <code>attrs</code> 裡，並給默認值；組件內部
+  會變化的狀態放在 <code>data</code> 裡。兩者不能重名。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-13" fold-styles="true"></docs-playground>
+<h2>attrs vs data</h2>
+<ul>
+  <li><code>attrs</code>：外部傳入的標量（名字、角色、初始等級），
+    會反映到 HTML attribute；</li>
+  <li><code>data</code>：組件自己的響應式狀態，外部不直接改；</li>
+  <li>示例裡的 <code>startLevel</code> 是字符串，組件內用
+    <code>Number()</code> 轉成數字。</li>
+</ul>
+<div class="doc-note">
+  <strong>不要直接改 attrs：</strong>子組件把 <code>attrs</code> 當只讀輸入，
+  需要派生狀態就複製到 <code>data</code>。這樣數據來源清晰，也避免父子互相覆蓋。
+</div>
+<h2>動手改</h2>
+<p>
+  在頁面里加一個 <code>level</code> 數據字段和一個輸入框，用
+  <code>attr:start-level="level"</code> 動態傳給第二個組件。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-12.html">12 · 第一個組件 →</a>　·　下一篇：<a olink href="./lesson-14.html">14 · 插槽與事件 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

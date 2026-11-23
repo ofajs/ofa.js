@@ -1,0 +1,58 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 08</p>
+      <h1>Renderizado de listas</h1>
+      <p class="doc-lead">o-fill renderiza un array; dentro de cada elemento, usa $data, $index y $host.</p>
+
+      <p>
+  Renderiza un array en un bucle con <code>&lt;o-fill :value="items"&gt;</code>. Dentro de un
+  elemento no puedes escribir <code>item.text</code> directamente; usa las variables de ámbito
+  que proporciona el framework, como <code>$data</code>.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-8" fold-styles="true"></docs-playground>
+<h2>Ámbito del elemento</h2>
+<ul>
+  <li><code>$data</code>: los datos del elemento actual, por ejemplo <code>$data.text</code>;</li>
+  <li><code>$index</code>: el índice actual, empezando en 0;</li>
+  <li><code>$host</code>: la instancia de la página; llama a métodos como <code>$host.removeItem(id)</code>;</li>
+  <li><code>fill-key="id"</code>: añádelo siempre que exista un campo único, para que los
+    elementos puedan reutilizarse al añadir o eliminar entradas.</li>
+</ul>
+<div class="doc-note">
+  <strong>Por qué importa fill-key:</strong> sin una clave, al eliminar un elemento intermedio
+  todos los siguientes se reconstruyen; si un elemento contiene una entrada o estado local,
+  ese estado se pierde. Usa <code>id</code> para indicarle al framework que "sigue siendo
+  el mismo elemento".
+</div>
+<div class="doc-note">
+  <strong>Para ir más lejos:</strong> en listas anidadas, usa <code>$parent</code> para acceder
+  a los datos externos; <code>o-fill</code> dentro de filas de tabla o de un <code>&lt;select&gt;</code>
+  requiere <code>&lt;template is="replace-temp"&gt;</code>, y las estructuras complejas pueden
+  residir en una plantilla con nombre. Consulta <a olink href="../docs/render.html">Condicionales y listas</a>
+  para ver ejemplos completos.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade un botón "Hecho" después de cada elemento que alterne el estado done del elemento al
+  pulsarlo (primero añade un campo <code>done</code> a los datos).
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-7.html">07 · Renderizado condicional →</a> · Siguiente: <a olink href="./lesson-9.html">09 · Edición de una lista →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

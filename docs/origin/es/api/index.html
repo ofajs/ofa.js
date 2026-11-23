@@ -1,0 +1,142 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Referencia de API</p>
+      <h1>Referencia de API</h1>
+      <p class="doc-lead">Todos los miembros de instancia, los miembros estáticos globales y ejemplos ejecutables.</p>
+
+      <h2>Pruébalo primero: operar sobre el elemento body con el $ global</h2>
+      <p>
+        Este ejemplo no es un módulo de página: <code>body</code> contiene un
+        <code>&lt;div id="target"&gt;</code> simple, y el <code>&lt;script type="module"&gt;</code>
+        de abajo usa el <code>$("#target")</code> global para obtener ese elemento y enlazar un evento
+        de clic, manipulando el DOM directamente igual que jQuery.
+        Después de editar el código, pulsa <kbd>Ctrl</kbd>+<kbd>S</kbd> o haz clic en «Ejecutar código» para ver el resultado.
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="globalBody"></docs-playground>
+
+      <div class="doc-note">
+        <strong>La API es para la sintaxis fuera de las plantillas:</strong>
+        Los métodos de instancia y el <code>$</code> global que aparecen aquí sirven para buscar o
+        crear nodos dinámicamente, leer y escribir datos, enlazar eventos y controlar la pila de páginas
+        desde JavaScript. La lógica que <code>on:</code>, <code>o-if</code>, <code>o-fill</code> o
+        <code>attr:</code> pueden expresar en una plantilla es mejor dejarla en la plantilla.
+      </div>
+
+      <p>
+        La API está agrupada por finalidad, y cada miembro incluye su firma y descripción.
+        El editor de la parte superior de la página te permite cambiar el código y ver el resultado en la
+        vista previa de la derecha.
+      </p>
+
+      <h2>Instancia</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./instance.html">
+          <span class="num">API</span>
+          <h2>Conceptos básicos de instancia</h2>
+          <p>Propiedades básicas como ele / tag / PATH</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./traverse.html">
+          <span class="num">API</span>
+          <h2>Selección y recorrido</h2>
+          <p>$ / all / parent / siblings</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./structure.html">
+          <span class="num">API</span>
+          <h2>Operaciones de estructura</h2>
+          <p>push / splice / before / remove</p>
+          <span class="more">Ver →</span>
+        </a>
+
+      </div>
+
+      <h2>Atributos y eventos</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./props.html">
+          <span class="num">API</span>
+          <h2>Contenido, atributos y estilos</h2>
+          <p>text / html / attr / css</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./events.html">
+          <span class="num">API</span>
+          <h2>Eventos</h2>
+          <p>on / one / off / emit</p>
+          <span class="more">Ver →</span>
+        </a>
+
+      </div>
+
+      <h2>Datos y extensiones</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./reactive.html">
+          <span class="num">API</span>
+          <h2>Datos y observación</h2>
+          <p>watch / watchUntil / refresh</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./context.html">
+          <span class="num">API</span>
+          <h2>Comunicación de contexto</h2>
+          <p>getProvider / dispatch</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./global.html">
+          <span class="num">API</span>
+          <h2>Miembros estáticos del $ global</h2>
+          <p>$.all / $.stanz / $.version</p>
+          <span class="more">Ver →</span>
+        </a>
+
+        <a class="docs-row" olink href="./extend.html">
+          <span class="num">API</span>
+          <h2>Extensión de instancias</h2>
+          <p>el.extend / $.fn.extend</p>
+          <span class="more">Ver →</span>
+        </a>
+
+      </div>
+
+      <h2>Aplicaciones y páginas</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./app.html">
+          <span class="num">API</span>
+          <h2>o-app y o-page</h2>
+          <p>Pila de páginas, goto, pageIsReady</p>
+          <span class="more">Ver →</span>
+        </a>
+
+      </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

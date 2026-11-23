@@ -1,0 +1,114 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Referencia</p>
+      <h1>Despliegue</h1>
+      <p class="doc-lead">
+        Las aplicaciones de ofa.js no tienen paso de compilación, así que el
+        despliegue consiste esencialmente en colocar el directorio de origen en
+        cualquier servidor estático. No hay dependencia de un entorno de
+        ejecución Node.js ni empaquetador.
+      </p>
+
+      <h2>Despliegue mínimo</h2>
+      <p>Sube el HTML de entrada, los módulos de página, los componentes y los recursos con su estructura de directorios original:</p>
+      <pre><code>site/
+├── index.html
+├── app-config.js
+├── pages/
+│   ├── home.html
+│   └── detail.html
+├── components/
+│   └── user-card.html
+└── assets/</code></pre>
+      <p>El servidor estático solo necesita devolver los tipos MIME correctos. Presta especial atención a:</p>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Extensión</th><th>Content-Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.html</code></td><td><code>text/html; charset=utf-8</code></td></tr>
+          <tr><td><code>.mjs</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.js</code></td><td><code>text/javascript; charset=utf-8</code></td></tr>
+          <tr><td><code>.css</code></td><td><code>text/css; charset=utf-8</code></td></tr>
+          <tr><td><code>.json</code></td><td><code>application/json; charset=utf-8</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Cargar el framework desde un CDN</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+      <p>
+        También puedes descargar el archivo dist en tu propio directorio estático
+        para evitar depender de un CDN de terceros. Si usas router / scsr,
+        recuerda desplegarlos también y mantener ofa.js cargándose primero.
+      </p>
+
+      <h2>Desplegar en un subdirectorio</h2>
+      <p>
+        Todas las rutas de recursos admiten rutas relativas. Cuando la aplicación
+        está en <code>https://example.com/app/</code>, <code>./detail.html</code>
+        en un módulo de página se resuelve como <code>/app/detail.html</code> sin
+        configurar una ruta base. Evita codificar de forma fija rutas absolutas
+        que empiecen por <code>/</code> en tu código.
+      </p>
+
+      <h2>Estrategia de caché</h2>
+      <ul>
+        <li>no almacenes en caché el HTML de entrada, o hazlo durante poco tiempo, para que la nueva versión se adopte tras el lanzamiento;</li>
+        <li>los archivos <code>.mjs</code> / <code>.js</code> pueden usar nombres con hash para caché a largo plazo;</li>
+        <li>desactiva la caché durante el desarrollo para que las páginas no sigan cargando módulos antiguos después de editarlos (consulta
+          <a olink href="./pitfalls.html">Errores comunes</a>).</li>
+      </ul>
+
+      <h2>o-router y scsr</h2>
+      <p>
+        <strong>o-router</strong> usa URLs con hash y no necesita reescritura en el servidor al desplegar:
+      </p>
+      <pre><code>&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <p>
+        <strong>scsr</strong> requiere que cada URL devuelva el HTML
+        correspondiente. Para un despliegue estático, cada ruta necesita un
+        archivo real; para un despliegue con servidor, genera por ruta el HTML a
+        partir de una plantilla. No hagas que todas las rutas recurran a la misma
+        estructura vacía, o se pierde el contenido de la primera pantalla.
+      </p>
+
+      <h2>CORS y archivos locales</h2>
+      <p>
+        Los módulos de página se cargan mediante fetch y los componentes se
+        cargan como scripts de módulo, así que ambos deben ir por HTTP. Abrir un
+        archivo HTML directamente (<code>file://</code>) queda bloqueado por la
+        política CORS del navegador. Para previsualizar localmente, usa cualquier
+        servidor estático:
+      </p>
+      <pre><code>$ npx serve .
+# o
+$ python3 -m http.server 3000</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./examples.html">Ejemplos completos →</a>
+         · Volver a: <a olink href="./">Resumen de la documentación →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

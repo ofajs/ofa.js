@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 19</p>
+      <h1>非同期と読み込み状態</h1>
+      <p class="doc-lead">loading / error / success の3つの非同期状態で UI を駆動します。非同期の結果を getter に入れないでください。</p>
+
+      <p>
+  ページの初期化では API の応答を待つことがよくあります。非同期ロジックを getter に包まず、
+  <code>loading</code>、<code>error</code>、<code>user</code> といった明示的な状態フィールドを使い、それらで UI を駆動します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-19" fold-styles="true"></docs-playground>
+<h2>推奨フロー</h2>
+<ol>
+  <li>リクエストを開始: <code>status = "loading"</code> とし、前回のエラーをクリアします。</li>
+  <li>成功時: 結果をデータに書き込み、<code>status = "done"</code> とします。</li>
+  <li>失敗時: エラーメッセージを <code>error</code> に書き込み、<code>status = "error"</code> とします。</li>
+</ol>
+<p>
+  UI は <code>o-if</code> / <code>o-else-if</code> / <code>o-else</code>
+  を使って、それぞれ読み込み中、エラー、コンテンツを表示します。
+</p>
+<div class="doc-note">
+  <strong>明示的な状態が重要な理由:</strong> 単一の <code>user</code> では
+  「まだ開始していない」「読み込み中」「読み込み失敗」を区別できません。状態フィールドがあれば各ケースに
+  明確な UI を割り当てられ、ボタンの無効化や再試行といったインタラクションも簡単に追加できます。
+</div>
+<h2>自分で試してみよう</h2>
+<p>
+  リクエストに 600ms の遅延を付け（例にはすでにあります）、読み込み中は「再読み込み」ボタンを無効にしてください。
+  次に、失敗メッセージをクリックして再試行できるようにしてみましょう。
+</p>
+
+      <p class="doc-end">前: <a olink href="./lesson-18.html">18 · ネストされたレイアウト →</a> · 次: <a olink href="./lesson-20.html">20 · まとめ：Todo リスト →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

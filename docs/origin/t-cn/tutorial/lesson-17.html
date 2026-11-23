@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 17</p>
+      <h1>頁面與路由</h1>
+      <p class="doc-lead">o-app 管理頁面棧：olink / goto 切頁，query 傳參，back 返回。</p>
+
+      <p>
+  多頁面應用用 <code>&lt;o-app src="./app.mjs"&gt;</code> 作為容器。
+  <code>app.mjs</code> 只放應用配置，例如首頁地址和切換動畫。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-17" fold-styles="true"></docs-playground>
+<h2>三個文件</h2>
+<ul>
+  <li><code>app.mjs</code>：<code>home</code> 指向首頁，<code>pageAnime</code> 配置切換動畫；</li>
+  <li><code>home.html</code>：用 <code>olink</code> 或 <code>goto()</code> 跳到關於頁；</li>
+  <li><code>about.html</code>：從 <code>query</code> 讀取參數，用 <code>back()</code> 返回。</li>
+</ul>
+<p>
+  <code>olink</code> 是聲明式導航，不會刷新頁面；<code>this.goto(url)</code>
+  用於代碼裡跳轉。<code>query</code> 在頁面模塊函數參數裡取，不在
+  <code>this</code> 上。
+</p>
+<div class="doc-note">
+  <strong>o-app 只接受應用配置：</strong>不要把頁面模塊直接寫給
+  <code>o-app src</code>。單頁場景用 <code>o-page src</code>，
+  多頁應用用 <code>o-app</code> + 頁面地址。
+</div>
+<h2>動手改</h2>
+<p>
+  在首頁增加一個「關於頁（帶參數）」按鈕，用
+  <code>goto("./about.html?from=home-btn")</code> 跳轉；
+  在關於頁顯示來源。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-16.html">16 · 全局狀態 →</a>　·　下一篇：<a olink href="./lesson-18.html">18 · 嵌套佈局 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,147 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>綁定與樣式</h1>
+      <p class="doc-lead">
+        屬性綁定是 ofa.js 模板裡最容易混淆的部分：什麼時候用
+        <code>:</code>、什麼時候用 <code>attr:</code>、什麼時候用
+        <code>sync:</code>，決定了頁面能否正確更新。
+      </p>
+
+      <h2>先看一張表</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>寫法</th><th>方向</th><th>適合</th><th>布爾屬性</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:prop</code></td><td>數據 → 屬性</td><td>普通值、對象、數組</td><td>不適合</td></tr>
+          <tr><td><code>sync:prop</code></td><td>雙向</td><td>字符串、數字、布爾等標量</td><td>可以，但更推薦 attr:</td></tr>
+          <tr><td><code>attr:name</code></td><td>數據 → HTML attribute</td><td>href/title/data-*、布爾屬性</td><td>必須用它</td></tr>
+          <tr><td><code>class:name</code></td><td>數據 → 類名</td><td>active/done/disabled 等狀態</td><td>—</td></tr>
+          <tr><td><code>:style.prop</code></td><td>數據 → 內聯樣式</td><td>顏色、尺寸等動態樣式</td><td>—</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>單向綁定</h2>
+      <pre><code>&lt;input :value="keyword" /&gt;
+&lt;my-card :user="user"&gt;&lt;/my-card&gt;
+&lt;div :html="articleHtml"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        <code>:</code> 只把數據寫進屬性，用戶操作不會回寫數據。
+        對象和數組通過 <code>:prop</code> 傳入組件，不會被序列化成字符串。
+      </p>
+
+      <h2>雙向綁定</h2>
+      <pre><code>&lt;input sync:value="keyword" /&gt;
+&lt;input type="checkbox" sync:checked="done" /&gt;
+&lt;textarea sync:value="content"&gt;&lt;/textarea&gt;</code></pre>
+      <p>
+        表單控件通常用 <code>sync:</code>。<strong>不要用它綁定對象或數組</strong>：
+        v5 明確禁止對象雙向同步，避免引用混亂；也避免把
+        <code>sync:</code> 綁到 <code>attrs</code> 聲明的屬性上，
+        字符串序列化可能造成循環更新。
+      </p>
+
+      <h2>attr：HTML 屬性與布爾值</h2>
+      <pre><code>&lt;a attr:href="detailUrl" attr:title="tip"&gt;詳情&lt;/a&gt;
+&lt;img attr:src="cover" attr:alt="title" /&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;
+&lt;input attr:readonly="locked" /&gt;
+&lt;section attr:hidden="collapsed"&gt;&lt;/section&gt;</code></pre>
+      <p>
+        <code>attr:</code> 會把值序列化為字符串；但遇到
+        <code>false</code> 時會直接移除屬性，遇到 <code>true</code>
+        時設置空值。這正是布爾屬性需要的行為。
+      </p>
+      <div class="doc-note">
+        <strong>不要用 <code>:disabled="false"</code>。</strong>
+        它會渲染出 <code>disabled="false"</code>，屬性仍然存在，按鈕照樣禁用。
+        布爾屬性統一寫 <code>attr:disabled="loading"</code>。
+      </div>
+
+      <h2>類名</h2>
+      <pre><code>&lt;li class="todo" class:done="item.done" class:active="item.id === currentId"&gt;
+  {{item.text}}
+&lt;/li&gt;</code></pre>
+      <p>
+        <code>class:name</code> 的條件為真時添加類名，為假時移除。
+        一個元素可以同時寫多個。數據固有屬性（type、status、level）
+        更適合 <code>attr:</code> + 屬性選擇器：
+      </p>
+      <pre><code>&lt;div class="message" attr:type="$data.type"&gt;&lt;/div&gt;
+
+.message[type="sent"] { color: #2563eb; }
+.message[type="failed"] { color: #dc2626; }</code></pre>
+
+      <h2>內聯樣式</h2>
+      <pre><code>&lt;p :style.color="active ? '#0f766e' : '#64748b'"&gt;&lt;/p&gt;
+&lt;div :style.width="width + 'px'" :style.height="height + 'px'"&gt;&lt;/div&gt;
+&lt;div :style.backgroundImage="'url(' + cover + ')'"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        樣式屬性名使用駝峰形式（<code>fontSize</code>、<code>borderRadius</code>）。
+        值必須是合法 CSS 字符串，需要單位時自己拼接。
+      </p>
+
+      <h2>樣式表裡的 data()</h2>
+      <p>
+        除了內聯樣式，還可以在 <code>&lt;style&gt;</code> 裡用
+        <code>data(field)</code> 讀取數據，適合根據狀態批量切換樣式：
+      </p>
+      <pre><code>&lt;style&gt;
+  :host {
+    --accent: data(accentColor);
+    border-color: var(--accent);
+  }
+  .title {
+    color: data(titleColor);
+  }
+&lt;/style&gt;</code></pre>
+      <p>
+        <code>data()</code> 也可以出現在 <code>@media</code> 條件和
+        <code>o-if</code> 內動態注入的 <code>&lt;style&gt;</code> 裡，
+        數據變化時會重寫樣式文本並立即生效。
+      </p>
+      <pre><code>@media screen and (min-width: data(breakpoint + "px")) {
+  .layout { grid-template-columns: 1fr 1fr; }
+}
+
+&lt;o-if :value="dense"&gt;
+  &lt;style&gt;.row { padding: data(padding + "px"); }&lt;/style&gt;
+&lt;/o-if&gt;</code></pre>
+      <p>這種寫法只適合組件自己的樣式；跨組件主題請使用 CSS 變量或 match-var。</p>
+
+      <h2>屬性值裡沒有 {{ }}</h2>
+      <p>
+        <code>{{ }}</code> 只解析元素文本內容。下面兩種寫法都是錯的：
+      </p>
+      <pre><code>&lt;!-- 錯誤：屬性裡的 {{ }} 不會解析 --&gt;
+&lt;a href="{{url}}"&gt;鏈接&lt;/a&gt;
+&lt;img title="{{name}}" /&gt;
+
+&lt;!-- 正確 --&gt;
+&lt;a attr:href="url"&gt;鏈接&lt;/a&gt;
+&lt;img attr:title="name" /&gt;</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./template.html">模板指令總覽 →</a>
+        　·　下一篇：<a olink href="./events.html">事件與表單 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

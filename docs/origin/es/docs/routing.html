@@ -1,0 +1,113 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento y navegación</h1>
+      <p class="doc-lead">
+        Las páginas de ofa.js navegan en uno de dos modos: enrutamiento hash
+        (o-router), que cambia solo dentro de la aplicación front-end, y scsr,
+        donde cada URL es un documento real. La API de navegación de páginas es
+        la misma en ambos modos.
+      </p>
+
+      <h2>API de navegación de páginas</h2>
+      <pre><code>// Dentro de un módulo de página, `this` es la instancia de la página
+this.goto("./detail.html?id=42"); // añade a la pila de páginas
+this.replace("./detail.html");    // reemplaza la página actual sin añadir historial
+this.back();                      // retrocede
+this.forward();                   // requiere allowForward: true en la configuración de la aplicación</code></pre>
+      <p>Para la navegación declarativa, usa <code>olink</code>:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;Ver detalles&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> solo tiene efecto dentro de <code>o-app</code>. Pasa
+        por el enrutamiento interno de la aplicación y las animaciones de
+        transición sin recargar toda la página. No añadas <code>olink</code> a
+        los enlaces externos.
+      </p>
+
+      <h2>Pasar parámetros mediante la consulta</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query es un argumento de la función del módulo de página, no
+        <code>this.$route</code>. Para reaccionar a los cambios de query, léelo
+        en la función del módulo de página; cambiar la dirección de la misma
+        página recarga el módulo.
+      </p>
+
+      <h2>o-router: enrutamiento hash</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>el router es un paquete puente y debe cargarse después de ofa.js;</li>
+        <li><code>fix-body</code> hace que html/body ocupen todo el tamaño; eliminarlo revierte el cambio;</li>
+        <li>la pila de páginas se sincroniza con el hash, por ejemplo <code>#/pages/detail.html?id=42</code>;</li>
+        <li>la actualización, los enlaces profundos, el uso compartido y adelante/atrás restauran la página sin reescrituras en el servidor;</li>
+        <li>una página funciona con un solo o-app.</li>
+      </ul>
+
+      <h2>Formato de URL hash</h2>
+      <pre><code>// Correcto
+location.origin + "/#/pages/detail.html?id=42"
+
+// Incorrecto: un pathname adicional o ./
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>Observar los cambios de enrutamiento</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> es <code>goto</code>, <code>replace</code>,
+        <code>back</code> o <code>forward</code>; <code>src</code> es la
+        dirección de la página de destino. El hook <code>routerChange</code> de
+        un módulo de página solo se dispara en la página de diseño padre, donde
+        se usa para resaltar el artículo actual.
+      </p>
+
+      <h2>Cuándo necesitas rutas reales</h2>
+      <p>
+        El enrutamiento hash es adecuado para aplicaciones puramente front-end.
+        Si cada URL debe poder rastrearse, ser accesible directamente y
+        compartirse, usa
+        <a olink href="./scsr.html">scsr con rutas reales</a>.
+        La API de páginas, los diseños anidados y el comportamiento de las
+        animaciones son idénticos en ambos.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./app.html">Aplicaciones o-app →</a>
+         · Siguiente: <a olink href="./nested-routing.html">Enrutamiento anidado →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

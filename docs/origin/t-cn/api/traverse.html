@@ -1,0 +1,56 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 選擇與遍歷</p>
+      <h1>選擇與遍歷</h1>
+      <p class="doc-lead">在實例內部查找元素，並沿 DOM / shadow 邊界前後移動。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="traverse"></docs-playground>
+
+      <h2>成員</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.$(expr)</code></td><td>在自身內部查找第一個匹配；組件內部用 this.shadow.$()</td></tr>
+          <tr><td><code>el.all(expr)</code></td><td>在自身內部查找全部匹配，返回實例數組</td></tr>
+          <tr><td><code>el.parent</code></td><td>父元素實例；父級是 document 時為 null</td></tr>
+          <tr><td><code>el.parents</code></td><td>全部祖先實例數組</td></tr>
+          <tr><td><code>el.parentsUntil(expr)</code></td><td>向上收集祖先，直到匹配 expr（不含該節點）</td></tr>
+          <tr><td><code>el.hosts</code></td><td>逐層向上的 shadow 宿主鏈</td></tr>
+          <tr><td><code>el.next / el.nexts</code></td><td>後一個 / 之後全部兄弟元素</td></tr>
+          <tr><td><code>el.prev / el.prevs</code></td><td>前一個 / 之前全部兄弟元素</td></tr>
+          <tr><td><code>el.siblings</code></td><td>除自身外的全部兄弟元素</td></tr>
+          <tr><td><code>el.is(expr)</code></td><td>是否匹配選擇器 / 等於某個實例或原生元素</td></tr>
+          <tr><td><code>el.contains(expr)</code></td><td>是否包含某個選擇器、實例或原生元素</td></tr>
+          <tr><td><code>el.composedPath()</code></td><td>事件系統的完整路徑（跨 shadow），返回原生節點數組</td></tr>
+          <tr><td><code>el.get("a.b.c")</code></td><td>點路徑取值，單鍵等價直接訪問</td></tr>
+          <tr><td><code>el.set("a.b.c", value)</code></td><td>點路徑賦值，單鍵等價直接賦值</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>示例裡的 second.prev / second.next 是兄弟實例；class() 用來開關類名。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

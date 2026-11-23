@@ -1,0 +1,168 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Referencia</p>
+      <h1>Complementos y extensiones</h1>
+      <p class="doc-lead">
+        Los complementos son capacidades opcionales que solo surten efecto cuando se
+        referencian; no forman parte de la compilación predeterminada de ofa.js. Se
+        enlazan al <code>$</code> global que la página ya ha cargado y nunca traen una
+        segunda instancia del framework.
+      </p>
+
+      <h2>Complementos disponibles</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Complemento</th><th>Capacidad</th><th>Uso</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>Enlace bidireccional entre los valores de un formulario contenedor y objetos stanz</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>Eleva las etiquetas style/link del shadow al host, alcanzando incluso a través de los slots</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>Teletransporta el contenido de la plantilla al final del body para renderizarlo (diálogos / superposiciones)</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>Inyecta una hoja de estilos global en los componentes montados después de él</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Importación</h2>
+      <p>Importa directamente la forma de código fuente, o usa la forma de script clásico o la forma dist ESM:</p>
+      <pre><code>// monorepo / código fuente npm
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist script clásico (con el dist de ofa.js)
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        Los complementos deben cargarse después de ofa.js porque se enlazan al
+        <code>$</code> global; si este falta, lanzan un error de inmediato.
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // leer
+data.username = "Yao";  // escribir de vuelta en el formulario
+data.revoke();          // liberar el enlace</code></pre>
+      <p>
+        Las casillas de verificación se agrupan en un array, y los campos de selección
+        múltiple, de opción única y de archivo tienen cada uno su propio tratamiento. Un
+        componente de formulario personalizado solo necesita exponer una propiedad
+        <code>value</code> y establecer <code>name</code> para participar.
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> solo puede alcanzar el primer nivel del contenido
+        proyectado en el slot. Para aplicar estilos a elementos situados en lo profundo
+        de un slot, usa <code>&lt;inject-host&gt;</code> para elevar los estilos al host:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        Escribe la ruta completa del componente en los selectores para evitar filtrar
+        estilos a otros componentes; úsalo con moderación en casos en los que los
+        estilos se actualicen con frecuencia.
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        Cuando los diálogos, avisos emergentes o superposiciones necesitan escapar de las
+        restricciones de <code>overflow</code> o <code>transform</code> de un
+        contenedor padre, teletransporta el contenido al body:
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        Los enlaces del framework siguen al elemento cuando se mueve, y los eventos
+        nativos se propagan desde su posición real en el DOM.
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        La hoja de estilos se inyecta únicamente en el shadow de los componentes
+        montados <strong>después</strong> de él; una vez que se elimina
+        <code>o-global-link</code>, los nuevos componentes dejan de recibir los estilos.
+        Se filtra al ámbito global, así que úsalo con cuidado.
+      </p>
+
+      <h2>match-var (consulta de estilos del núcleo)</h2>
+      <p>
+        Para alternar los estilos internos de un componente según variables CSS, usa
+        <code>&lt;match-var&gt;</code> del núcleo; no requiere ningún complemento
+        adicional:
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- varias condiciones deben cumplirse todas --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+      <p>
+        Las condiciones provienen de los valores de las variables CSS. Desde fuera, usa
+        <code>data()</code> para escribir datos en las variables:
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox:</strong> si los estilos no cambian inmediatamente después de que
+        cambie una variable, llama manualmente a <code>$.checkMatch()</code> para
+        desencadenar una nueva comprobación.
+      </div>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./api.html">$.fn y los objetos wrapper →</a>
+         · Siguiente: <a olink href="./pitfalls.html">Errores comunes →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 04</p>
+      <h1>Estilos y class</h1>
+      <p class="doc-lead">El &lt;style&gt; de una página solo se aplica a esa página; class: y :style hacen que los estilos sigan los cambios de los datos.</p>
+
+      <p>
+  Un <code>&lt;style&gt;</code> dentro de la plantilla de una página se recopila en el Shadow DOM de la página y
+  no se filtra a otros componentes. <code>:host</code> selecciona la propia página o componente.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+<h2>Tres formas habituales</h2>
+<ul>
+  <li><code>:host</code>: aplica estilos al contenedor de la página, por ejemplo <code>display:block</code>;</li>
+  <li><code>class:active="active"</code>: añade la clase cuando la condición es verdadera y la elimina cuando es falsa;</li>
+  <li><code>:style.background="..."</code>: estilo en línea; usa camelCase para el nombre de la propiedad.</li>
+</ul>
+<div class="doc-note">
+  <strong>Cómo elegir entre ambas:</strong> usa <code>class:</code> para estados estructurales (seleccionado, terminado)
+  y <code>:style</code> para valores individuales como el color o el tamaño. No construyas cadenas largas de
+  <code>style</code> dentro de la plantilla.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade otra clase enlazada con <code>class:highlight="active"</code>, dale un color de fondo en
+  <code>&lt;style&gt;</code> y observa qué cambia al alternar el estado.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-3.html">03 · Atributos dinámicos →</a> · Siguiente: <a olink href="./lesson-5.html">05 · Eventos →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

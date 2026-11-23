@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 20</p>
+      <h1>Poniéndolo todo junto: una lista de tareas</h1>
+      <p class="doc-lead">Combina listas, formularios, condicionales, propiedades calculadas, observaciones y localStorage en una aplicación completa.</p>
+
+      <p>
+  La última lección reúne las capacidades anteriores: añadir tareas desde un campo de entrada, marcar y eliminar
+  elementos de la lista, filtrar por estado y guardar los datos de forma automática en el navegador.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-20" fold-styles="true"></docs-playground>
+<h2>Qué usa esta lección</h2>
+<ul>
+  <li><code>sync:value</code> / <code>sync:checked</code>: edición de formularios y de elementos de la lista;</li>
+  <li><code>o-fill</code> + <code>fill-key</code>: renderizado y reutilización de la lista;</li>
+  <li><code>get visibleItems()</code> / <code>get remaining()</code>: filtrado y recuentos;</li>
+  <li><code>watch.items</code>: escribe en localStorage cuando los datos cambian.</li>
+</ul>
+<p>
+  Prueba a refrescar la vista previa de la derecha: las tareas se restauran, porque <code>watch</code>
+  las escribió en el almacenamiento del navegador cuando los datos cambiaron.
+</p>
+<div class="doc-note">
+  <strong>Siguientes pasos:</strong> divide las tareas en componentes (lecciones 12 a 14), compártelas entre
+  páginas con <code>$.stanz</code> (lección 16) y envuélvelo todo en un diseño (lección 18):
+  eso es una aplicación completa.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade un botón "Borrar completadas"; después añade a cada tarea un botón de edición que convierta la fila de texto en un campo de entrada.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-19.html">19 · Asincronía y estados de carga →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

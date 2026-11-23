@@ -1,0 +1,127 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">データ</p>
+      <h1>グローバル状態</h1>
+      <p class="doc-lead">
+        複数のページやコンポーネントで同じデータを共有する必要がある場合は、
+        <code>$.stanz()</code> でリアクティブな状態を作成します。グローバル変数には依存せず、
+        自動的に永続化されることもありません。
+      </p>
+
+      <h2>共有状態の作成</h2>
+      <pre><code>// store.js
+export const cart = $.stanz({
+  items: [],
+  total: 0,
+});
+
+export const session = $.stanz({
+  user: null,
+  theme: "dark",
+});</code></pre>
+      <p>
+        <code>$.stanz()</code> は深いリアクティブなプロキシを返します。ネストしたオブジェクトへの代入や
+        配列の <code>push</code>/<code>splice</code> は、すべての利用者に通知されます。
+      </p>
+
+      <h2>ページでの使用</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;ul&gt;
+    &lt;o-fill :value="items" fill-key="id"&gt;
+      &lt;li&gt;{{$data.name}} × {{$data.count}}&lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    export default async ({ load }) =&gt; {
+      const { cart } = await load("./store.js");
+
+      return {
+        data: { items: [] },
+        attached() {
+          this.items = cart.items;
+        },
+        detached() {
+          this.items = [];
+        },
+      };
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <div class="doc-note">
+        <strong>マウント/アンマウントの規約:</strong>
+        <code>attached</code> で共有状態を自身のデータに接続し、<code>detached</code> で
+        参照をクリアしてください。これにより、状態が破棄されたコンポーネントを参照し続けることを防げます。
+      </div>
+
+      <h2>共有状態の読み書き</h2>
+      <pre><code>cart.items.push({
+  id: Date.now(),
+  name: "ofa.js グッズ",
+  count: 1,
+});
+
+cart.total = cart.items.reduce(
+  (sum, item) =&gt; sum + item.count,
+  0,
+);</code></pre>
+      <p>
+        複数のページが同じ <code>cart</code> を読み取っている場合、そのうちの 1 つで行われた変更は
+        他のページやコンポーネントにも伝播します。
+      </p>
+
+      <h2>状態を直接監視する</h2>
+      <pre><code>const tid = cart.watch(() =&gt; {
+  console.log("カートが変更されました", cart.total);
+});
+
+// 不要になったとき
+cart.unwatch(tid);</code></pre>
+      <p>
+        <code>watch</code> は深く監視するため、子オブジェクトや配列の変更も発火します。
+        コンポーネント内では、DOM を手動で操作するのではなく、状態をデータに接続してテンプレートを
+        自動更新させるのが適しています。
+      </p>
+
+      <h2>ローカル状態と共有状態</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>シナリオ</th><th>手法</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>現在のコンポーネント内でのみ使用</td><td><code>data</code></td></tr>
+          <tr><td>親子コンポーネント間での値の受け渡し</td><td><code>:prop</code> / <code>sync:</code></td></tr>
+          <tr><td>階層をまたぐビジネスデータ</td><td><code>o-provider</code> / <code>o-consumer</code></td></tr>
+          <tr><td>ページをまたいでグローバルに共有</td><td><code>$.stanz()</code></td></tr>
+          <tr><td>純粋なスタイルのテーマ</td><td>CSS 変数 / <code>match-var</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        階層をまたいでデータを共有するより構造化された方法については、
+        <a olink href="./context.html">コンポーネント間のコンテキスト</a>を参照してください。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./data.html">データと監視 →</a>
+         · 次へ: <a olink href="./context.html">コンポーネント間のコンテキスト →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

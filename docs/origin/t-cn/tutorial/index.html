@@ -1,0 +1,192 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>從零開始用 ofa.js</h1>
+      <p class="doc-lead">
+        20 節短課，按「入門 → 交互與狀態 → 組件 → 應用與實戰」組織。
+        每節課都從一個小問題開始，改代碼、按 Ctrl/⌘+S 立即看結果。
+      </p>
+
+      <h2>入門</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>第一個頁面</h2>
+          <p>ofa.js 的頁面就是一個 HTML 文件：結構、樣式和邏輯都在同一個文件裡。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>數據與插值</h2>
+          <p>data 可以放字符串、數字、布爾、對象和數組，{{ }} 裡還能寫簡單表達式。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>動態屬性</h2>
+          <p>HTML attribute 用 attr:，DOM 屬性用 :prop；布爾屬性必須用 attr:。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>樣式與 class</h2>
+          <p>頁面裡的 &lt;style&gt; 只作用於當前頁面，class: 和 :style 讓樣式跟隨數據變化。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+      </div>
+
+      <h2>交互與狀態</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>事件</h2>
+          <p>用 on: 監聽事件：簡單邏輯寫表達式，複雜邏輯寫 proto 方法。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>雙向綁定</h2>
+          <p>sync: 讓表單和 data 雙向同步，適合標量值。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>條件渲染</h2>
+          <p>o-if / o-else-if / o-else 控制內容是否存在。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>列表渲染</h2>
+          <p>o-fill 渲染數組；列表項內用 $data、$index、$host。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>編輯列表</h2>
+          <p>數組的 push/splice 會自動更新視圖；行內編輯直接 sync 到 $data 字段。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>計算屬性與偵聽</h2>
+          <p>proto 的 getter 做同步計算，watch 觀察變化並處理副作用。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>生命週期</h2>
+          <p>ready → attached → loaded，移除時 detached；定時器和監聽要在 detached 清理。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+      </div>
+
+      <h2>組件</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>第一個組件</h2>
+          <p>把可複用的 UI 拆成 &lt;template component&gt;，用 l-m 引入。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>組件參數</h2>
+          <p>外部數據通過 attrs 傳給組件；組件內部用 data 保存自己的狀態。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>插槽與事件</h2>
+          <p>slot 讓組件接收外部內容，emit 把組件內部發生的事告訴外部。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+      </div>
+
+      <h2>應用與實戰</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>跨層上下文</h2>
+          <p>用 o-provider / o-consumer 在組件子樹裡共享數據。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>全局狀態</h2>
+          <p>多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>頁面與路由</h2>
+          <p>o-app 管理頁面棧：olink / goto 切頁，query 傳參，back 返回。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>嵌套佈局</h2>
+          <p>子頁聲明 parent，父頁用 slot 承接；切子頁時父頁不銷燬。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>異步與加載態</h2>
+          <p>異步請求用 loading / error / success 三種狀態驅動界面，不要把異步結果放進 getter。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>綜合：待辦清單</h2>
+          <p>把列表、表單、條件、計算屬性、偵聽和 localStorage 串成一個完整應用。</p>
+          <span class="more">開始學習 →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>怎麼學？</strong>
+        先讀說明，再改右側代碼，按 <kbd>Ctrl</kbd>+<kbd>S</kbd>（Mac 為
+        <kbd>⌘</kbd>+<kbd>S</kbd>）運行。改壞了可以點編輯器裡的「重置」，
+        恢復本課示例。
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

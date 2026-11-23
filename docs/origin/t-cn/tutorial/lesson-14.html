@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 14</p>
+      <h1>插槽與事件</h1>
+      <p class="doc-lead">slot 讓組件接收外部內容，emit 把組件內部發生的事告訴外部。</p>
+
+      <p>
+  組件需要保持結構、但內容由使用方決定時，用 <code>&lt;slot&gt;</code>；
+  組件內部發生點擊、保存等事件時，用 <code>this.emit()</code> 通知使用方。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-14" fold-styles="true"></docs-playground>
+<h2>插槽</h2>
+<ul>
+  <li><code>&lt;slot&gt;</code>：默認插槽，接收組件標籤裡的內容；</li>
+  <li><code>&lt;slot name="hint"&gt;</code>：命名插槽，使用方寫
+    <code>slot="hint"</code>；</li>
+  <li>插槽標籤裡的內容就是默認兜底內容。</li>
+</ul>
+<h2>自定義事件</h2>
+<p>
+  組件裡 <code>this.emit("confirm", { data: {...} })</code>，頁面用
+  <code>on:confirm="onConfirm"</code> 監聽；事件對象的數據在
+  <code>event.data</code> 裡。如果事件要穿出多層 Shadow DOM，
+  還要加 <code>bubbles: true, composed: true</code>。
+</p>
+<div class="doc-note">
+  <strong>單向數據流：</strong>組件不直接改頁面的 data；它只負責「告訴頁面發生了什麼」，
+  由頁面決定怎麼處理。這樣組件才能被不同頁面複用。
+</div>
+<h2>動手改</h2>
+<p>
+  在組件裡再加一個「取消」按鈕，emit 一個 <code>cancel</code> 事件；
+  頁面監聽後把提示文案改成「已取消」。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-13.html">13 · 組件參數 →</a>　·　下一篇：<a olink href="./lesson-15.html">15 · 全局狀態 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

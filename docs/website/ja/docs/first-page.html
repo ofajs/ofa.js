@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>最初のページ — ofa.js ドキュメント</title>
+    <meta name="description" content="template[page] を使ってページモジュールを作成し、o-page または o-app で実行します。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="最初のページ — ofa.js ドキュメント" />
+    <meta property="og:description" content="template[page] を使ってページモジュールを作成し、o-page または o-app で実行します。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">はじめに</p>
+      <h1>はじめてのページ</h1>
+      <p class="doc-lead">
+        ページモジュールは 1 つのルーティング位置のコンテンツを担います。
+        <code>o-page</code> で直接読み込むことも、<code>o-app</code> のページスタックで管理することもできます。
+      </p>
+
+      <h2>1. ページモジュール</h2>
+      <p>
+        <code>page.html</code> を作成します。ページは
+        <code>&lt;template page&gt;</code> を使い、<code>tag</code> は必要ありません:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host {
+      display: block;
+      padding: 24px;
+    }
+  &lt;/style&gt;
+
+  &lt;h1&gt;こんにちは、{{name}}&lt;/h1&gt;
+  &lt;p&gt;現在のカウント: {{count}}&lt;/p&gt;
+  &lt;button on:click="count++"&gt;+1 する&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async ({ query }) =&gt; ({
+      data: {
+        name: query.name || "ofa.js",
+        count: 0,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>2. o-page で直接読み込む</h2>
+      <p>
+        最も簡単な方法は、エントリ HTML に <code>o-page</code> を置き、
+        <code>src</code> をページモジュールに向けることです:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;最初のページ&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html?name=Yao"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      <p>
+        <code>?name=Yao</code> は <code>query</code> 引数としてページモジュール関数に渡されます。
+        <code>this.goto()</code> や <code>this.back()</code> などのメソッドが完全なルーティングの
+        意味を持つのは <code>o-app</code> の中だけです。
+      </p>
+
+      <h2>3. o-app でページを管理する</h2>
+      <p>
+        複数ページのナビゲーション、ページスタック、トランジションアニメーションが必要な場合は、
+        <code>o-app</code> でアプリ設定を読み込みます:
+      </p>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./page.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};</code></pre>
+
+      <p>
+        <code>home</code> はアプリ起動時に最初に読み込まれるページです。ページ内では
+        <code>this.goto("./detail.html")</code> または
+        <code>&lt;a olink href="./detail.html"&gt;</code> で移動します。
+        設定の全体は <a olink href="./app.html">o-app のアプリケーションページ</a> を参照してください。
+      </p>
+
+      <div class="doc-note">
+        <strong>ページは HTTP 経由で配信する必要があります。</strong>
+        HTML ファイルを直接開くと、<code>file://</code> がモジュールスクリプトとページの取得をブロックします。
+        代わりにディレクトリで <code>npx serve .</code> または <code>python3 -m http.server</code> を実行してください。
+      </div>
+
+      <p class="doc-end">
+        前へ: <a olink href="./first-component.html">はじめてのコンポーネント →</a>
+        · 次へ: <a olink href="./component.html">コンポーネント →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 19</p>
+      <h1>異步與加載態</h1>
+      <p class="doc-lead">異步請求用 loading / error / success 三種狀態驅動界面，不要把異步結果放進 getter。</p>
+
+      <p>
+  頁面初始化時常常要等接口。不要用 getter 包異步邏輯，改成顯式的狀態字段：
+  <code>loading</code>、<code>error</code>、<code>user</code>，由它們驅動 UI。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-19" fold-styles="true"></docs-playground>
+<h2>推薦的流程</h2>
+<ol>
+  <li>開始請求：<code>status = "loading"</code>，清空舊錯誤；</li>
+  <li>成功：把結果寫進 data，<code>status = "done"</code>；</li>
+  <li>失敗：把錯誤信息寫進 <code>error</code>，<code>status = "error"</code>。</li>
+</ol>
+<p>
+  界面用 <code>o-if</code> / <code>o-else-if</code> / <code>o-else</code>
+  分別顯示加載中、錯誤和內容。
+</p>
+<div class="doc-note">
+  <strong>為什麼要顯式狀態：</strong>只用一個 <code>user</code> 無法區分
+  「還沒開始」「正在加載」「加載失敗」。狀態字段讓每種情況都有確定的 UI，
+  也方便加禁用按鈕、重試等交互。
+</div>
+<h2>動手改</h2>
+<p>
+  給請求加一個 600ms 延遲（示例已有），並把「重新加載」按鈕在 loading 時禁用；
+  再試著把失敗提示改成可點擊重試。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-18.html">18 · 嵌套佈局 →</a>　·　下一篇：<a olink href="./lesson-20.html">20 · 綜合：待辦清單 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

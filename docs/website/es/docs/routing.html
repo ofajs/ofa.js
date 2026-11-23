@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enrutamiento y navegación — Documentación de ofa.js</title>
+    <meta name="description" content="goto/replace/back, olink, parámetros de consulta, enrutamiento hash con o-router y router-change." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enrutamiento y navegación — Documentación de ofa.js" />
+    <meta property="og:description" content="goto/replace/back, olink, parámetros de consulta, enrutamiento hash con o-router y router-change." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento y navegación</h1>
+      <p class="doc-lead">
+        Las páginas de ofa.js navegan en uno de dos modos: enrutamiento hash
+        (o-router), que cambia solo dentro de la aplicación front-end, y scsr,
+        donde cada URL es un documento real. La API de navegación de páginas es
+        la misma en ambos modos.
+      </p>
+
+      <h2>API de navegación de páginas</h2>
+      <pre><code>// Dentro de un módulo de página, `this` es la instancia de la página
+this.goto("./detail.html?id=42"); // añade a la pila de páginas
+this.replace("./detail.html");    // reemplaza la página actual sin añadir historial
+this.back();                      // retrocede
+this.forward();                   // requiere allowForward: true en la configuración de la aplicación</code></pre>
+      <p>Para la navegación declarativa, usa <code>olink</code>:</p>
+      <pre><code>&lt;a olink href="./detail.html?id=42"&gt;Ver detalles&lt;/a&gt;</code></pre>
+      <p>
+        <code>olink</code> solo tiene efecto dentro de <code>o-app</code>. Pasa
+        por el enrutamiento interno de la aplicación y las animaciones de
+        transición sin recargar toda la página. No añadas <code>olink</code> a
+        los enlaces externos.
+      </p>
+
+      <h2>Pasar parámetros mediante la consulta</h2>
+      <pre><code>this.goto("./detail.html?id=42&amp;tab=info");</code></pre>
+      <pre><code>export default async ({ query }) =&gt; ({
+  data: {
+    id: query.id,
+    tab: query.tab || "info",
+  },
+});</code></pre>
+      <p>
+        query es un argumento de la función del módulo de página, no
+        <code>this.$route</code>. Para reaccionar a los cambios de query, léelo
+        en la función del módulo de página; cambiar la dirección de la misma
+        página recarga el módulo.
+      </p>
+
+      <h2>o-router: enrutamiento hash</h2>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-router fix-body&gt;
+  &lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;
+&lt;/o-router&gt;</code></pre>
+      <ul>
+        <li>el router es un paquete puente y debe cargarse después de ofa.js;</li>
+        <li><code>fix-body</code> hace que html/body ocupen todo el tamaño; eliminarlo revierte el cambio;</li>
+        <li>la pila de páginas se sincroniza con el hash, por ejemplo <code>#/pages/detail.html?id=42</code>;</li>
+        <li>la actualización, los enlaces profundos, el uso compartido y adelante/atrás restauran la página sin reescrituras en el servidor;</li>
+        <li>una página funciona con un solo o-app.</li>
+      </ul>
+
+      <h2>Formato de URL hash</h2>
+      <pre><code>// Correcto
+location.origin + "/#/pages/detail.html?id=42"
+
+// Incorrecto: un pathname adicional o ./
+location.origin + location.pathname + "#./pages/detail.html?id=42"</code></pre>
+
+      <h2>Observar los cambios de enrutamiento</h2>
+      <pre><code>this.app.on("router-change", (event) =&gt; {
+  const { name, src } = event.data;
+  console.log(name, src);
+});</code></pre>
+      <p>
+        <code>name</code> es <code>goto</code>, <code>replace</code>,
+        <code>back</code> o <code>forward</code>; <code>src</code> es la
+        dirección de la página de destino. El hook <code>routerChange</code> de
+        un módulo de página solo se dispara en la página de diseño padre, donde
+        se usa para resaltar el artículo actual.
+      </p>
+
+      <h2>Cuándo necesitas rutas reales</h2>
+      <p>
+        El enrutamiento hash es adecuado para aplicaciones puramente front-end.
+        Si cada URL debe poder rastrearse, ser accesible directamente y
+        compartirse, usa
+        <a olink href="./scsr.html">scsr con rutas reales</a>.
+        La API de páginas, los diseños anidados y el comportamiento de las
+        animaciones son idénticos en ambos.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./app.html">Aplicaciones o-app →</a>
+         · Siguiente: <a olink href="./nested-routing.html">Enrutamiento anidado →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Datos</p>
+      <h1>Contexto entre componentes</h1>
+      <p class="doc-lead">
+        <code>o-provider</code> coloca datos en un subárbol y <code>o-consumer</code> los consume
+        desde el proveedor más cercano. Esto resulta adecuado para pasar información del usuario, temas y contexto
+        de negocio a través de varias capas de componentes, evitando el paso de propiedades por todos los niveles.
+      </p>
+
+      <h2>Proveedores y consumidores</h2>
+      <pre><code>&lt;!-- Proveedor: name identifica el contexto; los atributos restantes son datos compartidos --&gt;
+&lt;o-provider name="userInfo" user-id="9527" user-name="Alice"&gt;
+  &lt;o-page src="./profile.html"&gt;&lt;/o-page&gt;
+&lt;/o-provider&gt;</code></pre>
+
+      <pre><code>&lt;!-- Consumidor: sincroniza los atributos del contexto con sus propios campos de datos --&gt;
+&lt;o-consumer name="userInfo" watch:user-id="userId" watch:user-name="userName"&gt;&lt;/o-consumer&gt;
+
+&lt;p&gt;{{userId}} / {{userName}}&lt;/p&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: {
+      userId: 0,
+      userName: "",
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        El consumidor recorre el DOM hacia arriba para encontrar el proveedor <strong>más cercano</strong> con el
+        mismo nombre. El proveedor debe ser un ancestro del consumidor; un hermano no se encontrará.
+      </p>
+
+      <h2>Actualizaciones en tiempo de ejecución</h2>
+      <p>
+        Los atributos HTML de un proveedor se leen solo una vez, durante la inicialización. Para actualizar en
+        tiempo de ejecución debes cambiar directamente sus propiedades de datos; <code>setAttribute</code> no
+        funciona:
+      </p>
+      <pre><code>// Correcto: cambiar los datos del proveedor
+const provider = $("#userProvider");
+provider.userName = "Bob";
+
+// Incorrecto: setAttribute no propaga a los consumidores
+provider.ele.setAttribute("user-name", "Bob");</code></pre>
+
+      <h2>Anidamiento y reconexión</h2>
+      <p>
+        Cuando se anidan varios proveedores con el mismo nombre, sus datos se fusionan campo por
+        campo, y el proveedor más cercano al consumidor anula los campos del más lejano.
+        El <code>name</code> de un consumidor también puede cambiarse dinámicamente; tras el cambio
+        vuelve a buscar el proveedor más cercano con el nuevo nombre.
+      </p>
+
+      <h2>Valores predeterminados: o-root-provider</h2>
+      <pre><code>&lt;o-root-provider name="theme" mode="dark" accent="#0061a4"&gt;&lt;/o-root-provider&gt;
+
+&lt;o-consumer name="theme" watch:mode="themeMode" watch:accent="accentColor"&gt;&lt;/o-consumer&gt;</code></pre>
+      <p>
+        Cuando no existe ningún proveedor con el mismo nombre, el consumidor recurre al
+        root-provider a nivel de documento. Cuando existen ambos, gana el proveedor más cercano al consumidor.
+      </p>
+
+      <h2>Buscar un proveedor explícitamente</h2>
+      <pre><code>const provider = this.getProvider("userInfo");
+provider.userName = "Carol"; // los consumidores se actualizan automáticamente
+
+// cualquier elemento puede buscar un proveedor
+$(".profile").getProvider("userInfo");
+
+// proveedor raíz global
+const root = $.getRootProvider("theme");</code></pre>
+
+      <h2>Proveedores que despachan eventos a los consumidores</h2>
+      <pre><code>$("#chatProvider").dispatch("new-message", {
+  data: { text: "Hola" },
+});</code></pre>
+      <pre><code>&lt;o-consumer name="chat" on:new-message="addMessage"&gt;&lt;/o-consumer&gt;</code></pre>
+
+      <h2>Cuándo no usarlo</h2>
+      <ul>
+        <li>Pasar valores solo entre padre e hijo: usa <code>:prop</code> / <code>sync:</code>;</li>
+        <li>Compartir estado de negocio entre páginas: usa <code>$.stanz()</code>;</li>
+        <li>Contextos puramente de estilo, como colores o tamaños de tema: prefiere variables CSS o <code>match-var</code>.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./state.html">Estado global →</a>
+         · Siguiente: <a olink href="./app.html">Aplicaciones o-app →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

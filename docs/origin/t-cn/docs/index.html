@@ -1,0 +1,106 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc docs-intro">
+        <p class="doc-kicker">Documentation</p>
+        <h1>ofa.js 文檔</h1>
+        <p class="doc-lead">
+          從一行 script 開始，到組件、頁面、模板、狀態、路由與部署。
+          文檔按使用順序組織，也可以直接從左側目錄跳到需要的章節。
+        </p>
+
+        <div class="docs-list">
+          <a class="docs-row" olink href="./getting-started.html">
+            <span class="num">01</span>
+            <h2>安裝與引入</h2>
+            <p>用 CDN 或本地 dist 引入 ofa.js，運行第一個頁面。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>第一個組件</h2>
+            <p>創建自定義 Web Component，理解 tag、attrs、data 與插槽。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./template.html">
+            <span class="num">03</span>
+            <h2>模板指令總覽</h2>
+            <p>一次掌握插值、屬性、事件、雙向綁定、條件與列表。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>路由與導航</h2>
+            <p>o-app 頁面棧、goto/replace/back、o-router 與嵌套佈局。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn 與包裝對象</h2>
+            <p>選擇、樹導航、DOM 操作、事件、stanz 與實例擴展。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="../api/">
+            <span class="num">06</span>
+            <h2>API 參考</h2>
+            <p>實例成員、全局靜態成員與可直接運行的 VSCode 示例。</p>
+            <span class="more">進入 API →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">07</span>
+            <h2>完整示例</h2>
+            <p>最小頁面、自定義組件、待辦清單與路由應用。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./playground.html">
+            <span class="num">08</span>
+            <h2>案例預覽</h2>
+            <p>在 NoneOS 虛擬容器裡編輯並運行 ofa.js 頁面模塊。</p>
+            <span class="more">打開演練場 →</span>
+          </a>
+        </div>
+
+        <h2>文檔覆蓋範圍</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>章節</th><th>內容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>開始使用</td><td>安裝、第一個組件、第一個頁面</td></tr>
+            <tr><td>組件與頁面</td><td>組件契約、頁面模塊、生命週期</td></tr>
+            <tr><td>模板語法</td><td>指令總覽、綁定與樣式、事件與表單、條件與列表</td></tr>
+            <tr><td>數據與狀態</td><td>data、計算屬性、watch、$.stanz、provider/consumer</td></tr>
+            <tr><td>應用與路由</td><td>o-app、o-router、嵌套路由、scsr 真實路徑</td></tr>
+            <tr><td>參考</td><td>$.fn 與包裝對象、實例對象 API、插件、常見錯誤、完整示例、案例預覽、部署</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="doc-note">
+          <strong>先讀哪篇？</strong>
+          第一次使用從「安裝與引入」開始；已經有頁面在跑，可以直接看
+          「模板指令總覽」或從左側目錄挑選章節。
+        </div>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

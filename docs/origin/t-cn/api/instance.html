@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · 實例基礎</p>
+      <h1>實例基礎</h1>
+      <p class="doc-lead">實例對象同時是 DOM 包裝器、響應式數據和子元素集合。先認識它的基礎屬性。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="instance"></docs-playground>
+
+      <h2>成員</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.ele</code></td><td>原生 DOM 元素，瀏覽器 API 都從這裡取</td></tr>
+          <tr><td><code>el.tag</code></td><td>小寫標籤名（只讀）</td></tr>
+          <tr><td><code>el.owner</code></td><td>數據歸屬鏈（Set），響應式更新沿它向上冒泡（只讀）</td></tr>
+          <tr><td><code>el.length</code></td><td>子元素數量，與 ele.children.length 一致（只讀）</td></tr>
+          <tr><td><code>el[0]、el[1]</code></td><td>按下標讀取子元素實例（只讀）</td></tr>
+          <tr><td><code>el.index</code></td><td>在父級中的位置；沒有父級時為 null（只讀）</td></tr>
+          <tr><td><code>el.PATH</code></td><td>組件 / 頁面文件地址，相對資源以它為基準（只讀）</td></tr>
+          <tr><td><code>el.app</code></td><td>最近的 o-app 實例；不在應用內時為 undefined（只讀）</td></tr>
+          <tr><td><code>el.shadow</code></td><td>自身的 shadow root 實例（只讀）</td></tr>
+          <tr><td><code>el.root</code></td><td>所在根節點：document 或某個 shadow root（只讀）</td></tr>
+          <tr><td><code>el.host</code></td><td>最近的 shadow 宿主組件實例（只讀）</td></tr>
+          <tr><td><code>el.xid</code></td><td>實例唯一標識，用於區分同 tag 的不同實例（只讀）</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>提示：</strong>標記為「只讀」的成員由實例內部維護，賦值不會改變結構。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

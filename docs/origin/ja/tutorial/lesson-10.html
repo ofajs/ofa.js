@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 10</p>
+      <h1>算出プロパティと監視</h1>
+      <p class="doc-lead">proto の getter は同期的に計算し、watch は変更を監視して副作用を処理します。</p>
+
+      <p>
+  既存のデータから値を導出するには、<code>proto</code> の getter を使います。
+  データ変更後に追加の処理（ログ出力や外部ストレージへの書き込み）が必要な場合は、<code>watch</code> を使います。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10" fold-styles="true"></docs-playground>
+<h2>getter と watch の役割分担</h2>
+<ul>
+  <li><code>get total()</code>: テンプレートでは通常のフィールドのように使え、依存するデータに合わせて自動的に更新されます。</li>
+  <li><code>watch.qty(value, { watchers })</code>: データが変更された後に実行されます。</li>
+  <li>watch は初期化時にも一度呼ばれ、その時点では <code>watchers</code> はまだ存在しません。
+    そのため <code>if (!watchers) return</code> で最初の呼び出しをスキップできます。</li>
+</ul>
+<div class="doc-note">
+  <strong>getter の制約:</strong> getter はテンプレートの初期化時に評価されるため、
+  すでに存在する同期データにしか依存できません。API から返される非同期データに依存する場合は、
+  まず結果をデータフィールドに保存し、非同期コールバック内で代入してください。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  「割引」入力欄（0〜1）を追加して、合計金額が割引を適用して計算されるようにしてみましょう。
+  続いて watch で割引の変更をログ出力してみてください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-9.html">09 · リストの編集 →</a> · 次へ: <a olink href="./lesson-11.html">11 · ライフサイクル →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

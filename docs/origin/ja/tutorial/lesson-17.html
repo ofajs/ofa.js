@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 17</p>
+      <h1>ページとルーティング</h1>
+      <p class="doc-lead">o-app はページスタックを管理します。olink / goto で遷移し、query でパラメータを渡し、back で戻ります。</p>
+
+      <p>
+  マルチページアプリは <code>&lt;o-app src="./app.mjs"&gt;</code> をコンテナとして使います。
+  <code>app.mjs</code> にはホームページのアドレスや遷移アニメーションなど、アプリの設定だけを書きます。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-17" fold-styles="true"></docs-playground>
+<h2>3つのファイル</h2>
+<ul>
+  <li><code>app.mjs</code>: <code>home</code> がホームページを指し、<code>pageAnime</code> が遷移アニメーションを設定します。</li>
+  <li><code>home.html</code>: <code>olink</code> または <code>goto()</code> で about ページへ遷移します。</li>
+  <li><code>about.html</code>: <code>query</code> からパラメータを読み取り、<code>back()</code> で戻ります。</li>
+</ul>
+<p>
+  <code>olink</code> は宣言的なナビゲーションで、ページを再読み込みしません。<code>this.goto(url)</code>
+  はコードから遷移します。<code>query</code> はページモジュール関数の引数として渡され、
+  <code>this</code> には載りません。
+</p>
+<div class="doc-note">
+  <strong>o-app はアプリ設定のみを受け付けます:</strong> ページモジュールを直接
+  <code>o-app src</code> に渡さないでください。単一ページなら <code>o-page src</code>、
+  マルチページアプリなら <code>o-app</code> とページアドレスを使います。
+</div>
+<h2>自分で試してみよう</h2>
+<p>
+  ホームページに「About ページ（パラメータ付き）」ボタンを追加し、
+  <code>goto("./about.html?from=home-btn")</code> で遷移させましょう。
+  次に、about ページで遷移元を表示してください。
+</p>
+
+      <p class="doc-end">前: <a olink href="./lesson-16.html">16 · グローバル状態 →</a> · 次: <a olink href="./lesson-18.html">18 · ネストされたレイアウト →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

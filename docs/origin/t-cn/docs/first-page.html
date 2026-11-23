@@ -1,0 +1,116 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Getting started</p>
+      <h1>第一個頁面</h1>
+      <p class="doc-lead">
+        頁面模塊負責一個路由位置的內容。它可以直接被 <code>o-page</code>
+        加載，也可以交給 <code>o-app</code> 管理頁面棧。
+      </p>
+
+      <h2>1. 頁面模塊</h2>
+      <p>
+        新建 <code>page.html</code>。頁面使用
+        <code>&lt;template page&gt;</code>，不需要 <code>tag</code>：
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;style&gt;
+    :host {
+      display: block;
+      padding: 24px;
+    }
+  &lt;/style&gt;
+
+  &lt;h1&gt;你好，{{name}}&lt;/h1&gt;
+  &lt;p&gt;當前計數：{{count}}&lt;/p&gt;
+  &lt;button on:click="count++"&gt;點我 +1&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async ({ query }) =&gt; ({
+      data: {
+        name: query.name || "ofa.js",
+        count: 0,
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>2. 用 o-page 直接加載</h2>
+      <p>
+        最簡單的方式是在入口 HTML 裡放一個 <code>o-page</code>，
+        通過 <code>src</code> 指向頁面模塊：
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;第一個頁面&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html?name=Yao"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      <p>
+        <code>?name=Yao</code> 會進入頁面模塊函數的 <code>query</code> 參數。
+        頁面裡的 <code>this.goto()</code>、<code>this.back()</code> 等方法
+        在 <code>o-app</code> 內才具備完整路由語義。
+      </p>
+
+      <h2>3. 用 o-app 管理頁面</h2>
+      <p>
+        需要多頁跳轉、頁面棧和切換動畫時，用 <code>o-app</code> 加載應用配置：
+      </p>
+      <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;
+
+&lt;o-app src="./app-config.js"&gt;&lt;/o-app&gt;</code></pre>
+
+      <pre><code>// app-config.js
+export const home = "./page.html";
+
+export const pageAnime = {
+  current: { opacity: 1, transform: "translate(0, 0)" },
+  next: { opacity: 0, transform: "translate(30px, 0)" },
+  previous: { opacity: 0, transform: "translate(-30px, 0)" },
+};</code></pre>
+
+      <p>
+        <code>home</code> 是應用啟動後加載的第一個頁面。頁面內使用
+        <code>this.goto("./detail.html")</code> 或
+        <code>&lt;a olink href="./detail.html"&gt;</code> 跳轉。
+        詳細配置見 <a olink href="./app.html">o-app 應用</a>。
+      </p>
+
+      <div class="doc-note">
+        <strong>頁面必須通過 HTTP 訪問。</strong>
+        直接雙擊 HTML 文件時，<code>file://</code> 會攔截模塊腳本和頁面 fetch。
+        在目錄裡運行 <code>npx serve .</code> 或 <code>python3 -m http.server</code>
+        即可。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./first-component.html">第一個組件 →</a>
+        　·　下一篇：<a olink href="./component.html">組件 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutorial de ofa.js</title>
+    <meta name="description" content="Un tutorial progresivo de ofa.js en 20 lecciones: desde tu primera página hasta componentes, contexto, estado, enrutamiento y un proyecto completo." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tutorial de ofa.js" />
+    <meta property="og:description" content="Un tutorial progresivo de ofa.js en 20 lecciones: desde tu primera página hasta componentes, contexto, estado, enrutamiento y un proyecto completo." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc docs-intro">
+      <p class="doc-kicker">Tutorial</p>
+      <h1>Empieza con ofa.js desde cero</h1>
+      <p class="doc-lead">
+        20 lecciones breves, organizadas como «Primeros pasos → Interactividad y estado →
+        Componentes → Aplicaciones en la práctica». Cada lección empieza con un problema
+        pequeño: cambia el código y pulsa Ctrl/⌘+S para ver el resultado al instante.
+      </p>
+
+      <h2>Primeros pasos</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-1.html">
+          <span class="num">01</span>
+          <h2>Tu primera página</h2>
+          <p>En ofa.js, una página es solo un archivo HTML: la estructura, los estilos y la lógica viven en un mismo archivo.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-2.html">
+          <span class="num">02</span>
+          <h2>Datos e interpolación</h2>
+          <p>data puede contener cadenas, números, booleanos, objetos y arreglos, y {{ }} puede evaluar expresiones sencillas.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-3.html">
+          <span class="num">03</span>
+          <h2>Atributos dinámicos</h2>
+          <p>Usa attr: para los atributos HTML y :prop para las propiedades del DOM; los atributos booleanos deben usar attr:.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-4.html">
+          <span class="num">04</span>
+          <h2>Estilos y class</h2>
+          <p>El &lt;style&gt; de una página solo se aplica a esa página; class: y :style hacen que los estilos sigan los cambios de los datos.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Interactividad y estado</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-5.html">
+          <span class="num">05</span>
+          <h2>Eventos</h2>
+          <p>Usa on: para escuchar eventos: la lógica sencilla se escribe como expresiones y la compleja como métodos de proto.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-6.html">
+          <span class="num">06</span>
+          <h2>Enlace bidireccional</h2>
+          <p>sync: mantiene un campo de formulario y los datos sincronizados en ambos sentidos; es más adecuado para valores escalares.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-7.html">
+          <span class="num">07</span>
+          <h2>Renderizado condicional</h2>
+          <p>o-if / o-else-if / o-else controlan si el contenido existe.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-8.html">
+          <span class="num">08</span>
+          <h2>Renderizado de listas</h2>
+          <p>o-fill renderiza arreglos; dentro de cada elemento de la lista usa $data, $index y $host.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-9.html">
+          <span class="num">09</span>
+          <h2>Editar una lista</h2>
+          <p>push/splice en el arreglo actualizan la vista automáticamente; la edición en línea se sincroniza directamente con un campo de $data.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-10.html">
+          <span class="num">10</span>
+          <h2>Propiedades calculadas y observadores</h2>
+          <p>Los getters de proto se calculan de forma síncrona; watch observa los cambios y gestiona los efectos secundarios.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-11.html">
+          <span class="num">11</span>
+          <h2>Ciclo de vida</h2>
+          <p>ready → attached → loaded y, al eliminar el elemento, detached; limpia los temporizadores y los escuchadores de eventos en detached.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Componentes</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-12.html">
+          <span class="num">12</span>
+          <h2>Tu primer componente</h2>
+          <p>Divide la interfaz reutilizable en un &lt;template component&gt; y cárgalo con l-m.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-13.html">
+          <span class="num">13</span>
+          <h2>Parámetros de componente</h2>
+          <p>Los datos externos llegan al componente a través de attrs; internamente, el componente guarda su propio estado en data.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-14.html">
+          <span class="num">14</span>
+          <h2>Slots y eventos</h2>
+          <p>slot permite que un componente reciba contenido externo; emit informa hacia fuera lo que ocurrió dentro.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <h2>Aplicaciones en la práctica</h2>
+      <div class="docs-list">
+
+        <a class="docs-row" olink href="./lesson-15.html">
+          <span class="num">15</span>
+          <h2>Contexto entre capas</h2>
+          <p>Usa o-provider / o-consumer para compartir datos en un subárbol de componentes.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-16.html">
+          <span class="num">16</span>
+          <h2>Estado global</h2>
+          <p>Cuando varios componentes comparten una misma parte del estado, crea un almacén a nivel de módulo con $.stanz y móntalo y límpialo en attached/detached.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-17.html">
+          <span class="num">17</span>
+          <h2>Páginas y enrutamiento</h2>
+          <p>o-app gestiona la pila de páginas: cambia de página con olink / goto, pasa parámetros con query y vuelve con back.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-18.html">
+          <span class="num">18</span>
+          <h2>Diseños anidados</h2>
+          <p>Una página hija declara parent y la página padre la recibe mediante un slot; cambiar de página hija no destruye la página padre.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-19.html">
+          <span class="num">19</span>
+          <h2>Asincronía y estados de carga</h2>
+          <p>Controla la interfaz con los estados loading / error / success de las solicitudes asíncronas; nunca pongas resultados asíncronos en un getter.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+        <a class="docs-row" olink href="./lesson-20.html">
+          <span class="num">20</span>
+          <h2>Todo junto: una lista de tareas</h2>
+          <p>Combina listas, formularios, condicionales, propiedades calculadas, observadores y localStorage en una aplicación completa.</p>
+          <span class="more">Empezar a aprender →</span>
+        </a>
+
+      </div>
+
+      <div class="doc-note">
+        <strong>¿Cómo deberías estudiar?</strong>
+        Lee primero la explicación y después edita el código de la derecha y pulsa <kbd>Ctrl</kbd>+<kbd>S</kbd>
+        (<kbd>⌘</kbd>+<kbd>S</kbd> en Mac) para ejecutarlo. Si rompes algo, haz clic en «Restablecer» en el editor
+        para recuperar el ejemplo de esta lección.
+      </div>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

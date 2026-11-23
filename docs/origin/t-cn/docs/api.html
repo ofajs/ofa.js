@@ -1,0 +1,190 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>$.fn 與包裝對象</h1>
+      <p class="doc-lead">
+        <code>$</code> 既是選擇器也是元素工廠。它返回的是 ofa.js 包裝對象，
+        大部分框架能力都在這個對象上；瀏覽器原生能力通過 <code>.ele</code>
+        訪問。
+      </p>
+
+      <h2>獲取元素</h2>
+      <pre><code>$("#target");                       // 第一個匹配
+$("#target").$("h3");               // 子元素
+$("my-component").shadow.$("#x");   // Shadow DOM 內查詢
+$.all("li");                        // 所有匹配的包裝實例數組
+
+$(document.createElement("div"));   // 原生元素 → 包裝對象
+$(`&lt;div&gt;new&lt;/div&gt;`);               // HTML 字符串 → 包裝對象
+$({ tag: "div", text: "hi" });      // 對象描述 → 包裝對象</code></pre>
+
+      <h2>包裝對象與原生元素</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>場景</th><th>寫法</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ofa.js 屬性/方法</td><td><code>el.src</code>、<code>el.text</code>、<code>el.on()</code>、<code>el.app</code></td></tr>
+          <tr><td>瀏覽器原生屬性</td><td><code>el.ele.scrollTop</code>、<code>el.ele.shadowRoot</code></td></tr>
+          <tr><td>組件 data 字段</td><td><code>el.count</code>（直接訪問字段）</td></tr>
+          <tr><td>dataset</td><td><code>el.data.role</code></td></tr>
+          <tr><td>Shadow 查詢</td><td><code>this.shadow.$("#id")</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        口訣：ofa.js 加的屬性直接用，瀏覽器原生的走 <code>.ele</code>。
+      </p>
+
+      <h2>樹導航</h2>
+      <pre><code>el.prev;      el.prevs;
+el.next;      el.nexts;
+el.siblings;
+el.parent;    el.parents;
+el.host;      // 宿主組件實例
+el.app;       // 所在 o-app
+el.root;      // document 實例
+el.shadow;    // shadow root 實例
+el.tag;       // 小寫標籤名
+el.index;     // 在父級中的位置
+el.PATH;      // 組件註冊文件地址
+el.is("li");  // 是否匹配選擇器</code></pre>
+
+      <h2>子元素增刪</h2>
+      <pre><code>$("ul").push("&lt;li&gt;new&lt;/li&gt;");
+$("ul").unshift("&lt;li&gt;first&lt;/li&gt;");
+$("ul").pop();
+$("ul").shift();
+$("ul").splice(1, 2, "&lt;li&gt;replacement&lt;/li&gt;");
+
+el.before("&lt;p&gt;before&lt;/p&gt;");
+el.after("&lt;p&gt;after&lt;/p&gt;");
+el.remove();
+el.wrap("&lt;div class='wrapper'&gt;&lt;/div&gt;");
+el.unwrap();</code></pre>
+
+      <h2>內容與屬性</h2>
+      <pre><code>el.text = "new text";
+el.html = "&lt;b&gt;hi&lt;/b&gt;";
+
+el.attr("data-id");          // 讀取 attribute
+el.attr("data-id", "42");    // 寫入 attribute
+
+el.css.color = "red";
+el.css = { color: "blue", lineHeight: "1.5" };
+el.css = { ...el.css, color: "red" };
+
+el.classList.add("active");
+el.classList.remove("done");
+el.data.role = "admin";
+el.refresh();                // 手動刷新非響應式渲染</code></pre>
+      <p>
+        模板裡對應 <code>:text</code>、<code>:html</code>、
+        <code>attr:data-id</code>、<code>:style.color</code>、
+        <code>class:active</code>。
+      </p>
+
+      <h2>事件</h2>
+      <pre><code>el.on("click", handler);
+el.one("load", init);
+el.off("click", handler);
+
+el.emit("save", {
+  data: { id: 1 },
+  bubbles: true,
+  composed: true,
+});</code></pre>
+
+      <h2>o-app 與 o-page</h2>
+      <pre><code>const app = $("o-app");
+app.src;
+app.current;
+app.routers;
+app.goto("./page.html");
+app.replace("./page.html");
+app.back();
+app.forward();
+
+const page = app.current;
+page.src;
+page.goto("./next.html");
+page.pageIsReady;</code></pre>
+
+      <h2>stanz 能力</h2>
+      <pre><code>const tid = target.watch(() =&gt; {
+  // 深度監聽
+});
+target.watchTick(() =&gt; {}); // 節流監聽
+target.unwatch(tid);
+
+const data = $.stanz({ count: 0 });
+data._internal = "不會被監聽"; // 下劃線前綴跳過響應式</code></pre>
+      <p>
+        等某個數據條件成立時，用 <code>watchUntil</code>；它返回一個
+        Promise，條件滿足後自動取消監聽並兌現：
+      </p>
+      <pre><code>const app = $("o-app");
+await app.watchUntil(() =&gt; app.appIsReady);
+
+// 默認 30 秒超時，可傳第二個參數調整
+await app.watchUntil(() =&gt; app.current, 5000);</code></pre>
+      <div class="doc-note">
+        <strong>watchUntil 只在數據變更時判定，不會註冊後立即檢查。</strong>
+        如果條件可能已經成立，先自己判斷一次，再決定是否等待。
+      </div>
+
+      <h2>擴展實例</h2>
+      <pre><code>// 單個實例
+el.extend({
+  say() {
+    return "hello";
+  },
+});
+
+// 所有實例
+$.fn.extend({
+  get good() {
+    return "ofa.js is good";
+  },
+});
+
+// 新指令：:red="count % 3 === 0"
+$.fn.extend({
+  set red(value) {
+    this.css.color = value ? "red" : "";
+  },
+});</code></pre>
+
+      <h2>formData 插件</h2>
+      <p>
+        <code>formData()</code> 不在框架默認構建裡。先引入
+        <code>packages/plugins/formdata/formdata.mjs</code>（或 dist 腳本），
+        再調用：
+      </p>
+      <pre><code>const data = this.shadow.formData();
+data.username = "Yao";
+console.log(data.username);
+data.revoke(); // 釋放綁定</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./scsr.html">真實路徑 scsr →</a>
+        　·　下一篇：<a olink href="./plugins.html">插件與擴展 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

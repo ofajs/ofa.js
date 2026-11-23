@@ -1,0 +1,134 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>事件與表單</h1>
+      <p class="doc-lead">
+        事件綁定用 <code>on:</code>，一次性事件用 <code>one:</code>。
+        表單控件的值通過 <code>sync:</code> 與數據雙向同步。
+      </p>
+
+      <h2>綁定方法</h2>
+      <pre><code>&lt;button on:click="save"&gt;保存&lt;/button&gt;
+&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="add(5)"&gt;加 5&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;</code></pre>
+      <p>
+        純標識符（<code>save</code>）會被解析為 <code>proto</code> 方法並自動綁定
+        <code>this</code>。複雜表達式會直接執行。表達式裡的字符串字面量
+        必須加引號，否則會被當成變量名。
+      </p>
+
+      <h2>事件對象</h2>
+      <pre><code>&lt;input on:keydown="onKeydown($event)" /&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { draft: "" },
+    proto: {
+      onKeydown(event) {
+        if (event.key !== "Enter") return;
+        this.submit();
+      },
+      submit() {
+        console.log(this.draft);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        <code>$event</code> 是原生事件對象。自定義事件的數據在
+        <code>event.data</code> 中，網頁事件原有字段仍然可用。
+      </p>
+
+      <h2>一次性事件</h2>
+      <pre><code>&lt;img one:load="onImageReady" src="./cover.jpg" /&gt;
+&lt;div one:click="dismiss"&gt;點擊後解綁&lt;/div&gt;</code></pre>
+      <p>
+        <code>one:</code> 在第一次觸發後自動解綁，適合初始化、提示關閉等場景。
+      </p>
+
+      <h2>表單雙向綁定</h2>
+      <pre><code>&lt;input type="text" sync:value="form.name" placeholder="姓名" /&gt;
+&lt;input type="checkbox" sync:checked="form.agree" /&gt;
+&lt;select sync:value="form.city"&gt;
+  &lt;option value="shanghai"&gt;上海&lt;/option&gt;
+  &lt;option value="beijing"&gt;北京&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      <p>
+        <code>sync:</code> 只用於標量。表單對象可以整體放在 <code>data</code>
+        裡，但每個字段的綁定仍然要落到具體標量上。
+      </p>
+
+      <h2>提交表單</h2>
+      <pre><code>&lt;form on:submit="onSubmit($event)"&gt;
+  &lt;input sync:value="form.name" required /&gt;
+  &lt;button type="submit"&gt;保存&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { form: { name: "" } },
+    proto: {
+      onSubmit(event) {
+        event.preventDefault();
+        if (!this.form.name.trim()) return;
+        console.log("submit", this.form.name);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+
+      <h2>自定義事件</h2>
+      <p>組件或頁面主動拋事件：</p>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "張三" },
+  bubbles: true,   // 默認就是 true
+  composed: true,  // 需要穿出 Shadow DOM 時設置
+});</code></pre>
+      <p>使用方監聽並讀取 <code>event.data</code>：</p>
+      <pre><code>&lt;user-form on:save="onSaved"&gt;&lt;/user-form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { savedName: "" },
+    proto: {
+      onSaved(event) {
+        this.savedName = event.data.name;
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        內嵌在宿主 Shadow DOM 裡的 <code>o-page</code> 向上拋事件時，
+        <code>bubbles: true</code> 與 <code>composed: true</code> 必須同時存在，
+        否則宿主收不到。
+      </p>
+
+      <h2>命名建議</h2>
+      <ul>
+        <li>事件名用小寫短橫線：<code>data-changed</code>、<code>form-save</code>；</li>
+        <li>原生事件直接沿用 <code>click</code>、<code>input</code>、<code>submit</code>；</li>
+        <li>不要在事件名裡帶 <code>on</code> 前綴，模板已經用 <code>on:</code> 表達。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./binding.html">綁定與樣式 →</a>
+        　·　下一篇：<a olink href="./render.html">條件與列表 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

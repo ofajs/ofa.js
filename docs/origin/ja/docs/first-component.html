@@ -1,0 +1,158 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">はじめに</p>
+      <h1>はじめてのコンポーネント</h1>
+      <p class="doc-lead">
+        <code>.html</code> ファイルがそのままコンポーネントです。ブラウザが直接読み込みます。
+        コンパイルも、バンドルのエントリーポイントへの登録も不要です。
+      </p>
+
+      <h2>1. コンポーネントファイル</h2>
+      <p>
+        <code>my-counter.html</code> を作成します。コンポーネントモジュールは
+        <code>&lt;template component&gt;</code> を使い、<code>tag</code> でタグ名を宣言します:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{count}}&lt;/strong&gt;
+  &lt;button on:click="decrease"&gt;-&lt;/button&gt;
+  &lt;button on:click="increase"&gt;+&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initial: 0,
+      },
+      data: {
+        count: 0,
+      },
+      watch: {
+        initial(value) {
+          this.count = value;
+        },
+      },
+      ready() {
+        this.count = this.initial;
+      },
+      proto: {
+        increase() {
+          this.count += 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+        decrease() {
+          this.count -= 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <div class="doc-note">
+        <strong>script は template の内側に置きます。</strong>
+        ofa.js は <code>template[component]</code> または
+        <code>template[page]</code> の内側のスクリプトだけを抽出し、テンプレート外のスクリプトは無視します。
+      </div>
+
+      <h2>2. ページで使う</h2>
+      <p>
+        <code>&lt;l-m&gt;</code> でコンポーネントファイルをインポートし、通常の HTML タグのように使います。
+        タグ名は <code>tag</code> と一致している必要があります:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter initial="5" on:change="onCountChange"&gt;
+    現在のカウント
+  &lt;/my-counter&gt;
+
+  &lt;p&gt;最後の変更: {{lastChange}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { lastChange: "まだ変更はありません" },
+      proto: {
+        onCountChange(event) {
+          this.lastChange = event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>3. 区別しておきたい 3 つの要素</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>場所</th><th>目的</th><th>例</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tag</code></td>
+            <td>コンポーネントの HTML タグ名。必須</td>
+            <td><code>tag: "my-counter"</code></td>
+          </tr>
+          <tr>
+            <td><code>attrs</code></td>
+            <td>外部から渡されるスカラー属性</td>
+            <td><code>initial="5"</code></td>
+          </tr>
+          <tr>
+            <td><code>data</code></td>
+            <td>コンポーネント内部のリアクティブな状態</td>
+            <td><code>count: 0</code></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        <code>attrs</code> と <code>data</code> のキーは重複させてはいけません。配列やオブジェクトなどの
+        複雑なデータは <code>data</code> に置き、<code>:prop</code> で渡します。
+        <code>attrs</code> には文字列や数値などのスカラーのみを置きます。
+      </p>
+
+      <h2>4. スロットとイベント</h2>
+      <p>
+        コンポーネント内の <code>&lt;slot&gt;</code> は、利用側がコンポーネントのタグの間に書いた
+        内容を受け取ります。上記の <code>&lt;slot&gt;&lt;/slot&gt;</code> には「現在のカウント」が表示されます。
+      </p>
+      <p>
+        コンポーネントは <code>this.emit("change", { data })</code> で外へイベントを発行します。
+        利用側は <code>on:change</code> で購読し、<code>event.data</code> からペイロードを読み取ります。
+        イベントはデフォルトでバブルしますが、Shadow DOM の境界は越えません。越える必要がある場合は
+        <code>composed: true</code> を追加します。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./getting-started.html">インストール →</a>
+        · 次へ: <a olink href="./first-page.html">はじめてのページ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

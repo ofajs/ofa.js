@@ -1,0 +1,450 @@
+{
+  "meta": {
+    "lang": "es",
+    "language": "Español",
+    "title": "ofa.js — Escribe componentes como HTML",
+    "description": "ofa.js es un framework front-end sin compilación y sin dependencias basado en Web Components. Un archivo HTML es un componente que se ejecuta directamente en el navegador: no se necesita npm, Node.js ni ningún empaquetador.",
+    "noscript": "Esta página requiere JavaScript para ejecutar ofa.js.",
+    "order": 30
+  },
+  "shell": {
+    "nav": {
+      "tutorial": "Tutorial",
+      "docs": "Documentación",
+      "api": "API",
+      "blog": "Blog"
+    },
+    "actions": {
+      "nav": "Navegación principal",
+      "home": "Inicio",
+      "github": "GitHub",
+      "githubRepo": "Repositorio de GitHub",
+      "menu": "Alternar menú",
+      "languages": "Idiomas"
+    },
+    "footer": {
+      "tagline": "Un framework de Web Components sin compilación y sin dependencias. Escribe componentes como HTML y devuelve el desarrollo al navegador.",
+      "resources": "Recursos",
+      "ecosystem": "Ecosistema",
+      "community": "Comunidad",
+      "docs": "Documentación",
+      "plugins": "Complementos",
+      "note": "Esta página está construida con ofa.js."
+    },
+    "search": {
+      "label": "Buscar en el contenido del sitio",
+      "placeholder": "Buscar en documentación, tutoriales…",
+      "empty": "No hay contenido coincidente",
+      "loading": "Cargando el índice de búsqueda…"
+    },
+    "theme": {
+      "label": "Cambiar tema",
+      "light": "Modo claro",
+      "dark": "Modo oscuro",
+      "system": "Seguir al sistema"
+    }
+  },
+  "demo": {
+    "reset": "Reiniciar",
+    "kicker": "Hoy",
+    "heading": "Cosas por hacer",
+    "remainingSuffix": "pendientes",
+    "placeholder": "¿Qué quieres terminar hoy?",
+    "inputAria": "Nueva tarea",
+    "add": "Añadir",
+    "clear": "Borrar completadas",
+    "doneSuffix": "completadas",
+    "checkAria": "Marcar como completada",
+    "deleteAria": "Eliminar",
+    "todos": [
+      "Escribe tu primer componente en un solo archivo HTML",
+      "Renderiza la lista de tareas con o-fill",
+      "Sube la página a cualquier servidor estático"
+    ]
+  },
+  "toast": {
+    "copied": "Copiado al portapapeles",
+    "failed": "No se pudo copiar; selecciona el texto manualmente"
+  },
+  "docs": {
+    "label": "Documentación",
+    "overview": "Resumen de la documentación",
+    "onThisPage": "En esta página",
+    "nav": {
+      "start": {
+        "label": "Primeros pasos",
+        "items": {
+          "gettingStarted": "Instalación y configuración",
+          "firstComponent": "Tu primer componente",
+          "firstPage": "Tu primera página"
+        }
+      },
+      "basics": {
+        "label": "Componentes y páginas",
+        "items": {
+          "component": "Componentes",
+          "page": "Páginas",
+          "lifecycle": "Ciclo de vida"
+        }
+      },
+      "template": {
+        "label": "Sintaxis de plantillas",
+        "items": {
+          "template": "Resumen de directivas",
+          "binding": "Enlaces y estilos",
+          "events": "Eventos y formularios",
+          "render": "Condicionales y listas"
+        }
+      },
+      "data": {
+        "label": "Datos y estado",
+        "items": {
+          "data": "Datos y observadores",
+          "state": "Estado global",
+          "context": "Contexto entre componentes"
+        }
+      },
+      "app": {
+        "label": "Aplicaciones y enrutamiento",
+        "items": {
+          "app": "Aplicaciones o-app",
+          "routing": "Enrutamiento y navegación",
+          "nestedRouting": "Enrutamiento anidado",
+          "scsr": "scsr con rutas reales"
+        }
+      },
+      "reference": {
+        "label": "Referencia",
+        "items": {
+          "api": "$.fn y objetos envueltos",
+          "plugins": "Complementos y extensiones",
+          "pitfalls": "Errores comunes",
+          "examples": "Ejemplos completos",
+          "playground": "Área de pruebas en vivo",
+          "deployment": "Despliegue"
+        }
+      }
+    }
+  },
+  "pages": {
+    "docs/index.html": {
+      "title": "Documentación de ofa.js",
+      "description": "Resumen de la documentación de ofa.js v5: instalación, componentes, páginas, enrutamiento, estado y referencia de API."
+    },
+    "docs/getting-started.html": {
+      "title": "Instalación y configuración — Documentación de ofa.js",
+      "description": "Carga ofa.js v5 desde un CDN o un archivo local y ejecuta tu primera página."
+    },
+    "docs/first-component.html": {
+      "title": "Tu primer componente — Documentación de ofa.js",
+      "description": "Crea tu primer componente web personalizado y comprende etiqueta, datos, atributos y slot."
+    },
+    "docs/first-page.html": {
+      "title": "Tu primera página — Documentación de ofa.js",
+      "description": "Crea un módulo de página con template[page] y ejecútalo con o-page u o-app."
+    },
+    "docs/component.html": {
+      "title": "Componentes — Documentación de ofa.js",
+      "description": "Estructura de los componentes de ofa.js, atributos y datos, paso de propiedades, slots, eventos personalizados y reutilización de componentes."
+    },
+    "docs/page.html": {
+      "title": "Páginas — Documentación de ofa.js",
+      "description": "Módulos de página, parámetros de consulta, páginas hijas anidadas en o-page y división de páginas."
+    },
+    "docs/lifecycle.html": {
+      "title": "Ciclo de vida — Documentación de ofa.js",
+      "description": "Momento, orden y liberación de recursos para ready, attached, loaded y detached."
+    },
+    "docs/template.html": {
+      "title": "Resumen de directivas de plantilla — Documentación de ofa.js",
+      "description": "Tabla completa de las directivas de plantilla de ofa.js: interpolación, atributos, eventos, enlace bidireccional, condicionales y listas."
+    },
+    "docs/binding.html": {
+      "title": "Enlaces y estilos — Documentación de ofa.js",
+      "description": "La sintaxis correcta de attr:, :prop, sync:, class:, :style y los atributos booleanos."
+    },
+    "docs/events.html": {
+      "title": "Eventos y formularios — Documentación de ofa.js",
+      "description": "on:, one:, $event, enlace bidireccional de formularios, eventos personalizados y propagación de eventos."
+    },
+    "docs/render.html": {
+      "title": "Condicionales y listas — Documentación de ofa.js",
+      "description": "Renderizado condicional con o-if/o-else-if/o-else, listas o-fill y el ámbito $data."
+    },
+    "docs/data.html": {
+      "title": "Datos y observadores — Documentación de ofa.js",
+      "description": "Datos reactivos, getters calculados, observadores watch y casos límite habituales."
+    },
+    "docs/state.html": {
+      "title": "Estado global — Documentación de ofa.js",
+      "description": "Usa $.stanz() para crear un estado reactivo compartido entre páginas, y móntalo y límpialo correctamente."
+    },
+    "docs/context.html": {
+      "title": "Contexto entre componentes — Documentación de ofa.js",
+      "description": "o-provider, o-consumer, o-root-provider, getProvider y dispatch."
+    },
+    "docs/app.html": {
+      "title": "Aplicaciones o-app — Documentación de ofa.js",
+      "description": "Configuración de o-app, pila de páginas, animaciones de transición, estados de carga y error, y extensión de proto."
+    },
+    "docs/routing.html": {
+      "title": "Enrutamiento y navegación — Documentación de ofa.js",
+      "description": "goto/replace/back, olink, parámetros de consulta, enrutamiento hash con o-router y router-change."
+    },
+    "docs/nested-routing.html": {
+      "title": "Enrutamiento anidado — Documentación de ofa.js",
+      "description": "Enrutamiento anidado de varios niveles con diseños compartidos mediante export const parent y slots."
+    },
+    "docs/scsr.html": {
+      "title": "Enrutamiento con rutas reales mediante scsr — Documentación de ofa.js",
+      "description": "Usa scsr para que cada URL sea un documento completo y accesible directamente, ideal para SEO y para compartir."
+    },
+    "docs/api.html": {
+      "title": "$.fn y objetos envueltos — Documentación de ofa.js",
+      "description": "La API de objetos envueltos de ofa.js: selección, recorrido del árbol, operaciones DOM, eventos, propiedades y extensión."
+    },
+    "docs/plugins.html": {
+      "title": "Complementos y extensiones — Documentación de ofa.js",
+      "description": "Cómo cargar los complementos opcionales de ofa.js —formData, inject-host, body-ghost y global-link— y cuándo usarlos."
+    },
+    "docs/pitfalls.html": {
+      "title": "Errores comunes y solución de problemas — Documentación de ofa.js",
+      "description": "Solución de problemas de ReferenceError, conflictos con nombres reservados, atributos booleanos, src de o-page y problemas de caché."
+    },
+    "docs/examples.html": {
+      "title": "Ejemplos completos — Documentación de ofa.js",
+      "description": "Cuatro ejemplos completos: una aplicación mínima, un componente personalizado, una lista de tareas y una aplicación con enrutamiento."
+    },
+    "docs/playground.html": {
+      "title": "Área de pruebas en vivo — Documentación de ofa.js",
+      "description": "Edita y ejecuta módulos de página de ofa.js en línea dentro de un contenedor virtual de NoneOS Core."
+    },
+    "docs/deployment.html": {
+      "title": "Despliegue — Documentación de ofa.js",
+      "description": "Aspectos a tener en cuenta al desplegar una aplicación ofa.js en cualquier servidor estático, CDN o subdirectorio."
+    },
+    "tutorial/index.html": {
+      "title": "Tutorial de ofa.js",
+      "description": "Un tutorial progresivo de ofa.js en 20 lecciones: desde tu primera página hasta componentes, contexto, estado, enrutamiento y un proyecto completo."
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · Tu primera página — Tutorial de ofa.js",
+      "description": "En ofa.js una página es solo un archivo HTML: estructura, estilos y lógica conviven en un mismo archivo."
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · Datos e interpolación — Tutorial de ofa.js",
+      "description": "data puede contener cadenas, números, booleanos, objetos y arrays; {{ }} también admite expresiones simples."
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · Atributos dinámicos — Tutorial de ofa.js",
+      "description": "Usa attr: para los atributos HTML y :prop para las propiedades del DOM; los atributos booleanos deben usar attr:."
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · Estilos y clases — Tutorial de ofa.js",
+      "description": "<style> en una página solo se aplica a esa página; class: y :style permiten que los estilos sigan los cambios de los datos."
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · Eventos — Tutorial de ofa.js",
+      "description": "Escucha eventos con on:; usa expresiones para la lógica simple y métodos de proto para la lógica compleja."
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · Enlace bidireccional — Tutorial de ofa.js",
+      "description": "sync: mantiene formularios y datos sincronizados en ambos sentidos; funciona mejor con valores escalares."
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · Renderizado condicional — Tutorial de ofa.js",
+      "description": "o-if / o-else-if / o-else controlan si el contenido existe."
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · Renderizado de listas — Tutorial de ofa.js",
+      "description": "o-fill renderiza arrays; usa $data, $index y $host dentro de los elementos de la lista."
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · Edición de listas — Tutorial de ofa.js",
+      "description": "push/splice en los arrays actualizan la vista automáticamente; la edición en línea se sincroniza directamente con los campos de $data."
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · Propiedades calculadas y observadores — Tutorial de ofa.js",
+      "description": "Los getters de proto calculan de forma síncrona; watch observa los cambios y gestiona los efectos secundarios."
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · Ciclo de vida — Tutorial de ofa.js",
+      "description": "ready → attached → loaded y, al eliminar el elemento, detached; limpia temporizadores y escuchadores en detached."
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · Tu primer componente — Tutorial de ofa.js",
+      "description": "Divide la interfaz reutilizable en <template component> y cárgala con l-m."
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · Parámetros de componente — Tutorial de ofa.js",
+      "description": "Pasa datos externos a un componente mediante attrs; mantén el estado interno en data."
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · Slots y eventos — Tutorial de ofa.js",
+      "description": "los slots permiten que un componente reciba contenido externo; emit comunica al exterior lo que ocurre dentro."
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · Contexto entre niveles — Tutorial de ofa.js",
+      "description": "Comparte datos en todo un subárbol de componentes con o-provider / o-consumer."
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · Estado global — Tutorial de ofa.js",
+      "description": "Cuando varios componentes comparten estado, crea un almacén a nivel de módulo con $.stanz y móntalo y límpialo en attached/detached."
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · Páginas y enrutamiento — Tutorial de ofa.js",
+      "description": "o-app gestiona la pila de páginas: cambia de página con olink / goto, pasa parámetros de consulta y retrocede con back."
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · Diseños anidados — Tutorial de ofa.js",
+      "description": "Las páginas hijas declaran un parent y el padre usa un slot para alojarlas; el padre sobrevive a los cambios de página hija."
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · Asincronía y estados de carga — Tutorial de ofa.js",
+      "description": "Controla la interfaz con estados loading / error / success para las peticiones asíncronas, y nunca pongas resultados asíncronos en getters."
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · Todo junto: lista de tareas — Tutorial de ofa.js",
+      "description": "Combina listas, formularios, condicionales, propiedades calculadas, observadores y localStorage en una aplicación completa."
+    },
+    "api/index.html": {
+      "title": "Referencia de API — API de ofa.js",
+      "description": "Todos los miembros de instancia, los miembros estáticos globales y ejemplos en vivo."
+    },
+    "api/instance.html": {
+      "title": "Fundamentos de instancia — API de ofa.js",
+      "description": "Una instancia es a la vez un envoltorio del DOM, datos reactivos y una colección de elementos hijos. Empieza por sus propiedades básicas."
+    },
+    "api/traverse.html": {
+      "title": "Selección y recorrido — API de ofa.js",
+      "description": "Encuentra elementos dentro de una instancia y desplázate a través de los límites del DOM y del shadow DOM."
+    },
+    "api/structure.html": {
+      "title": "Operaciones de estructura — API de ofa.js",
+      "description": "Opera sobre los elementos hijos con semántica de arrays; los métodos mutadores realmente mueven nodos del DOM y desencadenan actualizaciones."
+    },
+    "api/props.html": {
+      "title": "Contenido, atributos y estilos — API de ofa.js",
+      "description": "Lee y escribe texto, HTML, atributos, clases y estilos en línea."
+    },
+    "api/events.html": {
+      "title": "Eventos — API de ofa.js",
+      "description": "Vincula, desvincula y despacha eventos con métodos de instancia; los eventos pueden llevar datos de carga útil y cruzar los límites del shadow DOM."
+    },
+    "api/reactive.html": {
+      "title": "Datos y observadores — API de ofa.js",
+      "description": "Los datos de una instancia provienen de stanz: leer y escribir campos es reactivo, con métodos dedicados para la observación y la limpieza."
+    },
+    "api/context.html": {
+      "title": "Comunicación por contexto — API de ofa.js",
+      "description": "o-provider coloca datos en un subárbol y o-consumer consume el más cercano; los métodos de instancia también pueden buscar proveedores."
+    },
+    "api/global.html": {
+      "title": "Miembros estáticos del $ global — API de ofa.js",
+      "description": "Selectores, registro, reactividad, renderizado e información de versión en el $ global."
+    },
+    "api/extend.html": {
+      "title": "Extensión de instancias — API de ofa.js",
+      "description": "Añade métodos, getters y nuevas directivas a una sola instancia o a todas las instancias."
+    },
+    "api/app.html": {
+      "title": "o-app y o-page — API de ofa.js",
+      "description": "El contenedor de la aplicación gestiona la pila de páginas y la navegación; una instancia de página gestiona su propia pantalla de contenido."
+    },
+    "blog/index.html": {
+      "title": "Blog — ofa.js",
+      "description": "Notas de ingeniería de ofa.js: versiones, rendimiento, arquitectura y práctica."
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "¿Cuánto mejor es ofa.js v5 que v4? — ofa.js",
+      "description": "Un análisis riguroso de lo que cambió entre ofa.js v4 y v5: arquitectura, renderizado, rendimiento de listas, enrutamiento y experiencia de desarrollo."
+    }
+  },
+  "tutorial": {
+    "label": "Tutorial",
+    "overview": "Resumen del tutorial",
+    "groups": {
+      "start": {
+        "label": "Primeros pasos",
+        "lessons": {
+          "lesson1": "01 · Tu primera página",
+          "lesson2": "02 · Datos e interpolación",
+          "lesson3": "03 · Atributos dinámicos",
+          "lesson4": "04 · Estilos y clases"
+        }
+      },
+      "interact": {
+        "label": "Interacción y estado",
+        "lessons": {
+          "lesson5": "05 · Eventos",
+          "lesson6": "06 · Enlace bidireccional",
+          "lesson7": "07 · Renderizado condicional",
+          "lesson8": "08 · Renderizado de listas",
+          "lesson9": "09 · Edición de listas",
+          "lesson10": "10 · Propiedades calculadas y observadores",
+          "lesson11": "11 · Ciclo de vida"
+        }
+      },
+      "component": {
+        "label": "Componentes",
+        "lessons": {
+          "lesson12": "12 · Tu primer componente",
+          "lesson13": "13 · Parámetros de componente",
+          "lesson14": "14 · Slots y eventos"
+        }
+      },
+      "app": {
+        "label": "Aplicaciones en la práctica",
+        "lessons": {
+          "lesson15": "15 · Contexto entre niveles",
+          "lesson16": "16 · Estado global",
+          "lesson17": "17 · Páginas y enrutamiento",
+          "lesson18": "18 · Diseños anidados",
+          "lesson19": "19 · Asincronía y estados de carga",
+          "lesson20": "20 · Todo junto: lista de tareas"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "Referencia de API",
+    "overview": "Resumen de la API",
+    "groups": {
+      "instance": {
+        "label": "Instancia",
+        "items": {
+          "instance": "Fundamentos de instancia",
+          "traverse": "Selección y recorrido",
+          "structure": "Operaciones de estructura"
+        }
+      },
+      "props": {
+        "label": "Propiedades y eventos",
+        "items": {
+          "props": "Contenido, propiedades y estilos",
+          "events": "Eventos"
+        }
+      },
+      "data": {
+        "label": "Datos y extensiones",
+        "items": {
+          "reactive": "Datos y observadores",
+          "context": "Comunicación por contexto",
+          "global": "Miembros estáticos del $ global",
+          "extend": "Extensión de instancias"
+        }
+      },
+      "app": {
+        "label": "Aplicación y páginas",
+        "items": {
+          "app": "o-app y o-page"
+        }
+      }
+    }
+  },
+  "skill": {
+    "label": "Agente",
+    "copyAria": "Copiar la URL del Agent Skill",
+    "hint": "Copia la URL del paquete de skill para un agente compatible con Agent Skills."
+  }
+}

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tu primer componente — Documentación de ofa.js</title>
+    <meta name="description" content="Crea tu primer componente web personalizado y comprende etiqueta, datos, atributos y slot." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tu primer componente — Documentación de ofa.js" />
+    <meta property="og:description" content="Crea tu primer componente web personalizado y comprende etiqueta, datos, atributos y slot." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Primeros pasos</p>
+      <h1>Tu primer componente</h1>
+      <p class="doc-lead">
+        Un archivo <code>.html</code> es un componente. El navegador lo carga directamente:
+        sin compilación y sin registro en un punto de entrada de empaquetado.
+      </p>
+
+      <h2>1. El archivo del componente</h2>
+      <p>
+        Crea <code>my-counter.html</code>. Un módulo de componente usa
+        <code>&lt;template component&gt;</code> y declara su nombre de etiqueta con
+        <code>tag</code>:
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;style&gt;
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+    }
+  &lt;/style&gt;
+
+  &lt;span&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/span&gt;
+  &lt;strong&gt;{{count}}&lt;/strong&gt;
+  &lt;button on:click="decrease"&gt;-&lt;/button&gt;
+  &lt;button on:click="increase"&gt;+&lt;/button&gt;
+
+  &lt;script&gt;
+    export default {
+      tag: "my-counter",
+      attrs: {
+        initial: 0,
+      },
+      data: {
+        count: 0,
+      },
+      watch: {
+        initial(value) {
+          this.count = value;
+        },
+      },
+      ready() {
+        this.count = this.initial;
+      },
+      proto: {
+        increase() {
+          this.count += 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+        decrease() {
+          this.count -= 1;
+          this.emit("change", { data: { value: this.count } });
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <div class="doc-note">
+        <strong>El script debe estar dentro de la plantilla.</strong>
+        ofa.js solo extrae los scripts que están dentro de <code>template[component]</code> o
+        <code>template[page]</code>; los scripts fuera de la plantilla se ignoran.
+      </div>
+
+      <h2>2. Usarlo en una página</h2>
+      <p>
+        Importa el archivo del componente con <code>&lt;l-m&gt;</code> y luego úsalo como una etiqueta HTML normal.
+        El nombre de la etiqueta debe coincidir con <code>tag</code>:
+      </p>
+      <pre><code>&lt;template page&gt;
+  &lt;l-m src="./my-counter.html"&gt;&lt;/l-m&gt;
+
+  &lt;my-counter initial="5" on:change="onCountChange"&gt;
+    Recuento actual
+  &lt;/my-counter&gt;
+
+  &lt;p&gt;Último cambio: {{lastChange}}&lt;/p&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { lastChange: "Aún sin cambios" },
+      proto: {
+        onCountChange(event) {
+          this.lastChange = event.data.value;
+        },
+      },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>3. Tres cosas que conviene distinguir</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Dónde</th><th>Propósito</th><th>Ejemplo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tag</code></td>
+            <td>El nombre de etiqueta HTML del componente; obligatorio</td>
+            <td><code>tag: "my-counter"</code></td>
+          </tr>
+          <tr>
+            <td><code>attrs</code></td>
+            <td>Atributos escalares pasados desde fuera</td>
+            <td><code>initial="5"</code></td>
+          </tr>
+          <tr>
+            <td><code>data</code></td>
+            <td>Estado reactivo interno del componente</td>
+            <td><code>count: 0</code></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>
+        Las claves de <code>attrs</code> y <code>data</code> no deben solaparse. Coloca los datos complejos,
+        como arrays y objetos, en <code>data</code> y pásalos con <code>:prop</code>;
+        <code>attrs</code> contiene solo escalares como cadenas y números.
+      </p>
+
+      <h2>4. Slots y eventos</h2>
+      <p>
+        Un <code>&lt;slot&gt;</code> dentro del componente recibe el contenido que los consumidores
+        escriben entre las etiquetas del componente. El <code>&lt;slot&gt;&lt;/slot&gt;</code> de arriba
+        renderiza «Recuento actual».
+      </p>
+      <p>
+        Los componentes emiten eventos hacia fuera con <code>this.emit("change", { data })</code>;
+        los consumidores los escuchan con <code>on:change</code> y leen la carga útil desde
+        <code>event.data</code>. Los eventos burbujean de forma predeterminada pero no cruzan el límite
+        del Shadow DOM; añade <code>composed: true</code> cuando necesiten hacerlo.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./getting-started.html">Instalación →</a>
+        · Siguiente: <a olink href="./first-page.html">Tu primera página →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

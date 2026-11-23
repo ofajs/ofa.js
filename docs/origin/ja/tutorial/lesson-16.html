@@ -1,0 +1,59 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 16</p>
+      <h1>グローバル状態</h1>
+      <p class="doc-lead">複数のコンポーネントが同じ状態を共有するときは、$.stanz でモジュールレベルのストアを作り、attached でマウントし、detached でクリーンアップします。</p>
+
+      <p>
+  コンポーネント自身の <code>data</code> はそのコンポーネントだけのものです。複数のコンポーネントが
+  同じデータを読み書きする必要があるときは、<code>$.stanz()</code> でリアクティブなストアを作り、
+  別モジュールから共有します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
+<h2>3つのファイル</h2>
+<ul>
+  <li><code>store.mjs</code>: <code>$.stanz({ count: 0 })</code> だけをエクスポートします。</li>
+  <li><code>counter-panel.html</code>: 2つのコンポーネントインスタンスが同じストアを参照します。</li>
+  <li><code>page.html</code>: パネル2つと、増加・減少のボタンを配置します。</li>
+</ul>
+<p>
+  <code>attached</code> では各コンポーネントが <code>this.sharedState = store</code> を直接設定し、
+  <code>detached</code> では <code>this.sharedState = {}</code> で参照をクリアします。
+  テンプレートは <code>sharedState.label</code> と <code>sharedState.count</code> を直接読み取り、
+  ストアが変わると両方のパネルが自動的に更新されます。
+</p>
+<div class="doc-note">
+  <strong>慣習:</strong> <code>data</code> にプレースホルダーの <code>sharedState: {}</code> を先に宣言し、
+  <code>attached</code> フェーズでストアをマウントし、<code>detached</code> フェーズでクリアします。
+  そうして初めて、メモリリークや、コンポーネント破棄後に残る古い参照を避けられます。
+</div>
+<div class="doc-note">
+  <strong>使い分け:</strong> データがアプリ全体ではなく1つのコンポーネントサブツリーに属するなら、
+  前のレッスンの <code>o-provider</code> / <code>o-consumer</code> が適しています。
+  <a olink href="./lesson-15.html">階層をまたぐコンテキスト</a> を参照してください。
+</div>
+<h2>自分で試してみよう</h2>
+<p>
+  ストアに <code>step</code> を追加して、「+1」ボタンが毎回 <code>store.step</code> を
+  加算するようにしましょう。次に、step を 5 に設定するボタンを追加してください。
+</p>
+
+      <p class="doc-end">前: <a olink href="./lesson-15.html">15 · 階層をまたぐコンテキスト →</a> · 次: <a olink href="./lesson-17.html">17 · ページとルーティング →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

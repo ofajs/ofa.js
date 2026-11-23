@@ -1,0 +1,165 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Template</p>
+      <h1>條件與列表</h1>
+      <p class="doc-lead">
+        <code>o-if</code> 控制內容是否存在，<code>o-fill</code> 按數組渲染列表。
+        兩者都是元素駐留實現，理解作用域和 DOM 結構很重要。
+      </p>
+
+      <h2>條件渲染</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;大於 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;大於 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;小於等於 5&lt;/p&gt;
+&lt;/o-else&gt;</code></pre>
+      <ul>
+        <li>三個標籤必須<strong>連續書寫</strong>，中間不能插入其他元素；</li>
+        <li><code>o-else</code> 不帶 <code>value</code>；</li>
+        <li>條件為假時內容被移除，為真時重新創建；</li>
+        <li>頻繁顯隱且需要保留 DOM 狀態時，用 <code>class:</code> 切換更合適。</li>
+      </ul>
+
+      <h2>o-fill 基礎</h2>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+      &lt;span&gt;{{$data.text}}&lt;/span&gt;
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        <code>fill-key</code> 指向列表項的唯一字段。加上它，增刪和排序時
+        節點會按 key 複用，項內的輸入狀態不會丟失；沒有唯一字段時才省略。
+      </p>
+
+      <h2>列表項作用域</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>變量</th><th>含義</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$data</code></td><td>當前項數據</td></tr>
+          <tr><td><code>$index</code></td><td>當前項索引，從 0 開始</td></tr>
+          <tr><td><code>$host</code></td><td>宿主頁面/組件實例，用來調用 proto 方法</td></tr>
+          <tr><td><code>$parent</code></td><td>嵌套 o-fill 時外層項的數據</td></tr>
+          <tr><td><code>$ele</code></td><td>當前項元素</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>o-fill 內不能寫自定義項名。</strong>
+        列表項裡只能用 <code>$data.text</code>，不能寫 <code>item.text</code>
+        或 <code>row.text</code>。根級（o-fill 外）沒有這些變量，
+        直接用 data 字段和 proto 方法名。
+      </div>
+
+      <h2>嵌套列表</h2>
+      <pre><code>&lt;o-fill :value="groups" fill-key="id"&gt;
+  &lt;section&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;o-fill :value="$data.items" fill-key="id"&gt;
+      &lt;p&gt;{{$parent.name}} / {{$data.name}}&lt;/p&gt;
+    &lt;/o-fill&gt;
+  &lt;/section&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        內層 <code>$data</code> 是子項，<code>$parent</code> 是外層分組。
+      </p>
+
+      <h2>命名模板</h2>
+      <p>
+        結構複雜或需要複用時，把列表項寫進頂層
+        <code>&lt;template name&gt;</code>，再用 <code>o-fill name</code> 引用：
+      </p>
+      <pre><code>&lt;o-fill :value="products" name="product-card" fill-key="id"&gt;&lt;/o-fill&gt;
+
+&lt;template name="product-card"&gt;
+  &lt;article class="card"&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;p&gt;¥{{$data.price}}&lt;/p&gt;
+    &lt;button on:click="$host.addToCart($data.id)"&gt;加入購物車&lt;/button&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+      <p>命名模板必須放在 <code>o-fill</code> 外部，通常放在頁面模板的頂層。</p>
+      <p>
+        命名模板也可以引用自己，用來渲染樹形結構：
+      </p>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="tree" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+&lt;/ul&gt;
+
+&lt;template name="tree-node"&gt;
+  &lt;li&gt;
+    {{$data.name}}
+    &lt;ul&gt;
+      &lt;o-fill :value="$data.children" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>select 與 table 的 replace-temp</h2>
+      <p>
+        瀏覽器解析器會把 <code>&lt;select&gt;</code>、<code>&lt;table&gt;</code>
+        內不符合白名單的元素修正掉。直接在裡面寫 <code>o-fill</code>
+        會渲染失敗，需要 <code>&lt;template is="replace-temp"&gt;</code>：
+      </p>
+      <pre><code>&lt;select&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="cities"&gt;
+      &lt;option&gt;{{$data}}&lt;/option&gt;
+    &lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/select&gt;</code></pre>
+      <p>表格行必須配合命名模板：</p>
+      <pre><code>&lt;tbody&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="rows" name="table-row"&gt;&lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/tbody&gt;
+
+&lt;template name="table-row"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;{{$data.name}}&lt;/td&gt;
+    &lt;td&gt;{{$data.desc}}&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>DOM 結構提醒</h2>
+      <p>
+        <code>o-if</code> 與 <code>o-fill</code> 使用
+        <code>display: contents</code>，元素本體仍然留在 DOM 中。
+        因此 CSS 子選擇器會隔著它們：<code>.container &gt; .item</code>
+        匹配不到 <code>o-if</code> 裡的 item；<code>table.rows</code>
+        也不會統計 <code>o-fill</code> 生成的行。遇到選擇器失效時，
+        改用後代選擇器或調整結構。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./events.html">事件與表單 →</a>
+        　·　下一篇：<a olink href="./data.html">數據與偵聽 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

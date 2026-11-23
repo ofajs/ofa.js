@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 13</p>
+      <h1>Parámetros de componente</h1>
+      <p class="doc-lead">Los datos externos llegan al componente a través de attrs; el componente guarda su propio estado en data.</p>
+
+      <p>
+  Los atributos que un componente recibe del exterior se declaran en <code>attrs</code> con valores predeterminados;
+  el estado que cambia dentro del componente vive en <code>data</code>. Los nombres de ambos no deben coincidir.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-13" fold-styles="true"></docs-playground>
+<h2>attrs frente a data</h2>
+<ul>
+  <li><code>attrs</code>: valores escalares que se pasan desde fuera (nombre, rol, nivel inicial);
+    se reflejan en los atributos HTML;</li>
+  <li><code>data</code>: el estado reactivo propio del componente; el código externo no lo modifica directamente;</li>
+  <li>en el ejemplo, <code>startLevel</code> es una cadena y el componente la convierte en un número con
+    <code>Number()</code>.</li>
+</ul>
+<div class="doc-note">
+  <strong>No modifiques attrs directamente:</strong> un componente hijo trata <code>attrs</code> como una entrada de solo lectura.
+  Si necesitas un estado derivado, cópialo en <code>data</code>. Así se mantiene clara la fuente de los datos y
+  se evita que el padre y el hijo se sobrescriban mutuamente.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade un campo de datos <code>level</code> y una entrada a la página, luego pásalo al segundo componente
+  de forma dinámica con <code>attr:start-level="level"</code>.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-12.html">12 · Tu primer componente →</a> · Siguiente: <a olink href="./lesson-14.html">14 · Slots y eventos →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

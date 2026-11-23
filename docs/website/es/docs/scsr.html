@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enrutamiento con rutas reales mediante scsr — Documentación de ofa.js</title>
+    <meta name="description" content="Usa scsr para que cada URL sea un documento completo y accesible directamente, ideal para SEO y para compartir." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enrutamiento con rutas reales mediante scsr — Documentación de ofa.js" />
+    <meta property="og:description" content="Usa scsr para que cada URL sea un documento completo y accesible directamente, ideal para SEO y para compartir." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento con rutas reales mediante scsr</h1>
+      <p class="doc-lead">
+        scsr hace que cada URL sea un documento HTML real que se puede abrir
+        directamente. La navegación dentro del sitio sigue pasando por el
+        enrutamiento de la aplicación, pero las recargas, el uso compartido y
+        los rastreadores obtienen todo el contenido.
+      </p>
+
+      <h2>En qué se diferencia de o-router</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Capacidad</th><th>o-router</th><th>scsr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Forma de la URL</td><td><code>#/pages/a.html</code></td><td><code>/pages/a.html</code></td></tr>
+          <tr><td>Reescritura en el servidor</td><td>No es necesaria</td><td>Un HTML por ruta</td></tr>
+          <tr><td>SEO / visible sin JS</td><td>Más débil</td><td>HTML completo de la primera pantalla</td></tr>
+          <tr><td>API de páginas</td><td colspan="2">Igual: goto / replace / back / diseños anidados / animaciones</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Estructura de la página</h2>
+      <p>
+        Cada URL se corresponde con un documento HTML completo, con el contenido
+        de la página incluido en línea en el <code>&lt;template page&gt;</code>
+        de <code>o-app</code>:
+      </p>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;Inicio&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/scsr/dist/scsr.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-app src="./app-config.js"&gt;
+      &lt;template page&gt;
+        &lt;h1&gt;Contenido de inicio&lt;/h1&gt;
+        &lt;a olink href="./detail.html"&gt;Ir a los detalles&lt;/a&gt;
+      &lt;/template&gt;
+    &lt;/o-app&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>La configuración de la aplicación no declara home</h2>
+      <pre><code>// app-config.js
+export const pageAnime = {
+  current: { opacity: 1 },
+  next: { opacity: 0 },
+  previous: { opacity: 0 },
+};</code></pre>
+      <p>
+        scsr adopta la URL actual como página, y la página de inicio es el HTML
+        de esa URL, así que no configures <code>home</code>. Navega dentro del
+        sitio con <code>olink</code> o <code>goto()</code>, manteniendo rutas
+        reales como direcciones.
+      </p>
+
+      <h2>Requisitos del servidor</h2>
+      <ul>
+        <li>cada ruta devuelve su HTML correspondiente con <code>Content-Type: text/html; charset=UTF-8</code>;</li>
+        <li>el <code>&lt;template page&gt;</code> de la página puede contener contenido estático renderizado en el servidor;</li>
+        <li>CSS, JS e imágenes se sirven como recursos estáticos normales;</li>
+        <li>scsr debe cargarse después de ofa.js, ya que se conecta al <code>$</code> global existente de la página.</li>
+      </ul>
+
+      <h2>Respaldo y primera pantalla</h2>
+      <p>
+        Sin JS, la página sigue siendo el HTML completo producido por el
+        servidor; solo la lógica interactiva no se ejecuta. Con JS, scsr toma el
+        control, convierte la URL actual en una página dentro de la aplicación y
+        la navegación posterior ya no necesita recargar la página completa.
+      </p>
+
+      <h2>Cuándo elegirlo</h2>
+      <ul>
+        <li>sitios que necesitan SEO y enlaces compartibles, como sitios de marketing, documentación y blogs;</li>
+        <li>cada página tiene su propia URL y su propia metainformación;</li>
+        <li>ya dispones de plantillas de servidor o SSG que pueden generar HTML por ruta.</li>
+      </ul>
+      <p>
+        Para aplicaciones puramente internas que no necesitan indexación en
+        buscadores, o-router es más sencillo.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./nested-routing.html">Enrutamiento anidado →</a>
+         · Siguiente: <a olink href="./api.html">$.fn y objetos envueltos →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

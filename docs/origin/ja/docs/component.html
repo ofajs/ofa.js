@@ -1,0 +1,140 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">基本概念</p>
+      <h1>コンポーネント</h1>
+      <p class="doc-lead">
+        コンポーネントは再利用可能な Web Component のモジュールです。独自の Shadow DOM、
+        リアクティブなデータ、外部から渡される attrs、外へイベントを発行するインターフェースを持ちます。
+      </p>
+
+      <h2>モジュールの契約</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>フィールド</th><th>必須</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>はい</td><td>コンポーネントのタグ名。使用時と一致している必要があります</td></tr>
+          <tr><td><code>attrs</code></td><td>いいえ</td><td>外部から渡されるスカラー属性。HTML 属性に反映されます</td></tr>
+          <tr><td><code>data</code></td><td>いいえ</td><td>内部のリアクティブな状態。オブジェクトや配列をそのまま置けます</td></tr>
+          <tr><td><code>proto</code></td><td>いいえ</td><td>メソッド、getter/setter</td></tr>
+          <tr><td><code>watch</code></td><td>いいえ</td><td>data/attrs の変更を監視</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>いいえ</td><td>ライフサイクルフック</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        <code>tag</code> を宣言しない場合、フレームワークはファイル名からタグ名を推測します:
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>。
+        ただし、ファイルの名前変更や移動でコンポーネントの公開タグが黙って変わらないよう、
+        明示的に宣言することをおすすめします。
+      </p>
+
+      <h2>attrs と data</h2>
+      <p>
+        <code>attrs</code> はコンポーネントの公開入力で、文字列、数値、真偽値に適しています。
+        <code>data</code> はコンポーネントの内部状態で、配列やオブジェクトに適しています。
+        両者のキーは重複させてはいけません:
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>外部から渡すときは、ケバブケースの名前が自動的にキャメルケースのフィールドにマッピングされます:</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        動的な値は <code>:</code> プレフィックスで渡します。真偽値属性には <code>attr:</code> を使います:
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>コンポーネントのインポート</h2>
+      <p>
+        ページテンプレートの先頭で <code>&lt;l-m&gt;</code> を使い、コンポーネントファイルを
+        非同期にインポートします。即座に制御を返すため、ページの初回レンダリングをブロックしません:
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        使用前にコンポーネントが登録されていることを保証したい場合は、
+        モジュール関数内で <code>await load()</code> を呼びます:
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>スロット</h2>
+      <pre><code>&lt;!-- コンポーネント内 --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;デフォルトのタイトル&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- 利用側 --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;Alice&lt;/h3&gt;
+  &lt;p&gt;これはデフォルトスロットの内容です&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        デフォルトスロットは <code>slot</code> 属性を持たない子ノードを受け取ります。名前付きスロットは
+        <code>slot="name"</code> に一致し、スロットにはフォールバックコンテンツを入れられます。
+      </p>
+
+      <h2>カスタムイベント</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Alice" },
+});</code></pre>
+      <p>
+        イベントはデフォルトで <code>bubbles: true</code>、<code>composed: false</code> です。
+        イベントが Shadow DOM の外へ出る必要がある場合は、<code>composed: true</code> を明示的に設定します。
+        ページが <code>o-page</code> をネストする場合に特によくあります。
+      </p>
+
+      <p>
+        コンポーネントの <code>PATH</code> は登録ファイルの URL を指します。コンポーネントテンプレート内の
+        相対リソース（<code>img src</code> や <code>style url()</code> など）は、利用するページの
+        URL ではなく <code>PATH</code> を基準に解決されます。
+      </p>
+
+      <h2>スタイルの分離</h2>
+      <p>
+        コンポーネントテンプレート内の <code>&lt;style&gt;</code> は、そのコンポーネント自身の
+        Shadow DOM 内にのみ適用されます。ルートノードを選択するには <code>:host</code> を使います。
+        <code>::slotted()</code> はスロットコンテンツの第 1 階層にしか届きません。より深い階層まで
+        届かせる必要がある場合は <code>inject-host</code> プラグインを使います。
+      </p>
+
+      <h2>命名の制約</h2>
+      <p>
+        <code>tag</code> は既存のコンポーネントと重複してはいけません。<code>data</code>/<code>proto</code>
+        では <code>back</code>、<code>goto</code>、<code>replace</code>、<code>src</code>、<code>on</code>、
+        <code>emit</code> などの組み込み予約名を使用できません。
+        名前が重複すると登録は即座に失敗します。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./first-page.html">はじめてのページ →</a>
+        · 次へ: <a olink href="./page.html">ページ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

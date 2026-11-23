@@ -1,0 +1,106 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc docs-intro">
+        <p class="doc-kicker">ドキュメント</p>
+        <h1>ofa.js ドキュメント</h1>
+        <p class="doc-lead">
+          1 つの script タグから、コンポーネント、ページ、テンプレート、状態、ルーティング、デプロイまで。
+          ドキュメントは実際に使う順番で並んでいます。必要な章は左の目次から直接開くこともできます。
+        </p>
+
+        <div class="docs-list">
+          <a class="docs-row" olink href="./getting-started.html">
+            <span class="num">01</span>
+            <h2>インストール</h2>
+            <p>CDN またはローカルの dist ビルドから ofa.js を読み込み、最初のページを動かします。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>はじめてのコンポーネント</h2>
+            <p>カスタム Web コンポーネントを作成し、tag・attrs・data・スロットを理解します。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="./template.html">
+            <span class="num">03</span>
+            <h2>テンプレートディレクティブ概要</h2>
+            <p>補間、属性、イベント、双方向バインディング、条件分岐、リストをまとめて学びます。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>ルーティングとナビゲーション</h2>
+            <p>o-app のページスタック、goto/replace/back、o-router、ネストしたレイアウト。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn とラップされたオブジェクト</h2>
+            <p>選択、ツリー探索、DOM 操作、イベント、stanz、インスタンス拡張。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="../api/">
+            <span class="num">06</span>
+            <h2>API リファレンス</h2>
+            <p>インスタンスメンバー、グローバル静的メンバー、実行可能な VSCode の例。</p>
+            <span class="more">API へ →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">07</span>
+            <h2>完全なサンプル</h2>
+            <p>最小限のページ、カスタムコンポーネント、Todo リスト、ルーティングアプリ。</p>
+            <span class="more">読み始める →</span>
+          </a>
+
+          <a class="docs-row" olink href="./playground.html">
+            <span class="num">08</span>
+            <h2>プレイグラウンド</h2>
+            <p>NoneOS 仮想コンテナ内で ofa.js のページモジュールを編集・実行します。</p>
+            <span class="more">プレイグラウンドを開く →</span>
+          </a>
+        </div>
+
+        <h2>ドキュメントで扱う内容</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>章</th><th>内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>はじめに</td><td>インストール、はじめてのコンポーネント、はじめてのページ</td></tr>
+            <tr><td>コンポーネントとページ</td><td>コンポーネントの契約、ページモジュール、ライフサイクル</td></tr>
+            <tr><td>テンプレート構文</td><td>ディレクティブ概要、バインディングとスタイル、イベントとフォーム、条件分岐とリスト</td></tr>
+            <tr><td>データと状態</td><td>data、算出プロパティ、監視、$.stanz、provider/consumer</td></tr>
+            <tr><td>アプリとルーティング</td><td>o-app、o-router、ネストルーティング、scsr の実パス</td></tr>
+            <tr><td>リファレンス</td><td>$.fn とラップされたオブジェクト、インスタンス API、プラグイン、よくある落とし穴、完全なサンプル、プレイグラウンド、デプロイ</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="doc-note">
+          <strong>どこから始めればよいですか？</strong>
+          はじめての場合はインストールから始めてください。すでにページが動いている場合は、
+          テンプレートディレクティブ概要へ進むか、左の目次から章を選んでください。
+        </div>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -258,6 +258,9 @@
     import { highlightCode } from "../content/highlight.mjs";
 
     const IS_EN = document.documentElement.lang.startsWith("en");
+    const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
+    const IS_JA = document.documentElement.lang.startsWith("ja");
+    const IS_ES = document.documentElement.lang.startsWith("es");
     const UI = IS_EN
       ? {
           editorAria: "Code editor",
@@ -266,6 +269,33 @@
           foldHint: "Click ▸ left of a line number to expand, or",
           expandAll: "Expand all and edit",
           foldToggle: "Collapse or expand",
+        }
+      : IS_TRADITIONAL
+      ? {
+          editorAria: "程式碼編輯器",
+          foldedPrefix: "已摺疊 ",
+          foldedSuffix: " 個區塊",
+          foldHint: "點擊行號左側的 ▸ 展開，或",
+          expandAll: "展開全部並編輯",
+          foldToggle: "摺疊或展開",
+        }
+      : IS_JA
+      ? {
+          editorAria: "コードエディタ",
+          foldedPrefix: "折りたたみ: ",
+          foldedSuffix: " 件",
+          foldHint: "行番号左の ▸ をクリックして展開、または",
+          expandAll: "すべて展開して編集",
+          foldToggle: "折りたたみ／展開",
+        }
+      : IS_ES
+      ? {
+          editorAria: "Editor de código",
+          foldedPrefix: "Regiones contraídas: ",
+          foldedSuffix: "",
+          foldHint: "Haz clic en ▸ a la izquierda del número de línea para expandir, o",
+          expandAll: "Expandir todo y editar",
+          foldToggle: "Contraer o expandir",
         }
       : {
           editorAria: "代码编辑器",

@@ -1,0 +1,166 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">テンプレート</p>
+      <h1>条件分岐とリスト</h1>
+      <p class="doc-lead">
+        <code>o-if</code> はコンテンツを存在させるかどうかを制御し、<code>o-fill</code> は配列からリストをレンダリングします。
+        どちらも要素に紐づく実装なので、スコープと DOM 構造を理解することが重要です。
+      </p>
+
+      <h2>条件付きレンダリング</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;10 より大きい&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;5 より大きい&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 以下&lt;/p&gt;
+&lt;/o-else&gt;</code></pre>
+      <ul>
+        <li>3 つのタグは<strong>連続して</strong>記述する必要があり、間に他の要素を挟むことはできません。</li>
+        <li><code>o-else</code> は <code>value</code> を取りません。</li>
+        <li>条件が偽のときコンテンツは削除され、真のときは再生成されます。</li>
+        <li>表示と非表示を頻繁に切り替え、DOM の状態を保持したい場合は <code>class:</code> による切り替えが適しています。</li>
+      </ul>
+
+      <h2>o-fill の基本</h2>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      &lt;input type="checkbox" sync:checked="$data.done" /&gt;
+      &lt;span&gt;{{$data.text}}&lt;/span&gt;
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        <code>fill-key</code> はリスト項目の一意なフィールドを指定します。これを指定すると、
+        項目の追加・削除・並べ替えの際にキーに基づいてノードが再利用され、
+        項目内の入力状態が失われません。一意なフィールドがない場合にのみ省略してください。
+      </p>
+
+      <h2>リスト項目のスコープ</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>変数</th><th>意味</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$data</code></td><td>現在の項目のデータ</td></tr>
+          <tr><td><code>$index</code></td><td>現在の項目のインデックス（0 から始まる）</td></tr>
+          <tr><td><code>$host</code></td><td>ホストとなるページ/コンポーネントのインスタンス。proto メソッドの呼び出しに使用する</td></tr>
+          <tr><td><code>$parent</code></td><td>ネストした o-fill における外側の項目のデータ</td></tr>
+          <tr><td><code>$ele</code></td><td>現在の項目の要素</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>o-fill の内部では独自の項目名を使用できません。</strong>
+        リスト項目内では <code>$data.text</code> しか使用でき、<code>item.text</code>
+        や <code>row.text</code> は記述できません。ルートレベル（o-fill の外）ではこれらの変数は存在しないため、
+        データフィールドと proto メソッド名を直接使用してください。
+      </div>
+
+      <h2>ネストしたリスト</h2>
+      <pre><code>&lt;o-fill :value="groups" fill-key="id"&gt;
+  &lt;section&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;o-fill :value="$data.items" fill-key="id"&gt;
+      &lt;p&gt;{{$parent.name}} / {{$data.name}}&lt;/p&gt;
+    &lt;/o-fill&gt;
+  &lt;/section&gt;
+&lt;/o-fill&gt;</code></pre>
+      <p>
+        内側の <code>$data</code> は子項目、<code>$parent</code> は外側のグループです。
+      </p>
+
+      <h2>名前付きテンプレート</h2>
+      <p>
+        構造が複雑な場合や再利用が必要な場合は、リスト項目をトップレベルの
+        <code>&lt;template name&gt;</code> に記述し、<code>o-fill name</code> で参照します。
+      </p>
+      <pre><code>&lt;o-fill :value="products" name="product-card" fill-key="id"&gt;&lt;/o-fill&gt;
+
+&lt;template name="product-card"&gt;
+  &lt;article class="card"&gt;
+    &lt;h3&gt;{{$data.name}}&lt;/h3&gt;
+    &lt;p&gt;¥{{$data.price}}&lt;/p&gt;
+    &lt;button on:click="$host.addToCart($data.id)"&gt;カートに追加&lt;/button&gt;
+  &lt;/article&gt;
+&lt;/template&gt;</code></pre>
+      <p>名前付きテンプレートは <code>o-fill</code> の外側、通常はページテンプレートのトップレベルに配置する必要があります。</p>
+      <p>
+        名前付きテンプレートは自身を参照することもでき、ツリー構造のレンダリングに便利です。
+      </p>
+      <pre><code>&lt;ul&gt;
+  &lt;o-fill :value="tree" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+&lt;/ul&gt;
+
+&lt;template name="tree-node"&gt;
+  &lt;li&gt;
+    {{$data.name}}
+    &lt;ul&gt;
+      &lt;o-fill :value="$data.children" name="tree-node" fill-key="id"&gt;&lt;/o-fill&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>select と table での replace-temp</h2>
+      <p>
+        ブラウザのパーサーは、<code>&lt;select&gt;</code> や <code>&lt;table&gt;</code> の内部にある
+        ホワイトリスト外の要素を修正します。その内部に <code>o-fill</code> を直接記述すると
+        レンダリングに失敗します。<code>&lt;template is="replace-temp"&gt;</code> が必要です。
+      </p>
+      <pre><code>&lt;select&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="cities"&gt;
+      &lt;option&gt;{{$data}}&lt;/option&gt;
+    &lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/select&gt;</code></pre>
+      <p>テーブルの行は名前付きテンプレートと組み合わせる必要があります。</p>
+      <pre><code>&lt;tbody&gt;
+  &lt;template is="replace-temp"&gt;
+    &lt;o-fill :value="rows" name="table-row"&gt;&lt;/o-fill&gt;
+  &lt;/template&gt;
+&lt;/tbody&gt;
+
+&lt;template name="table-row"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;{{$data.name}}&lt;/td&gt;
+    &lt;td&gt;{{$data.desc}}&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>DOM 構造の注意点</h2>
+      <p>
+        <code>o-if</code> と <code>o-fill</code> は
+        <code>display: contents</code> を使用するため、要素自体は DOM に残ります。
+        その結果、CSS の子セレクターはそれらを透過して評価します。<code>.container &gt; .item</code>
+        は <code>o-if</code> 内の項目にマッチせず、<code>table.rows</code>
+        は <code>o-fill</code> が生成した行を数えません。セレクターが機能しなくなった場合は、
+        子孫セレクターに切り替えるか、構造を調整してください。
+      </p>
+
+      <p class="doc-end">
+        前へ: <a olink href="./events.html">イベントとフォーム →</a>
+         · 次へ: <a olink href="./data.html">データと監視 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

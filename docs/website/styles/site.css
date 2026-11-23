@@ -3084,3 +3084,45 @@ mark.site-search-hit {
   content: "Copy";
   font-size: 12px;
 }
+
+
+/* Traditional Chinese: localize the copy label inside senti-ui st-code */
+:host-context(html[lang^="zh-Hant"]) st-code::part(copy) {
+  font-size: 0;
+}
+
+:host-context(html[lang^="zh-Hant"]) st-code::part(copy)::after {
+  content: "複製";
+  font-size: 12px;
+}
+
+/* Japanese: localize the copy label inside senti-ui st-code */
+:host-context(html[lang^="ja"]) st-code::part(copy) {
+  font-size: 0;
+}
+
+:host-context(html[lang^="ja"]) st-code::part(copy)::after {
+  content: "コピー";
+  font-size: 12px;
+}
+
+/* Spanish: localize the copy label inside senti-ui st-code */
+:host-context(html[lang^="es"]) st-code::part(copy) {
+  font-size: 0;
+}
+
+:host-context(html[lang^="es"]) st-code::part(copy)::after {
+  content: "Copiar";
+  font-size: 12px;
+}
+
+/* Hero 的 Agent Skill 复制卡片 */
+.cdn-box.skill-box {
+  margin-top: 14px;
+}
+
+.cdn-box.skill-box .cdn-url {
+  color: var(--md-sys-color-on-surface);
+  font-size: 12px;
+  word-break: break-all;
+}

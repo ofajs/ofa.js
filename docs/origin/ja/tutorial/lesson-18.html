@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 18</p>
+      <h1>ネストされたレイアウト</h1>
+      <p class="doc-lead">子ページが parent を宣言し、親ページがスロットでそれらを受け取ります。子ページを切り替えても親は破棄されません。</p>
+
+      <p>
+  ナビゲーションバーやサイドバーなどの共通構造を親ページに置きます。子ページは
+  自分の中身だけを持ち、<code>parent</code> を介して親の
+  <code>&lt;slot&gt;</code> の下に配置します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-18" fold-styles="true"></docs-playground>
+<h2>レイアウトの仕組み</h2>
+<ul>
+  <li><code>layout.html</code>: ナビゲーション + <code>&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;</code>。</li>
+  <li><code>home.html</code> / <code>settings.html</code>:
+    <code>export const parent = "./layout.html"</code>。</li>
+  <li>子ページを切り替えると親の <code>routerChange</code> が発火し、ナビゲーションのアクティブ表示の更新に使われます。</li>
+</ul>
+<p>
+  2つの子ページを何度も切り替えても、親インスタンスは再生成されません。ナビゲーションの状態とレイアウトは保たれます。
+</p>
+<div class="doc-note">
+  <strong>子ページでレイアウトを重複させないでください:</strong> ナビゲーションとフッターは親に一度だけ書きます。
+  子ページは自分のコンテンツだけに関心を持ちます。多段のネストでは、親自身も parent を宣言できます。
+</div>
+<h2>自分で試してみよう</h2>
+<p>
+  <code>profile.html</code> という別の子ページと、それに対応するナビ項目を追加し、切り替え時にレイアウトがちらつかないことを確認してください。
+</p>
+
+      <p class="doc-end">前: <a olink href="./lesson-17.html">17 · ページとルーティング →</a> · 次: <a olink href="./lesson-19.html">19 · 非同期と読み込み状態 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

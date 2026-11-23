@@ -513,6 +513,9 @@
     import { getApiExample } from "../content/api-examples.mjs";
 
     const IS_EN = document.documentElement.lang.startsWith("en");
+    const IS_TRADITIONAL = document.documentElement.lang.startsWith("zh-Hant");
+    const IS_JA = document.documentElement.lang.startsWith("ja");
+    const IS_ES = document.documentElement.lang.startsWith("es");
     const UI = IS_EN
       ? {
           starting: "Starting virtual container…",
@@ -534,6 +537,72 @@
           writing: "Writing virtual files…",
           ran: "Running. Keep editing and press Ctrl/⌘+S to rerun.",
           runFailed: "Run failed: ",
+        }
+      : IS_TRADITIONAL
+      ? {
+          starting: "正在啟動虛擬容器…",
+          resetTitle: "恢復本課範例程式碼",
+          reset: "↺ 重設",
+          runTitle: "執行程式碼（Ctrl+S / ⌘S）",
+          run: "▶ 執行程式碼",
+          editorAria: "ofa.js 程式碼編輯器",
+          splitterAria: "調整編輯器與預覽寬度",
+          previewAria: "範例預覽",
+          preview: "預覽",
+          newTabTitle: "在新分頁開啟預覽",
+          newTab: "新分頁開啟 ↗",
+          iframeTitle: "ofa.js 範例預覽",
+          restored: "已恢復本課範例程式碼，按 Ctrl/⌘+S 執行",
+          ready: "虛擬容器已就緒",
+          initFailed: "虛擬容器初始化失敗：",
+          unsupported: "目前瀏覽器不支援 Service Worker",
+          writing: "正在寫入虛擬檔案…",
+          ran: "已執行，可繼續編輯後按 Ctrl/⌘+S 重新執行",
+          runFailed: "執行失敗：",
+        }
+      : IS_JA
+      ? {
+          starting: "仮想コンテナを起動中…",
+          resetTitle: "このレッスンのサンプルコードを復元",
+          reset: "↺ リセット",
+          runTitle: "コードを実行（Ctrl+S / ⌘S）",
+          run: "▶ コードを実行",
+          editorAria: "ofa.js コードエディタ",
+          splitterAria: "エディタとプレビューの幅を調整",
+          previewAria: "サンプルプレビュー",
+          preview: "プレビュー",
+          newTabTitle: "新しいタブでプレビューを開く",
+          newTab: "新しいタブで開く ↗",
+          iframeTitle: "ofa.js サンプルプレビュー",
+          restored: "サンプルコードを復元しました。Ctrl/⌘+S で実行できます。",
+          ready: "仮想コンテナの準備ができました",
+          initFailed: "仮想コンテナの初期化に失敗しました：",
+          unsupported: "このブラウザは Service Worker に対応していません",
+          writing: "仮想ファイルを書き込み中…",
+          ran: "実行済みです。編集後は Ctrl/⌘+S で再実行できます。",
+          runFailed: "実行に失敗しました：",
+        }
+      : IS_ES
+      ? {
+          starting: "Iniciando el contenedor virtual…",
+          resetTitle: "Restaurar el código de ejemplo de esta lección",
+          reset: "↺ Restablecer",
+          runTitle: "Ejecutar código (Ctrl+S / ⌘S)",
+          run: "▶ Ejecutar código",
+          editorAria: "Editor de código de ofa.js",
+          splitterAria: "Ajustar el ancho del editor y la vista previa",
+          previewAria: "Vista previa del ejemplo",
+          preview: "Vista previa",
+          newTabTitle: "Abrir la vista previa en una pestaña nueva",
+          newTab: "Abrir en pestaña nueva ↗",
+          iframeTitle: "Vista previa del ejemplo de ofa.js",
+          restored: "Código de ejemplo restaurado. Pulsa Ctrl/⌘+S para ejecutar.",
+          ready: "Contenedor virtual listo",
+          initFailed: "Error al inicializar el contenedor virtual: ",
+          unsupported: "Este navegador no admite Service Worker",
+          writing: "Escribiendo archivos virtuales…",
+          ran: "Ejecutado. Sigue editando y pulsa Ctrl/⌘+S para volver a ejecutar.",
+          runFailed: "Error al ejecutar: ",
         }
       : {
           starting: "正在启动虚拟容器…",

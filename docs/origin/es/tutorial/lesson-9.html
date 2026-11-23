@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 09</p>
+      <h1>Edición de una lista</h1>
+      <p class="doc-lead">push/splice sobre un array actualizan la vista automáticamente; la edición en línea se sincroniza directamente con los campos de $data.</p>
+
+      <p>
+  Los arrays en ofa.js son reactivos: las operaciones en el propio array como <code>push</code> y
+  <code>splice</code> provocan actualizaciones, así que no hace falta reasignar el array completo.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-9" fold-styles="true"></docs-playground>
+<h2>Edición en línea</h2>
+<p>
+  La entrada de cada elemento está enlazada a <code>$data.name</code>, así que lo que escribe
+  el usuario se vuelca directamente en el objeto del array. Combinado con <code>fill-key="id"</code>,
+  este elemento no se reconstruirá cuando reordenes la lista o elimines otros elementos.
+</p>
+<div class="doc-note">
+  <strong>Cuándo reemplazar el array:</strong> cuando obtengas una lista completamente nueva
+  desde una API, <code>this.items = newList</code> es más claro; cuando añadas, elimines o
+  edites unos pocos elementos en la página, usa <code>push</code> / <code>splice</code>.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Añade un botón "↑" a cada fila que la intercambie con la fila de arriba (pista: usa
+  <code>items.splice($index - 1, 2, currentItem, previousItem)</code>).
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-8.html">08 · Renderizado de listas →</a> · Siguiente: <a olink href="./lesson-10.html">10 · Propiedades calculadas y observadores →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

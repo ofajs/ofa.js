@@ -1,0 +1,125 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Data</p>
+      <h1>全局狀態</h1>
+      <p class="doc-lead">
+        多個頁面或組件需要共享同一份數據時，用 <code>$.stanz()</code>
+        創建響應式狀態。它不依賴全局變量，也不會自動持久化。
+      </p>
+
+      <h2>創建共享狀態</h2>
+      <pre><code>// store.js
+export const cart = $.stanz({
+  items: [],
+  total: 0,
+});
+
+export const session = $.stanz({
+  user: null,
+  theme: "dark",
+});</code></pre>
+      <p>
+        <code>$.stanz()</code> 返回深度響應式代理。嵌套對象賦值、數組
+        <code>push</code>/<code>splice</code> 都會通知所有引用方。
+      </p>
+
+      <h2>在頁面中使用</h2>
+      <pre><code>&lt;template page&gt;
+  &lt;ul&gt;
+    &lt;o-fill :value="items" fill-key="id"&gt;
+      &lt;li&gt;{{$data.name}} × {{$data.count}}&lt;/li&gt;
+    &lt;/o-fill&gt;
+  &lt;/ul&gt;
+
+  &lt;script&gt;
+    export default async ({ load }) =&gt; {
+      const { cart } = await load("./store.js");
+
+      return {
+        data: { items: [] },
+        attached() {
+          this.items = cart.items;
+        },
+        detached() {
+          this.items = [];
+        },
+      };
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <div class="doc-note">
+        <strong>掛載/清理約定：</strong>
+        在 <code>attached</code> 階段把共享狀態掛到自身 data，
+        在 <code>detached</code> 階段清空引用，避免組件銷燬後仍被狀態引用。
+      </div>
+
+      <h2>讀寫共享狀態</h2>
+      <pre><code>cart.items.push({
+  id: Date.now(),
+  name: "ofa.js 周邊",
+  count: 1,
+});
+
+cart.total = cart.items.reduce(
+  (sum, item) =&gt; sum + item.count,
+  0,
+);</code></pre>
+      <p>
+        多個頁面讀取同一個 <code>cart</code> 時，任何一處的修改都會同步到
+        其他頁面和組件。
+      </p>
+
+      <h2>直接監聽狀態</h2>
+      <pre><code>const tid = cart.watch(() =&gt; {
+  console.log("購物車變化", cart.total);
+});
+
+// 不再需要時
+cart.unwatch(tid);</code></pre>
+      <p>
+        <code>watch</code> 是深度監聽，子對象和數組變化也會觸發。
+        組件裡更推薦把狀態掛到 data，讓模板自動更新，而不是手動操作 DOM。
+      </p>
+
+      <h2>局部狀態 vs 共享狀態</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>場景</th><th>方案</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>只在當前組件使用</td><td><code>data</code></td></tr>
+          <tr><td>父子組件傳值</td><td><code>:prop</code> / <code>sync:</code></td></tr>
+          <tr><td>跨層級業務數據</td><td><code>o-provider</code> / <code>o-consumer</code></td></tr>
+          <tr><td>跨頁面、全局共享</td><td><code>$.stanz()</code></td></tr>
+          <tr><td>純樣式主題</td><td>CSS 變量 / <code>match-var</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        下一種更結構化的跨層級方案見
+        <a olink href="./context.html">跨組件上下文</a>。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./data.html">數據與偵聽 →</a>
+        　·　下一篇：<a olink href="./context.html">跨組件上下文 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

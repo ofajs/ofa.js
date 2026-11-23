@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 11</p>
+      <h1>ライフサイクル</h1>
+      <p class="doc-lead">ready → attached → loaded、削除時は detached。タイマーとリスナーは detached でクリーンアップします。</p>
+
+      <p>
+  ページとコンポーネントは共通の固定されたライフサイクルフックを持ちます。最もよく使うのは
+  <code>ready</code>（DOM が生成された）、<code>attached</code>（ページにマウントされた）、
+  <code>detached</code>（削除された）です。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-11" fold-styles="true"></docs-playground>
+<h2>タイミングと責務</h2>
+<ul>
+  <li><code>ready</code>: テンプレートが描画され、DOM を参照できるようになりました。</li>
+  <li><code>attached</code>: 要素がドキュメントに入りました。タイマーを開始したり、グローバルリスナーを追加するのに適した場所です。</li>
+  <li><code>loaded</code>: 要素自体と非同期リソースの読み込みが完了しました。ローディング状態を解除するのに適した場所です。</li>
+  <li><code>detached</code>: 要素がドキュメントから離れました。タイマー、リスナー、共有状態への参照をクリーンアップする必要があります。</li>
+</ul>
+<div class="doc-note">
+  <strong>クリーンアップしないとどうなるか:</strong> ページが消えた後もタイマーが動き続けて
+  データを変更し、リスナーが古いページの参照を保持することでメモリリークが発生します。これは
+  ライフサイクルで最もよくある間違いです。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  タイマーを 0.5 秒ごとの更新に変更し、一時停止中は秒を加算しないようにしてみましょう（サンプルではすでにそうなっています）。
+  次に <code>detached</code> で <code>seconds</code> を 0 にリセットしてみて、別のページへ移動して戻ったときに
+  何が起こるかを確認してください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-10.html">10 · 算出プロパティと監視 →</a> · 次へ: <a olink href="./lesson-12.html">12 · はじめてのコンポーネント →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

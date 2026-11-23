@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Componentes — Documentación de ofa.js</title>
+    <meta name="description" content="Estructura de los componentes de ofa.js, atributos y datos, paso de propiedades, slots, eventos personalizados y reutilización de componentes." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Componentes — Documentación de ofa.js" />
+    <meta property="og:description" content="Estructura de los componentes de ofa.js, atributos y datos, paso de propiedades, slots, eventos personalizados y reutilización de componentes." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos básicos</p>
+      <h1>Componentes</h1>
+      <p class="doc-lead">
+        Un componente es un módulo Web Component reutilizable. Tiene su propio Shadow DOM, datos
+        reactivos, attrs externos y una interfaz para emitir eventos hacia fuera.
+      </p>
+
+      <h2>Contrato del módulo</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>Sí</td><td>Nombre de etiqueta del componente; debe coincidir al usarlo</td></tr>
+          <tr><td><code>attrs</code></td><td>No</td><td>Atributos escalares pasados desde fuera, reflejados en atributos HTML</td></tr>
+          <tr><td><code>data</code></td><td>No</td><td>Estado reactivo interno; coloca aquí directamente los objetos y arrays</td></tr>
+          <tr><td><code>proto</code></td><td>No</td><td>Métodos, getters/setters</td></tr>
+          <tr><td><code>watch</code></td><td>No</td><td>Observa cambios en data/attrs</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>No</td><td>Hooks del ciclo de vida</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        Cuando no se declara <code>tag</code>, el framework infiere el nombre de la etiqueta a partir del nombre del archivo:
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>.
+        Aun así, se recomienda declararlo explícitamente para que renombrar o mover el archivo no
+        cambie silenciosamente la etiqueta pública del componente.
+      </p>
+
+      <h2>attrs y data</h2>
+      <p>
+        <code>attrs</code> son las entradas públicas del componente, adecuadas para cadenas, números y
+        booleanos; <code>data</code> es el estado interno del componente, adecuado para arrays y
+        objetos. Sus claves no deben solaparse:
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>Cuando se pasan desde fuera, los nombres en kebab-case se asignan automáticamente a campos en camelCase:</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        Pasa valores dinámicos con el prefijo <code>:</code>; usa <code>attr:</code> para atributos booleanos:
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>Importar componentes</h2>
+      <p>
+        En la parte superior de la plantilla de una página, usa <code>&lt;l-m&gt;</code> para importar un archivo de componente
+        de forma asíncrona. Devuelve el control de inmediato y no bloquea el primer renderizado de la página:
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        Cuando necesites asegurarte de que un componente esté registrado antes de usarlo, usa <code>await load()</code>
+        en la función del módulo:
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>Slots</h2>
+      <pre><code>&lt;!-- dentro del componente --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;Título predeterminado&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- consumidor --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;Alice&lt;/h3&gt;
+  &lt;p&gt;Este es el contenido del slot predeterminado&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        El slot predeterminado recibe los nodos hijos sin atributo <code>slot</code>; los slots con nombre
+        coinciden con <code>slot="name"</code>, y un slot puede contener contenido de respaldo.
+      </p>
+
+      <h2>Eventos personalizados</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Alice" },
+});</code></pre>
+      <p>
+        Los eventos usan <code>bubbles: true</code> y <code>composed: false</code> de forma predeterminada.
+        Establece <code>composed: true</code> explícitamente cuando un evento necesite escapar del Shadow DOM;
+        esto es especialmente habitual cuando las páginas anidan <code>o-page</code>.
+      </p>
+
+      <p>
+        El <code>PATH</code> de un componente apunta a la URL de su archivo de registro; los recursos
+        relativos en la plantilla del componente, como <code>img src</code> y
+        <code>style url()</code>, se resuelven contra <code>PATH</code> en lugar de contra la URL
+        de la página que lo usa.
+      </p>
+
+      <h2>Aislamiento de estilos</h2>
+      <p>
+        Un <code>&lt;style&gt;</code> en la plantilla de un componente solo se aplica dentro del
+        propio Shadow DOM del componente. Usa <code>:host</code> para seleccionar el nodo raíz; <code>::slotted()</code>
+        solo puede alcanzar el primer nivel del contenido del slot. Usa el complemento <code>inject-host</code>
+        cuando necesites llegar más profundo.
+      </p>
+
+      <h2>Restricciones de nombres</h2>
+      <p>
+        <code>tag</code> no debe duplicar un componente existente; <code>data</code>/<code>proto</code>
+        no deben usar nombres reservados integrados como <code>back</code>, <code>goto</code>,
+        <code>replace</code>, <code>src</code>, <code>on</code> y <code>emit</code>.
+        Un nombre duplicado hace que el registro falle directamente.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./first-page.html">Tu primera página →</a>
+        · Siguiente: <a olink href="./page.html">Páginas →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

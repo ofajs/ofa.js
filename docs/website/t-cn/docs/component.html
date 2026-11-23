@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>組件 — ofa.js 文檔</title>
+    <meta name="description" content="ofa.js 組件的結構、attrs/data、props 傳遞、插槽、自定義事件與組件複用。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="組件 — ofa.js 文檔" />
+    <meta property="og:description" content="ofa.js 組件的結構、attrs/data、props 傳遞、插槽、自定義事件與組件複用。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Core concepts</p>
+      <h1>組件</h1>
+      <p class="doc-lead">
+        組件是可複用的 Web Component 模塊。它有自己的 Shadow DOM、響應式
+        data、外部 attrs，以及向外拋事件的接口。
+      </p>
+
+      <h2>模塊契約</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>字段</th><th>必填</th><th>說明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>是</td><td>組件標籤名，使用時必須一致</td></tr>
+          <tr><td><code>attrs</code></td><td>否</td><td>外部傳入的標量屬性，反映到 HTML attribute</td></tr>
+          <tr><td><code>data</code></td><td>否</td><td>內部響應式狀態；對象或數組直接放這裡</td></tr>
+          <tr><td><code>proto</code></td><td>否</td><td>方法、getter/setter</td></tr>
+          <tr><td><code>watch</code></td><td>否</td><td>偵聽 data/attrs 的變化</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>否</td><td>生命週期鉤子</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        未聲明 <code>tag</code> 時，框架會按文件名推斷標籤名：
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>。
+        建議仍然顯式聲明，文件改名或移動時不會悄悄改變組件的對外標籤。
+      </p>
+
+      <h2>attrs 與 data</h2>
+      <p>
+        <code>attrs</code> 是組件的公開入參，適合字符串、數字、布爾值；
+        <code>data</code> 是組件內部狀態，適合數組和對象。兩者 key 不可重複：
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>外部傳入時，短橫線命名會自動對應駝峰字段：</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        動態傳入帶 <code>:</code> 前綴；布爾屬性用 <code>attr:</code>：
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>組件引用</h2>
+      <p>
+        頁面模板頂部用 <code>&lt;l-m&gt;</code> 異步引入組件文件。它會立即返回，
+        不會阻塞頁面首次渲染：
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        需要確保組件在使用前已經註冊時，在模塊函數里 <code>await load()</code>：
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>插槽</h2>
+      <pre><code>&lt;!-- 組件內 --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;默認標題&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- 使用方 --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;張三&lt;/h3&gt;
+  &lt;p&gt;這是默認插槽內容&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        默認插槽接收沒有 <code>slot</code> 屬性的子節點，命名插槽按
+        <code>slot="name"</code> 匹配，slot 內可以寫兜底內容。
+      </p>
+
+      <h2>自定義事件</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "張三" },
+});</code></pre>
+      <p>
+        事件默認 <code>bubbles: true</code>、<code>composed: false</code>。
+        需要讓事件穿出 Shadow DOM 時顯式設置 <code>composed: true</code>，
+        這在頁面嵌套 <code>o-page</code> 時尤其常見。
+      </p>
+
+      <p>
+        組件的 <code>PATH</code> 指向註冊文件地址；組件模板裡的相對
+        <code>img src</code>、<code>style url()</code> 等資源會按
+        <code>PATH</code> 解析，而不是按使用它的頁面地址解析。
+      </p>
+
+      <h2>樣式隔離</h2>
+      <p>
+        組件模板裡的 <code>&lt;style&gt;</code> 只作用於組件自己的 Shadow DOM。
+        根節點用 <code>:host</code> 選中；<code>::slotted()</code> 只能命中
+        插槽內容的第一層。需要深入命中時使用 <code>inject-host</code> 插件。
+      </p>
+
+      <h2>命名約束</h2>
+      <p>
+        <code>tag</code> 不能與已有組件重複；<code>data</code>/<code>proto</code>
+        不能使用 <code>back</code>、<code>goto</code>、<code>replace</code>、
+        <code>src</code>、<code>on</code>、<code>emit</code> 等內置保留名。
+        重名會直接導致註冊失敗。
+      </p>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./first-page.html">第一個頁面 →</a>
+        　·　下一篇：<a olink href="./page.html">頁面 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

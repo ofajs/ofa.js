@@ -1,0 +1,65 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">リファレンス</p>
+      <h1>ライブサンプル</h1>
+      <p class="doc-lead">
+        このページは NoneOS Core を使ってブラウザ内に仮想ファイルシステムを
+        マウントします。左側で ofa.js のページモジュールを編集し、右側の仮想
+        コンテナで実行できます — バックエンドは不要です。
+      </p>
+
+      <l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground></docs-playground>
+
+      <h2>仕組み</h2>
+      <ol>
+        <li>初回オープン時に NoneOS Core の <code>sw.js</code> を登録します。</li>
+        <li>ページはブラウザの OPFS を直接開き、Service Worker が
+          <code>/$ofa-docs-playground/...</code> を仮想ファイルシステムに
+          マッピングします。</li>
+        <li>エディタはページモジュールを仮想ファイル
+          <code>page.html</code> に書き込み、固定の <code>index.html</code>
+          エントリを生成します。</li>
+        <li>右側の iframe が仮想コンテナ内の
+          <code>/$ofa-docs-playground/index.html</code> を開き、ofa.js が
+          ページをレンダリングします。</li>
+      </ol>
+
+      <div class="doc-note">
+        <strong>デプロイ要件:</strong>
+        Service Worker はサイトルートのパス <code>/sw.js</code> に登録されるため、
+        この機能はドキュメントをドメインルートにデプロイする（または
+        <code>npm run server:website</code> で <code>docs/website</code> をルートに
+        ローカルプレビューする）必要があります。サブディレクトリでは、Service
+        Worker は <code>/$</code> パスを引き継げません。
+      </div>
+
+      <h2>変更できるもの</h2>
+      <ul>
+        <li>テンプレート、スタイル、<code>data</code>、<code>proto</code> メソッドを編集し、「コードを実行」をクリックするとすぐに反映されます。</li>
+        <li><code>&lt;l-m&gt;</code> で CDN 上の他の ofa.js コンポーネントを参照できます。</li>
+        <li>コードはブラウザの <code>localStorage</code> に保存され、リフレッシュしても残ります。</li>
+        <li>エディタをクリアして新しいページモジュールを書けば、ゼロから試せます。</li>
+      </ul>
+
+      <p class="doc-end">
+        前: <a olink href="./examples.html">完全なサンプル →</a>
+         · 次: <a olink href="./deployment.html">デプロイ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

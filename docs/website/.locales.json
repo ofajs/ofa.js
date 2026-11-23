@@ -1,6 +1,9 @@
 {
   "locales": [
     "cn",
-    "en"
+    "t-cn",
+    "en",
+    "ja",
+    "es"
   ]
 }

@@ -12,7 +12,7 @@
 let uid = 100;
 
 export const CDN_URL =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 
 const loadSite = async (url, sitePath = "./site.json") => {
   const res = await fetch(new URL(sitePath, url));
@@ -34,7 +34,7 @@ const getNavUrls = (url, docs = false) => {
       api: new URL("../api/", url).href,
       blog: new URL("../blog/", url).href,
       searchIndex: new URL("../search-index.json", url).href,
-      languages: new URL("../../", url).href,
+      languages: new URL("../../?choose=1", url).href,
     };
   }
 
@@ -46,13 +46,16 @@ const getNavUrls = (url, docs = false) => {
     api: new URL("./api/", url).href,
     blog: new URL("./blog/", url).href,
     searchIndex: new URL("./search-index.json", url).href,
-    languages: new URL("../", url).href,
+    languages: new URL("../?choose=1", url).href,
   };
 };
 
 export const createLandingPage = async ({ url, sitePath }) => {
   const site = await loadSite(url, sitePath);
-  const isEnglish = document.documentElement.lang.startsWith("en");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") ||
+    document.documentElement.lang.startsWith("ja") ||
+    document.documentElement.lang.startsWith("es");
 
   const codeZh = {
     hero: `<template component>
@@ -182,6 +185,8 @@ $ python3 -m http.server
       doneCount: todos.filter((item) => item.done).length,
       cdnUrl: CDN_URL,
       cdnSnippet: `<script type="module" src="${CDN_URL}"><\/script>`,
+      skillUrl:
+        "https://raw.githubusercontent.com/ofajs/ofa.js/main/.agents/skills/ofajs-docs.zip",
       githubUrl: "https://github.com/ofajs/ofa.js",
 
       // st-code 展示用的代码样例（字符串绑定 :code，绕开 ofa 对 {{...}} 的插值编译）
@@ -252,6 +257,10 @@ $ python3 -m http.server
         this._toastTimer = setTimeout(() => {
           this.toastVisible = false;
         }, 1800);
+      },
+
+      copySkill() {
+        return this.copySnippet(this.skillUrl);
       },
 
       async copySnippet(text) {

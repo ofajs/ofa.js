@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js 文檔</title>
+    <meta name="description" content="ofa.js v5 文檔總覽：從安裝、組件、頁面到路由、狀態與 API 參考。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js 文檔" />
+    <meta property="og:description" content="ofa.js v5 文檔總覽：從安裝、組件、頁面到路由、狀態與 API 參考。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc docs-intro">
+        <p class="doc-kicker">Documentation</p>
+        <h1>ofa.js 文檔</h1>
+        <p class="doc-lead">
+          從一行 script 開始，到組件、頁面、模板、狀態、路由與部署。
+          文檔按使用順序組織，也可以直接從左側目錄跳到需要的章節。
+        </p>
+
+        <div class="docs-list">
+          <a class="docs-row" olink href="./getting-started.html">
+            <span class="num">01</span>
+            <h2>安裝與引入</h2>
+            <p>用 CDN 或本地 dist 引入 ofa.js，運行第一個頁面。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>第一個組件</h2>
+            <p>創建自定義 Web Component，理解 tag、attrs、data 與插槽。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./template.html">
+            <span class="num">03</span>
+            <h2>模板指令總覽</h2>
+            <p>一次掌握插值、屬性、事件、雙向綁定、條件與列表。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>路由與導航</h2>
+            <p>o-app 頁面棧、goto/replace/back、o-router 與嵌套佈局。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn 與包裝對象</h2>
+            <p>選擇、樹導航、DOM 操作、事件、stanz 與實例擴展。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="../api/">
+            <span class="num">06</span>
+            <h2>API 參考</h2>
+            <p>實例成員、全局靜態成員與可直接運行的 VSCode 示例。</p>
+            <span class="more">進入 API →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">07</span>
+            <h2>完整示例</h2>
+            <p>最小頁面、自定義組件、待辦清單與路由應用。</p>
+            <span class="more">開始閱讀 →</span>
+          </a>
+
+          <a class="docs-row" olink href="./playground.html">
+            <span class="num">08</span>
+            <h2>案例預覽</h2>
+            <p>在 NoneOS 虛擬容器裡編輯並運行 ofa.js 頁面模塊。</p>
+            <span class="more">打開演練場 →</span>
+          </a>
+        </div>
+
+        <h2>文檔覆蓋範圍</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>章節</th><th>內容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>開始使用</td><td>安裝、第一個組件、第一個頁面</td></tr>
+            <tr><td>組件與頁面</td><td>組件契約、頁面模塊、生命週期</td></tr>
+            <tr><td>模板語法</td><td>指令總覽、綁定與樣式、事件與表單、條件與列表</td></tr>
+            <tr><td>數據與狀態</td><td>data、計算屬性、watch、$.stanz、provider/consumer</td></tr>
+            <tr><td>應用與路由</td><td>o-app、o-router、嵌套路由、scsr 真實路徑</td></tr>
+            <tr><td>參考</td><td>$.fn 與包裝對象、實例對象 API、插件、常見錯誤、完整示例、案例預覽、部署</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="doc-note">
+          <strong>先讀哪篇？</strong>
+          第一次使用從「安裝與引入」開始；已經有頁面在跑，可以直接看
+          「模板指令總覽」或從左側目錄挑選章節。
+        </div>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

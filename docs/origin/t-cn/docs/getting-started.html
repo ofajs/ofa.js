@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">Getting started</p>
+        <h1>安裝與引入</h1>
+        <p class="doc-lead">
+          ofa.js 不要求安裝依賴，也不需要構建。用一行 script 引用 CDN 上的
+          ESM 文件，就可以開始寫組件和頁面。
+        </p>
+
+        <h2>1. 引入 ofa.js</h2>
+        <p>
+          推薦直接使用 v5 的 ESM 構建。把下面的地址放進
+          <code>&lt;script type="module"&gt;</code> 的 <code>src</code> 中：
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          如果你的環境更適合經典腳本，也可以使用 UMD 版本（會暴露全局
+          <code>$</code>）：
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>版本說明：</strong>CDN 地址建議使用
+          <code>@5</code>，它會跟隨最新的 5.x 版本；如果要完全固定，請寫完整版本號，例如
+          <code>@5.0.2</code>。
+        </div>
+
+        <h2>2. 寫一個入口</h2>
+        <p>
+          入口 HTML 只負責加載 ofa.js，並放一個 <code>o-page</code> 來加載頁面模塊：
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;我的第一個 ofa.js 頁面&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. 寫頁面模塊</h2>
+        <p>
+          一個 <code>.html</code> 文件就是一個頁面模塊。模板、樣式和邏輯都寫在
+          <code>&lt;template page&gt;</code> 裡面：
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;Hello, {{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;點了 {{count}} 次&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>注意：</strong>頁面和組件的 <code>&lt;script&gt;</code>
+          必須寫在 <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code> 內部。ofa.js 只提取模板裡的腳本，
+          寫在外面的腳本會被忽略。
+        </div>
+
+        <h2>4. 打開頁面</h2>
+        <p>
+          頁面需要通過 HTTP 訪問，不能直接雙擊 HTML 文件（
+          <code>file://</code> 會被模塊加載的 CORS 策略攔截）。任意靜態服務器都可以：
+        </p>
+        <pre><code>$ npx serve .
+
+# 或者
+$ python3 -m http.server</code></pre>
+        <p>
+          打開 http://localhost:3000 就能看到頁面。控制台執行
+          <code>$.version</code> 可以確認框架已經加載。
+        </p>
+
+        <h2>下一步</h2>
+        <p>
+          頁面已經能運行之後，下一步是掌握數據如何驅動模板：文本插值、事件、
+          雙向綁定、條件與列表。
+        </p>
+        <p class="doc-end">
+          下一篇：<a olink href="./first-component.html">第一個組件 →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

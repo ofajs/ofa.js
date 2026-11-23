@@ -1,0 +1,58 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 16</p>
+      <h1>全局狀態</h1>
+      <p class="doc-lead">多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。</p>
+
+      <p>
+  組件自己的 <code>data</code> 只屬於自己。多個組件要讀寫同一份數據時，
+  用 <code>$.stanz()</code> 創建一個響應式 store，放在獨立模塊裡共享。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
+<h2>三個文件</h2>
+<ul>
+  <li><code>store.mjs</code>：只導出 <code>$.stanz({ count: 0 })</code>；</li>
+  <li><code>counter-panel.html</code>：兩個組件實例都引用同一個 store；</li>
+  <li><code>page.html</code>：放兩個面板和加減按鈕。</li>
+</ul>
+<p>
+  組件在 <code>attached</code> 裡直接執行 <code>this.sharedState = store</code>，
+  在 <code>detached</code> 裡執行 <code>this.sharedState = {}</code> 清除引用。
+  模板裡直接讀 <code>sharedState.label</code> 和 <code>sharedState.count</code>；
+  store 發生變化時，兩個面板會自動同步。
+</p>
+<div class="doc-note">
+  <strong>約定：</strong>先在 <code>data</code> 裡聲明 <code>sharedState: {}</code> 佔位，
+  再在 <code>attached</code> 階段掛載 store、<code>detached</code> 階段置空，
+  才能避免內存洩漏和組件銷燬後繼續持有舊引用。
+</div>
+<div class="doc-note">
+  <strong>怎麼選：</strong>如果數據只屬於某棵組件子樹，而不是整個應用，
+  用上一課的 <code>o-provider</code> / <code>o-consumer</code> 更合適；
+  見 <a olink href="./lesson-15.html">跨層上下文</a>。
+</div>
+<h2>動手改</h2>
+<p>
+  在 store 裡增加 <code>step</code>，讓頁面上的「+1」按鈕每次加
+  <code>store.step</code>；再加一個按鈕把 step 改成 5。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-15.html">15 · 跨層上下文 →</a>　·　下一篇：<a olink href="./lesson-17.html">17 · 頁面與路由 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,153 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">テンプレート</p>
+      <h1>バインディングとスタイル</h1>
+      <p class="doc-lead">
+        プロパティバインディングは ofa.js テンプレートで最も混同しやすい部分です。いつ
+        <code>:</code> を使い、いつ <code>attr:</code> を使い、いつ <code>sync:</code> を
+        使うかを理解することが、ページが正しく更新されるかどうかを決めます。
+      </p>
+
+      <h2>まずは一覧で</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>構文</th><th>方向</th><th>適する用途</th><th>真偽値属性</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:prop</code></td><td>データ → プロパティ</td><td>単純な値、オブジェクト、配列</td><td>不向き</td></tr>
+          <tr><td><code>sync:prop</code></td><td>双方向</td><td>文字列、数値、真偽値などのスカラー</td><td>可能だが attr: を推奨</td></tr>
+          <tr><td><code>attr:name</code></td><td>データ → HTML 属性</td><td>href/title/data-*、真偽値属性</td><td>必須</td></tr>
+          <tr><td><code>class:name</code></td><td>データ → クラス名</td><td>active/done/disabled などの状態</td><td>—</td></tr>
+          <tr><td><code>:style.prop</code></td><td>データ → インラインスタイル</td><td>色やサイズなどの動的スタイル</td><td>—</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>単方向バインディング</h2>
+      <pre><code>&lt;input :value="keyword" /&gt;
+&lt;my-card :user="user"&gt;&lt;/my-card&gt;
+&lt;div :html="articleHtml"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        <code>:</code> はデータをプロパティに書き込むだけで、ユーザーの操作がデータへ
+        書き戻されることはありません。<code>:prop</code> でコンポーネントに渡した
+        オブジェクトや配列は文字列にシリアライズされません。
+      </p>
+
+      <h2>双方向バインディング</h2>
+      <pre><code>&lt;input sync:value="keyword" /&gt;
+&lt;input type="checkbox" sync:checked="done" /&gt;
+&lt;textarea sync:value="content"&gt;&lt;/textarea&gt;</code></pre>
+      <p>
+        フォームコントロールは通常 <code>sync:</code> を使います。<strong>オブジェクトや
+        配列のバインドには使わないでください</strong>。v5 は参照の混乱を避けるために
+        オブジェクトの双方向同期を明示的に禁止しています。また、<code>attrs</code> で
+        宣言したプロパティに <code>sync:</code> をバインドするのも避けてください。
+        文字列シリアライズによって循環更新が起きる可能性があります。
+      </p>
+
+      <h2>attr: HTML 属性と真偽値</h2>
+      <pre><code>&lt;a attr:href="detailUrl" attr:title="tip"&gt;詳細&lt;/a&gt;
+&lt;img attr:src="cover" attr:alt="title" /&gt;
+&lt;button attr:disabled="loading"&gt;送信&lt;/button&gt;
+&lt;input attr:readonly="locked" /&gt;
+&lt;section attr:hidden="collapsed"&gt;&lt;/section&gt;</code></pre>
+      <p>
+        <code>attr:</code> は値を文字列にシリアライズしますが、<code>false</code> の場合は
+        属性を完全に削除し、<code>true</code> の場合は空の値を設定します。これはまさに
+        真偽値属性に必要な挙動です。
+      </p>
+      <div class="doc-note">
+        <strong><code>:disabled="false"</code> を使わないでください。</strong>
+        <code>disabled="false"</code> としてレンダリングされるため属性が存在したままになり、
+        ボタンは無効のままです。真偽値属性は常に
+        <code>attr:disabled="loading"</code> と書きます。
+      </div>
+
+      <h2>クラス名</h2>
+      <pre><code>&lt;li class="todo" class:done="item.done" class:active="item.id === currentId"&gt;
+  {{item.text}}
+&lt;/li&gt;</code></pre>
+      <p>
+        <code>class:name</code> は条件が真のときクラスを追加し、偽のとき削除します。
+        1つの要素に複数指定できます。type、status、level のような本質的なデータ属性は、
+        <code>attr:</code> と属性セレクタで表現する方が適しています：
+      </p>
+      <pre><code>&lt;div class="message" attr:type="$data.type"&gt;&lt;/div&gt;
+
+.message[type="sent"] { color: #2563eb; }
+.message[type="failed"] { color: #dc2626; }</code></pre>
+
+      <h2>インラインスタイル</h2>
+      <pre><code>&lt;p :style.color="active ? '#0f766e' : '#64748b'"&gt;&lt;/p&gt;
+&lt;div :style.width="width + 'px'" :style.height="height + 'px'"&gt;&lt;/div&gt;
+&lt;div :style.backgroundImage="'url(' + cover + ')'"&gt;&lt;/div&gt;</code></pre>
+      <p>
+        スタイルプロパティ名は camelCase（<code>fontSize</code>、<code>borderRadius</code>）を
+        使います。値は有効な CSS 文字列である必要があり、単位は必要に応じて自分で
+        付加します。
+      </p>
+
+      <h2>スタイルシート内の data()</h2>
+      <p>
+        インラインスタイル以外に、<code>&lt;style&gt;</code> 内で <code>data(field)</code> を
+        使ってデータを読むこともできます。状態に応じてスタイルをまとめて切り替えるのに
+        便利です：
+      </p>
+      <pre><code>&lt;style&gt;
+  :host {
+    --accent: data(accentColor);
+    border-color: var(--accent);
+  }
+  .title {
+    color: data(titleColor);
+  }
+&lt;/style&gt;</code></pre>
+      <p>
+        <code>data()</code> は <code>@media</code> の条件や、<code>o-if</code> 内で動的に
+        注入される <code>&lt;style&gt;</code> にも使えます。データが変わるとスタイルテキストが
+        書き換えられ、即座に反映されます。
+      </p>
+      <pre><code>@media screen and (min-width: data(breakpoint + "px")) {
+  .layout { grid-template-columns: 1fr 1fr; }
+}
+
+&lt;o-if :value="dense"&gt;
+  &lt;style&gt;.row { padding: data(padding + "px"); }&lt;/style&gt;
+&lt;/o-if&gt;</code></pre>
+      <p>この方法はコンポーネント自身のスタイルにのみ適用されます。コンポーネントをまたぐテーマ設定には CSS 変数か match-var を使います。</p>
+
+      <h2>属性値では補間が機能しない</h2>
+      <p>
+        <code>{{ }}</code> は要素のテキストコンテンツしか解析しません。次の2つはどちらも
+        誤りです：
+      </p>
+      <pre><code>&lt;!-- 誤り: 属性内の {{ }} は解析されない --&gt;
+&lt;a href="{{url}}"&gt;リンク&lt;/a&gt;
+&lt;img title="{{name}}" /&gt;
+
+&lt;!-- 正しい --&gt;
+&lt;a attr:href="url"&gt;リンク&lt;/a&gt;
+&lt;img attr:title="name" /&gt;</code></pre>
+
+      <p class="doc-end">
+        前へ：<a olink href="./template.html">テンプレートディレクティブ →</a>
+         · 次へ：<a olink href="./events.html">イベントとフォーム →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

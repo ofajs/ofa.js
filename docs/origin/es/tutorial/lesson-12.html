@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 12</p>
+      <h1>Tu primer componente</h1>
+      <p class="doc-lead">Separa la interfaz de usuario reutilizable en &lt;template component&gt; y cárgala con l-m.</p>
+
+      <p>
+  Las páginas organizan el contenido; los componentes encapsulan una pieza reutilizable de la interfaz.
+  Un componente también es un archivo HTML, pero su nodo raíz es <code>&lt;template component&gt;</code> y declara un
+  <code>tag</code> único.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-12" fold-styles="true"></docs-playground>
+<h2>Dos archivos, dos pestañas</h2>
+<p>
+  Las pestañas de la parte superior del editor alternan entre <code>page.html</code> y
+  <code>hello-card.html</code>. La página carga el componente con
+  <code>&lt;l-m src="./hello-card.html"&gt;</code> y, a partir de ahí, puedes usar
+  <code>&lt;hello-card&gt;</code> como una etiqueta HTML normal.
+</p>
+<ul>
+  <li><code>tag</code>: el nombre de etiqueta del componente; debe coincidir con el nombre usado donde se invoca;</li>
+  <li>los <code>data</code> de un componente están aislados, por lo que cada una de las dos tarjetas mantiene su propio contador;</li>
+  <li>el <code>&lt;style&gt;</code> de un componente solo se aplica a ese componente.</li>
+</ul>
+<div class="doc-note">
+  <strong>El nombre del archivo no es el nombre de la etiqueta:</strong> el nombre de la etiqueta proviene del
+  <code>tag</code> declarado en el componente y solo se infiere del nombre del archivo cuando falta.
+  No dependas de la inferencia: decláralo explícitamente.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Cambia el texto del encabezado y del botón en el componente, luego añade una tercera tarjeta a la página y comprueba
+  si las tres tarjetas cuentan de forma independiente.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-11.html">11 · Ciclo de vida →</a> · Siguiente: <a olink href="./lesson-13.html">13 · Parámetros de componente →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

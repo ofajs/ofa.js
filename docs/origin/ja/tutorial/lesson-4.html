@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 04</p>
+      <h1>スタイルとクラス</h1>
+      <p class="doc-lead">ページの &lt;style&gt; はそのページにのみ適用されます。class: と :style を使えば、スタイルをデータの変化に追従させられます。</p>
+
+      <p>
+  ページテンプレート内の <code>&lt;style&gt;</code> はページの Shadow DOM に集約され、
+  他のコンポーネントには漏れません。<code>:host</code> はページ／コンポーネント自身を選択します。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-4"></docs-playground>
+<h2>よく使う3つの書き方</h2>
+<ul>
+  <li><code>:host</code>：ページコンテナをスタイリングします。例えば <code>display:block</code> など。</li>
+  <li><code>class:active="active"</code>：条件が true のときにクラスを追加し、false のときに削除します。</li>
+  <li><code>:style.background="..."</code>：インラインスタイルです。プロパティ名はキャメルケースで書きます。</li>
+</ul>
+<div class="doc-note">
+  <strong>使い分け：</strong>選択中・完了などの構造的な状態には <code>class:</code> を、
+  色やサイズといった個々の値には <code>:style</code> を使います。テンプレート内で長い
+  <code>style</code> 文字列を組み立てないでください。
+</div>
+<h2>自分で試してみる</h2>
+<p>
+  <code>class:highlight="active"</code> で別のクラスをバインドし、<code>&lt;style&gt;</code> で
+  背景色を指定して、状態を切り替えたときに何が変わるかを観察してみてください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-3.html">03 · 動的な属性 →</a> · 次へ: <a olink href="./lesson-5.html">05 · イベント →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

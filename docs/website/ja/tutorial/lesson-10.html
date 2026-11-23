@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>10 · 算出プロパティと監視 — ofa.js チュートリアル</title>
+    <meta name="description" content="proto ゲッターは同期的に計算します。watch は変更を監視し、副作用を処理します。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="10 · 算出プロパティと監視 — ofa.js チュートリアル" />
+    <meta property="og:description" content="proto ゲッターは同期的に計算します。watch は変更を監視し、副作用を処理します。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 10</p>
+      <h1>算出プロパティと監視</h1>
+      <p class="doc-lead">proto の getter は同期的に計算し、watch は変更を監視して副作用を処理します。</p>
+
+      <p>
+  既存のデータから値を導出するには、<code>proto</code> の getter を使います。
+  データ変更後に追加の処理（ログ出力や外部ストレージへの書き込み）が必要な場合は、<code>watch</code> を使います。
+</p>
+<l-m src="../../components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10" fold-styles="true"></docs-playground>
+<h2>getter と watch の役割分担</h2>
+<ul>
+  <li><code>get total()</code>: テンプレートでは通常のフィールドのように使え、依存するデータに合わせて自動的に更新されます。</li>
+  <li><code>watch.qty(value, { watchers })</code>: データが変更された後に実行されます。</li>
+  <li>watch は初期化時にも一度呼ばれ、その時点では <code>watchers</code> はまだ存在しません。
+    そのため <code>if (!watchers) return</code> で最初の呼び出しをスキップできます。</li>
+</ul>
+<div class="doc-note">
+  <strong>getter の制約:</strong> getter はテンプレートの初期化時に評価されるため、
+  すでに存在する同期データにしか依存できません。API から返される非同期データに依存する場合は、
+  まず結果をデータフィールドに保存し、非同期コールバック内で代入してください。
+</div>
+<h2>実際に試してみる</h2>
+<p>
+  「割引」入力欄（0〜1）を追加して、合計金額が割引を適用して計算されるようにしてみましょう。
+  続いて watch で割引の変更をログ出力してみてください。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-9.html">09 · リストの編集 →</a> · 次へ: <a olink href="./lesson-11.html">11 · ライフサイクル →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>このページで ofa.js を実行するには JavaScript が必要です。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

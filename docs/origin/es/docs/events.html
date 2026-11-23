@@ -1,0 +1,140 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Plantilla</p>
+      <h1>Eventos y formularios</h1>
+      <p class="doc-lead">
+        Enlaza eventos con <code>on:</code> y eventos de una sola vez con <code>one:</code>.
+        Los valores de los controles de formulario se mantienen sincronizados
+        bidireccionalmente con los datos mediante <code>sync:</code>.
+      </p>
+
+      <h2>Métodos de enlace</h2>
+      <pre><code>&lt;button on:click="save"&gt;Guardar&lt;/button&gt;
+&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="add(5)"&gt;Añadir 5&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;</code></pre>
+      <p>
+        Un identificador simple (<code>save</code>) se resuelve como un método de
+        <code>proto</code> y se enlaza automáticamente a <code>this</code>. Las
+        expresiones complejas se ejecutan directamente. Los literales de cadena dentro
+        de una expresión deben ir entre comillas; de lo contrario se tratan como nombres
+        de variables.
+      </p>
+
+      <h2>Objeto de evento</h2>
+      <pre><code>&lt;input on:keydown="onKeydown($event)" /&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { draft: "" },
+    proto: {
+      onKeydown(event) {
+        if (event.key !== "Enter") return;
+        this.submit();
+      },
+      submit() {
+        console.log(this.draft);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        <code>$event</code> es el objeto de evento nativo. Los datos de los eventos
+        personalizados están en <code>event.data</code>, mientras que los campos del
+        evento DOM original siguen disponibles.
+      </p>
+
+      <h2>Eventos de una sola vez</h2>
+      <pre><code>&lt;img one:load="onImageReady" src="./cover.jpg" /&gt;
+&lt;div one:click="dismiss"&gt;Haz clic para desvincular&lt;/div&gt;</code></pre>
+      <p>
+        <code>one:</code> se desvincula automáticamente tras el primer disparo, lo que
+        encaja en inicializaciones, cierre de avisos y casos similares.
+      </p>
+
+      <h2>Enlace bidireccional de formularios</h2>
+      <pre><code>&lt;input type="text" sync:value="form.name" placeholder="Nombre" /&gt;
+&lt;input type="checkbox" sync:checked="form.agree" /&gt;
+&lt;select sync:value="form.city"&gt;
+  &lt;option value="shanghai"&gt;Shanghái&lt;/option&gt;
+  &lt;option value="beijing"&gt;Pekín&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      <p>
+        <code>sync:</code> es solo para escalares. Un objeto de formulario puede vivir
+        entero en <code>data</code>, pero cada enlace de campo debe seguir apuntando a un
+        escalar concreto.
+      </p>
+
+      <h2>Enviar un formulario</h2>
+      <pre><code>&lt;form on:submit="onSubmit($event)"&gt;
+  &lt;input sync:value="form.name" required /&gt;
+  &lt;button type="submit"&gt;Guardar&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { form: { name: "" } },
+    proto: {
+      onSubmit(event) {
+        event.preventDefault();
+        if (!this.form.name.trim()) return;
+        console.log("enviar", this.form.name);
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+
+      <h2>Eventos personalizados</h2>
+      <p>Un componente o una página emite un evento por sí mismo:</p>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Juan Pérez" },
+  bubbles: true,   // verdadero por defecto
+  composed: true,  // se establece cuando el evento debe cruzar el límite del Shadow DOM
+});</code></pre>
+      <p>Quienes lo consumen lo escuchan y leen <code>event.data</code>:</p>
+      <pre><code>&lt;user-form on:save="onSaved"&gt;&lt;/user-form&gt;
+
+&lt;script&gt;
+  export default async () =&gt; ({
+    data: { savedName: "" },
+    proto: {
+      onSaved(event) {
+        this.savedName = event.data.name;
+      },
+    },
+  });
+&lt;/script&gt;</code></pre>
+      <p>
+        Cuando un <code>o-page</code> incrustado en el Shadow DOM del anfitrión emite un
+        evento hacia arriba, deben estar presentes tanto <code>bubbles: true</code> como
+        <code>composed: true</code>; de lo contrario, el anfitrión nunca lo recibe.
+      </p>
+
+      <h2>Sugerencias de nombres</h2>
+      <ul>
+        <li>Usa kebab-case en minúsculas para los nombres de eventos: <code>data-changed</code>, <code>form-save</code>;</li>
+        <li>Reutiliza nombres de eventos nativos como <code>click</code>, <code>input</code> y <code>submit</code>;</li>
+        <li>No añadas el prefijo <code>on</code> a los nombres de eventos; el <code>on:</code> de la plantilla ya lo expresa.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./binding.html">Enlaces y estilos →</a>
+         · Siguiente: <a olink href="./render.html">Condicionales y listas →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

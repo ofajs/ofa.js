@@ -1,0 +1,49 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 02</p>
+      <h1>データと補間</h1>
+      <p class="doc-lead">data には文字列、数値、真偽値、オブジェクト、配列を保持でき、{{ }} では簡単な式も評価できます。</p>
+
+      <p>
+  <code>data</code> はただのオブジェクトですが、ofa.js がそれをリアクティブなデータに変えます。
+  テンプレート内の <code>{{ }}</code> はフィールドを読むだけでなく、式の評価や
+  ネストしたプロパティへのアクセスもできます。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-2" fold-styles="true"></docs-playground>
+<h2>ルール</h2>
+<ul>
+  <li><code>{{user.name}}</code>：オブジェクトのネストしたフィールドにアクセスします。</li>
+  <li><code>{{user.age + 1}}</code>：{{ }} の中身は JavaScript の式です。</li>
+  <li><code>:html="note"</code>：文字列を HTML として描画します。信頼できるコンテンツにのみ使ってください。</li>
+</ul>
+<div class="doc-note">
+  <strong>覚えておきましょう：</strong><code>{{ }}</code> が使えるのは要素のテキストコンテンツだけです。
+  属性値には次のレッスンで扱う <code>attr:</code> / <code>:prop</code> を使ってください。
+  <code>&lt;a href="{{url}}"&gt;</code> と書いても効果はありません。
+</div>
+<h2>自分で試してみる</h2>
+<p>
+  <code>user</code> に <code>city</code> フィールドを追加し、「都市：xxx」の形で表示してみてください。
+  さらに <code>note</code> をプレーンテキストに変えて、<code>:html</code> と
+  <code>{{ }}</code> の違いを観察してみましょう。
+</p>
+
+      <p class="doc-end">前へ: <a olink href="./lesson-1.html">01 · 最初のページ →</a> · 次へ: <a olink href="./lesson-3.html">03 · 動的な属性 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

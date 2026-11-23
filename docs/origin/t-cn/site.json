@@ -1,0 +1,450 @@
+{
+  "meta": {
+    "lang": "zh-Hant",
+    "language": "繁體中文",
+    "title": "ofa.js — 把組件，寫成 HTML",
+    "description": "ofa.js 是一個零構建、零依賴的 Web Components 前端框架。一個 HTML 文件就是一個組件，瀏覽器直接運行，無需 npm、Node.js 或打包器。",
+    "noscript": "此頁面需要啟用 JavaScript 才能運行 ofa.js。",
+    "order": 15
+  },
+  "shell": {
+    "nav": {
+      "tutorial": "教程",
+      "docs": "文檔",
+      "api": "API",
+      "blog": "博客"
+    },
+    "actions": {
+      "nav": "主導航",
+      "home": "首頁",
+      "github": "GitHub",
+      "githubRepo": "GitHub 倉庫",
+      "menu": "切換菜單",
+      "languages": "語言"
+    },
+    "footer": {
+      "tagline": "零構建、零依賴的 Web Components 框架。把組件寫成 HTML，把開發還給瀏覽器。",
+      "resources": "資源",
+      "ecosystem": "生態",
+      "community": "社區",
+      "docs": "官方文檔",
+      "plugins": "插件",
+      "note": "這個頁面本身，也是用 ofa.js 寫的。"
+    },
+    "search": {
+      "label": "搜索站點內容",
+      "placeholder": "搜索文檔、教程、API…",
+      "empty": "沒有匹配內容",
+      "loading": "正在加載搜索索引…"
+    },
+    "theme": {
+      "label": "切換主題",
+      "light": "白天模式",
+      "dark": "黑夜模式",
+      "system": "跟隨系統"
+    }
+  },
+  "demo": {
+    "reset": "重置",
+    "kicker": "Today",
+    "heading": "要完成的事",
+    "remainingSuffix": "項待辦",
+    "placeholder": "今天想完成什麼？",
+    "inputAria": "新的待辦事項",
+    "add": "添加",
+    "clear": "清除已完成",
+    "doneSuffix": "已完成",
+    "checkAria": "標記完成",
+    "deleteAria": "刪除",
+    "todos": [
+      "用一份 HTML 寫出第一個組件",
+      "用 o-fill 渲染待辦列表",
+      "把頁面丟到任意靜態服務器"
+    ]
+  },
+  "toast": {
+    "copied": "已複製到剪貼板",
+    "failed": "複製失敗，請手動選擇"
+  },
+  "docs": {
+    "label": "文檔",
+    "overview": "文檔總覽",
+    "onThisPage": "本頁內容",
+    "nav": {
+      "start": {
+        "label": "開始使用",
+        "items": {
+          "gettingStarted": "安裝與引入",
+          "firstComponent": "第一個組件",
+          "firstPage": "第一個頁面"
+        }
+      },
+      "basics": {
+        "label": "組件與頁面",
+        "items": {
+          "component": "組件",
+          "page": "頁面",
+          "lifecycle": "生命週期"
+        }
+      },
+      "template": {
+        "label": "模板語法",
+        "items": {
+          "template": "指令總覽",
+          "binding": "綁定與樣式",
+          "events": "事件與表單",
+          "render": "條件與列表"
+        }
+      },
+      "data": {
+        "label": "數據與狀態",
+        "items": {
+          "data": "數據與偵聽",
+          "state": "全局狀態",
+          "context": "跨組件上下文"
+        }
+      },
+      "app": {
+        "label": "應用與路由",
+        "items": {
+          "app": "o-app 應用",
+          "routing": "路由與導航",
+          "nestedRouting": "嵌套路由",
+          "scsr": "真實路徑 scsr"
+        }
+      },
+      "reference": {
+        "label": "參考",
+        "items": {
+          "api": "$.fn 與包裝對象",
+          "plugins": "插件與擴展",
+          "pitfalls": "常見錯誤",
+          "examples": "完整示例",
+          "playground": "案例預覽",
+          "deployment": "部署"
+        }
+      }
+    }
+  },
+  "pages": {
+    "docs/index.html": {
+      "title": "ofa.js 文檔",
+      "description": "ofa.js v5 文檔總覽：從安裝、組件、頁面到路由、狀態與 API 參考。"
+    },
+    "docs/getting-started.html": {
+      "title": "安裝與引入 — ofa.js 文檔",
+      "description": "通過 CDN 或本地文件引入 ofa.js v5，並運行第一個頁面。"
+    },
+    "docs/first-component.html": {
+      "title": "第一個組件 — ofa.js 文檔",
+      "description": "創建第一個自定義 Web Component，理解 tag、data、attrs 與 slot。"
+    },
+    "docs/first-page.html": {
+      "title": "第一個頁面 — ofa.js 文檔",
+      "description": "使用 template[page] 創建頁面模塊，並通過 o-page 或 o-app 運行。"
+    },
+    "docs/component.html": {
+      "title": "組件 — ofa.js 文檔",
+      "description": "ofa.js 組件的結構、attrs/data、props 傳遞、插槽、自定義事件與組件複用。"
+    },
+    "docs/page.html": {
+      "title": "頁面 — ofa.js 文檔",
+      "description": "頁面模塊、query 參數、o-page 內嵌子頁面與頁面拆分。"
+    },
+    "docs/lifecycle.html": {
+      "title": "生命週期 — ofa.js 文檔",
+      "description": "ready、attached、loaded、detached 的時機、順序與資源清理。"
+    },
+    "docs/template.html": {
+      "title": "模板指令總覽 — ofa.js 文檔",
+      "description": "ofa.js 模板指令總表：插值、屬性、事件、雙向綁定、條件與列表。"
+    },
+    "docs/binding.html": {
+      "title": "綁定與樣式 — ofa.js 文檔",
+      "description": "attr:、:prop、sync:、class:、:style 與布爾屬性的正確寫法。"
+    },
+    "docs/events.html": {
+      "title": "事件與表單 — ofa.js 文檔",
+      "description": "on:、one:、$event、表單雙向綁定、自定義事件與事件冒泡。"
+    },
+    "docs/render.html": {
+      "title": "條件與列表 — ofa.js 文檔",
+      "description": "o-if/o-else-if/o-else 條件渲染，o-fill 列表與 $data 作用域。"
+    },
+    "docs/data.html": {
+      "title": "數據與偵聽 — ofa.js 文檔",
+      "description": "響應式 data、computed getter、watch 偵聽器與常見邊界。"
+    },
+    "docs/state.html": {
+      "title": "全局狀態 — ofa.js 文檔",
+      "description": "使用 $.stanz() 創建跨頁面共享的響應式狀態，並正確掛載與清理。"
+    },
+    "docs/context.html": {
+      "title": "跨組件上下文 — ofa.js 文檔",
+      "description": "o-provider、o-consumer、o-root-provider、getProvider 與 dispatch。"
+    },
+    "docs/app.html": {
+      "title": "o-app 應用 — ofa.js 文檔",
+      "description": "o-app 應用配置、頁面棧、切換動畫、loading/fail 與擴展 proto。"
+    },
+    "docs/routing.html": {
+      "title": "路由與導航 — ofa.js 文檔",
+      "description": "goto/replace/back、olink、query 傳參、o-router hash 路由與 router-change。"
+    },
+    "docs/nested-routing.html": {
+      "title": "嵌套路由 — ofa.js 文檔",
+      "description": "通過 export const parent 與 slot 建立共享佈局的多級嵌套路由。"
+    },
+    "docs/scsr.html": {
+      "title": "真實路徑路由 scsr — ofa.js 文檔",
+      "description": "用 scsr 讓每個 URL 都是可直接訪問的完整文檔，適合 SEO 與分享。"
+    },
+    "docs/api.html": {
+      "title": "$.fn 與包裝對象 — ofa.js 文檔",
+      "description": "ofa.js 包裝對象 API：選擇、樹導航、DOM 操作、事件、屬性與擴展。"
+    },
+    "docs/plugins.html": {
+      "title": "插件與擴展 — ofa.js 文檔",
+      "description": "ofa.js 可選插件：formData、inject-host、body-ghost、global-link 的引入方式與使用場景。"
+    },
+    "docs/pitfalls.html": {
+      "title": "常見錯誤與排查 — ofa.js 文檔",
+      "description": "ReferenceError、保留名衝突、布爾屬性、o-page src 與緩存問題排查。"
+    },
+    "docs/examples.html": {
+      "title": "完整示例 — ofa.js 文檔",
+      "description": "最小應用、自定義組件、待辦清單與路由應用四個完整示例。"
+    },
+    "docs/playground.html": {
+      "title": "案例預覽 — ofa.js 文檔",
+      "description": "在 NoneOS Core 虛擬容器中在線編輯並運行 ofa.js 頁面模塊。"
+    },
+    "docs/deployment.html": {
+      "title": "部署 — ofa.js 文檔",
+      "description": "把 ofa.js 應用部署到任意靜態服務器、CDN 與子目錄的注意事項。"
+    },
+    "tutorial/index.html": {
+      "title": "ofa.js 教程",
+      "description": "20 節漸進式 ofa.js 教程：從第一個頁面到組件、上下文、狀態、路由與綜合實戰。"
+    },
+    "tutorial/lesson-1.html": {
+      "title": "01 · 第一個頁面 — ofa.js 教程",
+      "description": "ofa.js 的頁面就是一個 HTML 文件：結構、樣式和邏輯都在同一個文件裡。"
+    },
+    "tutorial/lesson-2.html": {
+      "title": "02 · 數據與插值 — ofa.js 教程",
+      "description": "data 可以放字符串、數字、布爾、對象和數組，{{ }} 裡還能寫簡單表達式。"
+    },
+    "tutorial/lesson-3.html": {
+      "title": "03 · 動態屬性 — ofa.js 教程",
+      "description": "HTML attribute 用 attr:，DOM 屬性用 :prop；布爾屬性必須用 attr:。"
+    },
+    "tutorial/lesson-4.html": {
+      "title": "04 · 樣式與 class — ofa.js 教程",
+      "description": "頁面裡的 <style> 只作用於當前頁面，class: 和 :style 讓樣式跟隨數據變化。"
+    },
+    "tutorial/lesson-5.html": {
+      "title": "05 · 事件 — ofa.js 教程",
+      "description": "用 on: 監聽事件：簡單邏輯寫表達式，複雜邏輯寫 proto 方法。"
+    },
+    "tutorial/lesson-6.html": {
+      "title": "06 · 雙向綁定 — ofa.js 教程",
+      "description": "sync: 讓表單和 data 雙向同步，適合標量值。"
+    },
+    "tutorial/lesson-7.html": {
+      "title": "07 · 條件渲染 — ofa.js 教程",
+      "description": "o-if / o-else-if / o-else 控制內容是否存在。"
+    },
+    "tutorial/lesson-8.html": {
+      "title": "08 · 列表渲染 — ofa.js 教程",
+      "description": "o-fill 渲染數組；列表項內用 $data、$index、$host。"
+    },
+    "tutorial/lesson-9.html": {
+      "title": "09 · 編輯列表 — ofa.js 教程",
+      "description": "數組的 push/splice 會自動更新視圖；行內編輯直接 sync 到 $data 字段。"
+    },
+    "tutorial/lesson-10.html": {
+      "title": "10 · 計算屬性與偵聽 — ofa.js 教程",
+      "description": "proto 的 getter 做同步計算，watch 觀察變化並處理副作用。"
+    },
+    "tutorial/lesson-11.html": {
+      "title": "11 · 生命週期 — ofa.js 教程",
+      "description": "ready → attached → loaded，移除時 detached；定時器和監聽要在 detached 清理。"
+    },
+    "tutorial/lesson-12.html": {
+      "title": "12 · 第一個組件 — ofa.js 教程",
+      "description": "把可複用的 UI 拆成 <template component>，用 l-m 引入。"
+    },
+    "tutorial/lesson-13.html": {
+      "title": "13 · 組件參數 — ofa.js 教程",
+      "description": "外部數據通過 attrs 傳給組件；組件內部用 data 保存自己的狀態。"
+    },
+    "tutorial/lesson-14.html": {
+      "title": "14 · 插槽與事件 — ofa.js 教程",
+      "description": "slot 讓組件接收外部內容，emit 把組件內部發生的事告訴外部。"
+    },
+    "tutorial/lesson-15.html": {
+      "title": "15 · 跨層上下文 — ofa.js 教程",
+      "description": "用 o-provider / o-consumer 在組件子樹裡共享數據。"
+    },
+    "tutorial/lesson-16.html": {
+      "title": "16 · 全局狀態 — ofa.js 教程",
+      "description": "多個組件共享同一份狀態時，用 $.stanz 建一個模塊級 store，並在 attached/detached 掛載、清理。"
+    },
+    "tutorial/lesson-17.html": {
+      "title": "17 · 頁面與路由 — ofa.js 教程",
+      "description": "o-app 管理頁面棧：olink / goto 切頁，query 傳參，back 返回。"
+    },
+    "tutorial/lesson-18.html": {
+      "title": "18 · 嵌套佈局 — ofa.js 教程",
+      "description": "子頁聲明 parent，父頁用 slot 承接；切子頁時父頁不銷燬。"
+    },
+    "tutorial/lesson-19.html": {
+      "title": "19 · 異步與加載態 — ofa.js 教程",
+      "description": "異步請求用 loading / error / success 三種狀態驅動界面，不要把異步結果放進 getter。"
+    },
+    "tutorial/lesson-20.html": {
+      "title": "20 · 綜合：待辦清單 — ofa.js 教程",
+      "description": "把列表、表單、條件、計算屬性、偵聽和 localStorage 串成一個完整應用。"
+    },
+    "api/index.html": {
+      "title": "API 參考 — ofa.js API",
+      "description": "所有實例成員、全局靜態成員與運行示例。"
+    },
+    "api/instance.html": {
+      "title": "實例基礎 — ofa.js API",
+      "description": "實例對象同時是 DOM 包裝器、響應式數據和子元素集合。先認識它的基礎屬性。"
+    },
+    "api/traverse.html": {
+      "title": "選擇與遍歷 — ofa.js API",
+      "description": "在實例內部查找元素，並沿 DOM / shadow 邊界前後移動。"
+    },
+    "api/structure.html": {
+      "title": "結構操作 — ofa.js API",
+      "description": "子元素按數組語義操作；可變方法會真實搬動 DOM 並觸發更新。"
+    },
+    "api/props.html": {
+      "title": "內容、屬性與樣式 — ofa.js API",
+      "description": "讀寫文本、HTML、attribute、class 與內聯樣式。"
+    },
+    "api/events.html": {
+      "title": "事件 — ofa.js API",
+      "description": "用實例方法綁定、解綁和派發事件；事件可以帶業務數據並跨 shadow。"
+    },
+    "api/reactive.html": {
+      "title": "數據與偵聽 — ofa.js API",
+      "description": "實例數據來自 stanz：讀寫字段就是響應式更新，監聽與清理都有對應方法。"
+    },
+    "api/context.html": {
+      "title": "上下文通信 — ofa.js API",
+      "description": "o-provider 把數據放進一棵子樹，o-consumer 就近消費；實例方法可以主動查找 provider。"
+    },
+    "api/global.html": {
+      "title": "全局 $ 靜態成員 — ofa.js API",
+      "description": "掛在全局 $ 上的選擇器、註冊、響應式、渲染與版本信息。"
+    },
+    "api/extend.html": {
+      "title": "擴展實例 — ofa.js API",
+      "description": "在單個實例或全部實例上增加方法、getter 和新指令。"
+    },
+    "api/app.html": {
+      "title": "o-app 與 o-page — ofa.js API",
+      "description": "應用容器負責頁面棧和導航；頁面實例負責自己的一屏內容。"
+    },
+    "blog/index.html": {
+      "title": "博客 — ofa.js",
+      "description": "ofa.js 的工程博客：版本演進、性能、架構與實戰經驗。"
+    },
+    "blog/v5-vs-v4.html": {
+      "title": "ofa.js v5 比 v4 進步了多少？ — ofa.js",
+      "description": "從架構、模板渲染、列表性能、路由和工程體驗，拆解 ofa.js v5 相對 v4 的真實進步。"
+    }
+  },
+  "tutorial": {
+    "label": "教程",
+    "overview": "教程總覽",
+    "groups": {
+      "start": {
+        "label": "入門",
+        "lessons": {
+          "lesson1": "01 · 第一個頁面",
+          "lesson2": "02 · 數據與插值",
+          "lesson3": "03 · 動態屬性",
+          "lesson4": "04 · 樣式與 class"
+        }
+      },
+      "interact": {
+        "label": "交互與狀態",
+        "lessons": {
+          "lesson5": "05 · 事件",
+          "lesson6": "06 · 雙向綁定",
+          "lesson7": "07 · 條件渲染",
+          "lesson8": "08 · 列表渲染",
+          "lesson9": "09 · 編輯列表",
+          "lesson10": "10 · 計算屬性與偵聽",
+          "lesson11": "11 · 生命週期"
+        }
+      },
+      "component": {
+        "label": "組件",
+        "lessons": {
+          "lesson12": "12 · 第一個組件",
+          "lesson13": "13 · 組件參數",
+          "lesson14": "14 · 插槽與事件"
+        }
+      },
+      "app": {
+        "label": "應用與實戰",
+        "lessons": {
+          "lesson15": "15 · 跨層上下文",
+          "lesson16": "16 · 全局狀態",
+          "lesson17": "17 · 頁面與路由",
+          "lesson18": "18 · 嵌套佈局",
+          "lesson19": "19 · 異步與加載態",
+          "lesson20": "20 · 綜合：待辦清單"
+        }
+      }
+    }
+  },
+  "api": {
+    "label": "API 參考",
+    "overview": "API 總覽",
+    "groups": {
+      "instance": {
+        "label": "實例相關",
+        "items": {
+          "instance": "實例基礎",
+          "traverse": "選擇與遍歷",
+          "structure": "結構操作"
+        }
+      },
+      "props": {
+        "label": "屬性與事件",
+        "items": {
+          "props": "內容、屬性與樣式",
+          "events": "事件"
+        }
+      },
+      "data": {
+        "label": "數據與擴展",
+        "items": {
+          "reactive": "數據與偵聽",
+          "context": "上下文通信",
+          "global": "全局 $ 靜態成員",
+          "extend": "擴展實例"
+        }
+      },
+      "app": {
+        "label": "應用與頁面",
+        "items": {
+          "app": "o-app 與 o-page"
+        }
+      }
+    }
+  },
+  "skill": {
+    "label": "Agent",
+    "copyAria": "複製 Agent Skill 地址",
+    "hint": "複製技能包地址，交給支持 Agent Skills 的 AI。"
+  }
+}

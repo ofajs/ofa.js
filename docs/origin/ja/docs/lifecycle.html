@@ -1,0 +1,133 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">コアコンセプト</p>
+      <h1>ライフサイクル</h1>
+      <p class="doc-lead">
+        コンポーネントとページは同じライフサイクルフックを共有します。実行順序を理解して
+        おくと、DOM が存在する前に要素へ触れてしまうことを防げ、タイマーやリスナーも
+        適切にクリーンアップできます。
+      </p>
+
+      <h2>4つのフック</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>フック</th><th>実行タイミング</th><th>主な用途</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ready()</code></td>
+            <td>テンプレートがレンダリングされ DOM が生成された後（まだドキュメント内にない場合もある）</td>
+            <td>DOM とサードパーティライブラリの初期化、初期状態の計測</td>
+          </tr>
+          <tr>
+            <td><code>attached()</code></td>
+            <td>要素が DOM にマウントされたとき</td>
+            <td>タイマーの開始、グローバルリスナーの追加、共有状態の読み込み</td>
+          </tr>
+          <tr>
+            <td><code>loaded()</code></td>
+            <td>要素、その子コンポーネント、非同期リソースの読み込みがすべて完了したとき</td>
+            <td>コンポーネントツリー全体に依存する最終処理、ローディング表示の非表示</td>
+          </tr>
+          <tr>
+            <td><code>detached()</code></td>
+            <td>要素が DOM から削除されたとき</td>
+            <td>タイマー、リスナー、共有状態への参照のクリア</td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <p>初回マウント時の順序は <code>ready → attached → loaded</code> です。<code>detached</code> は要素が削除されたときに呼ばれます。</p>
+
+      <h2>完全なクリーンアップ例</h2>
+      <pre><code>export default {
+  tag: "clock-view",
+  data: {
+    now: Date.now(),
+  },
+  attached() {
+    this._timer = setInterval(() =&gt; {
+      this.now = Date.now();
+    }, 1000);
+    this._onResize = () =&gt; {
+      this.width = window.innerWidth;
+    };
+    window.addEventListener("resize", this._onResize);
+  },
+  detached() {
+    clearInterval(this._timer);
+    window.removeEventListener("resize", this._onResize);
+  },
+};</code></pre>
+      <p>
+        タイマー、グローバルイベントリスナー、共有状態への参照はすべて
+        <code>detached</code> で解放してください。そうしないと、コンポーネントが破棄された
+        後も更新が発火し続け、メモリリークにつながります。
+      </p>
+
+      <h2>ready と attached の違い</h2>
+      <p>
+        <code>ready</code> はコンポーネント自身の Shadow DOM を扱うのに適した場所です。
+        たとえば <code>this.shadow.$("#id")</code> で要素を取得できます。要素の実際のサイズや
+        ドキュメント内の位置に依存するロジックなら、<code>attached</code> の方が安全です。
+      </p>
+      <pre><code>ready() {
+  this.shadow.$("#canvas").css.width = "100%";
+},
+attached() {
+  const rect = this.ele.getBoundingClientRect();
+  this.width = rect.width;
+},</code></pre>
+
+      <h2>非同期データと算出プロパティ</h2>
+      <p>
+        <code>proto</code> のゲッターはテンプレートの初期化時、<code>ready</code> より前に
+        評価されます。同期の初期値に対する単純な計算にのみ適しています：
+      </p>
+      <pre><code>data: { count: 0 },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+},</code></pre>
+      <p>
+        計算が非同期 API に依存する場合は、ゲッターに置かないでください。データフィールドを
+        使い、非同期コールバック内で代入します：
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = user.role === "admin" ? "管理者" : "一般ユーザー";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+      <p>
+        デバッグのシナリオについては<a olink href="./pitfalls.html">よくある落とし穴</a>を参照してください。
+      </p>
+
+      <p class="doc-end">
+        前へ：<a olink href="./page.html">ページ →</a>
+         · 次へ：<a olink href="./template.html">テンプレートディレクティブ →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

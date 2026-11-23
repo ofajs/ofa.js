@@ -26,7 +26,13 @@ export const pageAnime = reducedMotion
 const loadingCss = new URL("./styles/loading.css", import.meta.url).href;
 const loadingLabel = document.documentElement.lang.startsWith("en")
   ? "Loading page"
-  : "页面加载中";
+  : document.documentElement.lang.startsWith("zh-Hant")
+    ? "頁面載入中"
+    : document.documentElement.lang.startsWith("ja")
+      ? "ページを読み込み中"
+      : document.documentElement.lang.startsWith("es")
+        ? "Cargando página"
+        : "页面加载中";
 
 export const loading = () => `
   <div class="route-progress" role="progressbar" aria-label="${loadingLabel}">

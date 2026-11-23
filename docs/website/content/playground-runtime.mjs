@@ -4,11 +4,12 @@
  */
 
 import { DEFAULT_CODE_EN, LESSONS_EN } from "./playground-runtime-en.mjs";
+import { DEFAULT_CODE_TCN, LESSONS_TCN } from "./playground-runtime-t-cn.mjs";
 
 export const SPACE = "ofa-docs-playground";
 
 export const OFA_CDN =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 
 // 教程结构改版时递增版本，避免旧的本地代码覆盖新示例
 export const STORAGE_KEY = "ofa-docs-playground-code:v2";
@@ -47,18 +48,21 @@ export const DEFAULT_CODE = `<template page>
 </template>`;
 
 export const buildIndex = (version, entry = "page") => {
-  const isEnglish = document.documentElement.lang.startsWith("en");
+  const isJapanese = document.documentElement.lang.startsWith("ja");
+  const isSpanish = document.documentElement.lang.startsWith("es");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") || isJapanese || isSpanish;
   const body =
     entry === "app"
       ? `<o-app src="./app.mjs?v=${version}"></o-app>`
       : `<o-page src="./page.html?v=${version}"></o-page>`;
 
   return `<!doctype html>
-<html lang="${isEnglish ? "en" : "zh-CN"}">
+<html lang="${isJapanese ? "ja" : isSpanish ? "es" : isEnglish ? "en" : "zh-CN"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${isEnglish ? "ofa.js Example Preview" : "ofa.js 案例预览"}</title>
+    <title>${isJapanese ? "ofa.js サンプルプレビュー" : isSpanish ? "Vista previa de ejemplo de ofa.js" : isEnglish ? "ofa.js Example Preview" : "ofa.js 案例预览"}</title>
     <script type="module" src="${OFA_CDN}"><\/script>
     <style>
       html, body { margin: 0; min-height: 100%; }
@@ -76,9 +80,17 @@ export const buildIndex = (version, entry = "page") => {
 // { entry: "page" | "app", files: { "page.html": "..." } }。
 // entry="app" 时入口写 app.mjs，用 <o-app> 跑多页面/路由课程。
 export const getLesson = (lesson) => {
-  const isEnglish = document.documentElement.lang.startsWith("en");
-  const lessons = isEnglish ? LESSONS_EN : LESSONS;
-  const fallback = isEnglish ? DEFAULT_CODE_EN : DEFAULT_CODE;
+  const isJapanese = document.documentElement.lang.startsWith("ja");
+  const isSpanish = document.documentElement.lang.startsWith("es");
+  const isEnglish =
+    document.documentElement.lang.startsWith("en") || isJapanese || isSpanish;
+  const isTraditional = document.documentElement.lang.startsWith("zh-Hant");
+  const lessons = isEnglish ? LESSONS_EN : isTraditional ? LESSONS_TCN : LESSONS;
+  const fallback = isEnglish
+    ? DEFAULT_CODE_EN
+    : isTraditional
+      ? DEFAULT_CODE_TCN || DEFAULT_CODE
+      : DEFAULT_CODE;
   const raw = lessons[lesson] || fallback;
 
   if (typeof raw === "string") {

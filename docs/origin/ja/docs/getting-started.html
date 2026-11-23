@@ -1,0 +1,112 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc">
+        <p class="doc-kicker">はじめに</p>
+        <h1>インストール</h1>
+        <p class="doc-lead">
+          ofa.js は依存関係もビルドステップも不要です。CDN 上の ESM ファイルを
+          script タグ 1 つで読み込めば、すぐにコンポーネントとページを書き始められます。
+        </p>
+
+        <h2>1. ofa.js を読み込む</h2>
+        <p>
+          v5 の ESM ビルドを推奨します。次の URL を
+          <code>&lt;script type="module"&gt;</code> の <code>src</code> に指定してください:
+        </p>
+        <pre><code>&lt;script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+&gt;&lt;/script&gt;</code></pre>
+
+        <p>
+          クラシックスクリプトのほうが環境に合っている場合は、代わりに UMD ビルドを
+          使用できます（グローバル <code>$</code> を公開します）:
+        </p>
+        <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>バージョンについて:</strong>
+          最新の 5.x リリースに追従するには <code>@5</code> を使用します。正確に固定するには、
+          <code>@5.0.2</code> のような完全なバージョンを指定してください。
+        </div>
+
+        <h2>2. エントリーポイントを書く</h2>
+        <p>
+          エントリ HTML は ofa.js を読み込み、ページモジュールを読み込む <code>o-page</code> を配置するだけです:
+        </p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;はじめての ofa.js ページ&lt;/title&gt;
+    &lt;script
+      type="module"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
+    &gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;o-page src="./page.html"&gt;&lt;/o-page&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. ページモジュールを書く</h2>
+        <p>
+          <code>.html</code> ファイルがページモジュールです。テンプレート、スタイル、ロジックはすべて
+          <code>&lt;template page&gt;</code> の中に記述します:
+        </p>
+        <pre><code>&lt;template page&gt;
+  &lt;h1&gt;こんにちは、{{name}}&lt;/h1&gt;
+  &lt;button on:click="count++"&gt;{{count}} 回クリックしました&lt;/button&gt;
+
+  &lt;script&gt;
+    export default async () =&gt; ({
+      data: { name: "ofa.js", count: 0 },
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+        <div class="doc-note">
+          <strong>注意:</strong> ページとコンポーネントの <code>&lt;script&gt;</code> は
+          <code>&lt;template page&gt;</code> /
+          <code>&lt;template component&gt;</code> の内側に置く必要があります。ofa.js はテンプレート内の
+          スクリプトだけを抽出し、外側に置かれたスクリプトは無視します。
+        </div>
+
+        <h2>4. ページを開く</h2>
+        <p>
+          ページは HTTP 経由で配信する必要があります。HTML ファイルを直接開くことはできません
+          （<code>file://</code> はモジュール読み込みの CORS ポリシーによってブロックされます）。任意の静的サーバーが使用できます:
+        </p>
+        <pre><code>$ npx serve .
+
+# または
+$ python3 -m http.server</code></pre>
+        <p>
+          http://localhost:3000 を開くとページが表示されます。コンソールで
+          <code>$.version</code> を実行すると、フレームワークが読み込まれていることを確認できます。
+        </p>
+
+        <h2>次のステップ</h2>
+        <p>
+          ページが動いたので、次はデータがテンプレートを動かす仕組みを学びましょう。
+          テキスト補間、イベント、双方向バインディング、条件分岐、リストです。
+        </p>
+        <p class="doc-end">
+          次へ: <a olink href="./first-component.html">はじめてのコンポーネント →</a>
+        </p>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

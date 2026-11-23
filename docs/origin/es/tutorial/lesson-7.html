@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 07</p>
+      <h1>Renderizado condicional</h1>
+      <p class="doc-lead">o-if / o-else-if / o-else controlan si el contenido está presente.</p>
+
+      <p>
+  Para mostrar contenido distinto según el estado, usa <code>&lt;o-if :value="condition"&gt;</code>.
+  Cuando la condición es falsa el contenido se elimina; cuando es verdadera el contenido se
+  vuelve a crear.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-7" fold-styles="true"></docs-playground>
+<h2>Las tres etiquetas deben ser consecutivas</h2>
+<ul>
+  <li><code>o-if</code> debe llevar un <code>:value</code>;</li>
+  <li><code>o-else-if</code> evalúa la siguiente condición;</li>
+  <li><code>o-else</code> no lleva <code>:value</code> y actúa como último recurso.</li>
+</ul>
+<div class="doc-note">
+  <strong>Usa class para alternar con frecuencia:</strong> si solo estás cambiando un color
+  o mostrando/ocultando algo, prefiere <code>class:</code> para conservar el DOM;
+  <code>o-if</code> destruye y vuelve a crear el contenido, así que encaja en condiciones que
+  rara vez cambian o en casos en los que de verdad hay que liberar recursos.
+</div>
+<h2>Pruébalo</h2>
+<p>
+  Cambia las puntuaciones inferiores a 60 a "Suspenso" y añade un nivel "Bien" para 80–89.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-6.html">06 · Enlace bidireccional →</a> · Siguiente: <a olink href="./lesson-8.html">08 · Renderizado de listas →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

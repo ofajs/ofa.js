@@ -1,0 +1,45 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Comunicación de contexto</p>
+      <h1>Comunicación de contexto</h1>
+      <p class="doc-lead">o-provider coloca datos en un subárbol y o-consumer consume el proveedor más cercano; los métodos de instancia pueden buscar un proveedor de forma proactiva.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="context"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.getProvider(name)</code></td><td>Busca hacia arriba, atravesando los límites del shadow DOM, un o-provider con el mismo nombre; si no lo encuentra, recurre a o-root-provider, y devuelve null cuando ninguno de los dos existe</td></tr>
+          <tr><td><code>provider.dispatch(name, { data })</code></td><td>Envía un evento personalizado a los consumidores de ese proveedor</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>Obtiene la instancia del proveedor raíz a nivel de aplicación</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> el atributo HTML de un proveedor se lee solo una vez, durante la inicialización; para actualizarlo en tiempo de ejecución, cambia directamente la propiedad data del proveedor.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

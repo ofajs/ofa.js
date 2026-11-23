@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Operaciones de estructura</p>
+      <h1>Operaciones de estructura</h1>
+      <p class="doc-lead">Los elementos hijos funcionan con semántica de array; los métodos mutadores realmente mueven nodos del DOM y desencadenan actualizaciones.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="structure"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>push(...items)</code></td><td>Añade elementos hijos al final; devuelve el nuevo número de elementos hijos</td></tr>
+          <tr><td><code>unshift(...items)</code></td><td>Inserta elementos hijos al principio; devuelve el nuevo número de elementos hijos</td></tr>
+          <tr><td><code>pop() / shift()</code></td><td>Elimina el último / primer elemento hijo y devuelve su instancia</td></tr>
+          <tr><td><code>splice(start, count, ...items)</code></td><td>Elimina e inserta; devuelve un array con las instancias eliminadas</td></tr>
+          <tr><td><code>reverse() / sort(fn)</code></td><td>Invierte / ordena los elementos hijos en el lugar</td></tr>
+          <tr><td><code>map / filter / slice / forEach</code></td><td>Métodos de array que no mutan: primero materializan un array de instancias y luego se ejecutan</td></tr>
+          <tr><td><code>el.before(content) / el.after(content)</code></td><td>Inserta contenido antes / después del propio elemento</td></tr>
+          <tr><td><code>el.remove()</code></td><td>Elimina el elemento de su padre (a través de splice, por lo que la semántica de eventos se mantiene intacta)</td></tr>
+          <tr><td><code>el.wrap(content)</code></td><td>Envuelve el elemento con content; lanza un error cuando no hay padre</td></tr>
+          <tr><td><code>el.unwrap()</code></td><td>Elimina el contenedor del propio elemento; lanza un error cuando hay más de un hermano</td></tr>
+          <tr><td><code>el.clone(bool = true)</code></td><td>Clona el elemento, incluidos los elementos hijos de forma predeterminada</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> Manipular los elementos hijos directamente no actualiza el array en data; usa o-fill para listas de plantilla.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

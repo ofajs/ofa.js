@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ofa.js v5 比 v4 進步了多少？ — ofa.js</title>
+    <meta name="description" content="從架構、模板渲染、列表性能、路由和工程體驗，拆解 ofa.js v5 相對 v4 的真實進步。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ofa.js v5 比 v4 進步了多少？ — ofa.js" />
+    <meta property="og:description" content="從架構、模板渲染、列表性能、路由和工程體驗，拆解 ofa.js v5 相對 v4 的真實進步。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/blog.css" />
+
+  <main class="article-page">
+    <a class="article-back" olink href="./">← 返回博客</a>
+
+    <article class="article-body">
+      <p class="article-kicker">Engineering · Version comparison</p>
+      <h1>ofa.js v5 比 v4<br />進步了多少？</h1>
+      <p class="article-lead">
+        v5 不是一次“加幾個 API”的升級。它保住了 v4 的使用方式，
+        卻把模板渲染、列表對賬、模塊邊界和路由細節重新做了一遍。
+      </p>
+
+      <div class="article-meta">
+        <span>2026-11-22</span>
+        <span>約 9 分鐘</span>
+        <span>基於 ofa.js 5.0 與 4.7.7</span>
+      </div>
+
+      <div class="article-tags" aria-label="主題">
+        <span>o-if / o-fill</span>
+        <span>LIS 對賬</span>
+        <span>monorepo</span>
+        <span>AI 輔助開發</span>
+      </div>
+
+      <p>
+        如果要給 v5 寫一句準確的總結，大概是：
+        <strong>表面上還是 ofa.js，底層已經換了一套更乾淨的實現。</strong>
+        v4 的組件、頁面、<code>o-app</code>、<code>o-page</code>、
+        provider/consumer、零構建這些概念都還在；變化發生在它們下面的運行時。
+      </p>
+
+      <h2>1. 先把結論說清楚</h2>
+      <p>
+        對大多數業務代碼來說，v5 的遷移成本並不高：模板語法基本不變，
+        頁面和組件的組織方式不變，SCSR 真實路徑路由也延續下來。
+        但如果你關心性能、可維護性或模板邊界行為，v5 的變化非常實質：
+      </p>
+      <ul>
+        <li>列表對賬使用 LIS，交換、部分更新、批量操作的耗時大幅下降；</li>
+        <li>核心從多倉庫收攏為 monorepo，drill、stanz、xhear、ofajs 四個包同倉開發；</li>
+        <li>模板渲染改用 xhear v9 的新管線，<code>o-if</code> / <code>o-fill</code> 下沉重寫；</li>
+        <li>移除 <code>x-*</code> 舊語法，統一為 <code>o-*</code>；</li>
+        <li>應用層去掉了對全局 <code>window.lm</code> 的隱式依賴，錯誤碼本地化；</li>
+        <li>路由在離場頁面鎖定、嵌套佈局重排等邊界上更穩定；</li>
+        <li>開發過程大量使用 AI 輔助，測試、文檔和問題反饋都在同一倉裡閉環。</li>
+      </ul>
+
+      <h2>2. 列表性能：這次不是“感覺快了”</h2>
+      <p>
+        v5 最硬的進步在列表運行時。舊版對賬存在兩個結構性問題：
+        深層 item 的任意變更都可能觸發整表刷新；逐位對賬加 <code>indexOf</code>
+        在交換場景下會退化成 O(n²)，併產生大量不必要的 DOM 移動。
+      </p>
+      <p>
+        v5 改成結構判定 + LIS 對賬 + 輕量行上下文 + 綁定級依賴過濾，
+        並把撤銷操作批量化。倉庫內用同一臺機器、Chromium 156、3 輪中位數
+        做的基準裡，數字變化是這樣的：
+      </p>
+
+      <table class="article-table">
+        <thead>
+          <tr><th>場景</th><th>v4 (4.7.7)</th><th>v5 (5.0)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>交換 1000 行中的兩項</td><td class="metric-v4">3020ms</td><td class="metric-v5">120ms</td></tr>
+          <tr><td>部分更新 ×10</td><td class="metric-v4">421ms</td><td class="metric-v5">93ms</td></tr>
+          <tr><td>追加 1000 行</td><td class="metric-v4">247ms</td><td class="metric-v5">39ms</td></tr>
+          <tr><td>刪除 100 行</td><td class="metric-v4">53ms</td><td class="metric-v5">20ms</td></tr>
+          <tr><td>清空 2000 行</td><td class="metric-v4">35ms</td><td class="metric-v5">16ms</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        需要說明的是，這是倉庫內部的基準，不是對所有設備、所有數據形態的承諾。
+        建 1000 行和首屏渲染的改善就小得多（約 38ms → 34ms、69ms 基本持平），
+        因為那部分成本主要在模塊執行和元素註冊，而不是列表對賬。
+        但交換、批量刪除、部分更新這些高頻操作，差距已經不是一個量級。
+      </p>
+      <p>
+        順帶看體積：v4 的 <code>ofa.min.mjs</code> 是 75,749 B
+        （gzip 25,327 B，brotli 22,662 B），v5 對應產物是 69,914 B
+        （gzip 24,168 B，brotli 21,552 B）。raw 體積約小 7.7%，gzip 約小 4.6%，
+        brotli 約小 4.9%。這不是數量級變化，但至少說明性能提升不是靠堆代碼換來的。
+      </p>
+
+      <div class="article-note">
+        <strong>為什麼交換場景提升最大？</strong>
+        <p>
+          因為舊實現對每次移動都要重新計算 key 映射，交換兩項會級聯出一串
+          DOM 移動；新實現先用 LIS 找出真正需要移動的最少節點集合，
+          其餘節點保持原位，再把變更批量提交。
+        </p>
+      </div>
+
+      <h2>3. 從多倉庫到 monorepo：四個包，一個倉庫</h2>
+      <p>
+        v4 時代，核心能力分散在多個倉庫：
+        <strong>drill</strong> 負責瀏覽器端模塊加載，
+        <strong>stanz</strong> 負責 Proxy 響應式數據，
+        <strong>xhear</strong> 負責 Web Components 與模板編譯，
+        <strong>ofajs</strong> 只補應用層能力——頁面、路由、上下文、<code>o-link</code>。
+        它們各自能工作，但跨倉庫修改、聯調和版本對齊都很費勁。
+      </p>
+      <p>
+        v5 的核心變化不是把這些能力重新“拆開”，而是把原來分屬不同倉庫的
+        部分收進同一個 monorepo，放在一個倉庫裡共同演進。
+        四個包的邊界仍然清楚，但一次跨包改動可以在同一個提交裡完成，
+        也能用同一套測試和構建一次驗證。
+      </p>
+      <p>
+        對維護 ofa.js 本身也方便很多。以前升級 ofa.js 往往要在多個倉庫之間
+        同步版本、測試和 issue；現在改一處，drill / stanz / xhear 的下游影響
+        就在同一個倉裡，搜索、跳轉、跑測試、定位問題都不用切倉庫。
+        發現問題時，可以把復現用例、修復和迴歸測試放在同一個提交裡，
+        更新 ofa.js 和查找問題的路徑都短了很多。
+      </p>
+      <p>
+        這對框架本身很重要：改 <strong>xhear</strong> 的渲染管線時，
+        可以同時跑 <strong>ofajs</strong> 的頁面/路由測試；
+        改 <strong>stanz</strong> 的響應式發射時，也能立刻看到
+        <strong>xhear</strong> 列表重渲染是否退化。
+        ofajs 還顯式 <code>import</code> 自己需要的加載器，
+        不再依賴“頁面上碰巧有一個全局 <code>lm</code>”。
+        同時，v5 把錯誤碼錶收回框架內部，移除了單獨的 <code>ofa-error</code> 包。
+      </p>
+      <p>
+        另一個容易被忽略的變化是發佈形態：
+        <strong>源碼就是產物</strong>。除了 ofa.js 主包和少數橋接包需要 rollup，
+        其他包保持 source-only ESM，瀏覽器看到的 <code>.mjs</code>
+        就是倉庫裡的源碼。調試時不需要在 sourcemap 和真實實現之間來回跳。
+      </p>
+
+      <h2>4. 模板與渲染：修掉“看起來能用”的邊界</h2>
+      <p>
+        v4 的模板系統已經足夠好用，但它建立在舊的 xtext / x-bind-data 管線上。
+        v5 把渲染遷到 xhear v9 之後，<code>o-if</code> 和
+        <code>o-fill</code> 不再是簡單的“包一層模板”，而是按需編譯、
+        緩存編譯結果，並走描述符快路徑。
+      </p>
+      <p>
+        這些改動帶來的直接結果是，一些過去會在複雜組合裡靜默失效的場景
+        變得可靠了，例如：
+      </p>
+      <ul>
+        <li><code>o-if</code> 內部再放 <code>o-fill</code>；</li>
+        <li><code>o-fill</code> 的每一項裡再寫 <code>o-if</code>；</li>
+        <li>在 <code>&lt;table&gt;</code> 裡通過 <code>replace-temp</code> 渲染行；</li>
+        <li>命名模板遞歸引用自身。</li>
+      </ul>
+      <p>
+        同時，v5 明確移除了 <code>x-if</code>、<code>x-else-if</code>、
+        <code>x-else</code>、<code>x-fill</code>。這些標籤不再註冊，
+        繼續使用會在控制台得到棄用提示，而不是悄悄表現不一致。
+        統一到 <code>o-*</code> 之後，模板語義和文檔終於只有一套。
+      </p>
+      <pre class="code-sample"><code><span class="tok-comment">&lt;!-- v4 舊寫法 --&gt;</span>
+<span class="tok-tag">&lt;x-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/x-fill&gt;</span>
+
+<span class="tok-comment">&lt;!-- v5 --&gt;</span>
+<span class="tok-tag">&lt;o-fill</span> <span class="tok-attr">:value</span>=<span class="tok-string">"rows"</span><span class="tok-tag">&gt;&lt;/o-fill&gt;</span></code></pre>
+
+      <h2>5. 路由與頁面：把“能用”變成“穩定”</h2>
+      <p>
+        v5 繼續使用 SCSR 真實路徑：每個 URL 對應一份 HTML，
+        可以直接部署到靜態服務器，也能被 <code>o-app</code> 接管成嵌套頁面。
+        v4 已經證明這套模型可行，v5 主要修的是邊界：
+      </p>
+      <ul>
+        <li>離場舊頁在佈局變化時鎖定尺寸和位置，不再突然跳到左上角；</li>
+        <li>嵌套路由公共父頁通過 <code>export const parent</code> 保留，切換子頁時父頁不重建；</li>
+        <li><code>waitPageReaded</code> 優先複用頁面自身的 <code>_rendered</code> Promise，而不是純輪詢；</li>
+        <li><code>o-app</code> 支持 <code>access</code>、<code>allowForward</code>、頁面動畫配置，失敗頁也有明確入口。</li>
+      </ul>
+      <p>
+        這些改動單獨看都不大，但組合起來，頁面切換的觀感和可預測性會明顯不同。
+        尤其是“從首頁進入文檔，再返回”的路徑，v5 不會讓舊頁面在佈局重排時閃一下。
+      </p>
+
+      <h2>6. 狀態與上下文：保留 API，收緊實現</h2>
+      <p>
+        <code>o-provider</code> / <code>o-consumer</code> /
+        <code>o-root-provider</code> 在 v5 中繼續存在，並明確通過
+        <code>composedPath</code> 跨 shadow 查找。<code>getProvider</code>、
+        <code>watchUntil</code>、<code>access</code> 等能力也保留了 v4 的使用手感。
+      </p>
+      <p>
+        區別在於實現更剋制：上下文數據不再依賴全局變量，
+        組件和頁面可以更明確地知道自己屬於哪個 app、哪個 provider；
+        <code>o-consumer</code> 的 light children 不參與編譯這一邊界也被寫進了測試。
+        對使用者來說，這通常意味著更少的“為什麼這裡不更新”，
+        而不是一套新的學習成本。
+      </p>
+
+      <h2>7. 工程與生態：把零構建堅持到底</h2>
+      <p>
+        v4 已經把“不用打包”做成了核心賣點，v5 沒有背叛它。
+        一個 HTML 文件仍然是組件/頁面，瀏覽器直接運行；
+        <code>l-m</code>、<code>olink</code>、SCSR 都不要求 Node.js。
+        變化主要在生態組織：
+      </p>
+      <ul>
+        <li><code>inject-host</code>、<code>formdata</code> 等能力拆成插件，按需引用；</li>
+        <li>測試覆蓋組件、條件/列表、路由、上下文、命名模板等關鍵路徑；</li>
+        <li>文檔、API、教程與 playground 共用同一套可運行示例；</li>
+        <li>錯誤信息更具體，調試模式（<code>#debug</code>）能打開 sourcemap。</li>
+      </ul>
+
+      <h2>8. AI 深度參與開發，反饋鏈路更短</h2>
+      <p>
+        v5 的開發過程大量使用了 AI 輔助：從框架重構、測試補齊、文檔與教程，
+        到這個官網本身，都有 AI 參與。真正有價值的不是“讓 AI 寫幾段代碼”，
+        而是倉庫結構讓 AI 能形成穩定的反饋閉環。
+      </p>
+      <ul>
+        <li>每個包都有 <code>CONTEXT.md</code>，記錄真實目錄、API 契約和踩坑；</li>
+        <li>自檢頁 + Playwright 三瀏覽器測試，能直接復現“看起來只是偶發”的問題；</li>
+        <li>文檔、教程、playground 和源碼在同一個倉，行為變了可以同步修正說明；</li>
+        <li>monorepo 讓跨包修改一次跑完全量測試，AI 不用在多個倉庫之間猜上下文。</li>
+      </ul>
+      <p>
+        所以“AI 輔助開發”在這裡不是一句宣傳語。它意味著後面查問題、修問題時，
+        AI 能讀到同一份上下文、跑同一套測試、看到同一個失敗結果，
+        再把修復和文檔一起提交。反饋越短，修復越不容易跑偏。
+      </p>
+
+      <h2>9. 遷移成本：比想像中低，但不是零</h2>
+      <p>
+        如果你是從 v4 過來的，主要需要處理三件事：
+      </p>
+      <ol>
+        <li>把模板裡的 <code>x-if</code> / <code>x-fill</code> 換成 <code>o-if</code> / <code>o-fill</code>；</li>
+        <li>確認組件和頁面的 <code>&lt;script&gt;</code> 寫在
+          <code>&lt;template&gt;</code> 內部（v4 也建議如此，v5 會直接忽略外部腳本）；</li>
+        <li>如果有第三方代碼依賴舊的全局 <code>lm</code>，改成顯式模塊引用。</li>
+      </ol>
+      <p>
+        CDN 地址也要注意：建議用
+        <code>@5</code> 跟隨最新的 5.x 版本；如果要完全固定，就直接寫
+        <code>@5.0.2</code> 這樣的完整版本號。
+        除此之外，頁面組織、路由、上下文和狀態寫法基本可以原樣帶過來。
+      </p>
+
+      <h2>結論</h2>
+      <p>
+        v5 的進步不是“多了一個功能”，而是把 v4 裡那些
+        <strong>能用但不夠穩、夠快但不夠可解釋</strong> 的部分重新做了一遍。
+        它讓模板組合更可靠，讓列表操作從秒級回到毫秒級，
+        讓模塊邊界和錯誤路徑更清楚，同時沒有把零構建的簡單性拿走。
+      </p>
+      <p>
+        如果你只需要一個能跑的頁面，v4 和 v5 的差別可能不明顯；
+        但如果你在維護一個長期項目，或者曾經被列表重排、嵌套條件、
+        離場頁面閃動這些問題咬過，v5 的價值會非常具體。
+      </p>
+
+      <p class="article-end">
+        想繼續看實現細節，可以從
+        <a olink href="../../docs/">文檔</a> 或
+        <a olink href="../../tutorial/">教程</a> 開始。
+      </p>
+    </article>
+  </main>
+
+  <script>
+    export const parent = "../layout.html";
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

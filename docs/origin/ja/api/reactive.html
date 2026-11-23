@@ -1,0 +1,50 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · データと監視</p>
+      <h1>データと監視</h1>
+      <p class="doc-lead">インスタンスのデータは stanz に由来します。フィールドの読み書きはリアクティブな更新であり、監視とクリーンアップにはそれぞれ専用のメソッドが用意されています。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="reactive"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.watch(cb)</code></td><td>インスタンスとその子の変更を監視し、監視 ID を返します</td></tr>
+          <tr><td><code>el.watchTick(cb)</code></td><td>watch と同じですが、1 ティック内の複数の変更は 1 回だけ発火します</td></tr>
+          <tr><td><code>el.unwatch(id)</code></td><td>監視を解除します</td></tr>
+          <tr><td><code>el.watchUntil(fn, timeout = 30000)</code></td><td>条件が成立すると解決し、自動的に解除される Promise。タイムアウトのデフォルトは 30 秒です</td></tr>
+          <tr><td><code>el.refresh(opts)</code></td><td>データを変更せずに更新イベントを手動で発行します</td></tr>
+          <tr><td><code>el.sync(prop, path, options)</code></td><td>双方向同期アクション。テンプレートの sync: 専用で、直接呼び出すと例外がスローされます</td></tr>
+          <tr><td><code>el.toJSON() / el.toString()</code></td><td>プレーンオブジェクト（再帰）/ JSON 文字列をエクスポートします</td></tr>
+          <tr><td><code>el.revoke()</code></td><td>インスタンスを破棄します。監視をクリアし、データ参照を解放します</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>watchUntil はデータ変更時にのみ評価され、登録直後にはチェックしません。条件がすでに成立している可能性がある場合は、先に自分で 1 回確認してください。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

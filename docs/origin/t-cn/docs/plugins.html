@@ -1,0 +1,156 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>插件與擴展</h1>
+      <p class="doc-lead">
+        插件是「引用才生效」的可選能力，不屬於 ofa.js 默認構建。
+        它們掛接頁面已加載的全局 <code>$</code>，不會引入第二份框架實例。
+      </p>
+
+      <h2>現有插件</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>插件</th><th>能力</th><th>使用方式</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>容器表單值 ↔ stanz 對象雙向綁定</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>把 shadow 內的 style/link 提升到宿主，穿透 slot 深層</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>把模板內容傳送到 body 末尾渲染（彈窗 / 浮層）</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>向其後掛載的組件注入全局樣式表</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>引入方式</h2>
+      <p>源碼形態直接 import，dist 形態用經典腳本或 ESM：</p>
+      <pre><code>// monorepo / npm 源碼
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist 經典腳本（配合 dist ofa.js）
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        插件必須在 ofa.js 之後加載，因為它要掛接全局 <code>$</code>；
+        缺失時會直接拋錯。
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // 讀取
+data.username = "Yao";  // 寫回表單
+data.revoke();          // 釋放綁定</code></pre>
+      <p>
+        複選框會聚合成數組，select 多選、radio、file 都有對應處理。
+        自定義表單組件只要暴露 <code>value</code> 屬性並設置
+        <code>name</code> 即可接入。
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> 只能命中插槽內容的第一層。需要給 slot
+        深處的元素寫樣式時，用 <code>&lt;inject-host&gt;</code> 把樣式提升到宿主：
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        選擇器要寫完整組件路徑，避免汙染其他組件；頻繁更新樣式的場景慎用。
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        彈窗、toast、浮層需要跳出父級 <code>overflow</code> 或
+        <code>transform</code> 限制時，把內容傳送到 body：
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        框架綁定會跟隨元素移動，原生事件在真實 DOM 位置冒泡。
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        樣式表只會注入到它<strong>之後掛載</strong>的組件 shadow；
+        移除 <code>o-global-link</code> 後，新組件不再獲得樣式。
+        它會汙染全局作用域，謹慎使用。
+      </p>
+
+      <h2>match-var（核心樣式查詢）</h2>
+      <p>
+        需要按 CSS 變量切換組件內部樣式時，可以用核心的
+        <code>&lt;match-var&gt;</code>，它不需要額外插件：
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- 多個條件同時匹配 --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+      <p>
+        條件來自 CSS 變量的值。外層用 <code>data()</code> 把數據寫進變量：
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox：</strong>改變變量後若樣式沒有立即切換，
+        手動調用 <code>$.checkMatch()</code> 觸發一次重新檢測。
+      </div>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./api.html">$.fn 與包裝對象 →</a>
+        　·　下一篇：<a olink href="./pitfalls.html">常見錯誤 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

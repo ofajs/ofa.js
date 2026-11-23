@@ -8,10 +8,10 @@
 // 这样本地预览、静态托管、子目录部署都不会先产生一串本地 404。
 const ofaLocal = "../../dist/ofa.min.mjs";
 const ofaCdn =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 const scsrLocal = "../../packages/scsr/dist/scsr.min.mjs";
 const scsrCdn =
-  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs";
+  "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/scsr/dist/scsr.min.mjs";
 
 const ofaSources = [ofaCdn, ofaLocal];
 const scsrSources = [scsrCdn, scsrLocal];

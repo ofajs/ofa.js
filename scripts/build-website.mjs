@@ -10,12 +10,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { syncTraditionalChinese } from "./sync-t-cn.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const originRoot = path.join(root, "docs", "origin");
 const websiteRoot = path.join(root, "docs", "website");
 const templateRoot = path.join(websiteRoot, "templates");
 const manifestPath = path.join(websiteRoot, ".locales.json");
+
+await syncTraditionalChinese();
 
 const RESERVED = new Set([
   "assets",

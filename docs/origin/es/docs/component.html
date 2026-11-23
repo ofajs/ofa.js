@@ -1,0 +1,141 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Conceptos básicos</p>
+      <h1>Componentes</h1>
+      <p class="doc-lead">
+        Un componente es un módulo Web Component reutilizable. Tiene su propio Shadow DOM, datos
+        reactivos, attrs externos y una interfaz para emitir eventos hacia fuera.
+      </p>
+
+      <h2>Contrato del módulo</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tag</code></td><td>Sí</td><td>Nombre de etiqueta del componente; debe coincidir al usarlo</td></tr>
+          <tr><td><code>attrs</code></td><td>No</td><td>Atributos escalares pasados desde fuera, reflejados en atributos HTML</td></tr>
+          <tr><td><code>data</code></td><td>No</td><td>Estado reactivo interno; coloca aquí directamente los objetos y arrays</td></tr>
+          <tr><td><code>proto</code></td><td>No</td><td>Métodos, getters/setters</td></tr>
+          <tr><td><code>watch</code></td><td>No</td><td>Observa cambios en data/attrs</td></tr>
+          <tr><td><code>ready/attached/loaded/detached</code></td><td>No</td><td>Hooks del ciclo de vida</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p>
+        Cuando no se declara <code>tag</code>, el framework infiere el nombre de la etiqueta a partir del nombre del archivo:
+        <code>user-card.html</code> → <code>&lt;user-card&gt;</code>.
+        Aun así, se recomienda declararlo explícitamente para que renombrar o mover el archivo no
+        cambie silenciosamente la etiqueta pública del componente.
+      </p>
+
+      <h2>attrs y data</h2>
+      <p>
+        <code>attrs</code> son las entradas públicas del componente, adecuadas para cadenas, números y
+        booleanos; <code>data</code> es el estado interno del componente, adecuado para arrays y
+        objetos. Sus claves no deben solaparse:
+      </p>
+      <pre><code>export default {
+  tag: "user-card",
+  attrs: {
+    userId: 0,
+    compact: false,
+  },
+  data: {
+    profile: null,
+    loading: false,
+  },
+};</code></pre>
+      <p>Cuando se pasan desde fuera, los nombres en kebab-case se asignan automáticamente a campos en camelCase:</p>
+      <pre><code>&lt;user-card user-id="42" compact&gt;&lt;/user-card&gt;</code></pre>
+      <p>
+        Pasa valores dinámicos con el prefijo <code>:</code>; usa <code>attr:</code> para atributos booleanos:
+      </p>
+      <pre><code>&lt;user-card :user-id="currentId" attr:compact="isCompact"&gt;&lt;/user-card&gt;</code></pre>
+
+      <h2>Importar componentes</h2>
+      <p>
+        En la parte superior de la plantilla de una página, usa <code>&lt;l-m&gt;</code> para importar un archivo de componente
+        de forma asíncrona. Devuelve el control de inmediato y no bloquea el primer renderizado de la página:
+      </p>
+      <pre><code>&lt;l-m src="./user-card.html"&gt;&lt;/l-m&gt;</code></pre>
+      <p>
+        Cuando necesites asegurarte de que un componente esté registrado antes de usarlo, usa <code>await load()</code>
+        en la función del módulo:
+      </p>
+      <pre><code>export default async ({ load }) =&gt; {
+  await load("./user-card.html");
+  return { data: {} };
+};</code></pre>
+
+      <h2>Slots</h2>
+      <pre><code>&lt;!-- dentro del componente --&gt;
+&lt;header&gt;&lt;slot name="title"&gt;Título predeterminado&lt;/slot&gt;&lt;/header&gt;
+&lt;main&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/main&gt;
+
+&lt;!-- consumidor --&gt;
+&lt;user-card&gt;
+  &lt;h3 slot="title"&gt;Alice&lt;/h3&gt;
+  &lt;p&gt;Este es el contenido del slot predeterminado&lt;/p&gt;
+&lt;/user-card&gt;</code></pre>
+      <p>
+        El slot predeterminado recibe los nodos hijos sin atributo <code>slot</code>; los slots con nombre
+        coinciden con <code>slot="name"</code>, y un slot puede contener contenido de respaldo.
+      </p>
+
+      <h2>Eventos personalizados</h2>
+      <pre><code>this.emit("save", {
+  data: { id: 1, name: "Alice" },
+});</code></pre>
+      <p>
+        Los eventos usan <code>bubbles: true</code> y <code>composed: false</code> de forma predeterminada.
+        Establece <code>composed: true</code> explícitamente cuando un evento necesite escapar del Shadow DOM;
+        esto es especialmente habitual cuando las páginas anidan <code>o-page</code>.
+      </p>
+
+      <p>
+        El <code>PATH</code> de un componente apunta a la URL de su archivo de registro; los recursos
+        relativos en la plantilla del componente, como <code>img src</code> y
+        <code>style url()</code>, se resuelven contra <code>PATH</code> en lugar de contra la URL
+        de la página que lo usa.
+      </p>
+
+      <h2>Aislamiento de estilos</h2>
+      <p>
+        Un <code>&lt;style&gt;</code> en la plantilla de un componente solo se aplica dentro del
+        propio Shadow DOM del componente. Usa <code>:host</code> para seleccionar el nodo raíz; <code>::slotted()</code>
+        solo puede alcanzar el primer nivel del contenido del slot. Usa el complemento <code>inject-host</code>
+        cuando necesites llegar más profundo.
+      </p>
+
+      <h2>Restricciones de nombres</h2>
+      <p>
+        <code>tag</code> no debe duplicar un componente existente; <code>data</code>/<code>proto</code>
+        no deben usar nombres reservados integrados como <code>back</code>, <code>goto</code>,
+        <code>replace</code>, <code>src</code>, <code>on</code> y <code>emit</code>.
+        Un nombre duplicado hace que el registro falle directamente.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./first-page.html">Tu primera página →</a>
+        · Siguiente: <a olink href="./page.html">Páginas →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

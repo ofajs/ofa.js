@@ -1,0 +1,149 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Plantilla</p>
+      <h1>Resumen de directivas de plantilla</h1>
+      <p class="doc-lead">
+        La sintaxis de plantillas de ofa.js vive directamente en el HTML: las directivas
+        enlazan datos, eventos y lógica de renderizado. No hay JSX ni ningún archivo de
+        plantilla que requiera compilación.
+      </p>
+
+      <h2>Referencia de directivas</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead>
+          <tr><th>Sintaxis</th><th>Propósito</th><th>Ejemplo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{{expr}}</code></td><td>Interpolación de texto, limitada al contenido de texto del elemento</td><td><code>&lt;span&gt;{{message}}&lt;/span&gt;</code></td></tr>
+          <tr><td><code>:html</code></td><td>Renderiza contenido HTML</td><td><code>&lt;div :html="html"&gt;</code></td></tr>
+          <tr><td><code>:prop</code></td><td>Enlace de propiedad unidireccional</td><td><code>&lt;input :value="name"&gt;</code></td></tr>
+          <tr><td><code>sync:prop</code></td><td>Enlace de propiedad bidireccional</td><td><code>&lt;input sync:value="name"&gt;</code></td></tr>
+          <tr><td><code>attr:name</code></td><td>Enlace de atributos HTML</td><td><code>&lt;a attr:href="url"&gt;</code></td></tr>
+          <tr><td><code>class:name</code></td><td>Nombre de clase condicional</td><td><code>&lt;li class:done="done"&gt;</code></td></tr>
+          <tr><td><code>:style.prop</code></td><td>Enlace de estilos en línea</td><td><code>&lt;p :style.color="color"&gt;</code></td></tr>
+          <tr><td><code>on:event</code></td><td>Enlace de eventos</td><td><code>&lt;button on:click="save"&gt;</code></td></tr>
+          <tr><td><code>one:event</code></td><td>Un evento que se dispara solo una vez</td><td><code>&lt;img one:load="init"&gt;</code></td></tr>
+          <tr><td><code>$event</code></td><td>Objeto de evento</td><td><code>on:input="update($event)"</code></td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <h2>Interpolación de texto</h2>
+      <pre><code>&lt;p&gt;Hola, {{name}}&lt;/p&gt;
+&lt;p&gt;Recuento: {{count}}, doble: {{doubleCount}}&lt;/p&gt;</code></pre>
+      <p>
+        <code>{{ }}</code> solo funciona en el contenido de texto de un elemento. Los
+        valores de atributos, los argumentos de eventos y los valores de estilo siempre
+        usan expresiones de directiva. Para renderizar HTML, usa <code>:html</code> y
+        asegúrate de que el contenido sea de confianza.
+      </p>
+
+      <h2>Propiedades y enlace bidireccional</h2>
+      <pre><code>&lt;input :value="inputValue" /&gt;
+&lt;input sync:value="inputValue" /&gt;
+&lt;a attr:href="url" attr:title="tip"&gt;Enlace&lt;/a&gt;
+&lt;!-- Los atributos booleanos siempre usan attr: --&gt;
+&lt;button attr:disabled="loading"&gt;Enviar&lt;/button&gt;</code></pre>
+      <p>
+        <code>:</code> es un enlace unidireccional y <code>sync:</code> es bidireccional.
+        Para <code>true</code>, <code>attr:</code> establece un atributo vacío; para
+        <code>false</code>, elimina el atributo. Por eso los atributos booleanos deben
+        usarlo.
+      </p>
+
+      <h2>Nombres de clase y estilos</h2>
+      <pre><code>&lt;li class:active="isActive" class:done="item.done"&gt;&lt;/li&gt;
+&lt;p :style.color="active ? '#5eead4' : '#9aa6bd'"&gt;&lt;/p&gt;
+&lt;p :style.fontSize="'16px'"&gt;&lt;/p&gt;</code></pre>
+      <p>
+        <code>class:</code> añade o elimina una clase según una expresión booleana;
+        <code>:style.prop</code> usa nombres de propiedad en camelCase. Para las reglas
+        completas, consulta <a olink href="./binding.html">Enlaces y estilos</a>.
+      </p>
+
+      <h2>Eventos</h2>
+      <pre><code>&lt;button on:click="count++"&gt;+1&lt;/button&gt;
+&lt;button on:click="save"&gt;Guardar&lt;/button&gt;
+&lt;input on:input="update($event)" /&gt;
+&lt;my-counter on:change="onChange"&gt;&lt;/my-counter&gt;</code></pre>
+      <p>
+        Un nombre de método simple se enlaza automáticamente a <code>this</code>, y
+        también puedes escribir expresiones directamente. Los datos de los eventos
+        personalizados se leen a través de <code>event.data</code>. Consulta
+        <a olink href="./events.html">Eventos y formularios</a>.
+      </p>
+
+      <h2>Condiciones y listas</h2>
+      <pre><code>&lt;o-if :value="count &gt; 10"&gt;
+  &lt;p&gt;Mayor que 10&lt;/p&gt;
+&lt;/o-if&gt;
+&lt;o-else-if :value="count &gt; 5"&gt;
+  &lt;p&gt;Mayor que 5&lt;/p&gt;
+&lt;/o-else-if&gt;
+&lt;o-else&gt;
+  &lt;p&gt;5 o menos&lt;/p&gt;
+&lt;/o-else&gt;
+
+&lt;ul&gt;
+  &lt;o-fill :value="todos" fill-key="id"&gt;
+    &lt;li class:done="$data.done"&gt;
+      {{$data.text}}
+      &lt;button on:click="$host.remove($data.id)"&gt;×&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/o-fill&gt;
+&lt;/ul&gt;</code></pre>
+      <p>
+        Las etiquetas condicionales deben escribirse de forma consecutiva; dentro de
+        <code>o-fill</code> solo están disponibles <code>$data</code>, <code>$index</code>,
+        <code>$host</code>, <code>$parent</code> y <code>$ele</code>. Consulta
+        <a olink href="./render.html">Condicionales y listas</a>.
+      </p>
+
+      <h2>De dónde vienen los datos</h2>
+      <p>
+        Toda variable usada en una plantilla debe declararse primero en <code>data</code>
+        o en <code>attrs</code>. Una variable no declarada no es <code>undefined</code>:
+        lanza un <code>ReferenceError</code> y aborta el renderizado de toda la página.
+      </p>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    name: "ofa.js",
+    count: 0,
+    inputValue: "",
+    loading: false,
+    todos: [],
+  },
+  proto: {
+    get doubleCount() {
+      return this.count * 2;
+    },
+    async save() {
+      this.loading = true;
+      await submit();
+      this.loading = false;
+    },
+  },
+});</code></pre>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./lifecycle.html">Ciclo de vida →</a>
+         · Siguiente: <a olink href="./binding.html">Enlaces y estilos →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

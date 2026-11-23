@@ -1,0 +1,47 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 10</p>
+      <h1>計算屬性與偵聽</h1>
+      <p class="doc-lead">proto 的 getter 做同步計算，watch 觀察變化並處理副作用。</p>
+
+      <p>
+  依賴現有 data 算出來的值，用 <code>proto</code> 裡的 getter；
+  需要在數據變化後做額外操作（記日誌、寫入外部存儲），用 <code>watch</code>。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-10" fold-styles="true"></docs-playground>
+<h2>getter 與 watch 的分工</h2>
+<ul>
+  <li><code>get total()</code>：模板裡像普通字段一樣用，自動隨依賴更新；</li>
+  <li><code>watch.qty(value, { watchers })</code>：數據變化後執行；</li>
+  <li>watch 在初始化時會先調用一次，此時 <code>watchers</code> 不存在，
+    可以用 <code>if (!watchers) return</code> 跳過首次調用。</li>
+</ul>
+<div class="doc-note">
+  <strong>getter 的邊界：</strong>getter 在模板初始化時就會求值，
+  只能依賴已經存在的同步數據；如果依賴接口返回的異步數據，先用 data 字段
+  存結果，再在異步回調裡賦值。
+</div>
+<h2>動手改</h2>
+<p>
+  增加一個「折扣」輸入（0–1），讓總價按折扣計算；再用 watch 記錄折扣變化。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-9.html">09 · 編輯列表 →</a>　·　下一篇：<a olink href="./lesson-11.html">11 · 生命週期 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

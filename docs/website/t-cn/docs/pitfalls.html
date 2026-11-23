@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>常見錯誤與排查 — ofa.js 文檔</title>
+    <meta name="description" content="ReferenceError、保留名衝突、布爾屬性、o-page src 與緩存問題排查。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="常見錯誤與排查 — ofa.js 文檔" />
+    <meta property="og:description" content="ReferenceError、保留名衝突、布爾屬性、o-page src 與緩存問題排查。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Reference</p>
+      <h1>常見錯誤與排查</h1>
+      <p class="doc-lead">
+        頁面不渲染、只渲染一半、改了代碼不生效——大部分問題來自幾個固定原因。
+        先按報錯文案對號入座，再檢查模板表達式。
+      </p>
+
+      <h2>ReferenceError：模板引用了未聲明的鍵</h2>
+      <p>
+        模板裡的每個表達式都會在初始化階段求值，引用的鍵必須先在
+        <code>data</code> 或 <code>attrs</code> 聲明。未聲明會直接拋錯並
+        中斷整頁渲染：
+      </p>
+      <pre><code>Error evaluating element expression: ':value="flag"'
+Caused by: ReferenceError: flag is not defined</code></pre>
+      <p>
+        修法：在 data 裡補上字段並給安全默認值，例如
+        <code>data: { flag: false }</code>。
+      </p>
+
+      <h2>TypeError：getter 依賴了還沒到達的數據</h2>
+      <p>
+        計算屬性 getter 在模板初始化時立即執行，早於 <code>ready</code>。
+        如果訪問了異步數據的深層字段，可能得到
+        <code>TypeError</code> 並整頁崩潰。
+      </p>
+      <pre><code>// 錯誤：user 還是空對象
+get roleText() {
+  return ROLE_TEXT[this.user.role];
+}</code></pre>
+      <p>
+        改為 data 字段，在異步回調裡賦值：
+      </p>
+      <pre><code>data: { user: null, roleText: "" },
+proto: {
+  async loadUser() {
+    const user = await fetchUser();
+    this.user = user;
+    this.roleText = ROLE_TEXT[user.role] || "";
+  },
+},
+ready() {
+  this.loadUser();
+},</code></pre>
+
+      <h2>SyntaxError：指令值裡寫了裸字面量</h2>
+      <p>
+        <code>attr:</code>、<code>:prop</code>、<code>sync:</code>、
+        <code>class:</code> 的值都按 JavaScript 表達式解析：
+      </p>
+      <pre><code>&lt;!-- 錯誤 --&gt;
+&lt;button attr:data-type="in"&gt;
+&lt;button attr:title="點這裡選擇"&gt;
+&lt;button attr:title="Choose one"&gt;
+
+&lt;!-- 正確 --&gt;
+&lt;button title="點這裡選擇"&gt;
+&lt;button attr:title="'點這裡選擇'"&gt;
+&lt;button attr:title="locked ? '已鎖定' : ''"&gt;</code></pre>
+      <p>
+        連鎖症狀：模板 HTML 已經寫入 Shadow DOM，但 <code>ready</code>
+        不執行、<code>o-fill</code> 不展開、數據恆為空。看到這種組合，
+        優先 grep 指令值裡的裸文案。
+      </p>
+
+      <h2>保留名衝突</h2>
+      <p>
+        <code>data</code> 和 <code>proto</code> 不能使用頁面/應用內置成員：
+        <code>back</code>、<code>goto</code>、<code>replace</code>、
+        <code>src</code>、<code>pageAnime</code>、<code>pageIsReady</code>，
+        以及 <code>on</code>、<code>off</code>、<code>emit</code>、
+        <code>$</code>、<code>text</code>、<code>html</code>、<code>css</code>、
+        <code>data</code> 等通用方法。重名會導致註冊失敗或整頁報錯。
+      </p>
+
+      <h2>$host / $data 只在 o-fill 內</h2>
+      <pre><code>&lt;!-- 錯誤：根級沒有 $host --&gt;
+&lt;button on:click="$host.openHelp()"&gt;?&lt;/button&gt;
+
+&lt;!-- 正確：根級直接寫方法名 --&gt;
+&lt;button on:click="openHelp()"&gt;?&lt;/button&gt;</code></pre>
+      <p>
+        頂層 <code>o-if</code> 引用 <code>$host</code> 時可能靜默失效；
+        頂層 <code>attr:</code> 引用 <code>$host</code> 可能不報錯但永不設置。
+        根級一律使用 data 字段和 proto 方法。
+      </p>
+
+      <h2>布爾屬性用 attr:</h2>
+      <pre><code>&lt;!-- 錯誤：false 時仍渲染 disabled="false" --&gt;
+&lt;button :disabled="loading"&gt;提交&lt;/button&gt;
+
+&lt;!-- 正確 --&gt;
+&lt;button attr:disabled="loading"&gt;提交&lt;/button&gt;</code></pre>
+
+      <h2>屬性值裡沒有 {{ }}</h2>
+      <pre><code>&lt;!-- 錯誤 --&gt;
+&lt;a href="{{url}}"&gt;鏈接&lt;/a&gt;
+
+&lt;!-- 正確 --&gt;
+&lt;a attr:href="url"&gt;鏈接&lt;/a&gt;</code></pre>
+
+      <h2>o-page 的 src 不可變</h2>
+      <pre><code>&lt;!-- 運行時拋錯 --&gt;
+&lt;o-page :src="'./form.html?id=' + editingId"&gt;&lt;/o-page&gt;</code></pre>
+      <p>
+        常駐 o-page，通過子頁面方法傳參；需要重建時用
+        <code>o-if</code> 包住銷燬重建。
+      </p>
+
+      <h2>hash 路由格式</h2>
+      <pre><code>// 錯誤
+location.origin + location.pathname + "#./pages/set.html"
+
+// 正確
+location.origin + "/#/pages/set.html"</code></pre>
+
+      <h2>改代碼不生效：先查緩存</h2>
+      <p>
+        ofa.js 會緩存已加載的頁面模塊，靜態服務器也可能緩存 HTML。
+        修改文件後 hash 導航仍顯示舊內容、控制台無報錯時：
+      </p>
+      <ul>
+        <li>讓開發服務器禁用 HTTP 緩存（如 <code>http-server -c-1</code>）；</li>
+        <li>用帶新 query 的完整 URL 整頁刷新；</li>
+        <li>自動化測試用 <code>page.goto(url)</code> 整頁加載，不要依賴 hash 導航。</li>
+      </ul>
+
+      <h2>包裝對象與 .ele</h2>
+      <pre><code>// 錯誤
+$("o-app").current.shadowRoot
+
+// 正確
+$("o-app").current.ele.shadowRoot.querySelector(".item")
+$("o-app").current.src</code></pre>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./plugins.html">插件與擴展 →</a>
+        　·　下一篇：<a olink href="./examples.html">完整示例 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

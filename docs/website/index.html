@@ -198,6 +198,99 @@
         }
       }
     </style>
+    <script>
+      // 根路径语言自动跳转：
+      // - ?choose=1 或 ?lang=choose 时停留在当前语言选择页
+      // - ?lang=cn / ?lang=en 强制指定语言
+      // - 否则优先使用手动选择过的语言，再按浏览器语言 / 地区判断
+      (function () {
+        try {
+          const params = new URLSearchParams(location.search);
+          if (params.get("choose") === "1" || params.get("lang") === "choose") {
+            return;
+          }
+
+          const supported = ["cn", "t-cn", "en", "ja", "es"];
+          const forced = params.get("lang");
+          let locale = "";
+
+          if (supported.includes(forced)) {
+            locale = forced;
+          } else {
+            const stored = localStorage.getItem("ofa-site-locale");
+            if (supported.includes(stored)) {
+              locale = stored;
+            } else {
+              const languages =
+                navigator.languages && navigator.languages.length
+                  ? navigator.languages
+                  : [navigator.language || ""];
+              const hasTraditional = languages.some((lang) =>
+                /^zh-(TW|HK|MO|Hant)/i.test(lang),
+              );
+              const hasChinese = languages.some((lang) =>
+                /^zh(?:-|$)/i.test(lang),
+              );
+              const hasEnglish = languages.some((lang) =>
+                /^en(?:-|$)/i.test(lang),
+              );
+              const hasJapanese = languages.some((lang) =>
+                /^ja(?:-|$)/i.test(lang),
+              );
+              const hasSpanish = languages.some((lang) =>
+                /^es(?:-|$)/i.test(lang),
+              );
+
+              if (hasTraditional) {
+                locale = "t-cn";
+              } else if (hasChinese) {
+                locale = "cn";
+              } else if (hasJapanese) {
+                locale = "ja";
+              } else if (hasSpanish) {
+                locale = "es";
+              } else if (hasEnglish) {
+                locale = "en";
+              } else {
+                const zone =
+                  Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+                locale =
+                  /^(Asia\/(Taipei|Hong_Kong|Macau))$/.test(zone)
+                    ? "t-cn"
+                    : /^(Asia\/Tokyo)$/.test(zone)
+                      ? "ja"
+                      : /^(Europe\/Madrid|America\/(Mexico_City|Bogota|Lima|Santiago|Argentina\/Buenos_Aires))$/.test(
+                            zone,
+                          )
+                        ? "es"
+                        : /^(Asia\/(Shanghai|Chongqing|Harbin|Urumqi)|Asia\/Singapore)$/.test(
+                              zone,
+                            )
+                          ? "cn"
+                          : "en";
+              }
+            }
+          }
+
+          if (forced && supported.includes(forced)) {
+            localStorage.setItem("ofa-site-locale", forced);
+          }
+
+          location.replace("./" + locale + "/");
+        } catch {}
+      })();
+
+      // 点击语言卡片时记住选择，方便下次从根路径自动进入。
+      document.addEventListener("click", (event) => {
+        const card = event.target.closest && event.target.closest(".lang-card");
+        if (!card) return;
+        const match = (card.getAttribute("href") || "").match(/\/(cn|t-cn|en|ja|es)\/?$/);
+        if (!match) return;
+        try {
+          localStorage.setItem("ofa-site-locale", match[1]);
+        } catch {}
+      });
+    </script>
   </head>
   <body>
     <main>
@@ -220,11 +313,35 @@
           </span>
           <span class="lang-arrow" aria-hidden="true">→</span>
         </a>
+        <a class="lang-card" href="./t-cn/" hreflang="zh-Hant">
+          <span class="lang-mark">t-cn</span>
+          <span class="lang-main">
+            <span class="lang-native">繁體中文</span>
+            <span class="lang-title">ofa.js — 把組件，寫成 HTML</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a>
         <a class="lang-card" href="./en/" hreflang="en">
           <span class="lang-mark">en</span>
           <span class="lang-main">
             <span class="lang-native">English</span>
             <span class="lang-title">ofa.js — Write Components as HTML</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="lang-card" href="./ja/" hreflang="ja">
+          <span class="lang-mark">ja</span>
+          <span class="lang-main">
+            <span class="lang-native">日本語</span>
+            <span class="lang-title">ofa.js — コンポーネントをHTMLで書く</span>
+          </span>
+          <span class="lang-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="lang-card" href="./es/" hreflang="es">
+          <span class="lang-mark">es</span>
+          <span class="lang-main">
+            <span class="lang-native">Español</span>
+            <span class="lang-title">ofa.js — Escribe componentes como HTML</span>
           </span>
           <span class="lang-arrow" aria-hidden="true">→</span>
         </a></div>

@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Miembros estáticos del $ global</p>
+      <h1>Miembros estáticos del $ global</h1>
+      <p class="doc-lead">Selectores, registro, reactividad, renderizado e información de versión asociados al $ global.</p>
+      <p>
+        Para ver primero cómo el <code>$</code> global selecciona un elemento del body, consulta el
+        ejemplo ejecutable al inicio de la <a olink href="./index.html">Referencia de API</a>.
+      </p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="global"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>$(expr)</code></td><td>Selector / fábrica de elementos, devuelve una instancia o null</td></tr>
+          <tr><td><code>$.all(expr)</code></td><td>Consulta globalmente todas las coincidencias y devuelve un array de instancias</td></tr>
+          <tr><td><code>$.register(opts)</code></td><td>Registra un componente (tag/temp/data/attrs/proto/lifecycle)</td></tr>
+          <tr><td><code>$.stanz(data)</code></td><td>Crea un objeto de datos reactivo independiente</td></tr>
+          <tr><td><code>$.Stanz</code></td><td>La clase constructora de stanz, utilizada para comprobaciones instanceof</td></tr>
+          <tr><td><code>$.fn</code></td><td>Prototipo de instancia, el punto de montaje para $.fn.extend()</td></tr>
+          <tr><td><code>$.nextTick(cb)</code></td><td>Se ejecuta en la siguiente microtarea</td></tr>
+          <tr><td><code>$.frag()</code></td><td>Crea una instancia de DocumentFragment</td></tr>
+          <tr><td><code>$.render / $.convert</code></td><td>Puntos de entrada de bajo nivel para el renderizado / la compilación de plantillas</td></tr>
+          <tr><td><code>$.getRootProvider(name)</code></td><td>Obtiene el proveedor raíz a nivel de aplicación</td></tr>
+          <tr><td><code>$.version</code></td><td>Versión del framework (solo lectura)</td></tr>
+          <tr><td><code>$.debugMode</code></td><td>Indica si el framework se cargó con #debug (solo lectura)</td></tr>
+          <tr><td><code>$.showlog</code></td><td>Interruptor interno del registro de diagnóstico, legible y modificable en tiempo de ejecución</td></tr>
+          <tr><td><code>$.COMP / $.PAGE</code></td><td>Marcadores de tipo para componentes / módulos de página</td></tr>
+          <tr><td><code>$.extensions</code></td><td>Contenedor de extensiones de hooks del ciclo de vida (afterAttached/afterDetached)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Consejo:</strong> la mayor parte del código de una página solo necesita $, $.all y $.stanz; los demás miembros estáticos son para extensiones del framework o labores de diagnóstico.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,53 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">チュートリアル · 01</p>
+      <h1>最初のページ</h1>
+      <p class="doc-lead">ofa.js のページはただの HTML ファイルです。構造、スタイル、ロジックがすべて1つのファイルに収まります。</p>
+
+      <p>
+  ページモジュールは <code>&lt;template page&gt;</code> で宣言します。表示したい内容を
+  テンプレートに書き、データを <code>data</code> に置き、<code>{{ }}</code> でデータをテキストに埋め込みます。
+</p>
+<h2>1行変えて、1回実行する</h2>
+<p>
+  エディタ内の <code>name</code> を自分の名前に変えてから <kbd>Ctrl</kbd>+<kbd>S</kbd>
+  （Mac では <kbd>⌘</kbd>+<kbd>S</kbd>）を押すか「コードを実行」をクリックすると、右側のプレビューが更新されます。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-1" fold-styles="true"></docs-playground>
+<h2>いま書いた3つの要素</h2>
+<ul>
+  <li><code>&lt;template page&gt;</code>：これがページモジュールであることを宣言します。</li>
+  <li><code>data</code>：ページのリアクティブなデータです。変更するとページが更新されます。</li>
+  <li><code>{{name}}</code>：data の値をテキストに挿入します。</li>
+</ul>
+<div class="doc-note">
+  <strong>よくある落とし穴：</strong><code>&lt;script&gt;</code> は
+  <code>&lt;template page&gt;</code> の内側に書く必要があります。また、テンプレートで使うフィールドは
+  すべて最初に <code>data</code> で宣言してください。そうしないとページ全体が
+  <code>ReferenceError</code> を投げます。
+</div>
+<h2>自分で試してみる</h2>
+<p>
+  <code>data</code> に <code>city</code> フィールドを追加し、<code>{{city}}</code> で
+  ページに表示してみてください。
+</p>
+
+      <p class="doc-end">次へ: <a olink href="./lesson-2.html">02 · データと補間 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

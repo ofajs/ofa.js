@@ -1,0 +1,59 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 16</p>
+      <h1>Estado global</h1>
+      <p class="doc-lead">Cuando varios componentes comparten el mismo estado, crea un almacén a nivel de módulo con $.stanz, móntalo en attached y límpialo en detached.</p>
+
+      <p>
+  Los <code>data</code> propios de un componente le pertenecen solo a él. Cuando varios componentes
+  necesitan leer y escribir los mismos datos, crea un almacén reactivo con <code>$.stanz()</code>
+  y compártelo desde un módulo aparte.
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-16" fold-styles="true"></docs-playground>
+<h2>Tres archivos</h2>
+<ul>
+  <li><code>store.mjs</code>: solo exporta <code>$.stanz({ count: 0 })</code>;</li>
+  <li><code>counter-panel.html</code>: las dos instancias del componente referencian el mismo almacén;</li>
+  <li><code>page.html</code>: aloja dos paneles junto con los botones de incremento y decremento.</li>
+</ul>
+<p>
+  En <code>attached</code>, cada componente asigna <code>this.sharedState = store</code> directamente,
+  y en <code>detached</code> borra la referencia con <code>this.sharedState = {}</code>.
+  La plantilla lee <code>sharedState.label</code> y <code>sharedState.count</code> directamente;
+  cuando el almacén cambia, ambos paneles se actualizan de forma automática.
+</p>
+<div class="doc-note">
+  <strong>Convención:</strong> declara primero un marcador de posición <code>sharedState: {}</code> en <code>data</code>,
+  luego monta el almacén en la fase <code>attached</code> y límpialo en la fase <code>detached</code>.
+  Solo así evitarás fugas de memoria y referencias obsoletas que queden retenidas tras destruirse el componente.
+</div>
+<div class="doc-note">
+  <strong>Cómo elegir:</strong> si los datos pertenecen a un subárbol de componentes y no a toda la aplicación,
+  encajan mejor <code>o-provider</code> / <code>o-consumer</code> de la lección anterior;
+  consulta <a olink href="./lesson-15.html">Contexto entre niveles</a>.
+</div>
+<h2>Pruébalo tú mismo</h2>
+<p>
+  Añade <code>step</code> al almacén para que el botón "+1" sume
+  <code>store.step</code> cada vez; después añade un botón que establezca step en 5.
+</p>
+
+      <p class="doc-end">Anterior: <a olink href="./lesson-15.html">15 · Contexto entre niveles →</a> · Siguiente: <a olink href="./lesson-17.html">17 · Páginas y enrutamiento →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,54 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · Conceptos básicos de instancia</p>
+      <h1>Conceptos básicos de instancia</h1>
+      <p class="doc-lead">Un objeto de instancia es a la vez un contenedor del DOM, datos reactivos y una colección de elementos hijos. Empieza por conocer sus propiedades básicas.</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="instance"></docs-playground>
+
+      <h2>Miembros</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>Miembro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.ele</code></td><td>El elemento DOM nativo; a través de él se accede a toda la API del navegador</td></tr>
+          <tr><td><code>el.tag</code></td><td>Nombre de etiqueta en minúsculas (solo lectura)</td></tr>
+          <tr><td><code>el.owner</code></td><td>La cadena de propiedad de los datos (un Set); las actualizaciones reactivas se propagan hacia arriba a lo largo de ella (solo lectura)</td></tr>
+          <tr><td><code>el.length</code></td><td>Número de elementos hijos; coincide con ele.children.length (solo lectura)</td></tr>
+          <tr><td><code>el[0], el[1]</code></td><td>Lee una instancia de elemento hijo por índice (solo lectura)</td></tr>
+          <tr><td><code>el.index</code></td><td>Posición dentro del padre; null cuando no hay padre (solo lectura)</td></tr>
+          <tr><td><code>el.PATH</code></td><td>Ubicación del archivo de componente / página; los recursos relativos se resuelven respecto a ella (solo lectura)</td></tr>
+          <tr><td><code>el.app</code></td><td>Instancia de o-app más cercana; undefined cuando está fuera de una aplicación (solo lectura)</td></tr>
+          <tr><td><code>el.shadow</code></td><td>La instancia de la shadow root del propio elemento (solo lectura)</td></tr>
+          <tr><td><code>el.root</code></td><td>El nodo raíz en el que se encuentra: document o alguna shadow root (solo lectura)</td></tr>
+          <tr><td><code>el.host</code></td><td>Instancia del componente shadow host más cercana (solo lectura)</td></tr>
+          <tr><td><code>el.xid</code></td><td>Identificador único de la instancia; sirve para distinguir instancias con la misma etiqueta (solo lectura)</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>Nota:</strong> Los miembros marcados como «solo lectura» los mantiene internamente la instancia; asignarles un valor no cambia la estructura.
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← Volver a la descripción general de la API</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

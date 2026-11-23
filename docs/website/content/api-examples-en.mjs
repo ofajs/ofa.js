@@ -27,7 +27,7 @@ export const API_EXAMPLES_EN = {
 
     <script
       type="module"
-      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+      src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
     ></script>
     <script type="module">
       const target = $("#target");

@@ -1,0 +1,106 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+    <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+      <article class="doc docs-intro">
+        <p class="doc-kicker">Documentación</p>
+        <h1>Documentación de ofa.js</h1>
+        <p class="doc-lead">
+          Desde una sola etiqueta script hasta componentes, páginas, plantillas, estado, enrutamiento y despliegue.
+          La documentación está organizada en el orden en que la usarás, o puedes ir directamente al capítulo que necesites desde la tabla de contenidos de la izquierda.
+        </p>
+
+        <div class="docs-list">
+          <a class="docs-row" olink href="./getting-started.html">
+            <span class="num">01</span>
+            <h2>Instalación</h2>
+            <p>Carga ofa.js desde un CDN o desde una compilación local de dist y ejecuta tu primera página.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="./first-component.html">
+            <span class="num">02</span>
+            <h2>Tu primer componente</h2>
+            <p>Crea un Web Component personalizado y comprende tag, attrs, data y slots.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="./template.html">
+            <span class="num">03</span>
+            <h2>Resumen de directivas de plantilla</h2>
+            <p>Aprende en una sola pasada la interpolación, los atributos, los eventos, el enlace bidireccional, los condicionales y las listas.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="./routing.html">
+            <span class="num">04</span>
+            <h2>Enrutamiento y navegación</h2>
+            <p>La pila de páginas de o-app, goto/replace/back, o-router y diseños anidados.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="./api.html">
+            <span class="num">05</span>
+            <h2>$.fn y objetos envueltos</h2>
+            <p>Selección, navegación por el árbol, manipulación del DOM, eventos, stanz y extensiones de instancia.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="../api/">
+            <span class="num">06</span>
+            <h2>Referencia de API</h2>
+            <p>Miembros de instancia, miembros estáticos globales y ejemplos ejecutables en VSCode.</p>
+            <span class="more">Ir a la API →</span>
+          </a>
+
+          <a class="docs-row" olink href="./examples.html">
+            <span class="num">07</span>
+            <h2>Ejemplos completos</h2>
+            <p>Una página mínima, componentes personalizados, una lista de tareas y una aplicación con enrutamiento.</p>
+            <span class="more">Empezar a leer →</span>
+          </a>
+
+          <a class="docs-row" olink href="./playground.html">
+            <span class="num">08</span>
+            <h2>Playground</h2>
+            <p>Edita y ejecuta módulos de página de ofa.js dentro del contenedor virtual de NoneOS.</p>
+            <span class="more">Abrir el playground →</span>
+          </a>
+        </div>
+
+        <h2>Qué cubre la documentación</h2>
+        <div class="doc-table-wrap">
+<table class="doc-table">
+          <thead>
+            <tr><th>Capítulo</th><th>Contenido</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Primeros pasos</td><td>Instalación, tu primer componente, tu primera página</td></tr>
+            <tr><td>Componentes y páginas</td><td>Contrato de componentes, módulos de página, ciclo de vida</td></tr>
+            <tr><td>Sintaxis de plantillas</td><td>Resumen de directivas, enlaces y estilos, eventos y formularios, condicionales y listas</td></tr>
+            <tr><td>Datos y estado</td><td>datos, propiedades calculadas, observación, $.stanz, provider/consumer</td></tr>
+            <tr><td>Aplicaciones y enrutamiento</td><td>o-app, o-router, enrutamiento anidado, rutas reales de scsr</td></tr>
+            <tr><td>Referencia</td><td>$.fn y objetos envueltos, API de instancia, complementos, errores comunes, ejemplos completos, playground, despliegue</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="doc-note">
+          <strong>¿Por dónde empiezo?</strong>
+          Si es tu primera vez, comienza por Instalación; si ya tienes una página en ejecución,
+          ve directamente al Resumen de directivas de plantilla o elige un capítulo de la tabla de contenidos de la izquierda.
+        </div>
+      </article>
+    </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

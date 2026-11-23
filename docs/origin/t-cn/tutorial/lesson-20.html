@@ -1,0 +1,51 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 20</p>
+      <h1>綜合：待辦清單</h1>
+      <p class="doc-lead">把列表、表單、條件、計算屬性、偵聽和 localStorage 串成一個完整應用。</p>
+
+      <p>
+  最後一課把前面的能力組合起來：輸入框添加待辦，列表項可勾選、可刪除，
+  可以按狀態篩選，數據自動保存到瀏覽器。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-20" fold-styles="true"></docs-playground>
+<h2>這一課用到了什麼</h2>
+<ul>
+  <li><code>sync:value</code> / <code>sync:checked</code>：表單和列表項編輯；</li>
+  <li><code>o-fill</code> + <code>fill-key</code>：列表渲染與複用；</li>
+  <li><code>get visibleItems()</code> / <code>get remaining()</code>：篩選和統計；</li>
+  <li><code>watch.items</code>：數據變化後寫入 localStorage。</li>
+</ul>
+<p>
+  試著刷新右側預覽：待辦會被恢復，因為 <code>watch</code> 在數據變化時
+  把它寫進了瀏覽器存儲。
+</p>
+<div class="doc-note">
+  <strong>下一步：</strong>把待辦拆成組件（第 12–14 課），用
+  <code>$.stanz</code>（第 16 課）跨頁面共享，再套上佈局（第 18 課），
+  就是一個完整應用了。
+</div>
+<h2>動手改</h2>
+<p>
+  增加「清除已完成」按鈕；再給每條待辦加一個編輯按鈕，把文本行切換成輸入框。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-19.html">19 · 異步與加載態 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

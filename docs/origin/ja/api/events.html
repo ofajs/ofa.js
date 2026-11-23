@@ -1,0 +1,46 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · イベント</p>
+      <h1>イベント</h1>
+      <p class="doc-lead">インスタンスメソッドでイベントをバインド・解除・発行します。イベントはペイロードデータを運ぶことができ、shadow 境界をまたげます。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="events"></docs-playground>
+
+      <h2>メンバー</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>メンバー</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><code>el.on(name, handler)</code></td><td>イベントをバインドします。el を返すため、呼び出しをチェーンできます</td></tr>
+          <tr><td><code>el.one(name, handler)</code></td><td>1 回だけ発火し、自動的に解除されます</td></tr>
+          <tr><td><code>el.off(name, handler)</code></td><td>イベントを解除します</td></tr>
+          <tr><td><code>el.emit(name, opts)</code></td><td>イベントを発行します。opts.data は event.data として付加され、残りのフィールドは Event の init オプションとして渡されます</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="doc-note">
+        <strong>ヒント：</strong>テンプレート内の on:click="method" は、コンポーネントのアンマウント時に自動的に解除されるため、手動で off を呼ぶ必要はありません。
+      </div>
+
+
+      <p class="doc-end">
+        <a olink href="./index.html">← API 総覧に戻る</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

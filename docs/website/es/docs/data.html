@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Datos y observadores — Documentación de ofa.js</title>
+    <meta name="description" content="Datos reactivos, getters calculados, observadores watch y casos límite habituales." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Datos y observadores — Documentación de ofa.js" />
+    <meta property="og:description" content="Datos reactivos, getters calculados, observadores watch y casos límite habituales." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Datos</p>
+      <h1>Datos y observadores</h1>
+      <p class="doc-lead">
+        <code>data</code> es el estado reactivo de un componente o página. Está impulsado por stanz,
+        por lo que los cambios profundos en objetos y arreglos activan automáticamente las actualizaciones de la vista.
+      </p>
+
+      <h2>data es un objeto, no una función</h2>
+      <pre><code>export default async () =&gt; ({
+  data: {
+    count: 0,
+    user: { name: "Alice", tags: [] },
+    todos: [],
+  },
+});</code></pre>
+      <p>
+        Cada instancia de componente tiene sus propios datos. Asignar a objetos anidados y usar
+        <code>push</code>/<code>splice</code>/<code>sort</code> en arreglos también activa las actualizaciones:
+      </p>
+      <pre><code>this.user.name = "Bob";
+this.user.tags.push("admin");
+this.todos.splice(index, 1);
+this.todos = this.todos.filter((item) =&gt; !item.done);</code></pre>
+
+      <h2>Propiedades calculadas</h2>
+      <p>Usa getters en <code>proto</code>; no uses propiedades calculadas al estilo de Vue:</p>
+      <pre><code>data: { count: 0, firstName: "", lastName: "" },
+proto: {
+  get double() {
+    return this.count * 2;
+  },
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+  set fullName(value) {
+    [this.firstName, this.lastName] = value.split(" ");
+  },
+},</code></pre>
+      <p>Úsalas en las plantillas como campos normales: <code>{{double}}</code>, <code>{{fullName}}</code>.</p>
+      <div class="doc-note">
+        <strong>Los getters se evalúan en cuanto se inicializa la plantilla, antes de ready.</strong>
+        Solo sirven para cálculos simples que dependen de valores iniciales síncronos. No pongas en un getter
+        cálculos que dependan de datos asíncronos; usa un campo de datos y asígnalo dentro de la
+        función asíncrona, de lo contrario puede producirse un <code>TypeError</code> y romper el renderizado
+        de toda la página.
+      </div>
+
+      <h2>Observadores</h2>
+      <pre><code>data: {
+  count: 0,
+  width: 0,
+  height: 0,
+  area: 0,
+},
+watch: {
+  count(value, { watchers }) {
+    if (!watchers) return; // primera llamada durante la inicialización
+    console.log("el contador cambió a", value);
+  },
+  "width,height"() {
+    this.area = this.width * this.height;
+  },
+  user() {
+    // los objetos y arreglos se observan en profundidad
+    console.log("el usuario cambió");
+  },
+},</code></pre>
+      <p>
+        El segundo argumento de la función de callback es <code>{ watchers }</code>, el conjunto de cambios fusionados
+        durante el ciclo de debounce actual. <code>watchers[0]</code> contiene
+        <code>name</code>, <code>oldValue</code>, <code>value</code>,
+        <code>type</code>, <code>target</code> y <code>args</code>.
+      </p>
+      <p>
+        Una función watch se ejecuta una vez cuando finaliza la inicialización del componente; en ese momento
+        <code>watchers</code> está vacío y la llamada se usa para establecer la observación. Si no necesitas
+        que se ejecute lógica de negocio durante la inicialización, comprueba primero
+        <code>if (!watchers) return;</code>.
+      </p>
+
+      <h2>Evitar bucles de reescritura</h2>
+      <pre><code>// Incorrecto: observar count y además cambiar count dentro de la función de callback
+watch: {
+  count(value) {
+    this.count = value + 1;
+  },
+},</code></pre>
+      <p>
+        Cuando necesites un valor derivado, usa una propiedad calculada o añade una condición de activación
+        explícita. No escribas sin condiciones en los datos observados desde dentro de un observador.
+      </p>
+
+      <h2>watch y los datos asíncronos</h2>
+      <pre><code>data: { userId: 0, profile: null },
+watch: {
+  async userId(id) {
+    if (!id) return;
+    this.profile = await fetchProfile(id);
+  },
+},</code></pre>
+      <p>
+        Las funciones de observación pueden ser asíncronas. Con solicitudes concurrentes, lleva
+        un número de secuencia de la solicitud o usa <code>AbortController</code> para que una solicitud
+        anterior no pueda sobrescribir un resultado más reciente.
+      </p>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./render.html">Condicionales y listas →</a>
+         · Siguiente: <a olink href="./state.html">Estado global →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

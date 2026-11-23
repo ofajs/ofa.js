@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>嵌套路由 — ofa.js 文檔</title>
+    <meta name="description" content="通過 export const parent 與 slot 建立共享佈局的多級嵌套路由。" />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="嵌套路由 — ofa.js 文檔" />
+    <meta property="og:description" content="通過 export const parent 與 slot 建立共享佈局的多級嵌套路由。" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Application</p>
+      <h1>嵌套路由</h1>
+      <p class="doc-lead">
+        多個頁面共享同一套導航和側欄時，把公共結構放進父頁面，
+        子頁面通過 <code>export const parent</code> 掛到父頁的
+        <code>&lt;slot&gt;</code> 下。
+      </p>
+
+      <h2>父頁面：佈局</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;首頁&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;文檔&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>子頁面：聲明 parent</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;正文&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "../layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> 相對於子頁面自身地址解析。子頁面只負責
+        <code>slot</code> 裡的內容，公共 header/footer 和側欄保留在父頁。
+      </p>
+
+      <h2>切換時的行為</h2>
+      <ul>
+        <li>同一個父頁下的子頁互相切換時，父頁<strong>不銷燬</strong>，只替換 slot 內容；</li>
+        <li>父頁的 data、滾動位置和已加載的組件都會保留；</li>
+        <li>子頁從父頁進入/離開時觸發父頁的 <code>routerChange</code>；</li>
+        <li>父頁也可以再聲明 <code>parent</code>，形成多級嵌套。</li>
+      </ul>
+
+      <h2>本站在用的結構</h2>
+      <p>
+        官網本身就是這個模式的實例：
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← 站點 layout（導航、頁腳、文檔側欄）
+docs/origin/cn/index.html         ← 首頁，掛在 layout
+docs/origin/cn/docs/*.html        ← 文檔頁，掛在同一 layout</code></pre>
+      <p>
+        所有文檔頁的底部腳本都包含：
+      </p>
+      <pre><code>export const parent = "../layout.html";</code></pre>
+      <p>
+        因此切換文檔文章時 header/footer 與左側目錄不會重建，
+        只有正文區域更新。
+      </p>
+
+      <h2>常見錯誤</h2>
+      <ul>
+        <li>父頁忘記寫 <code>&lt;slot&gt;&lt;/slot&gt;</code>，子頁內容不顯示；</li>
+        <li><code>parent</code> 路徑寫錯，頁面會被當作獨立頁加載，佈局消失；</li>
+        <li>把 <code>routerChange</code> 寫在子頁上——它只在父頁觸發；</li>
+        <li>在父頁 data 裡使用 <code>back</code>、<code>goto</code>、<code>src</code> 等保留名，註冊失敗。</li>
+      </ul>
+
+      <p class="doc-end">
+        上一篇：<a olink href="./routing.html">路由與導航 →</a>
+        　·　下一篇：<a olink href="./scsr.html">真實路徑 scsr →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>此頁面需要啟用 JavaScript 才能運行 ofa.js。</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

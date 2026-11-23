@@ -1,0 +1,166 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">リファレンス</p>
+      <h1>プラグインと拡張</h1>
+      <p class="doc-lead">
+        プラグインは、参照したときだけ有効になるオプションの機能で、ofa.js の
+        標準ビルドには含まれません。ページがすでに読み込んだグローバル
+        <code>$</code> に接続するため、2 つ目のフレームワークインスタンスを
+        読み込むことはありません。
+      </p>
+
+      <h2>利用可能なプラグイン</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>プラグイン</th><th>機能</th><th>使い方</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formdata</code></td>
+              <td>コンテナ内のフォーム値と stanz オブジェクトの双方向バインディング</td>
+              <td><code>$("#form").formData()</code></td>
+            </tr>
+            <tr>
+              <td><code>inject-host</code></td>
+              <td>style/link タグを shadow からホストへ引き上げ、スロットの深い階層まで届かせる</td>
+              <td><code>&lt;inject-host&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>body-ghost</code></td>
+              <td>テンプレートの内容を body の末尾へ転送して描画する（ダイアログ / オーバーレイ）</td>
+              <td><code>&lt;body-ghost&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>global-link</code></td>
+              <td>以降にマウントされるコンポーネントへグローバルスタイルシートを注入する</td>
+              <td><code>&lt;o-global-link href&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>インポート</h2>
+      <p>ソース形式を直接インポートするか、クラシックスクリプトまたは ESM の dist 形式を使います：</p>
+      <pre><code>// monorepo / npm のソース
+import "ofa.js/packages/plugins/formdata/formdata.mjs";
+
+// dist のクラシックスクリプト（dist 版 ofa.js と併用）
+&lt;script src=".../packages/plugins/formdata/dist/formdata.min.js"&gt;&lt;/script&gt;
+
+// dist の ESM
+import ".../packages/plugins/formdata/dist/formdata.min.mjs";</code></pre>
+      <p>
+        プラグインはグローバル <code>$</code> に接続するため、ofa.js より後に
+        読み込む必要があります。存在しない場合は即座に例外を投げます。
+      </p>
+
+      <h2>formData</h2>
+      <pre><code>&lt;form id="profile"&gt;
+  &lt;input name="username" /&gt;
+  &lt;input name="email" type="email" /&gt;
+  &lt;input name="tags" type="checkbox" value="admin" /&gt;
+&lt;/form&gt;</code></pre>
+      <pre><code>const data = $("#profile").formData();
+
+data.username;          // 読み取り
+data.username = "Yao";  // フォームへ書き戻し
+data.revoke();          // バインディングを解除</code></pre>
+      <p>
+        チェックボックスは配列にまとめられ、複数選択・ラジオ・ファイルの各入力は
+        それぞれ独自に処理されます。カスタムフォームコンポーネントは
+        <code>value</code> プロパティを公開し、<code>name</code> を設定するだけで
+        参加できます。
+      </p>
+
+      <h2>inject-host</h2>
+      <p>
+        <code>::slotted()</code> はスロットされた内容の 1 階層目にしか届きません。
+        スロットの深い位置にある要素をスタイリングするには、
+        <code>&lt;inject-host&gt;</code> を使ってスタイルをホストへ引き上げます：
+      </p>
+      <pre><code>&lt;template component&gt;
+  &lt;inject-host&gt;
+    &lt;style&gt;
+      user-list user-list-item .item-name { color: red; }
+    &lt;/style&gt;
+  &lt;/inject-host&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        セレクタにはコンポーネントの完全なパスを書き、他のコンポーネントへ
+        スタイルが漏れないようにしてください。スタイルを頻繁に更新する場面での
+        使用は控えめにしてください。
+      </p>
+
+      <h2>body-ghost</h2>
+      <p>
+        ダイアログ、トースト、オーバーレイが親の <code>overflow</code> や
+        <code>transform</code> の制約を抜け出す必要があるときは、内容を body へ
+        転送します：
+      </p>
+      <pre><code>&lt;body-ghost&gt;
+  &lt;div class="dialog"&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/body-ghost&gt;</code></pre>
+      <p>
+        フレームワークのバインディングは要素の移動に追従し、ネイティブイベントは
+        実際の DOM 上の位置からバブルします。
+      </p>
+
+      <h2>global-link</h2>
+      <pre><code>&lt;o-global-link href="./theme.css"&gt;&lt;/o-global-link&gt;</code></pre>
+      <p>
+        スタイルシートは、これより <strong>後</strong> にマウントされた
+        コンポーネントの shadow にのみ注入されます。<code>o-global-link</code> を
+        削除すると、以降の新しいコンポーネントはスタイルを受け取らなくなります。
+        グローバルスコープへ漏れるため、慎重に使ってください。
+      </p>
+
+      <h2>match-var（コアのスタイルクエリ）</h2>
+      <p>
+        CSS 変数に応じてコンポーネント内部のスタイルを切り替えるには、コアの
+        <code>&lt;match-var&gt;</code> を使います。追加のプラグインは不要です：
+      </p>
+      <pre><code>&lt;match-var theme="dark"&gt;
+  &lt;style&gt;.content { background: #333; color: white; }&lt;/style&gt;
+&lt;/match-var&gt;
+
+&lt;!-- 複数の条件はすべて一致する必要がある --&gt;
+&lt;match-var theme="dark" size="large"&gt;
+  &lt;style&gt;:host { padding: 20px; }&lt;/style&gt;
+&lt;/match-var&gt;</code></pre>
+      <p>
+        条件は CSS 変数の値から取得します。外側では <code>data()</code> を使って
+        変数へデータを書き込みます：
+      </p>
+      <pre><code>&lt;style&gt;
+  .container { --theme: data(currentTheme); --size: data(currentSize); }
+&lt;/style&gt;</code></pre>
+      <div class="doc-note">
+        <strong>Firefox：</strong> 変数の変更後にスタイルがすぐ切り替わらない場合は、
+        <code>$.checkMatch()</code> を手動で呼び出して再チェックを実行してください。
+      </div>
+
+      <p class="doc-end">
+        前へ: <a olink href="./api.html">$.fn とラッパーオブジェクト →</a>
+         · 次へ: <a olink href="./pitfalls.html">よくある落とし穴 →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

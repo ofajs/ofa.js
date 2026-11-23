@@ -1,0 +1,48 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">Tutorial · 02</p>
+      <h1>數據與插值</h1>
+      <p class="doc-lead">data 可以放字符串、數字、布爾、對象和數組，{{ }} 裡還能寫簡單表達式。</p>
+
+      <p>
+  <code>data</code> 是一個普通對象，但 ofa.js 會把它變成響應式數據。
+  模板裡的 <code>{{ }}</code> 不只能取字段，也能做運算和訪問嵌套屬性。
+</p>
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground lesson="lesson-2" fold-styles="true"></docs-playground>
+<h2>規則</h2>
+<ul>
+  <li><code>{{user.name}}</code>：訪問對象的嵌套字段；</li>
+  <li><code>{{user.age + 1}}</code>：{{ }} 裡是 JavaScript 表達式；</li>
+  <li><code>:html="note"</code>：把字符串當作 HTML 渲染，只用於可信內容。</li>
+</ul>
+<div class="doc-note">
+  <strong>記住：</strong><code>{{ }}</code> 只能用在元素的文本內容裡。
+  屬性值要用下一課的 <code>attr:</code> / <code>:prop</code>，寫
+  <code>&lt;a href="{{url}}"&gt;</code> 不會生效。
+</div>
+<h2>動手改</h2>
+<p>
+  給 <code>user</code> 增加一個 <code>city</code> 字段，並顯示成
+  「城市：xxx」；再試著把 <code>note</code> 改成一段普通文本，觀察
+  <code>:html</code> 和 <code>{{ }}</code> 的區別。
+</p>
+
+      <p class="doc-end">上一篇：<a olink href="./lesson-1.html">01 · 第一個頁面 →</a>　·　下一篇：<a olink href="./lesson-3.html">03 · 動態屬性 →</a></p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createTutorialPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createTutorialPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

@@ -1,0 +1,61 @@
+<template page>
+  <link rel="stylesheet" href="{{SITE}}/styles/site.css" />
+  <link rel="stylesheet" href="{{SITE}}/styles/docs.css" />
+  <l-m src="{{SITE}}/components/docs-layout.html"></l-m>
+
+  <docs-layout layout="wide" attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc doc-wide">
+      <p class="doc-kicker">API · o-app 與 o-page</p>
+      <h1>o-app 與 o-page</h1>
+      <p class="doc-lead">應用容器負責頁面棧和導航；頁面實例負責自己的一屏內容。</p>
+
+<l-m src="{{SITE}}/components/playground.html"></l-m>
+      <docs-playground example="app"></docs-playground>
+
+      <h2>o-app 實例</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>app.src</code></td><td>應用配置模塊地址</td></tr>
+          <tr><td><code>app.current</code></td><td>當前頁面實例（只讀）</td></tr>
+          <tr><td><code>app.routers</code></td><td>歷史路由數組，可讀也可寫</td></tr>
+          <tr><td><code>app.goto(src)</code></td><td>跳轉併入棧</td></tr>
+          <tr><td><code>app.replace(src)</code></td><td>替換當前頁，不入棧</td></tr>
+          <tr><td><code>app.back(delta = 1)</code></td><td>後退</td></tr>
+          <tr><td><code>app.forward(delta = 1)</code></td><td>前進（需配置 allowForward）</td></tr>
+          <tr><td><code>app.appIsReady</code></td><td>首個頁面渲染完成（只讀）</td></tr>
+          <tr><td><code>app._module</code></td><td>應用配置：home、loading、fail、access、allowForward、pageAnime</td></tr>
+        </tbody>
+      </table>
+        </div>
+      <h2>o-page 實例</h2>
+      <div class="doc-table-wrap">
+<table class="doc-table">
+        <thead><tr><th>成員</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>page.src</code></td><td>頁面模塊地址，初始化後不可修改</td></tr>
+          <tr><td><code>page.pageIsReady</code></td><td>頁面渲染完成標誌（只讀）</td></tr>
+          <tr><td><code>page.goto(src) / page.replace(src)</code></td><td>相對當前頁面解析地址後跳轉</td></tr>
+          <tr><td><code>page.back()</code></td><td>後退</td></tr>
+          <tr><td><code>page.pageAnime</code></td><td>本頁動畫配置，讀寫均可</td></tr>
+          <tr><td><code>page._rendered</code></td><td>頁面渲染完成的 Promise</td></tr>
+        </tbody>
+      </table>
+        </div>
+
+      <p class="doc-end">
+        <a olink href="./index.html">← 返回 API 總覽</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "{{SITE}}/content/page-runtime.mjs";
+
+    export const parent = "{{LOCALE}}/layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "{{LOCALE}}/site.json" });
+  </script>
+</template>

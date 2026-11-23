@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enrutamiento anidado — Documentación de ofa.js</title>
+    <meta name="description" content="Enrutamiento anidado de varios niveles con diseños compartidos mediante export const parent y slots." />
+    <meta name="theme-color" content="#1a1c1e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enrutamiento anidado — Documentación de ofa.js" />
+    <meta property="og:description" content="Enrutamiento anidado de varios niveles con diseños compartidos mediante export const parent y slots." />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="../../styles/loading.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script>
+      // 首次访问默认深色；可在顶部切换白天 / 黑夜 / 跟随系统（尊重已有偏好）
+      try {
+        if (!localStorage.getItem("st-theme-mode"))
+          localStorage.setItem("st-theme-mode", "dark");
+      } catch {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/ofajs/senti-ui@main/packages/boot/st-boot.js"></script>
+    <noscript><style>#site-loading { display: none; }</style></noscript>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      body {
+        font-family:
+          "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      o-app,
+      o-page {
+        display: block;
+        min-height: 100vh;
+      }
+      noscript {
+        display: block;
+        padding: 48px 24px;
+        text-align: center;
+        color: #c3c7cf;
+      }
+
+      /* 首屏 critical：只保定位/尺寸/遮罩，装饰样式在 styles/loading.css */
+      #site-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background: var(--md-sys-color-surface, #111318);
+        color: var(--md-sys-color-on-surface, #e2e2e9);
+        transition: opacity 0.22s ease;
+      }
+
+      #site-loading.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .site-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: min(260px, 70vw);
+      }
+
+      .site-loading-logo {
+        display: block;
+        width: auto;
+        height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="site-loading" role="status" aria-live="polite">
+      <div class="site-loading-inner">
+        <div class="site-loading-brand" aria-hidden="true">
+          <img class="site-loading-logo" src="../../assets/logo.svg" width="28" height="30" alt="" />
+          <span class="site-loading-wordmark">ofa<span>.js</span></span>
+        </div>
+        <div class="site-loading-bar" aria-hidden="true"></div>
+        <div class="site-loading-label">
+          <span class="site-loading-label-zh">正在加载页面…</span>
+          <span class="site-loading-label-tcn">正在載入頁面…</span>
+          <span class="site-loading-label-ja">ページを読み込み中…</span>
+          <span class="site-loading-label-es">Cargando página…</span>
+          <span class="site-loading-label-en">Loading page…</span>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      SCSR 契约：本文件既是完整文档，也是页面模块的源文件。
+      页面内容内联在 o-app 的 template[page] 中，scsr 接管后把当前 URL
+      收编为 o-page，站内跳转使用真实路径。
+    -->
+    <o-app src="../../app.mjs">
+      <template page>
+
+  <link rel="stylesheet" href="../../styles/site.css" />
+  <link rel="stylesheet" href="../../styles/docs.css" />
+  <l-m src="../../components/docs-layout.html"></l-m>
+
+  <docs-layout attr:label-on-this-page="site.docs.onThisPage">
+    <article class="doc">
+      <p class="doc-kicker">Aplicación</p>
+      <h1>Enrutamiento anidado</h1>
+      <p class="doc-lead">
+        Cuando varias páginas comparten la misma navegación y barra lateral,
+        coloca la estructura común en una página padre y monta las páginas
+        hijas bajo el <code>&lt;slot&gt;</code> del padre mediante
+        <code>export const parent</code>.
+      </p>
+
+      <h2>Página padre: el diseño</h2>
+      <pre><code>&lt;!-- layout.html --&gt;
+&lt;template page&gt;
+  &lt;header&gt;
+    &lt;a olink href="./"&gt;Inicio&lt;/a&gt;
+    &lt;a olink href="./docs/"&gt;Documentación&lt;/a&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;slot&gt;&lt;/slot&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    export default {
+      data: { active: "" },
+      attached() {
+        this.syncActive();
+      },
+      routerChange({ current }) {
+        this.syncActive(current);
+      },
+      proto: {
+        syncActive(current) {
+          const src = (current || this.app?.current)?.src || "";
+          this.active = src.split("/").pop().split("?")[0];
+        },
+      },
+    };
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+
+      <h2>Página hija: declarar el padre</h2>
+      <pre><code>&lt;!-- docs/getting-started.html --&gt;
+&lt;template page&gt;
+  &lt;article&gt;Contenido principal&lt;/article&gt;
+
+  &lt;script&gt;
+    export const parent = "../layout.html";
+
+    export default async () =&gt; ({
+      data: {},
+    });
+  &lt;/script&gt;
+&lt;/template&gt;</code></pre>
+      <p>
+        <code>parent</code> se resuelve en relación con la dirección de la
+        propia página hija. La página hija solo se encarga del contenido dentro
+        de <code>slot</code>; el encabezado, el pie de página y la barra lateral
+        compartidos permanecen en el padre.
+      </p>
+
+      <h2>Comportamiento al cambiar</h2>
+      <ul>
+        <li>Cuando se cambia entre páginas hijas del mismo padre, el padre <strong>no se destruye</strong>: solo se reemplaza el contenido del slot;</li>
+        <li>se conservan los datos del padre, la posición de desplazamiento y los componentes cargados;</li>
+        <li>entrar o salir de una página hija a través del padre dispara el <code>routerChange</code> del padre;</li>
+        <li>un padre también puede declarar <code>parent</code>, formando varios niveles de anidación.</li>
+      </ul>
+
+      <h2>La estructura que usa este sitio</h2>
+      <p>
+        Este sitio es en sí mismo una instancia del patrón:
+      </p>
+      <pre><code>docs/origin/cn/layout.html        ← diseño del sitio (navegación, pie de página, barra lateral de documentación)
+docs/origin/cn/index.html         ← página de inicio, montada en el diseño
+docs/origin/cn/docs/*.html        ← páginas de documentación, montadas en el mismo diseño</code></pre>
+      <p>
+        Cada página de documentación termina con:
+      </p>
+      <pre><code>export const parent = "../layout.html";</code></pre>
+      <p>
+        Como resultado, cambiar de artículo de documentación no reconstruye el
+        encabezado, el pie de página ni la tabla de contenidos de la izquierda:
+        solo se actualiza el área del cuerpo.
+      </p>
+
+      <h2>Errores comunes</h2>
+      <ul>
+        <li>Olvidar <code>&lt;slot&gt;&lt;/slot&gt;</code> en el padre, de modo que el contenido de la página hija no se muestra;</li>
+        <li>una ruta <code>parent</code> incorrecta, que carga la página de forma independiente y descarta el diseño;</li>
+        <li>colocar <code>routerChange</code> en la página hija: solo se dispara en el padre;</li>
+        <li>usar nombres reservados como <code>back</code>, <code>goto</code> o <code>src</code> en los datos del padre, lo que hace que falle el registro.</li>
+      </ul>
+
+      <p class="doc-end">
+        Anterior: <a olink href="./routing.html">Enrutamiento y navegación →</a>
+         · Siguiente: <a olink href="./scsr.html">scsr con rutas reales →</a>
+      </p>
+    </article>
+  </docs-layout>
+
+  <script>
+    import { createDocsPage } from "../../content/page-runtime.mjs";
+
+    export const parent = "../layout.html";
+
+    export default (args) =>
+      createDocsPage({ ...args, sitePath: "../site.json" });
+  </script>
+
+      </template>
+    </o-app>
+
+    <noscript>Esta página requiere JavaScript para ejecutar ofa.js.</noscript>
+
+    <script type="module" src="../../boot.js"></script>
+  </body>
+</html>

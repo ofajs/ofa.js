@@ -17,10 +17,9 @@
 console.log($.version); // v4.7.x 或 5.0.0
 ```
 
-> **技能自身的位置**：本技能只存在于 `v5` 分支的 `.agents/skills/ofajs-docs`；
-> `main` 分支对应的是根 `skills/ofajs-docs`（v4 版内容）。在 GitHub 上直接看
-> `main` 是找不到 `.agents/` 的，需要切到 `v5` 分支。v5 合并进 `main` 时，两处
-> 技能目录要合并对齐（不要留下两份不同步的副本）。
+> **技能自身的位置**：这是旧版技能，已归档到
+> `.agents/skills/ofajs-docs-archive`；当前 5.x 技能在
+> `.agents/skills/ofajs-docs`。本文件里的 v5 分支地址仅作历史记录。
 
 ## 二、为什么 v5 要写 `@refs/heads/v5`
 

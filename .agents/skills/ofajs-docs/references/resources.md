@@ -4,32 +4,32 @@
 
 | 线 | 位置 | 版本 | 结构 |
 |----|------|------|------|
-| v4 主线 | `main` 分支 / npm `ofa.js` | 4.7.x | 源码 `packages/ofa/`；router/scsr 在根 `libs/`；产物在根 `dist/` |
-| v5（本文档） | `v5` 分支 | 5.0.0 | monorepo：`packages/{ofajs,router,scsr,drill,stanz,xhear}`；router/scsr 在各自 `packages/<pkg>/dist/` |
+| v4 | `v4` 分支 / npm `ofa.js` 4.x | 4.7.x | 源码 `packages/ofa/`；router/scsr 在根 `libs/`；产物在根 `dist/` |
+| v5（本文档） | `main` 分支 / npm `ofa.js` 5.x | 5.0.2 | monorepo：`packages/{ofajs,router,scsr,drill,stanz,xhear}`；router/scsr 在各自 `packages/<pkg>/dist/` |
 
-控制台 `$.version` 直接判断项目版本（v4.7.x / "5.0.0"）。
+控制台 `$.version` 直接判断项目版本（v4.7.x / "5.0.2"）。
 
 ## CDN 地址
 
 ```html
-<!-- ofa.js ESM（推荐）—— v5 分支 -->
+<!-- ofa.js ESM（推荐）—— 5.x -->
 <script
-  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs"
+  src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs"
   type="module"
 ></script>
 
 <!-- ofa.js 经典 script（UMD，全局 $） -->
-<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.js"></script>
 
-<!-- o-router / scsr 桥接包（v5）——必须在 ofa.js 之后加载 -->
-<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/router/dist/router.min.mjs" type="module"></script>
-<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/packages/scsr/dist/scsr.min.mjs" type="module"></script>
+<!-- o-router / scsr 桥接包（5.x）——必须在 ofa.js 之后加载 -->
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/router/dist/router.min.mjs" type="module"></script>
+<script src="https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/packages/scsr/dist/scsr.min.mjs" type="module"></script>
 ```
 
-v4 主线把 `@refs/heads/v5` 去掉（回退默认分支），并把
-`packages/{router,scsr}/dist/` 换成 `libs/{router,scsr}/dist/`。
+v4 使用 `@4` 或 `@4.7.x`，并把 `packages/{router,scsr}/dist/` 换成
+`libs/{router,scsr}/dist/`。
 
-### 为什么 v5 必须写 `@refs/heads/v5`
+### 为什么 v5 必须写 `@5`
 
 jsdelivr 的 `@` 后**先按 semver/tag 解析**再回退分支；分支名 `v5` 形似版本号，
 `@v5` 会因找不到同名 tag 而 404。需要固定可复现版本时用 commit hash
@@ -39,7 +39,7 @@ jsdelivr 的 `@` 后**先按 semver/tag 解析**再回退分支；分支名 `v5`
 > 先用 GitHub/raw 确认文件在分支上，再给 URL 加 `?v=1` 触发回源；不要因为
 > 一次 404 就改回 v4 路径。raw 地址 MIME 不保证是 JS，不要用于模块脚本。
 
-## dist 产物（v5）
+## dist 产物（5.x）
 
 | 产物 | 位置 | 说明 |
 |------|------|------|
@@ -56,7 +56,7 @@ jsdelivr 的 `@` 后**先按 semver/tag 解析**再回退分支；分支名 `v5`
 ```html
 <!-- 浏览器直接可用：CDN 全路径（import 顺序即加载顺序） -->
 <script type="module">
-  import "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@refs/heads/v5/dist/ofa.min.mjs";
+  import "https://cdn.jsdelivr.net/gh/ofajs/ofa.js@5/dist/ofa.min.mjs";
 </script>
 
 <!-- 经典脚本：书写顺序 -->

@@ -43,7 +43,7 @@ packages/plugins/
   package.json 目前仅作元数据与构建 banner 来源，发布待 v5 发布工程定论；
 - dist 由根 `npm run build`（rollup）生成，不手改；
 - 新增插件必须带 README + test（冒烟页 + spec），并同步本 CONTEXT 与
-  使用方文档（如 `.agents/skills/ofajs-docs-v5`）。
+  使用方文档（如 `.agents/skills/ofajs-docs`）。
 
 ## 四、现有插件
 

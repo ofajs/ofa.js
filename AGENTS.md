@@ -105,8 +105,8 @@ stanz 响应式数据、xhear DOM 封装）同仓开发、同源演进。
 | 技能 | 触发场景 |
 |------|---------|
 | `benchmark-methodology` | 新建/修改 benchmark、解读 benchmark 结果、怀疑性能回退时 |
-| `ofajs-docs-v5` | 写/改 ofa.js 页面、组件、路由、状态管理时（**v5 修订版使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。已按 v5 源修订过期声明、移除项目特定泄漏，全文去重至 9 个文件——SKILL.md + syntax/modules/app-routing/state/api/pitfalls/examples/resources） |
-| `ofajs-docs` | 原始完整版（内容冗余、含 v4 残留声明如"o-fill && 必炸"、他项目调试痕迹，且部分说法与 v5 行为相悖）；已被 `ofajs-docs-v5` 取代，**建议删除以免误触发**（两技能触发场景几乎相同） |
+| `ofajs-docs` | 写/改 ofa.js 页面、组件、路由、状态管理时（**5.x 使用方文档**，`packages/ofajs` 是正源；行为不一致时以 `packages/ofajs` 为准并同步修订。全文去重至 9 个文件——SKILL.md + syntax/modules/app-routing/state/api/pitfalls/examples/resources） |
+| `ofajs-docs-archive` | v4 时代旧版完整技能，仅作历史参考；已归档，不再用于新项目，避免误触发 |
 
 **同步维护**：新增或删除 `.agents/skills/` 下的技能时，必须同步更新上表。
 

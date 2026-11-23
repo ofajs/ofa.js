@@ -26,7 +26,8 @@
     "server:website": "node scripts/static-server.mjs docs/website",
     "bench:ofajs": "node packages/ofajs/benchmark/run.mjs",
     "bench:cross": "node packages/ofajs/benchmark/run-cross.mjs",
-    "sync:t-cn": "node scripts/sync-t-cn.mjs"
+    "sync:t-cn": "node scripts/sync-t-cn.mjs",
+    "build:skill": "node scripts/build-skill.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

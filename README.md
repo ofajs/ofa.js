@@ -199,6 +199,44 @@ npm run bench:cross   # ofa.js vs Vue vs React
 See [`packages/ofajs/CONTEXT.md`](./packages/ofajs/CONTEXT.md) for benchmark
 methodology and the latest v4→v5 results.
 
+## AI skill package
+
+The repository keeps the agent skill as plain files in
+[`.agents/skills/ofajs-docs`](./.agents/skills/ofajs-docs). To package it for
+distribution or for agents that accept a ZIP upload:
+
+```bash
+npm run build:skill
+# → .agents/skills/ofajs-docs.zip
+```
+
+The default archive contains a top-level `ofajs-docs/` directory, matching the
+layout expected by Claude Skills (`<skill-name>/SKILL.md`):
+
+```text
+ofajs-docs/
+  SKILL.md
+  references/...
+```
+
+Install it locally by extracting into `.agents/skills`:
+
+```bash
+unzip .agents/skills/ofajs-docs.zip -d .agents/skills
+```
+
+Some agents expect `SKILL.md` directly at the ZIP root; generate that variant
+with:
+
+```bash
+npm run build:skill -- --flat
+# → .agents/skills/ofajs-docs-flat.zip
+```
+
+The packager uses only Node.js built-ins, preserves paths, and writes a
+deterministic ZIP (fixed timestamps, sorted entries). The archives live next
+to the skill folder in `.agents/skills/`.
+
 ## Philosophy
 
 ofa.js keeps the web platform as the runtime:
